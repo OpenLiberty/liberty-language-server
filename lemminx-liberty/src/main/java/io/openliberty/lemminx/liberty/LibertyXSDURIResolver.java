@@ -1,20 +1,22 @@
 package io.openliberty.lemminx.liberty;
 
+import java.net.URI;
 import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 
-import org.apache.xerces.xni.XMLResourceIdentifier;
-import org.apache.xerces.xni.parser.XMLInputSource;
-import org.eclipse.lemminx.uriresolver.URIResolverExtension;
-import io.openliberty.lemminx.liberty.util.LibertyUtils;
-import org.eclipse.lemminx.uriresolver.CacheResourcesManager.ResourceToDeploy;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
+import org.eclipse.lemminx.uriresolver.CacheResourcesManager.ResourceToDeploy;
+import org.eclipse.lemminx.uriresolver.IExternalSchemaLocationProvider;
+import org.eclipse.lemminx.uriresolver.URIResolverExtension;
 
-public class LibertyXSDURIResolver implements URIResolverExtension {
+import io.openliberty.lemminx.liberty.util.LibertyUtils;
 
+public class LibertyXSDURIResolver implements URIResolverExtension, IExternalSchemaLocationProvider {
   private static final Logger LOGGER = Logger.getLogger(LibertyXSDURIResolver.class.getName());
 
-  private static final String XSD_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/master/lemminx-liberty/src/main/resources/schema/server.xsd";
+  private static final String XSD_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server.xsd";
   private static final String XSD_CLASSPATH_LOCATION = "/schema/xsd/liberty/server.xsd";
 
   /**
@@ -28,7 +30,6 @@ public class LibertyXSDURIResolver implements URIResolverExtension {
   private static final ResourceToDeploy SERVER_XSD_RESOURCE = new ResourceToDeploy(XSD_RESOURCE_URL,
       XSD_CLASSPATH_LOCATION);
 
-  @Override
   public String resolve(String baseLocation, String publicId, String systemId) {
     if (LibertyUtils.isServerXMLFile(baseLocation)) {
       try {
@@ -39,21 +40,19 @@ public class LibertyXSDURIResolver implements URIResolverExtension {
         e.printStackTrace();
       }
     }
-
     return null;
   }
 
   @Override
-  public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier) {
-    String publicId = resourceIdentifier.getNamespace();
-    String baseLocation = resourceIdentifier.getBaseSystemId();
-    if (LibertyUtils.isServerXMLFile(baseLocation)) {
-      String xslFilePath = resolve(baseLocation, publicId, null);
-      if (xslFilePath != null) {
-        return new XMLInputSource(publicId, xslFilePath, xslFilePath);
-      }
+  public Map<String, String> getExternalSchemaLocation(URI fileURI) {
+    String xsdFile = resolve(fileURI.toString(), null, null);
+    if (xsdFile == null) {
+      return null;
     }
 
-    return null;
+    Map<String, String> externalGrammar = new HashMap<>();
+    externalGrammar.put(IExternalSchemaLocationProvider.NO_NAMESPACE_SCHEMA_LOCATION, xsdFile);
+    return externalGrammar;
   }
+
 }
