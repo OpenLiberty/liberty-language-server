@@ -9,7 +9,7 @@ public class Feature {
   private String shortDescription;
   private String type;
   private String version;
-  WlpInformation wlpInformationObject;
+  WlpInformation wlpInformation;
  
  
   // Getter Methods 
@@ -47,7 +47,7 @@ public class Feature {
   }
  
   public WlpInformation getWlpInformation() {
-   return wlpInformationObject;
+   return wlpInformation;
   }
  
   // Setter Methods 
@@ -84,8 +84,8 @@ public class Feature {
    this.version = version;
   }
  
-  public void setWlpInformation(WlpInformation wlpInformationObject) {
-   this.wlpInformationObject = wlpInformationObject;
+  public void setWlpInformation(WlpInformation wlpInformation) {
+   this.wlpInformation = wlpInformation;
   }
  }
  
