@@ -8,7 +8,7 @@ public class WlpInformation {
   private String downloadPolicy;
   private String ibmInstallTo;
   private String installPolicy;
-  JavaSEVersionRequirements javaSEVersionRequirementsObject;
+  JavaSEVersionRequirements javaSEVersionRequirements;
   ArrayList<String> provideFeature;
   ArrayList<String> requireFeature;
   private String singleton;
@@ -41,7 +41,7 @@ public class WlpInformation {
   }
 
   public JavaSEVersionRequirements getJavaSEVersionRequirements() {
-    return javaSEVersionRequirementsObject;
+    return javaSEVersionRequirements;
   }
 
   public String getSingleton() {
@@ -62,10 +62,6 @@ public class WlpInformation {
 
   public String getMavenCoordinates() {
     return mavenCoordinates;
-  }
-
-  public JavaSEVersionRequirements getJavaSEVersionRequirementsObject() {
-    return javaSEVersionRequirementsObject;
   }
 
   public ArrayList<String> getProvideFeature() {
@@ -102,8 +98,8 @@ public class WlpInformation {
     this.installPolicy = installPolicy;
   }
 
-  public void setJavaSEVersionRequirements(JavaSEVersionRequirements javaSEVersionRequirementsObject) {
-    this.javaSEVersionRequirementsObject = javaSEVersionRequirementsObject;
+  public void setJavaSEVersionRequirements(JavaSEVersionRequirements javaSEVersionRequirements) {
+    this.javaSEVersionRequirements = javaSEVersionRequirements;
   }
 
   public void setSingleton(String singleton) {
@@ -124,10 +120,6 @@ public class WlpInformation {
 
   public void setMavenCoordinates(String mavenCoordinates) {
     this.mavenCoordinates = mavenCoordinates;
-  }
-
-  public void setJavaSEVersionRequirementsObject(JavaSEVersionRequirements javaSEVersionRequirementsObject) {
-    this.javaSEVersionRequirementsObject = javaSEVersionRequirementsObject;
   }
 
   public void setProvideFeature(ArrayList<String> provideFeature) {

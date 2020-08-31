@@ -5,13 +5,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.URL;
-import io.openliberty.lemminx.liberty.models.feature.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import java.util.Map;
 import java.util.Optional;
+
+import io.openliberty.lemminx.liberty.models.feature.*;
 import io.openliberty.lemminx.liberty.util.LibertyConstants;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class FeatureService {
 
@@ -36,20 +38,18 @@ public class FeatureService {
 
   /**
    * Fetches information about liberty features from maven repo
-   * 
+   *
    * @param libertyVersion - version of liberty to fetch features for
    * @return list of features supported by the provided version of liberty
    */
   private List<Feature> fetchFeaturesForVersion(String libertyVersion) throws IOException {
-    ObjectMapper objectMapper = new ObjectMapper();
-    // Not all properties returned from maven are currently described in the Feature
-    // POJO model. So this must be disabled or else it throws an error on unknown
-    // properties.
-    objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
     String featureEndpoint = String.format(
         "https://repo1.maven.org/maven2/io/openliberty/features/features/%s/features-%s.json", libertyVersion,
         libertyVersion);
-    Feature[] featureList = objectMapper.readValue(new URL(featureEndpoint), Feature[].class);
+    InputStreamReader reader = new InputStreamReader(new URL(featureEndpoint).openStream());
+    Gson gson = new GsonBuilder().create();
+    Feature[] featureList = new Gson().fromJson(reader, Feature[].class);
+
     // Only need the public features
     ArrayList<Feature> publicFeatures = new ArrayList<>();
     Arrays.asList(featureList).stream()

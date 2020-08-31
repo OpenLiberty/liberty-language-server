@@ -5,11 +5,10 @@ public class Feature {
   private String licenseId;
   private String licenseType;
   private String name;
-  Provider providerObject;
   private String shortDescription;
   private String type;
   private String version;
-  WlpInformation wlpInformationObject;
+  WlpInformation wlpInformation;
  
  
   // Getter Methods 
@@ -30,10 +29,6 @@ public class Feature {
    return name;
   }
  
-  public Provider getProvider() {
-   return providerObject;
-  }
- 
   public String getShortDescription() {
    return shortDescription;
   }
@@ -47,7 +42,7 @@ public class Feature {
   }
  
   public WlpInformation getWlpInformation() {
-   return wlpInformationObject;
+   return wlpInformation;
   }
  
   // Setter Methods 
@@ -68,10 +63,6 @@ public class Feature {
    this.name = name;
   }
  
-  public void setProvider(Provider providerObject) {
-   this.providerObject = providerObject;
-  }
- 
   public void setShortDescription(String shortDescription) {
    this.shortDescription = shortDescription;
   }
@@ -84,8 +75,8 @@ public class Feature {
    this.version = version;
   }
  
-  public void setWlpInformation(WlpInformation wlpInformationObject) {
-   this.wlpInformationObject = wlpInformationObject;
+  public void setWlpInformation(WlpInformation wlpInformation) {
+   this.wlpInformation = wlpInformation;
   }
  }
  
