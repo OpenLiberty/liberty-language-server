@@ -5,7 +5,6 @@ public class Feature {
   private String licenseId;
   private String licenseType;
   private String name;
-  Provider providerObject;
   private String shortDescription;
   private String type;
   private String version;
@@ -28,10 +27,6 @@ public class Feature {
  
   public String getName() {
    return name;
-  }
- 
-  public Provider getProvider() {
-   return providerObject;
   }
  
   public String getShortDescription() {
@@ -66,10 +61,6 @@ public class Feature {
  
   public void setName(String name) {
    this.name = name;
-  }
- 
-  public void setProvider(Provider providerObject) {
-   this.providerObject = providerObject;
   }
  
   public void setShortDescription(String shortDescription) {
