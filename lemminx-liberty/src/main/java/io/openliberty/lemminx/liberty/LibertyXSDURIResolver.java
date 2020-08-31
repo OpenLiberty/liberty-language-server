@@ -15,7 +15,7 @@ public class LibertyXSDURIResolver implements URIResolverExtension {
   private static final Logger LOGGER = Logger.getLogger(LibertyXSDURIResolver.class.getName());
 
   private static final String XSD_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/master/lemminx-liberty/src/main/resources/schema/server.xsd";
-  private static final String XSD_CLASSPATH_LOCATION = "/schema/server.xsd";
+  private static final String XSD_CLASSPATH_LOCATION = "/schema/xsd/liberty/server.xsd";
 
   /**
    * SERVER_XSD_RESOURCE is the server.xsd that is located at `/schema/server.xsd`
