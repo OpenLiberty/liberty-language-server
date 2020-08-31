@@ -7,6 +7,7 @@ import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkupContent;
 import io.openliberty.lemminx.liberty.models.feature.*;
 import io.openliberty.lemminx.liberty.services.FeatureService;
+import io.openliberty.lemminx.liberty.services.SettingsService;
 import io.openliberty.lemminx.liberty.util.*;
 
 import java.io.IOException;
@@ -42,7 +43,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
 		if (parentElement.getTagName().equals(LibertyConstants.FEATURE_ELEMENT)) {
 			try {
 				String featureName = request.getNode().getTextContent();
-				return getHoverFeatureDescription(featureName, "20.0.0.8");
+				return getHoverFeatureDescription(featureName);
 			} catch (IOException e) {
 				System.err.println("Error getting features");
 				System.err.println(e.getMessage());
@@ -52,7 +53,8 @@ public class LibertyHoverParticipant implements IHoverParticipant {
 		return null;
 	}
 
-	private Hover getHoverFeatureDescription(String featureName, String libertyVersion) throws IOException {
+	private Hover getHoverFeatureDescription(String featureName) throws IOException {
+		final String libertyVersion = SettingsService.getInstance().getLibertyVersion();
 		Optional<Feature> feature = FeatureService.getInstance().getFeature(featureName, libertyVersion);
 		if (feature.isPresent()) {
 			return new Hover(new MarkupContent("plaintext", feature.get().getShortDescription()));

@@ -14,8 +14,12 @@ import io.openliberty.lemminx.liberty.models.feature.*;
 import io.openliberty.lemminx.liberty.util.LibertyConstants;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import java.util.logging.Logger;
+
 
 public class FeatureService {
+
+  private static final Logger LOGGER = Logger.getLogger(FeatureService.class.getName());
 
   // Singleton so that only 1 Feature Service can be initialized and is
   // shared between all Lemminx Language Feature Participants
@@ -59,6 +63,7 @@ public class FeatureService {
   }
 
   public List<Feature> getFeatures(String libertyVersion) throws IOException {
+    LOGGER.fine("Getting features for version: " + libertyVersion);
     // if the features are already cached in the feature cache
     if (featureCache.containsKey(libertyVersion)) {
       return featureCache.get(libertyVersion);

@@ -1,0 +1,45 @@
+package io.openliberty.lemminx.liberty.services;
+
+import org.eclipse.lemminx.utils.JSONUtility;
+import io.openliberty.lemminx.liberty.models.settings.*;
+
+public class SettingsService {
+
+  // Singleton so that only 1 Settings Service can be initialized and is
+  // shared between all Lemminx Language Feature Participants
+
+  private static SettingsService instance = new SettingsService();
+
+  public static SettingsService getInstance() {
+    return instance;
+  }
+
+  private static String DEFAULT_SERVER_VERSION = "20.0.0.9";
+
+  private SettingsService() {
+  }
+
+  private LibertySettings settings;
+
+  /**
+   * Takes the xml settings object and parses out the Liberty Settings
+   * @param xmlSettings - All xml settings provided by the client
+   */
+  public void updateLibertySettings(Object xmlSettings) {
+    AllSettings rootSettings = JSONUtility.toModel(xmlSettings, AllSettings.class);
+    if (rootSettings != null) {
+      settings = JSONUtility.toModel(rootSettings.getLiberty(), LibertySettings.class);
+    }
+  }
+
+  public String getLibertyVersion() {
+    if (settings != null) {
+      String version = settings.getVersion();
+      if (version != null) {
+        return version;
+      }
+    }
+
+    return DEFAULT_SERVER_VERSION;
+  }
+}
