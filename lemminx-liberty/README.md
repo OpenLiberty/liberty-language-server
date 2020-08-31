@@ -1,5 +1,7 @@
 # lemminx-liberty
 
+[![License](https://img.shields.io/badge/License-EPL%202.0-red.svg?label=license&logo=eclipse)](https://www.eclipse.org/legal/epl-2.0/)
+
 Extension to the [Eclipse LemMinX](https://github.com/eclipse/lemminx) XML language server providing language features for the Open Liberty server.xml file.
 
 ## Features
