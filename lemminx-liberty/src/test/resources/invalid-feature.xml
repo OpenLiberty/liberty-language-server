@@ -1,0 +1,5 @@
+<server description="Sample Liberty server">
+    <featureManager>
+        <feature>mpConf</feature>
+    </featureManager
+</server>
