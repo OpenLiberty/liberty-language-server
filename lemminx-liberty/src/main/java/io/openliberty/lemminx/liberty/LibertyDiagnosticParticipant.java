@@ -10,6 +10,7 @@ import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import io.openliberty.lemminx.liberty.services.FeatureService;
+import io.openliberty.lemminx.liberty.services.SettingsService;
 import io.openliberty.lemminx.liberty.util.*;
 import java.io.IOException;
 import java.util.*;
@@ -45,6 +46,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             return;
         }
 
+        final String libertyVersion = SettingsService.getInstance().getLibertyVersion();
+
         // Search for duplicate features
         // or features that do not exist
         Set<String> includedFeatures = new HashSet<>();
@@ -53,7 +56,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             DOMNode featureNode = (DOMNode) features.item(i);
             DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
             String featureName = featureTextNode.getTextContent();
-            if (!FeatureService.getInstance().featureExists(featureName, "20.0.0.8")) {
+            if (!FeatureService.getInstance().featureExists(featureName, libertyVersion)) {
                 Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
                         domDocument);
                 String message = "ERROR: The " + featureName + " feature does not exist.";

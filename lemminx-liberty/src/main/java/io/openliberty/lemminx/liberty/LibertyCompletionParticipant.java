@@ -8,6 +8,7 @@ import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import io.openliberty.lemminx.liberty.models.feature.*;
 import io.openliberty.lemminx.liberty.services.FeatureService;
+import io.openliberty.lemminx.liberty.services.SettingsService;
 import io.openliberty.lemminx.liberty.util.*;
 
 import java.io.IOException;
@@ -40,7 +41,8 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
     }
 
     private void listFeatures(ICompletionResponse response) throws IOException {
-        List<Feature> features = FeatureService.getInstance().getFeatures("20.0.0.8");
+        final String libertyVersion = SettingsService.getInstance().getLibertyVersion();
+        List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion);
         for (Feature feature : features) {
             CompletionItem item = new CompletionItem();
             item.setLabel(feature.getWlpInformation().getShortName());
