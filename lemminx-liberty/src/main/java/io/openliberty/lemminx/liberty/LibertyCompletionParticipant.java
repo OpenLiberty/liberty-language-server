@@ -31,16 +31,11 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
         // if the parent element of cursor is a <feature>
         // provide the liberty features as completion options
         if (parentElement.getTagName().equals(LibertyConstants.FEATURE_ELEMENT)) {
-            try {
-                listFeatures(response);
-            } catch (IOException e) {
-                System.err.println("Error getting features");
-                System.err.println(e.getMessage());
-            }
+            listFeatures(response);
         }
     }
 
-    private void listFeatures(ICompletionResponse response) throws IOException {
+    private void listFeatures(ICompletionResponse response) {
         final String libertyVersion = SettingsService.getInstance().getLibertyVersion();
         List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion);
         for (Feature feature : features) {

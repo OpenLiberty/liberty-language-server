@@ -10,7 +10,6 @@ import io.openliberty.lemminx.liberty.services.FeatureService;
 import io.openliberty.lemminx.liberty.services.SettingsService;
 import io.openliberty.lemminx.liberty.util.*;
 
-import java.io.IOException;
 import java.util.Optional;
 
 public class LibertyHoverParticipant implements IHoverParticipant {
@@ -41,19 +40,14 @@ public class LibertyHoverParticipant implements IHoverParticipant {
 
 		// if we are hovering over text inside a <feature> element
 		if (parentElement.getTagName().equals(LibertyConstants.FEATURE_ELEMENT)) {
-			try {
-				String featureName = request.getNode().getTextContent();
-				return getHoverFeatureDescription(featureName);
-			} catch (IOException e) {
-				System.err.println("Error getting features");
-				System.err.println(e.getMessage());
-			}
+			String featureName = request.getNode().getTextContent();
+			return getHoverFeatureDescription(featureName);
 		}
 
 		return null;
 	}
 
-	private Hover getHoverFeatureDescription(String featureName) throws IOException {
+	private Hover getHoverFeatureDescription(String featureName) {
 		final String libertyVersion = SettingsService.getInstance().getLibertyVersion();
 		Optional<Feature> feature = FeatureService.getInstance().getFeature(featureName, libertyVersion);
 		if (feature.isPresent()) {
