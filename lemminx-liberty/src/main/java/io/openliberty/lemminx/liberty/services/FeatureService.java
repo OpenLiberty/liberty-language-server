@@ -11,12 +11,10 @@ import java.nio.charset.StandardCharsets;
 import java.net.URL;
 import java.util.Map;
 import java.util.Optional;
-import java.lang.ClassLoader;
 
 import io.openliberty.lemminx.liberty.models.feature.*;
 import io.openliberty.lemminx.liberty.util.LibertyConstants;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import java.util.logging.Logger;
 import com.google.gson.JsonParseException;
 
@@ -43,7 +41,6 @@ public class FeatureService {
 
   private FeatureService() {
     featureCache = new HashMap<>();
-    defaultFeatureList = new ArrayList<>();
     featureUpdateTime = System.currentTimeMillis();
   }
 
@@ -60,7 +57,7 @@ public class FeatureService {
     InputStreamReader reader = new InputStreamReader(new URL(featureEndpoint).openStream());
 
     // Only need the public features
-    ArrayList<Feature> publicFeatures = getPublicFeatureList(reader);
+    ArrayList<Feature> publicFeatures = readPublicFeatures(reader);
 
     return publicFeatures;
   }
@@ -72,13 +69,12 @@ public class FeatureService {
    */
   private List<Feature> getDefaultFeatureList() {
     try {
-      if (defaultFeatureList.isEmpty()) {
-        ClassLoader classloader = Thread.currentThread().getContextClassLoader();
-        InputStream is = classloader.getResourceAsStream("features-20.0.0.9.json");
+      if (defaultFeatureList == null) {
+        InputStream is = getClass().getClassLoader().getResourceAsStream("features-20.0.0.9.json");
         InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
 
         // Only need the public features
-        defaultFeatureList = getPublicFeatureList(reader);
+        defaultFeatureList = readPublicFeatures(reader);
       }
       return defaultFeatureList;
 
@@ -95,8 +91,7 @@ public class FeatureService {
    * @param reader - InputStreamReader for json feature list
    * @return list of public features
    */
-  private ArrayList<Feature> getPublicFeatureList(InputStreamReader reader) throws JsonParseException {
-    Gson gson = new GsonBuilder().create();
+  private ArrayList<Feature> readPublicFeatures(InputStreamReader reader) throws JsonParseException {
     Feature[] featureList = new Gson().fromJson(reader, Feature[].class);
 
     ArrayList<Feature> publicFeatures = new ArrayList<>();
@@ -107,7 +102,7 @@ public class FeatureService {
     return publicFeatures;
   }
 
-  public List<Feature> getFeatures(String libertyVersion) {
+  public List<Feature> getFeatures(String libertyVersion, int requestDelay) {
     LOGGER.fine("Getting features for version: " + libertyVersion);
     // if the features are already cached in the feature cache
     if (featureCache.containsKey(libertyVersion)) {
@@ -115,9 +110,9 @@ public class FeatureService {
     }
     // else need to fetch the features from maven central
     try {
-      // verify that 2 min has gone by since last fetch request
+      // verify that request delay (seconds) has gone by since last fetch request
       long currentTime = System.currentTimeMillis();
-      if (currentTime >= (this.featureUpdateTime + 120000)) {
+      if (currentTime >= (this.featureUpdateTime + (requestDelay*1000))) {
         List<Feature> features = fetchFeaturesForVersion(libertyVersion);
         featureCache.put(libertyVersion, features);
         this.featureUpdateTime = System.currentTimeMillis();
@@ -131,13 +126,13 @@ public class FeatureService {
     return defaultFeatures;
   }
 
-  public Optional<Feature> getFeature(String featureName, String libertyVersion) {
-    List<Feature> features = getFeatures(libertyVersion);
+  public Optional<Feature> getFeature(String featureName, String libertyVersion, int requestDelay) {
+    List<Feature> features = getFeatures(libertyVersion, requestDelay);
     return features.stream().filter(f -> f.getWlpInformation().getShortName().equalsIgnoreCase(featureName))
         .findFirst();
   }
 
-  public boolean featureExists(String featureName, String libertyVersion) {
-    return this.getFeature(featureName, libertyVersion).isPresent();
+  public boolean featureExists(String featureName, String libertyVersion, int requestDelay) {
+    return this.getFeature(featureName, libertyVersion, requestDelay).isPresent();
   }
 }

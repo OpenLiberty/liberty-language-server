@@ -39,7 +39,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
 			return null;
 
 		// if we are hovering over text inside a <feature> element
-		if (parentElement.getTagName().equals(LibertyConstants.FEATURE_ELEMENT)) {
+		if (LibertyConstants.FEATURE_ELEMENT.equals(parentElement.getTagName())) {
 			String featureName = request.getNode().getTextContent();
 			return getHoverFeatureDescription(featureName);
 		}
@@ -49,7 +49,8 @@ public class LibertyHoverParticipant implements IHoverParticipant {
 
 	private Hover getHoverFeatureDescription(String featureName) {
 		final String libertyVersion = SettingsService.getInstance().getLibertyVersion();
-		Optional<Feature> feature = FeatureService.getInstance().getFeature(featureName, libertyVersion);
+		final int requestDelay = SettingsService.getInstance().getRequestDelay();
+		Optional<Feature> feature = FeatureService.getInstance().getFeature(featureName, libertyVersion, requestDelay);
 		if (feature.isPresent()) {
 			return new Hover(new MarkupContent("plaintext", feature.get().getShortDescription()));
 		}

@@ -37,7 +37,8 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
 
     private void listFeatures(ICompletionResponse response) {
         final String libertyVersion = SettingsService.getInstance().getLibertyVersion();
-        List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion);
+        final int requestDelay = SettingsService.getInstance().getRequestDelay();
+        List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion, requestDelay);
         for (Feature feature : features) {
             CompletionItem item = new CompletionItem();
             item.setLabel(feature.getWlpInformation().getShortName());
