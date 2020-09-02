@@ -1,5 +1,6 @@
 <server description="Sample Liberty server">
     <featureManager>
-        <feature>mpConfi</feature>
+        <feature>jaxrs-2.1</feature>
+        <invalidElement>test</invalidElement>
     </featureManager>
 </server>
