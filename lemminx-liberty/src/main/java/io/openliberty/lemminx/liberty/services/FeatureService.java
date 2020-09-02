@@ -41,7 +41,7 @@ public class FeatureService {
 
   private FeatureService() {
     featureCache = new HashMap<>();
-    featureUpdateTime = System.currentTimeMillis();
+    featureUpdateTime = -1;
   }
 
   /**
@@ -112,7 +112,7 @@ public class FeatureService {
     try {
       // verify that request delay (seconds) has gone by since last fetch request
       long currentTime = System.currentTimeMillis();
-      if (currentTime >= (this.featureUpdateTime + (requestDelay*1000))) {
+      if (this.featureUpdateTime == -1 || currentTime >= (this.featureUpdateTime + (requestDelay*1000))) {
         List<Feature> features = fetchFeaturesForVersion(libertyVersion);
         featureCache.put(libertyVersion, features);
         this.featureUpdateTime = System.currentTimeMillis();
