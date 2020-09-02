@@ -5,8 +5,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 
 import org.eclipse.lemminx.commons.TextDocument;
@@ -15,6 +13,12 @@ import org.eclipse.lemminx.services.XMLLanguageService;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.TextDocumentItem;
 
+/**
+ * Utils class for Liberty Lemminx Test Cases
+ * 
+ * adapted from:
+ * https://github.com/eclipse/lemminx-maven/blob/master/lemminx-maven/src/test/java/org/eclipse/lemminx/maven/test/MavenLemminxTestsUtils.java
+ */
 public interface LibertyLemminxTestsUtils {
 
     public static DOMDocument createDOMDocument(String resourcePath, XMLLanguageService languageService)
@@ -26,25 +30,13 @@ public interface LibertyLemminxTestsUtils {
     public static TextDocumentItem createTextDocumentItem(String resourcePath) throws IOException, URISyntaxException {
         URI uri = LibertyLemminxTestsUtils.class.getResource(resourcePath).toURI();
         File file = new File(uri);
+        String contents = new String(Files.readAllBytes(file.toPath()));
 
-        Path targetPath = Paths.get(file.getParent(), "server.xml");
-        Files.copy(file.toPath(), targetPath);
-
-        String contents = new String(Files.readAllBytes(targetPath));
-
-        return new TextDocumentItem(targetPath.toUri().toString(), "xml", 1, contents);
+        return new TextDocumentItem("/test/server.xml", "xml", 1, contents);
     }
 
     public static boolean completionContains(List<CompletionItem> completionItems, String searchString) {
         return completionItems.stream().map(CompletionItem::getLabel).anyMatch(label -> label.contains(searchString));
-    }
-
-    public static void cleanUpServerXML() throws URISyntaxException {
-        URI uri = LibertyLemminxTestsUtils.class.getResource("/server.xml").toURI();
-        File file = new File(uri);
-        if (file.exists()) {
-            file.delete();
-        }
     }
 
 }
