@@ -1,6 +1,6 @@
 package io.openliberty;
 
-import static io.openliberty.LibertyLemminxTestsUtils.createDOMDocument;
+import static io.openliberty.LibertyLemminxTestsUtils.createServerXMLDOMDocument;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -35,7 +35,7 @@ public class LibertyFeaturesTest {
 
     @Test
     public void testFeatureDiagnostic() throws IOException, URISyntaxException {
-        DOMDocument document = createDOMDocument("/invalid-feature.xml", languageServer.getXMLLanguageService());
+        DOMDocument document = createServerXMLDOMDocument("/invalid-feature.xml", languageServer.getXMLLanguageService());
         List<Diagnostic> diagnosticsList = languageServer.getXMLLanguageService().doDiagnostics(document, () -> {
         }, new XMLValidationSettings());
         assertTrue(diagnosticsList.stream()
@@ -44,7 +44,7 @@ public class LibertyFeaturesTest {
 
     @Test
     public void testFeatureHover() throws IOException, URISyntaxException {
-        DOMDocument document = createDOMDocument("/simple-server.xml", languageServer.getXMLLanguageService());
+        DOMDocument document = createServerXMLDOMDocument("/simple-server.xml", languageServer.getXMLLanguageService());
         String hover = languageServer.getXMLLanguageService()
                 .doHover(document, new Position(2, 18), new SharedSettings()).getContents().getRight().getValue();
         assertNotNull(hover);

@@ -1,6 +1,6 @@
 package io.openliberty;
 
-import static io.openliberty.LibertyLemminxTestsUtils.createDOMDocument;
+import static io.openliberty.LibertyLemminxTestsUtils.createServerXMLDOMDocument;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
@@ -35,7 +35,7 @@ public class ServerSchemaTest {
 
     @Test
     public void testInvalidElementDiagnostic() throws IOException, URISyntaxException {
-        DOMDocument document = createDOMDocument("/invalid-element.xml", languageServer.getXMLLanguageService());
+        DOMDocument document = createServerXMLDOMDocument("/invalid-element.xml", languageServer.getXMLLanguageService());
         List<Diagnostic> diagnosticsList = languageServer.getXMLLanguageService().doDiagnostics(document, () -> {
         }, new XMLValidationSettings());
         assertTrue(diagnosticsList.stream().anyMatch(diag -> diag.getMessage().contains(
@@ -44,7 +44,7 @@ public class ServerSchemaTest {
 
     @Test
     public void testServerXSDCompletion() throws IOException, URISyntaxException {
-        DOMDocument document = createDOMDocument("/invalid-element.xml", languageServer.getXMLLanguageService());
+        DOMDocument document = createServerXMLDOMDocument("/invalid-element.xml", languageServer.getXMLLanguageService());
         List<CompletionItem> completionsList = languageServer.getXMLLanguageService()
                 .doComplete(document, new Position(1, 0), new SharedSettings()).getItems();
         // completionsList.get(0).getLab
