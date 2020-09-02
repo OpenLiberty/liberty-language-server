@@ -21,13 +21,13 @@ import org.eclipse.lsp4j.TextDocumentItem;
  */
 public interface LibertyLemminxTestsUtils {
 
-    public static DOMDocument createDOMDocument(String resourcePath, XMLLanguageService languageService)
+    public static DOMDocument createServerXMLDOMDocument(String resourcePath, XMLLanguageService languageService)
             throws IOException, URISyntaxException {
         return org.eclipse.lemminx.dom.DOMParser.getInstance().parse(
-                new TextDocument(createTextDocumentItem(resourcePath)), languageService.getResolverExtensionManager());
+                new TextDocument(createServerXMLTextDocumentItem(resourcePath)), languageService.getResolverExtensionManager());
     }
 
-    public static TextDocumentItem createTextDocumentItem(String resourcePath) throws IOException, URISyntaxException {
+    public static TextDocumentItem createServerXMLTextDocumentItem(String resourcePath) throws IOException, URISyntaxException {
         URI uri = LibertyLemminxTestsUtils.class.getResource(resourcePath).toURI();
         File file = new File(uri);
         String contents = new String(Files.readAllBytes(file.toPath()));
