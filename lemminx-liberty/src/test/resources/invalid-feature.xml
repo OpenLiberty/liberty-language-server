@@ -1,5 +1,0 @@
-<server description="Sample Liberty server">
-    <featureManager>
-        <feature>mpConfi</feature>
-    </featureManager>
-</server>
