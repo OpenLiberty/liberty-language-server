@@ -16,6 +16,9 @@ public class SettingsService {
 
   private static String DEFAULT_SERVER_VERSION = "20.0.0.9";
 
+  // default request delay is 120 seconds
+  private static int DEFAULT_REQUEST_DELAY = 120;
+
   private SettingsService() {
   }
 
@@ -42,4 +45,16 @@ public class SettingsService {
 
     return DEFAULT_SERVER_VERSION;
   }
+
+  public int getRequestDelay() {
+    if (settings != null) {
+      int requestDelay = settings.getRequestDelay();
+      if (requestDelay > 0) {
+        return requestDelay;
+      }
+    }
+
+    return DEFAULT_REQUEST_DELAY;
+  }
+
 }

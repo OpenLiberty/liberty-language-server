@@ -47,6 +47,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         }
 
         final String libertyVersion = SettingsService.getInstance().getLibertyVersion();
+        final int requestDelay = SettingsService.getInstance().getRequestDelay();
 
         // Search for duplicate features
         // or features that do not exist
@@ -56,7 +57,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             DOMNode featureNode = (DOMNode) features.item(i);
             DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
             String featureName = featureTextNode.getTextContent();
-            if (!FeatureService.getInstance().featureExists(featureName, libertyVersion)) {
+            if (!FeatureService.getInstance().featureExists(featureName, libertyVersion, requestDelay)) {
                 Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
                         domDocument);
                 String message = "ERROR: The " + featureName + " feature does not exist.";
