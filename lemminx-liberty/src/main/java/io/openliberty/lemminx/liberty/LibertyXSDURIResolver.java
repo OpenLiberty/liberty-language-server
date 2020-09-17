@@ -7,13 +7,13 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
+import org.eclipse.lemminx.uriresolver.IExternalGrammarLocationProvider;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager.ResourceToDeploy;
-import org.eclipse.lemminx.uriresolver.IExternalSchemaLocationProvider;
 import org.eclipse.lemminx.uriresolver.URIResolverExtension;
 
 import io.openliberty.lemminx.liberty.util.LibertyUtils;
 
-public class LibertyXSDURIResolver implements URIResolverExtension, IExternalSchemaLocationProvider {
+public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGrammarLocationProvider {
   private static final Logger LOGGER = Logger.getLogger(LibertyXSDURIResolver.class.getName());
 
   private static final String XSD_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server.xsd";
@@ -44,14 +44,14 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalSch
   }
 
   @Override
-  public Map<String, String> getExternalSchemaLocation(URI fileURI) {
+  public Map<String, String> getExternalGrammarLocation(URI fileURI) {
     String xsdFile = resolve(fileURI.toString(), null, null);
     if (xsdFile == null) {
       return null;
     }
 
     Map<String, String> externalGrammar = new HashMap<>();
-    externalGrammar.put(IExternalSchemaLocationProvider.NO_NAMESPACE_SCHEMA_LOCATION, xsdFile);
+    externalGrammar.put(IExternalGrammarLocationProvider.NO_NAMESPACE_SCHEMA_LOCATION, xsdFile);
     return externalGrammar;
   }
 
