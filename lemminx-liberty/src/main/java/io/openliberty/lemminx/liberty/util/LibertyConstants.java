@@ -1,7 +1,8 @@
 package io.openliberty.lemminx.liberty.util;
 
 public final class LibertyConstants {
-    private LibertyConstants() {}
+    private LibertyConstants() {
+    }
 
     public static final String SERVER_XML = "server.xml";
 

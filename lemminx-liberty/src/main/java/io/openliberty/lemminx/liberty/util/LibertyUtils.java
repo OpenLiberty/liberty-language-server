@@ -3,7 +3,8 @@ package io.openliberty.lemminx.liberty.util;
 import org.eclipse.lemminx.dom.DOMDocument;
 
 public class LibertyUtils {
-    private LibertyUtils() {}
+    private LibertyUtils() {
+    }
 
     public static boolean isServerXMLFile(String filePath) {
         return filePath.endsWith("/" + LibertyConstants.SERVER_XML);
