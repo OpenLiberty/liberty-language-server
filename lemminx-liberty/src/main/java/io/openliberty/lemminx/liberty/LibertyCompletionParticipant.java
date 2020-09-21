@@ -48,7 +48,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
         // Build a text edit to replace whatever is inside <feature></feature>
         // with the completion result
         Range range = XMLPositionUtility.createRange(featureElement.getStartTagCloseOffset() + 1,
-                featureElement.getEndTagCloseOffset(), document);
+                featureElement.getEndTagOpenOffset(), document);
         TextEdit edit = new TextEdit(range, featureName);
 
         // Build the completion item to return to the client
