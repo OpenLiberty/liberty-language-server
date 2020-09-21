@@ -21,7 +21,6 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     public void doDiagnostics(DOMDocument domDocument, List<Diagnostic> list, CancelChecker cancelChecker) {
         if (!LibertyUtils.isServerXMLFile(domDocument))
             return;
-
         try {
             validateFeatures(domDocument, list);
         } catch (IOException e) {
@@ -56,23 +55,25 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         for (int i = 0; i < features.getLength(); i++) {
             DOMNode featureNode = (DOMNode) features.item(i);
             DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
-            String featureName = featureTextNode.getTextContent();
-            if (!FeatureService.getInstance().featureExists(featureName, libertyVersion, requestDelay)) {
-                Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
-                        domDocument);
-                String message = "ERROR: The " + featureName + " feature does not exist.";
-                list.add(new Diagnostic(range, message));
-            } else {
-                if (includedFeatures.contains(featureName)) {
+            // skip nodes that do not have any text value (ie. comments)
+            if (featureTextNode != null) {
+                String featureName = featureTextNode.getTextContent();
+                if (!FeatureService.getInstance().featureExists(featureName, libertyVersion, requestDelay)) {
                     Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
                             domDocument);
-                    String message = "ERROR: " + featureName + " is already included.";
+                    String message = "ERROR: The feature \"" + featureName + "\" does not exist.";
                     list.add(new Diagnostic(range, message));
                 } else {
-                    includedFeatures.add(featureName);
+                    if (includedFeatures.contains(featureName)) {
+                        Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
+                                featureTextNode.getEnd(), domDocument);
+                        String message = "ERROR: " + featureName + " is already included.";
+                        list.add(new Diagnostic(range, message));
+                    } else {
+                        includedFeatures.add(featureName);
+                    }
                 }
             }
         }
-
     }
 }
