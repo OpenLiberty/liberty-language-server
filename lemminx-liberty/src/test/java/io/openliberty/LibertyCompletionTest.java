@@ -3,7 +3,6 @@ package io.openliberty;
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lsp4j.CompletionItem;
-import org.eclipse.lsp4j.TextEdit;
 
 import static org.eclipse.lemminx.XMLAssert.*;
 
@@ -11,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 public class LibertyCompletionTest {
 
-        static String newLine = System.getProperty("line.separator");
+        static String newLine = System.lineSeparator();
         static String serverXMLURI = "test/server.xml";
 
         // Tests the availability of completion of XML elements provided by the
