@@ -26,8 +26,10 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
    * server.xsd it takes the resource located at `/schema/server.xsd` and deploys
    * it to:
    * ~/.lemminx/cache/https/github.com/OpenLiberty/liberty-language-server/master/lemminx-liberty/src/main/resources/schema/server.xsd
+   * 
+   * Declared public to be used by tests
    */
-  private static final ResourceToDeploy SERVER_XSD_RESOURCE = new ResourceToDeploy(XSD_RESOURCE_URL,
+  public static final ResourceToDeploy SERVER_XSD_RESOURCE = new ResourceToDeploy(XSD_RESOURCE_URL,
       XSD_CLASSPATH_LOCATION);
 
   public String resolve(String baseLocation, String publicId, String systemId) {
