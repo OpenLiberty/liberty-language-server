@@ -2,7 +2,7 @@ package io.openliberty;
 
 import org.junit.jupiter.api.Test;
 
-import static io.openliberty.lemminx.liberty.LibertyXSDURIResolver.SERVER_XSD_RESOURCE;;
+import static io.openliberty.lemminx.liberty.LibertyXSDURIResolver.SERVER_XSD_RESOURCE;
 
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lemminx.commons.BadLocationException;

@@ -1,7 +1,14 @@
 package io.openliberty.lemminx.liberty;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.dom.DOMElement;
+import org.eclipse.lemminx.dom.DOMNode;
 import org.eclipse.lemminx.services.extensions.CompletionParticipantAdapter;
 import org.eclipse.lemminx.services.extensions.ICompletionRequest;
 import org.eclipse.lemminx.services.extensions.ICompletionResponse;
@@ -10,16 +17,14 @@ import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import io.openliberty.lemminx.liberty.models.feature.*;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import io.openliberty.lemminx.liberty.models.feature.Feature;
 import io.openliberty.lemminx.liberty.services.FeatureService;
 import io.openliberty.lemminx.liberty.services.SettingsService;
-import io.openliberty.lemminx.liberty.util.*;
-
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.eclipse.lemminx.commons.BadLocationException;
+import io.openliberty.lemminx.liberty.util.LibertyConstants;
+import io.openliberty.lemminx.liberty.util.LibertyUtils;
 
 public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
 
@@ -36,7 +41,14 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
         // if the parent element of cursor is a <feature>
         // provide the liberty features as completion options
         if (parentElement.getTagName().equals(LibertyConstants.FEATURE_ELEMENT)) {
-            List<CompletionItem> featureCompletionItems = buildCompletionItems(parentElement, request.getXMLDocument());
+            List<String> existingFeatures = new ArrayList<>();
+            // collect existing features
+            if (parentElement.getParentNode() != null
+                    && parentElement.getParentNode().getNodeName().equals(LibertyConstants.FEATURE_MANAGER_ELEMENT)) {
+                existingFeatures = collectExistingFeatures(parentElement.getParentNode());
+            }
+            List<CompletionItem> featureCompletionItems = buildCompletionItems(parentElement, request.getXMLDocument(),
+                    existingFeatures);
             featureCompletionItems.stream().forEach(item -> response.addCompletionItem(item));
         }
     }
@@ -59,14 +71,32 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
         return item;
     }
 
-    private List<CompletionItem> buildCompletionItems(DOMElement featureElement, DOMDocument document) {
+    private List<CompletionItem> buildCompletionItems(DOMElement featureElement, DOMDocument document,
+            List<String> existingFeatures) {
         final String libertyVersion = SettingsService.getInstance().getLibertyVersion();
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
         List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion, requestDelay);
 
-        List<CompletionItem> items = features.stream()
+        // filter out features that are already specified in the featureManager block
+        List<CompletionItem> uniqueFeatureCompletionItems = features.stream()
+                .filter(feature -> !existingFeatures.contains(feature.getWlpInformation().getShortName()))
                 .map(feat -> buildFeatureCompletionItem(feat, featureElement, document)).collect(Collectors.toList());
 
-        return items;
+        return uniqueFeatureCompletionItems;
+    }
+
+    private List<String> collectExistingFeatures(Node featureManager) {
+        List<String> includedFeatures = new ArrayList<>();
+        NodeList features = featureManager.getChildNodes();
+        for (int i = 0; i < features.getLength(); i++) {
+            DOMNode featureNode = (DOMNode) features.item(i);
+            DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
+            // skip nodes that do not have any text value (ie. comments)
+            if (featureNode.getNodeName().equals(LibertyConstants.FEATURE_ELEMENT) && featureTextNode != null) {
+                String featureName = featureTextNode.getTextContent();
+                includedFeatures.add(featureName);
+            }
+        }
+        return includedFeatures;
     }
 }
