@@ -3,10 +3,9 @@ package io.openliberty;
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lsp4j.CompletionItem;
+import org.junit.jupiter.api.Test;
 
 import static org.eclipse.lemminx.XMLAssert.*;
-
-import org.junit.jupiter.api.Test;
 
 public class LibertyCompletionTest {
 
@@ -67,6 +66,7 @@ public class LibertyCompletionTest {
                                 "<server description=\"Sample Liberty server\">", //
                                 "       <featureManager>", //
                                 "               <feature>|</feature>", //
+                                "               <feature>mpConfig-1.4</feature>", //
                                 "       </featureManager>", //
                                 "</server>" //
                 );
@@ -75,7 +75,8 @@ public class LibertyCompletionTest {
                 CompletionItem websocket = c("websocket-1.1", "websocket-1.1");
                 CompletionItem microProfileCompletion = c("microProfile-2.2", "microProfile-2.2");
 
-                final int TOTAL_ITEMS = 158; // total number of available completion items
+                // would be 158 if mpConfig-1.4 was not already specified
+                final int TOTAL_ITEMS = 157; // total number of available completion items
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, jaxrsCompletion, websocket,
                                 microProfileCompletion);
