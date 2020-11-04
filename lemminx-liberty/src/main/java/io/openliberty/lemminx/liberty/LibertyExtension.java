@@ -1,6 +1,7 @@
 package io.openliberty.lemminx.liberty;
 
 import org.eclipse.lemminx.services.extensions.ICompletionParticipant;
+import org.eclipse.lemminx.services.extensions.IDocumentLinkParticipant;
 import org.eclipse.lemminx.services.extensions.IHoverParticipant;
 import org.eclipse.lemminx.services.extensions.IXMLExtension;
 import org.eclipse.lemminx.services.extensions.XMLExtensionsRegistry;
@@ -22,6 +23,7 @@ public class LibertyExtension implements IXMLExtension {
     private ICompletionParticipant completionParticipant;
     private IHoverParticipant hoverParticipant;
     private IDiagnosticsParticipant diagnosticsParticipant;
+    private IDocumentLinkParticipant documentLinkParticipant;
 
     @Override
     public void start(InitializeParams initializeParams, XMLExtensionsRegistry xmlExtensionsRegistry) {
@@ -36,6 +38,9 @@ public class LibertyExtension implements IXMLExtension {
 
         diagnosticsParticipant = new LibertyDiagnosticParticipant();
         xmlExtensionsRegistry.registerDiagnosticsParticipant(diagnosticsParticipant);
+
+        documentLinkParticipant = new LibertyDocumentLinkParticipant();
+        xmlExtensionsRegistry.registerDocumentLinkParticipant(documentLinkParticipant);
     }
 
     @Override
@@ -44,6 +49,7 @@ public class LibertyExtension implements IXMLExtension {
         xmlExtensionsRegistry.unregisterCompletionParticipant(completionParticipant);
         xmlExtensionsRegistry.unregisterHoverParticipant(hoverParticipant);
         xmlExtensionsRegistry.unregisterDiagnosticsParticipant(diagnosticsParticipant);
+        xmlExtensionsRegistry.unregisterDocumentLinkParticipant(documentLinkParticipant);
     }
 
     // Do save is called on startup with a Settings update
