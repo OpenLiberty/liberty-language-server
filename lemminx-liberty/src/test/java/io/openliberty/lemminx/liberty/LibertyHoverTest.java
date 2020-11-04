@@ -1,6 +1,8 @@
-package io.openliberty;
+package io.openliberty.lemminx.liberty;
 
 import org.junit.jupiter.api.Test;
+
+import io.openliberty.lemminx.liberty.utils.XMLTestUtils;
 
 import static io.openliberty.lemminx.liberty.LibertyXSDURIResolver.SERVER_XSD_RESOURCE;
 
@@ -11,13 +13,12 @@ import java.io.IOException;
 
 public class LibertyHoverTest {
 
-        static String newLine = System.lineSeparator();
         static String serverXMLURI = "test/server.xml";
 
         @Test
         public void testFeatureHover() throws BadLocationException {
 
-                String serverXML = String.join(newLine, //
+                String serverXML = XMLTestUtils.joinWithNewLine( //
                                 "<server description=\"Sample Liberty server\">", //
                                 "       <featureManager>", //
                                 "               <feature>j|axrs-2.1</feature>", //
@@ -37,7 +38,7 @@ public class LibertyHoverTest {
         public void testXSDSchemaHover() throws BadLocationException, IOException {
                 String serverXSDURI = SERVER_XSD_RESOURCE.getDeployedPath().toUri().toString().replace("///", "/");
 
-                String serverXML = String.join(newLine, //
+                String serverXML = XMLTestUtils.joinWithNewLine( //
                                 "<server description=\"Sample Liberty server\">", //
                                 "       <feature|Manager>", //
                                 "               <feature>jaxrs-2.1</feature>", //

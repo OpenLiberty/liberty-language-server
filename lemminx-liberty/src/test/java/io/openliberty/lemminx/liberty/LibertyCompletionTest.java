@@ -1,22 +1,23 @@
-package io.openliberty;
+package io.openliberty.lemminx.liberty;
 
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lsp4j.CompletionItem;
 import org.junit.jupiter.api.Test;
 
+import io.openliberty.lemminx.liberty.utils.XMLTestUtils;
+
 import static org.eclipse.lemminx.XMLAssert.*;
 
 public class LibertyCompletionTest {
 
-        static String newLine = System.lineSeparator();
         static String serverXMLURI = "test/server.xml";
 
         // Tests the availability of completion of XML elements provided by the
         // server.xsd file
         @Test
         public void testXSDElementCompletionItem() throws BadLocationException {
-                String serverXML = String.join(newLine, //
+                String serverXML = XMLTestUtils.joinWithNewLine( //
                                 "<server description=\"Sample Liberty server\">", //
                                 "       |<featureManager>", //
                                 "               <feature>jaxrs-2.1</feature>", //
@@ -40,7 +41,7 @@ public class LibertyCompletionTest {
         // provided by the server.xsd file
         @Test
         public void testXSDAttributeCompletionItem() throws BadLocationException {
-                String serverXML = String.join(newLine, //
+                String serverXML = XMLTestUtils.joinWithNewLine( //
                                 "<server description=\"Sample Liberty server\">", //
                                 "       <featureManager>", //
                                 "               <feature>jaxrs-2.1</feature>", //
@@ -62,7 +63,7 @@ public class LibertyCompletionTest {
         // availability of feature completion
         @Test
         public void testFeatureCompletionItem() throws BadLocationException {
-                String serverXML = String.join(newLine, //
+                String serverXML = XMLTestUtils.joinWithNewLine( //
                                 "<server description=\"Sample Liberty server\">", //
                                 "       <featureManager>", //
                                 "               <feature>|</feature>", //

@@ -1,19 +1,20 @@
-package io.openliberty;
+package io.openliberty.lemminx.liberty;
 
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lsp4j.Diagnostic;
 import org.junit.jupiter.api.Test;
 
+import io.openliberty.lemminx.liberty.utils.XMLTestUtils;
+
 import static org.eclipse.lemminx.XMLAssert.r;
 
 public class LibertyDiagnosticTest {
 
-    static String newLine = System.lineSeparator();
     static String serverXMLURI = "test/server.xml";
 
     @Test
     public void testFeatureDuplicateDiagnostic() {
-        String serverXML = String.join(newLine, //
+        String serverXML = XMLTestUtils.joinWithNewLine( //
                 "<server description=\"Sample Liberty server\">", //
                 "       <featureManager>", //
                 "               <feature>jaxrs-2.1</feature>", //
@@ -38,7 +39,7 @@ public class LibertyDiagnosticTest {
 
     @Test
     public void testInvalidFeatureDiagnostic() {
-        String serverXML = String.join(newLine, //
+        String serverXML = XMLTestUtils.joinWithNewLine( //
                 "<server description=\"Sample Liberty server\">", //
                 "       <featureManager>", //
                 "               <feature>jaxrs-2.1</feature>", //
