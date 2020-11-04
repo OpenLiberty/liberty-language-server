@@ -17,8 +17,6 @@ import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 
 import io.openliberty.lemminx.liberty.models.feature.Feature;
 import io.openliberty.lemminx.liberty.services.FeatureService;
@@ -85,11 +83,10 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
         return uniqueFeatureCompletionItems;
     }
 
-    private List<String> collectExistingFeatures(Node featureManager) {
+    private List<String> collectExistingFeatures(DOMNode featureManager) {
         List<String> includedFeatures = new ArrayList<>();
-        NodeList features = featureManager.getChildNodes();
-        for (int i = 0; i < features.getLength(); i++) {
-            DOMNode featureNode = (DOMNode) features.item(i);
+        List<DOMNode> features = featureManager.getChildren();
+        for (DOMNode featureNode : features) {
             DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
             // skip nodes that do not have any text value (ie. comments)
             if (featureNode.getNodeName().equals(LibertyConstants.FEATURE_ELEMENT) && featureTextNode != null) {
