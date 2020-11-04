@@ -14,3 +14,7 @@ Extension to the [Eclipse LemMinX](https://github.com/eclipse/lemminx) XML langu
 - Completion, hover and validation support for liberty features
 
 ![Feature Completion](../docs/feature-completion.png)
+
+- Document Links for `<include>` elements
+
+![Document Links](../docs/document-link.gif)
