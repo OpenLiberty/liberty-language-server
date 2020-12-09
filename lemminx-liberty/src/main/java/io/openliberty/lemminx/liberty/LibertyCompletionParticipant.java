@@ -3,6 +3,7 @@ package io.openliberty.lemminx.liberty;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.lemminx.commons.BadLocationException;
@@ -26,9 +27,12 @@ import io.openliberty.lemminx.liberty.util.LibertyUtils;
 
 public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
 
+    private static final Logger LOGGER = Logger.getLogger(LibertyCompletionParticipant.class.getName());
+
     @Override
     public void onXMLContent(ICompletionRequest request, ICompletionResponse response)
             throws IOException, BadLocationException {
+        LOGGER.info("Running completion");
         if (!LibertyUtils.isServerXMLFile(request.getXMLDocument()))
             return;
 

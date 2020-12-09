@@ -13,12 +13,16 @@ import io.openliberty.lemminx.liberty.services.SettingsService;
 import io.openliberty.lemminx.liberty.util.*;
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Logger;
 
 public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
+
+    private static final Logger LOGGER = Logger.getLogger(LibertyDiagnosticParticipant.class.getName());
 
     @Override
     public void doDiagnostics(DOMDocument domDocument, List<Diagnostic> diagnostics,
             XMLValidationSettings validationSettings, CancelChecker cancelChecker) {
+        LOGGER.info("Running diagnostics");
         if (!LibertyUtils.isServerXMLFile(domDocument))
             return;
         try {

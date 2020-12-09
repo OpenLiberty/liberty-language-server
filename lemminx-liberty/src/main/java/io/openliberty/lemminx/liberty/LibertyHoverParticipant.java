@@ -11,8 +11,11 @@ import io.openliberty.lemminx.liberty.services.SettingsService;
 import io.openliberty.lemminx.liberty.util.*;
 
 import java.util.Optional;
+import java.util.logging.Logger;
 
 public class LibertyHoverParticipant implements IHoverParticipant {
+
+	private static final Logger LOGGER = Logger.getLogger(LibertyHoverParticipant.class.getName());
 
 	@Override
 	public Hover onAttributeName(IHoverRequest request) {
@@ -31,6 +34,9 @@ public class LibertyHoverParticipant implements IHoverParticipant {
 
 	@Override
 	public Hover onText(IHoverRequest request) {
+
+		LOGGER.info("Running Hover");
+
 		if (!LibertyUtils.isServerXMLFile(request.getXMLDocument()))
 			return null;
 
