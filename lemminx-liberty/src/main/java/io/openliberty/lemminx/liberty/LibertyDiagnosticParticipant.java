@@ -54,9 +54,11 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         for (DOMNode featureNode : features) {
             DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
             // skip nodes that do not have any text value (ie. comments)
-            if (featureTextNode != null) {
+            if (featureTextNode != null && featureTextNode.getTextContent() != null) {
                 String featureName = featureTextNode.getTextContent();
-                if (!FeatureService.getInstance().featureExists(featureName, libertyVersion, requestDelay)) {
+                // if the feature is not a user defined feature and the feature does not exist in the list of
+                // supported features show a "Feature does not exist" diagnostic
+                if (!featureName.startsWith("usr:") && !FeatureService.getInstance().featureExists(featureName, libertyVersion, requestDelay)) {
                     Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
                             domDocument);
                     String message = "ERROR: The feature \"" + featureName + "\" does not exist.";
