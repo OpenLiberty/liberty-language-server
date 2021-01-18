@@ -1,5 +1,6 @@
 package io.openliberty.lemminx.liberty;
 
+import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.dom.DOMElement;
 import org.eclipse.lemminx.services.extensions.IHoverParticipant;
 import org.eclipse.lemminx.services.extensions.IHoverRequest;
@@ -41,16 +42,20 @@ public class LibertyHoverParticipant implements IHoverParticipant {
 		// if we are hovering over text inside a <feature> element
 		if (LibertyConstants.FEATURE_ELEMENT.equals(parentElement.getTagName())) {
 			String featureName = request.getNode().getTextContent();
-			return getHoverFeatureDescription(featureName);
+			return getHoverFeatureDescription(featureName, request.getXMLDocument());
 		}
 
 		return null;
 	}
 
-	private Hover getHoverFeatureDescription(String featureName) {
-		final String libertyVersion = SettingsService.getInstance().getLibertyVersion();
+	private Hover getHoverFeatureDescription(String featureName, DOMDocument domDocument) {
+		String libertyVersion = SettingsService.getInstance().getLibertyVersion();
+		if (libertyVersion == null) {
+            // try to get version from installed Liberty
+            libertyVersion = LibertyUtils.getVersion(domDocument);
+        }
 		final int requestDelay = SettingsService.getInstance().getRequestDelay();
-		Optional<Feature> feature = FeatureService.getInstance().getFeature(featureName, libertyVersion, requestDelay);
+		Optional<Feature> feature = FeatureService.getInstance().getFeature(featureName, libertyVersion, requestDelay, domDocument.getDocumentURI());
 		if (feature.isPresent()) {
 			return new Hover(new MarkupContent("plaintext", feature.get().getShortDescription()));
 		}

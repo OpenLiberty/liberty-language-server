@@ -30,7 +30,9 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
     public void onXMLContent(ICompletionRequest request, ICompletionResponse response)
             throws IOException, BadLocationException {
         if (!LibertyUtils.isServerXMLFile(request.getXMLDocument()))
-            return;
+            return;    
+
+        LibertyUtils.getVersion(request.getXMLDocument());
 
         DOMElement parentElement = request.getParentElement();
         if (parentElement == null || parentElement.getTagName() == null)
@@ -69,16 +71,22 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
         return item;
     }
 
-    private List<CompletionItem> buildCompletionItems(DOMElement featureElement, DOMDocument document,
+    private List<CompletionItem> buildCompletionItems(DOMElement featureElement, DOMDocument domDocument,
             List<String> existingFeatures) {
-        final String libertyVersion = SettingsService.getInstance().getLibertyVersion();
+
+        String libertyVersion = LibertyUtils.getVersion(domDocument);
+        if (libertyVersion == null) {
+            // try to get version from installed Liberty
+            libertyVersion = LibertyUtils.getVersion(domDocument);
+        }
+
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
-        List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion, requestDelay);
+        List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion, requestDelay, domDocument.getDocumentURI());
 
         // filter out features that are already specified in the featureManager block
         List<CompletionItem> uniqueFeatureCompletionItems = features.stream()
                 .filter(feature -> !existingFeatures.contains(feature.getWlpInformation().getShortName()))
-                .map(feat -> buildFeatureCompletionItem(feat, featureElement, document)).collect(Collectors.toList());
+                .map(feat -> buildFeatureCompletionItem(feat, featureElement, domDocument)).collect(Collectors.toList());
 
         return uniqueFeatureCompletionItems;
     }

@@ -20,6 +20,10 @@ public class WlpInformation {
 
   // Getter Methods
 
+  public WlpInformation(String shortName) {
+    this.shortName = shortName;
+  }
+
   public String getAppliesTo() {
     return appliesTo;
   }

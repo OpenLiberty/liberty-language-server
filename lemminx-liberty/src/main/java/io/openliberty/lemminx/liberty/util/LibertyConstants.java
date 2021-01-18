@@ -12,4 +12,6 @@ public final class LibertyConstants {
     public static final String FEATURE_ELEMENT = "feature";
 
     public static final String PUBLIC_VISIBILITY = "PUBLIC";
+
+    public static String DEFAULT_SERVER_VERSION = "20.0.0.9";
 }

@@ -9,9 +9,12 @@ import org.eclipse.lemminx.services.extensions.save.ISaveContext;
 import org.eclipse.lemminx.services.extensions.save.ISaveContext.SaveContextType;
 import org.eclipse.lemminx.uriresolver.URIResolverExtension;
 import org.eclipse.lsp4j.InitializeParams;
+import org.eclipse.lsp4j.WorkspaceFolder;
 
+import java.util.List;
 import java.util.logging.Logger;
 
+import io.openliberty.lemminx.liberty.services.LibertyProjectsManager;
 import io.openliberty.lemminx.liberty.services.SettingsService;
 
 public class LibertyExtension implements IXMLExtension {
@@ -25,6 +28,10 @@ public class LibertyExtension implements IXMLExtension {
 
     @Override
     public void start(InitializeParams initializeParams, XMLExtensionsRegistry xmlExtensionsRegistry) {
+        List<WorkspaceFolder> folders = initializeParams.getWorkspaceFolders();
+        if (folders != null) {
+            LibertyProjectsManager.getInstance().setWorkspaceFolders(folders);
+        }
         xsdResolver = new LibertyXSDURIResolver();
         xmlExtensionsRegistry.getResolverExtensionManager().registerResolver(xsdResolver);
 
@@ -40,6 +47,9 @@ public class LibertyExtension implements IXMLExtension {
 
     @Override
     public void stop(XMLExtensionsRegistry xmlExtensionsRegistry) {
+        // clean up .libertyls folders
+        LibertyProjectsManager.getInstance().cleanUpTempDirs();
+
         xmlExtensionsRegistry.getResolverExtensionManager().unregisterResolver(xsdResolver);
         xmlExtensionsRegistry.unregisterCompletionParticipant(completionParticipant);
         xmlExtensionsRegistry.unregisterHoverParticipant(hoverParticipant);
