@@ -5,7 +5,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -23,8 +22,6 @@ import javax.xml.bind.Unmarshaller;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
-
-import org.eclipse.lsp4j.WorkspaceFolder;
 
 import io.openliberty.lemminx.liberty.models.feature.Feature;
 import io.openliberty.lemminx.liberty.models.feature.FeatureInfo;
@@ -48,7 +45,7 @@ public class FeatureService {
     return instance;
   }
 
-  // Cache of liberty version -> list of supported features
+  // Cache of Liberty version -> list of supported features
   private Map<String, List<Feature>> featureCache;
   private List<Feature> defaultFeatureList;
   private long featureUpdateTime;
@@ -59,10 +56,10 @@ public class FeatureService {
   }
 
   /**
-   * Fetches information about liberty features from maven repo
+   * Fetches information about Liberty features from Maven repo
    *
-   * @param libertyVersion - version of liberty to fetch features for
-   * @return list of features supported by the provided version of liberty
+   * @param libertyVersion - version of Liberty to fetch features for
+   * @return list of features supported by the provided version of Liberty
    */
   private List<Feature> fetchFeaturesForVersion(String libertyVersion) throws IOException, JsonParseException {
     String featureEndpoint = String.format(
@@ -80,7 +77,7 @@ public class FeatureService {
   /**
    * Returns the default feature list
    *
-   * @return list of features supported by the default version of liberty
+   * @return list of features supported by the default version of Liberty
    */
   private List<Feature> getDefaultFeatureList() {
     try {
@@ -91,6 +88,7 @@ public class FeatureService {
         // Only need the public features
         defaultFeatureList = readPublicFeatures(reader);
       }
+      LOGGER.fine("Returning default feature list");
       return defaultFeatureList;
 
     } catch (JsonParseException e) {
@@ -151,7 +149,7 @@ public class FeatureService {
     }
 
     // return default feature list
-    List<Feature> defaultFeatures = getDefaultFeatureList();
+    List<Feature> defaultFeatures = getDefaultFeatureList(); 
     return defaultFeatures;
   }
 
@@ -169,11 +167,13 @@ public class FeatureService {
   private List<Feature> getInstalledFeaturesList(String documentURI) {
     List<Feature> installedFeatures = new ArrayList<Feature>();
     try {
-      String workspaceFolder = LibertyProjectsManager.getWorkspaceFolder(documentURI);
-      File tempDir = LibertyUtils.getTempDir(workspaceFolder);
+      LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getWorkspaceFolder(documentURI);
+      if (libertyWorkspace == null || libertyWorkspace.getURI() == null) {
+        return installedFeatures;
+      }
+      File tempDir = LibertyUtils.getTempDir(libertyWorkspace.getURI());
       Path featureListJAR = LibertyUtils.findFileInWorkspace(documentURI, "ws-featurelist.jar");
 
-      // TODO: verify where we should generate this temporary file
       if (featureListJAR != null && featureListJAR.toFile().exists()) {
         File tempFeaturesList = File.createTempFile("featureslist", ".xml", tempDir);
         String[] cmd = { "java", "-jar", featureListJAR.toAbsolutePath().toString(),

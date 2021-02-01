@@ -28,9 +28,13 @@ public class LibertyExtension implements IXMLExtension {
 
     @Override
     public void start(InitializeParams initializeParams, XMLExtensionsRegistry xmlExtensionsRegistry) {
-        List<WorkspaceFolder> folders = initializeParams.getWorkspaceFolders();
-        if (folders != null) {
-            LibertyProjectsManager.getInstance().setWorkspaceFolders(folders);
+        try {
+            List<WorkspaceFolder> folders = initializeParams.getWorkspaceFolders();
+            if (folders != null) {
+                LibertyProjectsManager.getInstance().setWorkspaceFolders(folders);
+            }
+        } catch (NullPointerException e) {
+            LOGGER.warning("Could not get workspace folders: " + e.toString());
         }
         xsdResolver = new LibertyXSDURIResolver();
         xmlExtensionsRegistry.getResolverExtensionManager().registerResolver(xsdResolver);

@@ -5,21 +5,29 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchKey;
+import java.nio.file.WatchService;
 import java.util.List;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.lemminx.dom.DOMDocument;
 
 import io.openliberty.lemminx.liberty.services.LibertyProjectsManager;
+import io.openliberty.lemminx.liberty.services.LibertyWorkspace;
 
 public class LibertyUtils {
 
     private static final Logger LOGGER = Logger.getLogger(LibertyUtils.class.getName());
+
+    private static Thread thread;
 
     private LibertyUtils() {
     }
@@ -33,21 +41,20 @@ public class LibertyUtils {
     }
 
     /**
-     * Given a server xml uri find the associated workspace folder and search that
-     * folder for the most recently edited file that matches the given name
+     * Given a server.xml URI find the associated workspace folder and search that
+     * folder for the most recently edited file that matches the given name.
      * 
      * @param serverXmlURI
      * @param filename
      * @return path to given file or null if could not be found
      */
     public static Path findFileInWorkspace(String serverXmlURI, String filename) {
-
-        String workspaceFolderURI = LibertyProjectsManager.getWorkspaceFolder(serverXmlURI);
-        if (workspaceFolderURI == null) {
+        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getWorkspaceFolder(serverXmlURI);
+        if (libertyWorkspace.getURI() == null) {
             return null;
         }
         try {
-            URI rootURI = new URI(workspaceFolderURI);
+            URI rootURI = new URI(libertyWorkspace.getURI());
             Path rootPath = Paths.get(rootURI);
             List<Path> matchingFiles = Files.walk(rootPath)
                     .filter(p -> (Files.isRegularFile(p) && p.getFileName().endsWith(filename)))
@@ -72,53 +79,63 @@ public class LibertyUtils {
     }
 
     /**
-     * Get the version from the installed Liberty instance Searched for and gets the
-     * version from an openliberty.properties file
+     * Given a server.xml find the version associated with the corresponding Liberty
+     * workspace. If the version has not been set, search for an
+     * openliberty.properties file in the workspace and return the version from that
+     * file. Otherwise, return null.
      * 
      * @param serverXML server xml associated
      * @return version of Liberty or null
      */
     public static String getVersion(DOMDocument serverXML) {
-        // TODO: add logic to determine how often we should check for list of installed
-        // features
-
         // find workspace folder this serverXML belongs to
-        String workspaceFolderURI = LibertyProjectsManager.getWorkspaceFolder(serverXML.getDocumentURI());
-        if (workspaceFolderURI == null) {
+        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getWorkspaceFolder(serverXML.getDocumentURI());
+
+        if (libertyWorkspace == null || libertyWorkspace.getURI() == null) {
             return null;
         }
-        String version;
 
-        LibertyProjectsManager projectsManager = LibertyProjectsManager.getInstance();
-        version = projectsManager.getLibertyVersion(workspaceFolderURI);
-        LOGGER.info("---- version from cache: " + version);
-        if (version == null) {
-            Path propertiesFile = findFileInWorkspace(serverXML.getDocumentURI(), "openliberty.properties");
-            if (propertiesFile != null && propertiesFile.toFile().exists()) {
-                Properties prop = new Properties();
-                try {
-                    FileInputStream fis = new FileInputStream(propertiesFile.toFile());
-                    prop.load(fis);
-                    version = prop.getProperty("com.ibm.websphere.productVersion");
-                    LOGGER.info("---- version from property file: " + version);
-                    projectsManager.updateLibertyVersionCache(workspaceFolderURI, version);
-                    return version;
-                } catch (IOException e) {
-                    LOGGER.warning("Unable to get version from properties file: " + propertiesFile.toString() + ": "
-                            + e.getMessage());
-                    return null;
-                }
-            }
+        String version = libertyWorkspace.getLibertyVersion();
+
+        // return version from cache if set and Liberty is installed
+        if (version != null && libertyWorkspace.isLibertyInstalled()) {
+            return version;
         }
-        return null;
+        Path propertiesFile = findFileInWorkspace(serverXML.getDocumentURI(), "openliberty.properties");
+
+        // detected a new Liberty properties file, re-calculate version
+        if (propertiesFile != null && propertiesFile.toFile().exists()) {
+            Properties prop = new Properties();
+            try {
+                // add a file watcher on this file
+                if (!libertyWorkspace.isLibertyInstalled()) {
+                    watchFiles(propertiesFile, libertyWorkspace);
+                }
+
+                FileInputStream fis = new FileInputStream(propertiesFile.toFile());
+                prop.load(fis);
+                version = prop.getProperty("com.ibm.websphere.productVersion");
+                libertyWorkspace.setLibertyVersion(version);
+                libertyWorkspace.setLibertyInstalled(true);
+                return version;
+            } catch (IOException e) {
+                LOGGER.warning("Unable to get version from properties file: " + propertiesFile.toString() + ": "
+                        + e.getMessage());
+                return null;
+            }
+        } else {
+            // did not detect a new liberty properties file, return version from cache
+            return version;
+        }
     }
 
     /**
-     * Return temp dir to store generated feature lists and schema Creates temp dir
-     * if it does not exist
+     * Return temp directory to store generated feature lists and schema. Creates
+     * temp directory if it does not exist.
      * 
-     * @param folder
-     * @return
+     * @param folder WorkspaceFolderURI indicates where to create the temporary
+     *               directory
+     * @return temporary directory File object
      */
     public static File getTempDir(String workspaceFolderURI) {
         if (workspaceFolderURI == null) {
@@ -137,10 +154,57 @@ public class LibertyUtils {
             }
             return file;
         } catch (Exception e) {
-            // unable to create temp dir
             LOGGER.warning("Unable to create temp dir: " + e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * Watches the parent directory of the Liberty properties file in a separate
+     * thread. If the the contents of the directory have been modified or deleted,
+     * the installation of Liberty has changed and the corresponding Liberty
+     * Workspace item is updated.
+     * 
+     * @param propertiesFile   openliberty.properties file to watch
+     * @param libertyWorkspace Liberty Workspace object, updated to indicate if
+     *                         there is an associated installation of Liberty
+     */
+    public static void watchFiles(Path propertiesFile, LibertyWorkspace libertyWorkspace) {
+        try {
+            // updateLibertyPropertiesList(propertiesFile);
+            WatchService watcher = FileSystems.getDefault().newWatchService();
+            propertiesFile.getParent().register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
+            thread = new Thread(() -> {
+                WatchKey watchKey = null;
+                try {
+                    while (true) {
+                        watchKey = watcher.poll(5, TimeUnit.SECONDS);
+                        if (watchKey != null) {
+                            watchKey.pollEvents().stream().forEach(event -> {
+                                LOGGER.fine("Liberty properties file (" + propertiesFile + ") has been modified: "
+                                        + event.context());
+                                // if modified re-calculate version
+                                libertyWorkspace.setLibertyInstalled(false);
+                            });
+
+                            // if watchkey.reset() returns false indicates that the parent folder has been
+                            // deleted
+                            boolean valid = watchKey.reset();
+                            if (!valid) {
+                                // if deleted re-calculate version
+                                LOGGER.fine("Liberty properties file (" + propertiesFile + ") has been deleted");
+                                libertyWorkspace.setLibertyInstalled(false);
+                            }
+                        }
+                    }
+                } catch (InterruptedException e) {
+                    LOGGER.warning("Unable to watch properties file(s): " + e.toString());
+                }
+            });
+            thread.start();
+        } catch (IOException e) {
+            LOGGER.warning("Unable to watch properties file(s): " + e.toString());
+        }
     }
 
 }

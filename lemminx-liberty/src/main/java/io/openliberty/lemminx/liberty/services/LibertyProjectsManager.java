@@ -6,7 +6,7 @@ import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -19,31 +19,29 @@ public class LibertyProjectsManager {
 
     private static final LibertyProjectsManager INSTANCE = new LibertyProjectsManager();
 
-    private List<WorkspaceFolder> workspaceFolders;
-    private static HashMap<String, String> libertyVersionCache;
+    private List<LibertyWorkspace> libertyWorkspaceFolders;
 
     public static LibertyProjectsManager getInstance() {
         return INSTANCE;
     }
 
     private LibertyProjectsManager() {
-        libertyVersionCache = new HashMap<String, String>();
+        libertyWorkspaceFolders = new ArrayList<LibertyWorkspace>();
     }
 
     public void setWorkspaceFolders(List<WorkspaceFolder> workspaceFolders) {
-        this.workspaceFolders = workspaceFolders;
+        for (WorkspaceFolder folder : workspaceFolders) {
+            LibertyWorkspace libertyWorkspace = new LibertyWorkspace(folder.getUri());
+            this.libertyWorkspaceFolders.add(libertyWorkspace);
+        }
     }
 
-    public List<WorkspaceFolder> getWorkspaceFolders() {
-        return this.workspaceFolders;
+    public List<LibertyWorkspace> getLibertyWorkspaceFolders() {
+        return this.libertyWorkspaceFolders;
     }
 
-    public void updateLibertyVersionCache(String workspaceFolderURI, String version) {
-        libertyVersionCache.put(workspaceFolderURI, version);
-    }
-
-    public String getLibertyVersion(String workspaceFolderURI) {
-        return libertyVersionCache.get(workspaceFolderURI);
+    public String getLibertyVersion(LibertyWorkspace libertyWorkspace) {
+        return libertyWorkspace.getLibertyVersion();
     }
 
     /**
@@ -52,19 +50,19 @@ public class LibertyProjectsManager {
      * @param serverXMLUri
      * @return
      */
-    public static String getWorkspaceFolder(String serverXMLUri) {
-        for (WorkspaceFolder folder : getInstance().getWorkspaceFolders()) {
-            if (serverXMLUri.contains(folder.getUri())) {
-                return folder.getUri();
+    public static LibertyWorkspace getWorkspaceFolder(String serverXMLUri) {
+        for (LibertyWorkspace folder : getInstance().getLibertyWorkspaceFolders()) {
+            if (serverXMLUri.contains(folder.getURI())) {
+                return folder;
             }
         }
         return null;
     }
 
     public void cleanUpTempDirs() {
-        for (WorkspaceFolder folder : getInstance().getWorkspaceFolders()) {
+        for (LibertyWorkspace folder : getInstance().getLibertyWorkspaceFolders()) {
             // search for liberty ls directory
-            String workspaceFolderURI = folder.getUri();
+            String workspaceFolderURI = folder.getURI();
             try {
                 if (workspaceFolderURI != null) {
                     URI rootURI = new URI(workspaceFolderURI);
@@ -79,13 +77,11 @@ public class LibertyProjectsManager {
                             LOGGER.warning("Could not delete " + libertylsDir);
                         }
                     }
-
                 }
             } catch (IOException | URISyntaxException e) {
                 LOGGER.warning("Could not clean up /.libertyls directory: " + e.getMessage());
             }
-            
         }
-	}
+    }
 
 }
