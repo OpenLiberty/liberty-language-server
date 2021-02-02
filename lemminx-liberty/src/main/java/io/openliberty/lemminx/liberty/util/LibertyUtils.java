@@ -49,7 +49,7 @@ public class LibertyUtils {
      * @return path to given file or null if could not be found
      */
     public static Path findFileInWorkspace(String serverXmlURI, String filename) {
-        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getWorkspaceFolder(serverXmlURI);
+        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlURI);
         if (libertyWorkspace.getURI() == null) {
             return null;
         }
@@ -89,7 +89,7 @@ public class LibertyUtils {
      */
     public static String getVersion(DOMDocument serverXML) {
         // find workspace folder this serverXML belongs to
-        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getWorkspaceFolder(serverXML.getDocumentURI());
+        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXML.getDocumentURI());
 
         if (libertyWorkspace == null || libertyWorkspace.getURI() == null) {
             return null;

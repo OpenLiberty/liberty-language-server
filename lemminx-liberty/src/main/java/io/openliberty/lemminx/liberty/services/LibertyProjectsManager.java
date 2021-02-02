@@ -50,7 +50,7 @@ public class LibertyProjectsManager {
      * @param serverXMLUri
      * @return
      */
-    public static LibertyWorkspace getWorkspaceFolder(String serverXMLUri) {
+    public LibertyWorkspace getWorkspaceFolder(String serverXMLUri) {
         for (LibertyWorkspace folder : getInstance().getLibertyWorkspaceFolders()) {
             if (serverXMLUri.contains(folder.getURI())) {
                 return folder;
