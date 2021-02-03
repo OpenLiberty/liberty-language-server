@@ -22,6 +22,7 @@ import org.eclipse.lemminx.dom.DOMDocument;
 import io.openliberty.lemminx.liberty.services.FeatureService;
 import io.openliberty.lemminx.liberty.services.LibertyProjectsManager;
 import io.openliberty.lemminx.liberty.services.LibertyWorkspace;
+import io.openliberty.lemminx.liberty.services.SettingsService;
 
 public class LibertyUtils {
 
@@ -80,7 +81,7 @@ public class LibertyUtils {
 
     /**
      * Given a server.xml find the version associated with the corresponding Liberty
-     * workspace. If the version has not been set, search for an
+     * workspace. If the version has not been set via the Settings Service, search for an
      * openliberty.properties file in the workspace and return the version from that
      * file. Otherwise, return null.
      * 
@@ -88,6 +89,11 @@ public class LibertyUtils {
      * @return version of Liberty or null
      */
     public static String getVersion(DOMDocument serverXML) {
+        // return version set in settings if it exists
+        String libertyVersion = SettingsService.getInstance().getLibertyVersion();
+        if (libertyVersion != null) {
+            return libertyVersion;
+        }
         // find workspace folder this serverXML belongs to
         LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXML.getDocumentURI());
 

@@ -49,11 +49,8 @@ public class LibertyHoverParticipant implements IHoverParticipant {
 	}
 
 	private Hover getHoverFeatureDescription(String featureName, DOMDocument domDocument) {
-		String libertyVersion = SettingsService.getInstance().getLibertyVersion();
-		if (libertyVersion == null) {
-            // try to get version from installed Liberty
-            libertyVersion = LibertyUtils.getVersion(domDocument);
-        }
+		String libertyVersion = LibertyUtils.getVersion(domDocument);
+
 		final int requestDelay = SettingsService.getInstance().getRequestDelay();
 		Optional<Feature> feature = FeatureService.getInstance().getFeature(featureName, libertyVersion, requestDelay, domDocument.getDocumentURI());
 		if (feature.isPresent()) {

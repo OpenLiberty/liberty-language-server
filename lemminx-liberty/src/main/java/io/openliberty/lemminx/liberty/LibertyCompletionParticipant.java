@@ -74,11 +74,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
     private List<CompletionItem> buildCompletionItems(DOMElement featureElement, DOMDocument domDocument,
             List<String> existingFeatures) {
 
-        String libertyVersion = SettingsService.getInstance().getLibertyVersion();
-        if (libertyVersion == null) {
-            // try to get version from installed Liberty
-            libertyVersion = LibertyUtils.getVersion(domDocument);
-        }
+        String libertyVersion = LibertyUtils.getVersion(domDocument);
 
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
         List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion, requestDelay, domDocument.getDocumentURI());

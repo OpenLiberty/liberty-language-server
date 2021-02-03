@@ -44,11 +44,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             return;
         }
 
-        String libertyVersion = SettingsService.getInstance().getLibertyVersion();
-        if (libertyVersion == null) {
-            // try to get version from installed Liberty
-            libertyVersion = LibertyUtils.getVersion(domDocument);
-        }
+        String libertyVersion =  LibertyUtils.getVersion(domDocument);
+
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
 
         // Search for duplicate features
