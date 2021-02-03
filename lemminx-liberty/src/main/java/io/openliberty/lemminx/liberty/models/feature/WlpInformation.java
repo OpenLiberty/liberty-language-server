@@ -18,8 +18,6 @@ public class WlpInformation {
   private String mavenCoordinates;
   private String shortName;
 
-  // Getter Methods
-
   public WlpInformation(String shortName) {
     this.shortName = shortName;
   }
@@ -79,8 +77,6 @@ public class WlpInformation {
   public String getShortName() {
     return shortName;
   }
-
-  // Setter Methods
 
   public void setAppliesTo(String appliesTo) {
     this.appliesTo = appliesTo;

@@ -1,6 +1,5 @@
 package io.openliberty.lemminx.liberty.util;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -20,6 +19,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.lemminx.dom.DOMDocument;
 
+import io.openliberty.lemminx.liberty.services.FeatureService;
 import io.openliberty.lemminx.liberty.services.LibertyProjectsManager;
 import io.openliberty.lemminx.liberty.services.LibertyWorkspace;
 
@@ -105,6 +105,10 @@ public class LibertyUtils {
 
         // detected a new Liberty properties file, re-calculate version
         if (propertiesFile != null && propertiesFile.toFile().exists()) {
+            // new properties file, remove the installed features from the feature cache
+            // so that the installed features list will be regenerated as it may have
+            // changed between Liberty installations
+            FeatureService.getInstance().removeFromFeatureCache(LibertyConstants.INSTALLED_FEATURE_KEY);
             Properties prop = new Properties();
             try {
                 // add a file watcher on this file
@@ -129,35 +133,35 @@ public class LibertyUtils {
         }
     }
 
-    /**
-     * Return temp directory to store generated feature lists and schema. Creates
-     * temp directory if it does not exist.
-     * 
-     * @param folder WorkspaceFolderURI indicates where to create the temporary
-     *               directory
-     * @return temporary directory File object
-     */
-    public static File getTempDir(String workspaceFolderURI) {
-        if (workspaceFolderURI == null) {
-            return null;
-        }
-        try {
-            URI rootURI = new URI(workspaceFolderURI);
-            Path rootPath = Paths.get(rootURI);
-            File file = rootPath.toFile();
-            File libertyLSFolder = new File(file, ".libertyls");
+    // /**
+    //  * Return temp directory to store generated feature lists and schema. Creates
+    //  * temp directory if it does not exist.
+    //  * 
+    //  * @param folder WorkspaceFolderURI indicates where to create the temporary
+    //  *               directory
+    //  * @return temporary directory File object
+    //  */
+    // public static File getTempDir(String workspaceFolderURI) {
+    //     if (workspaceFolderURI == null) {
+    //         return null;
+    //     }
+    //     try {
+    //         URI rootURI = new URI(workspaceFolderURI);
+    //         Path rootPath = Paths.get(rootURI);
+    //         File file = rootPath.toFile();
+    //         File libertyLSFolder = new File(file, ".libertyls");
 
-            if (!libertyLSFolder.exists()) {
-                if (!libertyLSFolder.mkdir()) {
-                    return null;
-                }
-            }
-            return file;
-        } catch (Exception e) {
-            LOGGER.warning("Unable to create temp dir: " + e.getMessage());
-        }
-        return null;
-    }
+    //         if (!libertyLSFolder.exists()) {
+    //             if (!libertyLSFolder.mkdir()) {
+    //                 return null;
+    //             }
+    //         }
+    //         return file;
+    //     } catch (Exception e) {
+    //         LOGGER.warning("Unable to create temp dir: " + e.getMessage());
+    //     }
+    //     return null;
+    // }
 
     /**
      * Watches the parent directory of the Liberty properties file in a separate
@@ -171,7 +175,6 @@ public class LibertyUtils {
      */
     public static void watchFiles(Path propertiesFile, LibertyWorkspace libertyWorkspace) {
         try {
-            // updateLibertyPropertiesList(propertiesFile);
             WatchService watcher = FileSystems.getDefault().newWatchService();
             propertiesFile.getParent().register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
             thread = new Thread(() -> {
