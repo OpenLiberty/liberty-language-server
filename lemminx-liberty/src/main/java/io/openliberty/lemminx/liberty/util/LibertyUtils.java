@@ -11,6 +11,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 
 import org.eclipse.lemminx.dom.DOMDocument;
 
-import io.openliberty.lemminx.liberty.services.FeatureService;
+import io.openliberty.lemminx.liberty.models.feature.Feature;
 import io.openliberty.lemminx.liberty.services.LibertyProjectsManager;
 import io.openliberty.lemminx.liberty.services.LibertyWorkspace;
 import io.openliberty.lemminx.liberty.services.SettingsService;
@@ -111,10 +112,10 @@ public class LibertyUtils {
 
         // detected a new Liberty properties file, re-calculate version
         if (propertiesFile != null && propertiesFile.toFile().exists()) {
-            // new properties file, remove the installed features from the feature cache
+            // new properties file, reset the installed features stored in the feature cache
             // so that the installed features list will be regenerated as it may have
             // changed between Liberty installations
-            FeatureService.getInstance().removeFromFeatureCache(LibertyConstants.INSTALLED_FEATURE_KEY);
+            libertyWorkspace.setInstalledFeatureList(new ArrayList<Feature>());
             Properties prop = new Properties();
             try {
                 // add a file watcher on this file

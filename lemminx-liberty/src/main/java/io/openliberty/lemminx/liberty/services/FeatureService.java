@@ -149,14 +149,9 @@ public class FeatureService {
       // do nothing, continue on to returning default feature list
     }
 
-    // if the installed features are already cached, return that list
-     if (featureCache.containsKey(LibertyConstants.INSTALLED_FEATURE_KEY)) {
-      return featureCache.get(LibertyConstants.INSTALLED_FEATURE_KEY);
-    }
-    // else need to fetch installed features from installed Liberty
+    // fetch installed features list
     List<Feature> installedFeatures = getInstalledFeaturesList(documentURI);
     if (installedFeatures.size() != 0) {
-      featureCache.put(LibertyConstants.INSTALLED_FEATURE_KEY, installedFeatures);
       return installedFeatures;
     }
 
@@ -177,15 +172,6 @@ public class FeatureService {
   }
 
   /**
-   * Remove a <version, feature list> pair from the feature cache
-   * 
-   * @param libertyVersion version key stored in the feature cache
-   */
-  public void removeFromFeatureCache(String libertyVersion) {
-    this.featureCache.remove(libertyVersion);
-  }
-
-  /**
    * Returns the list of installed features generated from ws-featurelist.jar.
    * Generated feature list is stored in the LemMinx cache. Returns an empty list
    * if cannot determine installed feature list.
@@ -200,6 +186,12 @@ public class FeatureService {
       if (libertyWorkspace == null || libertyWorkspace.getURI() == null) {
         return installedFeatures;
       }
+
+      // return installed features from cache
+      if (libertyWorkspace.getInstalledFeatureList().size() != 0) {
+        return libertyWorkspace.getInstalledFeatureList();
+      }
+
       Path featureListJAR = LibertyUtils.findFileInWorkspace(documentURI, "ws-featurelist.jar");
 
       if (featureListJAR != null && featureListJAR.toFile().exists()) {
@@ -231,6 +223,7 @@ public class FeatureService {
               f.setWlpInformation(wlpInfo);
             }
             installedFeatures = featureInfo.getFeatures();
+            libertyWorkspace.setInstalledFeatureList(installedFeatures);
           }
         } else {
           LOGGER.warning("Unable to load installed features into LemMinx cache, file does not exist:" + featureListCacheFile.toAbsolutePath());

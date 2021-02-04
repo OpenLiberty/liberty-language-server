@@ -15,6 +15,4 @@ public final class LibertyConstants {
 
     public static final String DEFAULT_SERVER_VERSION = "20.0.0.9";
 
-    // used in the feature cache to store the installed feature list
-    public static final String INSTALLED_FEATURE_KEY = "installedFeatures";
 }
