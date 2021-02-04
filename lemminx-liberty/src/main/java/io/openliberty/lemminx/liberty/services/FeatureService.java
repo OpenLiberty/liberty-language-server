@@ -1,22 +1,35 @@
 package io.openliberty.lemminx.liberty.services;
 
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
-import io.openliberty.lemminx.liberty.models.feature.*;
-import io.openliberty.lemminx.liberty.util.LibertyConstants;
-import com.google.gson.Gson;
 import java.util.logging.Logger;
+
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
+import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
+
+import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
+import org.eclipse.lemminx.uriresolver.CacheResourcesManager.ResourceToDeploy;
+
+import io.openliberty.lemminx.liberty.models.feature.Feature;
+import io.openliberty.lemminx.liberty.models.feature.FeatureInfo;
+import io.openliberty.lemminx.liberty.models.feature.WlpInformation;
+import io.openliberty.lemminx.liberty.util.LibertyConstants;
+import io.openliberty.lemminx.liberty.util.LibertyUtils;
 
 public class FeatureService {
 
@@ -34,7 +47,7 @@ public class FeatureService {
     return instance;
   }
 
-  // Cache of liberty version -> list of supported features
+  // Cache of Liberty version -> list of supported features
   private Map<String, List<Feature>> featureCache;
   private List<Feature> defaultFeatureList;
   private long featureUpdateTime;
@@ -45,10 +58,10 @@ public class FeatureService {
   }
 
   /**
-   * Fetches information about liberty features from maven repo
+   * Fetches information about Liberty features from Maven repo
    *
-   * @param libertyVersion - version of liberty to fetch features for
-   * @return list of features supported by the provided version of liberty
+   * @param libertyVersion - version of Liberty to fetch features for
+   * @return list of features supported by the provided version of Liberty
    */
   private List<Feature> fetchFeaturesForVersion(String libertyVersion) throws IOException, JsonParseException {
     String featureEndpoint = String.format(
@@ -59,13 +72,14 @@ public class FeatureService {
     // Only need the public features
     ArrayList<Feature> publicFeatures = readPublicFeatures(reader);
 
+    LOGGER.fine("Returning public features from Maven: " + publicFeatures.size());
     return publicFeatures;
   }
 
   /**
    * Returns the default feature list
    *
-   * @return list of features supported by the default version of liberty
+   * @return list of features supported by the default version of Liberty
    */
   private List<Feature> getDefaultFeatureList() {
     try {
@@ -76,6 +90,7 @@ public class FeatureService {
         // Only need the public features
         defaultFeatureList = readPublicFeatures(reader);
       }
+      LOGGER.fine("Returning default feature list");
       return defaultFeatureList;
 
     } catch (JsonParseException e) {
@@ -96,23 +111,35 @@ public class FeatureService {
 
     ArrayList<Feature> publicFeatures = new ArrayList<>();
     Arrays.asList(featureList).stream()
-            .filter(f -> f.getWlpInformation().getVisibility().equals(LibertyConstants.PUBLIC_VISIBILITY))
-            .forEach(publicFeatures::add);
+        .filter(f -> f.getWlpInformation().getVisibility().equals(LibertyConstants.PUBLIC_VISIBILITY))
+        .forEach(publicFeatures::add);
     defaultFeatureList = publicFeatures;
     return publicFeatures;
   }
 
-  public List<Feature> getFeatures(String libertyVersion, int requestDelay) {
+  /**
+   * Returns the Liberty features corresponding to the Liberty version. First
+   * attempts to fetch the feature list from Maven, otherwise falls back to the
+   * list of installed features. If the installed features list cannot be
+   * gathered, falls back to the default feature list.
+   * 
+   * @param libertyVersion Liberty version (corrsponds to XML document)
+   * @param requestDelay Time to wait in between feature list requests to Maven
+   * @param documentURI Liberty XML document
+   * @return List of possible features
+   */
+  public List<Feature> getFeatures(String libertyVersion, int requestDelay, String documentURI) {
     LOGGER.fine("Getting features for version: " + libertyVersion);
     // if the features are already cached in the feature cache
     if (featureCache.containsKey(libertyVersion)) {
       return featureCache.get(libertyVersion);
     }
+
     // else need to fetch the features from maven central
     try {
       // verify that request delay (seconds) has gone by since last fetch request
       long currentTime = System.currentTimeMillis();
-      if (this.featureUpdateTime == -1 || currentTime >= (this.featureUpdateTime + (requestDelay*1000))) {
+      if (this.featureUpdateTime == -1 || currentTime >= (this.featureUpdateTime + (requestDelay * 1000))) {
         List<Feature> features = fetchFeaturesForVersion(libertyVersion);
         featureCache.put(libertyVersion, features);
         this.featureUpdateTime = System.currentTimeMillis();
@@ -121,18 +148,93 @@ public class FeatureService {
     } catch (Exception e) {
       // do nothing, continue on to returning default feature list
     }
+
+    // fetch installed features list
+    List<Feature> installedFeatures = getInstalledFeaturesList(documentURI);
+    if (installedFeatures.size() != 0) {
+      return installedFeatures;
+    }
+
+
     // return default feature list
-    List<Feature> defaultFeatures = getDefaultFeatureList();
+    List<Feature> defaultFeatures = getDefaultFeatureList(); 
     return defaultFeatures;
   }
 
-  public Optional<Feature> getFeature(String featureName, String libertyVersion, int requestDelay) {
-    List<Feature> features = getFeatures(libertyVersion, requestDelay);
+  public Optional<Feature> getFeature(String featureName, String libertyVersion, int requestDelay, String documentURI) {
+    List<Feature> features = getFeatures(libertyVersion, requestDelay, documentURI);
     return features.stream().filter(f -> f.getWlpInformation().getShortName().equalsIgnoreCase(featureName))
         .findFirst();
   }
 
-  public boolean featureExists(String featureName, String libertyVersion, int requestDelay) {
-    return this.getFeature(featureName, libertyVersion, requestDelay).isPresent();
+  public boolean featureExists(String featureName, String libertyVersion, int requestDelay, String documentURI) {
+    return this.getFeature(featureName, libertyVersion, requestDelay, documentURI).isPresent();
   }
+
+  /**
+   * Returns the list of installed features generated from ws-featurelist.jar.
+   * Generated feature list is stored in the LemMinx cache. Returns an empty list
+   * if cannot determine installed feature list.
+   * 
+   * @param documentURI xml document
+   * @return list of installed features, or empty list
+   */
+  private List<Feature> getInstalledFeaturesList(String documentURI) {
+    List<Feature> installedFeatures = new ArrayList<Feature>();
+    try {
+      LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(documentURI);
+      if (libertyWorkspace == null || libertyWorkspace.getURI() == null) {
+        return installedFeatures;
+      }
+
+      // return installed features from cache
+      if (libertyWorkspace.getInstalledFeatureList().size() != 0) {
+        return libertyWorkspace.getInstalledFeatureList();
+      }
+
+      Path featureListJAR = LibertyUtils.findFileInWorkspace(documentURI, "ws-featurelist.jar");
+
+      if (featureListJAR != null && featureListJAR.toFile().exists()) {
+
+        // creating featurelist.xml file in cache
+        String XSD_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/featurelist.xml";
+        String XSD_CLASSPATH_LOCATION = "/schema/xsd/liberty/featurelist.xml";
+        ResourceToDeploy FEATURE_LIST_RESOURCE = new ResourceToDeploy(XSD_RESOURCE_URL, XSD_CLASSPATH_LOCATION);
+        Path featureListCacheFile = CacheResourcesManager.getResourceCachePath(FEATURE_LIST_RESOURCE);
+
+        if (featureListCacheFile.toFile().exists()) {
+          String[] cmd = { "java", "-jar", featureListJAR.toAbsolutePath().toString(),
+          featureListCacheFile.toAbsolutePath().toString() };
+  
+          Process proc = Runtime.getRuntime().exec(cmd);
+          BufferedReader in = new BufferedReader(new InputStreamReader(proc.getInputStream()));
+          while (in.readLine() != null) {
+            // read input from file
+          }
+  
+          JAXBContext jaxbContext = JAXBContext.newInstance(FeatureInfo.class);
+          Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+          FeatureInfo featureInfo = (FeatureInfo) jaxbUnmarshaller.unmarshal(featureListCacheFile.toFile());
+          if (featureInfo.getFeatures().size() > 0) {
+            for (int i = 0; i < featureInfo.getFeatures().size(); i++) {
+              Feature f = featureInfo.getFeatures().get(i);
+              f.setShortDescription(f.getDescription());
+              WlpInformation wlpInfo = new WlpInformation(f.getName());
+              f.setWlpInformation(wlpInfo);
+            }
+            installedFeatures = featureInfo.getFeatures();
+            libertyWorkspace.setInstalledFeatureList(installedFeatures);
+          }
+        } else {
+          LOGGER.warning("Unable to load installed features into LemMinx cache, file does not exist:" + featureListCacheFile.toAbsolutePath());
+        }
+      }
+    } catch (IOException | JAXBException e) {
+      LOGGER.warning("Unable to get installed features: " + e);
+    }
+
+    LOGGER.fine("Returning installed features: " + installedFeatures.size());
+    return installedFeatures;
+  }
+
 }
