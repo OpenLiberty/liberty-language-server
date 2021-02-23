@@ -16,6 +16,7 @@ import org.eclipse.lemminx.utils.XMLPositionUtility;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextEdit;
+import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 import io.openliberty.lemminx.liberty.models.feature.Feature;
@@ -27,7 +28,7 @@ import io.openliberty.lemminx.liberty.util.LibertyUtils;
 public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
 
     @Override
-    public void onXMLContent(ICompletionRequest request, ICompletionResponse response)
+    public void onXMLContent(ICompletionRequest request, ICompletionResponse response, CancelChecker cancelChecker)
             throws IOException, BadLocationException {
         if (!LibertyUtils.isServerXMLFile(request.getXMLDocument()))
             return;    
