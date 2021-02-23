@@ -6,6 +6,7 @@ import org.eclipse.lemminx.extensions.contentmodel.settings.XMLValidationSetting
 import org.eclipse.lemminx.services.extensions.diagnostics.IDiagnosticsParticipant;
 import org.eclipse.lemminx.utils.XMLPositionUtility;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 import io.openliberty.lemminx.liberty.services.FeatureService;
@@ -63,13 +64,13 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                     Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
                             domDocument);
                     String message = "ERROR: The feature \"" + featureName + "\" does not exist.";
-                    list.add(new Diagnostic(range, message));
+                    list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, "liberty-lemminx"));
                 } else {
                     if (includedFeatures.contains(featureName)) {
                         Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
                                 featureTextNode.getEnd(), domDocument);
                         String message = "ERROR: " + featureName + " is already included.";
-                        list.add(new Diagnostic(range, message));
+                        list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, "liberty-lemminx"));
                     } else {
                         includedFeatures.add(featureName);
                     }
