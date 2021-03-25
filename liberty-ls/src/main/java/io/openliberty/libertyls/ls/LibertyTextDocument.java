@@ -1,4 +1,4 @@
-package io.microshed.libertyls.ls;
+package io.openliberty.libertyls.ls;
 
 import java.util.List;
 import java.util.logging.Logger;

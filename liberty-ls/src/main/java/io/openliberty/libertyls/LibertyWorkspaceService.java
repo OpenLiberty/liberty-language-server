@@ -1,4 +1,4 @@
-package io.microshed.libertyls;
+package io.openliberty.libertyls;
 
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;

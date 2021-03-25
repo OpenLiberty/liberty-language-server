@@ -11,7 +11,7 @@
 *     IBM Corporation - initial API and implementation
 *******************************************************************************/
 
-package io.microshed.libertyls.api;
+package io.openliberty.libertyls.api;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;

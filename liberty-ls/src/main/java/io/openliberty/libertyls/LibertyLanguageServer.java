@@ -1,4 +1,4 @@
-package io.microshed.libertyls;
+package io.openliberty.libertyls;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;

@@ -1,4 +1,4 @@
-package io.microshed.libertyls;
+package io.openliberty.libertyls;
 
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
@@ -6,8 +6,8 @@ import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
 import org.eclipse.lsp4j.services.TextDocumentService;
 
-import io.microshed.libertyls.ls.LibertyTextDocument;
-import io.microshed.libertyls.ls.LibertyTextDocuments;
+import io.openliberty.libertyls.ls.LibertyTextDocument;
+import io.openliberty.libertyls.ls.LibertyTextDocuments;
 
 import java.util.ArrayList;
 import java.util.Arrays;

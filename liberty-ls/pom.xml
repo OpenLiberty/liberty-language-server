@@ -50,7 +50,7 @@
             <configuration>
               <archive>
                 <manifest>
-                  <mainClass>io.microshed.libertyls.LibertyLanguageServerLauncher</mainClass>
+                  <mainClass>io.openliberty.libertyls.LibertyLanguageServerLauncher</mainClass>
                 </manifest>
               </archive>
               <descriptorRefs>

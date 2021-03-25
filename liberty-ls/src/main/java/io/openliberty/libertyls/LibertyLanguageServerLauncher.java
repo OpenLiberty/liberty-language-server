@@ -1,4 +1,4 @@
-package io.microshed.libertyls;
+package io.openliberty.libertyls;
 
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -10,7 +10,7 @@ import org.eclipse.lsp4j.launch.LSPLauncher.Builder;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 
-import io.microshed.libertyls.api.LibertyLanguageClientAPI;
+import io.openliberty.libertyls.api.LibertyLanguageClientAPI;
 
 public class LibertyLanguageServerLauncher {
     public static void main(String[] args) {
