@@ -14,64 +14,63 @@ import org.eclipse.lsp4j.services.WorkspaceService;
 
 public class LibertyLanguageServer implements LanguageServer {
 
-  private static final Logger LOGGER = Logger.getLogger(LibertyLanguageServer.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(LibertyLanguageServer.class.getName());
 
-  private final WorkspaceService workspaceService;
-  private final TextDocumentService textDocumentService;
+    private final WorkspaceService workspaceService;
+    private final TextDocumentService textDocumentService;
 
-  private LanguageClient languageClient;
-
-
-  public LibertyLanguageServer() {
-    // Workspace service handles workspace settings changes and calls update settings. 
-    workspaceService = new LibertyWorkspaceService(this);
-    textDocumentService = new LibertyTextDocumentService(this);
-  }
+    private LanguageClient languageClient;
 
 
-  @Override
-  public CompletableFuture<InitializeResult> initialize(InitializeParams params) {
-    LOGGER.info("Initializing Liberty Language server");
-
-    ServerCapabilities serverCapabilities = new ServerCapabilities();
-    InitializeResult initializeResult = new InitializeResult(serverCapabilities);
-    return CompletableFuture.completedFuture(initializeResult);
-  }
-
-  public synchronized void updateSettings(Object initializationOptionsSettings) {
-    if (initializationOptionsSettings == null) {
-			return;
+    public LibertyLanguageServer() {
+        // Workspace service handles workspace settings changes and calls update settings. 
+        workspaceService = new LibertyWorkspaceService(this);
+        textDocumentService = new LibertyTextDocumentService(this);
     }
-    // TODO: else update settings
-  }
 
-  @Override
-  public CompletableFuture<Object> shutdown() {
-    // TODO Auto-generated method stub
-    return null;
-  }
 
-  @Override
-  public void exit() {
-    System.exit(0);
-  }
+    @Override
+    public CompletableFuture<InitializeResult> initialize(InitializeParams params) {
+        LOGGER.info("Initializing Liberty Language server");
 
-  @Override
-  public TextDocumentService getTextDocumentService() {
-    return this.textDocumentService;
-  }
+        ServerCapabilities serverCapabilities = new ServerCapabilities();
+        InitializeResult initializeResult = new InitializeResult(serverCapabilities);
+        return CompletableFuture.completedFuture(initializeResult);
+    }
 
-  @Override
-  public WorkspaceService getWorkspaceService() {
-    return this.workspaceService;
-  }
+    public synchronized void updateSettings(Object initializationOptionsSettings) {
+        if (initializationOptionsSettings == null) {
+            return;
+        }
+        // TODO: else update settings
+    }
 
-  public LanguageClient getLanguageClient() {
-    return this.languageClient;
-  }
+    @Override
+    public CompletableFuture<Object> shutdown() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
-  public void setLanguageClient(LanguageClient languageClient) {
-    this.languageClient = languageClient;
-  }
-  
+    @Override
+    public void exit() {
+        System.exit(0);
+    }
+
+    @Override
+    public TextDocumentService getTextDocumentService() {
+        return this.textDocumentService;
+    }
+
+    @Override
+    public WorkspaceService getWorkspaceService() {
+        return this.workspaceService;
+    }
+
+    public LanguageClient getLanguageClient() {
+        return this.languageClient;
+    }
+
+    public void setLanguageClient(LanguageClient languageClient) {
+        this.languageClient = languageClient;
+    }
 }

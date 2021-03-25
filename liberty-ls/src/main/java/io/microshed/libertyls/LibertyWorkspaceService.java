@@ -6,20 +6,19 @@ import org.eclipse.lsp4j.services.WorkspaceService;
 
 public class LibertyWorkspaceService implements WorkspaceService {
 
-  private final LibertyLanguageServer libertyLanguageServer;
+    private final LibertyLanguageServer libertyLanguageServer;
 
-  public LibertyWorkspaceService(LibertyLanguageServer libertyls) {
-    this.libertyLanguageServer = libertyls;
-  }
+    public LibertyWorkspaceService(LibertyLanguageServer libertyls) {
+        this.libertyLanguageServer = libertyls;
+    }
 
-  @Override
-  public void didChangeConfiguration(DidChangeConfigurationParams params) {
-    libertyLanguageServer.updateSettings(params.getSettings());
-  }
+    @Override
+    public void didChangeConfiguration(DidChangeConfigurationParams params) {
+        libertyLanguageServer.updateSettings(params.getSettings());
+    }
 
-  @Override
-  public void didChangeWatchedFiles(DidChangeWatchedFilesParams params) {
-    // Do nothing
-  }
-
+    @Override
+    public void didChangeWatchedFiles(DidChangeWatchedFilesParams params) {
+        // Do nothing
+    }
 }
