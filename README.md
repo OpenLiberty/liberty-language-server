@@ -4,5 +4,6 @@ Monorepo for projects providing IDE / language support for Open Liberty using th
 
 ## Projects
 
-* [lemminx-liberty](./lemminx-liberty) - an extension to the [Eclipse LemMinX](https://github.com/eclipse/lemminx) XML language server providing language features for the liberty server.xml file.
+* [lemminx-liberty](./lemminx-liberty) - an extension to the [Eclipse LemMinX](https://github.com/eclipse/lemminx) XML language server providing language features for the Liberty server.xml file.
+* [liberty-ls](./liberty-ls) - a language server providing language features for the Liberty bootstrap.properties and server.env files. 
 
