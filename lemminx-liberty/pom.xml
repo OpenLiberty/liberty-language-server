@@ -5,7 +5,7 @@
   <packaging>jar</packaging>
   <version>1.0-SNAPSHOT</version>
   <properties>
-    <lemminx.version>0.16.1-SNAPSHOT</lemminx.version>
+    <lemminx.version>0.19.2-SNAPSHOT</lemminx.version>
   </properties>
   <build>
     <plugins>

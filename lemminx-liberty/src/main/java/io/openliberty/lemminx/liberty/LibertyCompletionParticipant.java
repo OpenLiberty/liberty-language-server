@@ -14,6 +14,7 @@ import org.eclipse.lemminx.services.extensions.ICompletionRequest;
 import org.eclipse.lemminx.services.extensions.ICompletionResponse;
 import org.eclipse.lemminx.utils.XMLPositionUtility;
 import org.eclipse.lsp4j.CompletionItem;
+import org.eclipse.lsp4j.InsertReplaceEdit;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
@@ -62,7 +63,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
         // with the completion result
         Range range = XMLPositionUtility.createRange(featureElement.getStartTagCloseOffset() + 1,
                 featureElement.getEndTagOpenOffset(), document);
-        TextEdit edit = new TextEdit(range, featureName);
+        Either<TextEdit, InsertReplaceEdit> edit = Either.forLeft(new TextEdit(range, featureName));
 
         // Build the completion item to return to the client
         CompletionItem item = new CompletionItem();
