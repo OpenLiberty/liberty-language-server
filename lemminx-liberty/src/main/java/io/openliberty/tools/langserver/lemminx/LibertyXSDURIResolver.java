@@ -1,4 +1,16 @@
-package io.openliberty.lemminx.liberty;
+/*******************************************************************************
+* Copyright (c) 2020, 2022 IBM Corporation and others.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Eclipse Public License v. 2.0 which is available at
+* http://www.eclipse.org/legal/epl-2.0.
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*     IBM Corporation - initial API and implementation
+*******************************************************************************/
+package io.openliberty.tools.langserver.lemminx;
 
 import java.net.URI;
 import java.nio.file.Path;
@@ -11,7 +23,7 @@ import org.eclipse.lemminx.uriresolver.IExternalGrammarLocationProvider;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager.ResourceToDeploy;
 import org.eclipse.lemminx.uriresolver.URIResolverExtension;
 
-import io.openliberty.lemminx.liberty.util.LibertyUtils;
+import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGrammarLocationProvider {
   private static final Logger LOGGER = Logger.getLogger(LibertyXSDURIResolver.class.getName());

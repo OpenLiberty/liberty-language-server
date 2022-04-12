@@ -1,4 +1,16 @@
-package io.openliberty.lemminx.liberty.util;
+/*******************************************************************************
+* Copyright (c) 2020, 2022 IBM Corporation and others.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Eclipse Public License v. 2.0 which is available at
+* http://www.eclipse.org/legal/epl-2.0.
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*     IBM Corporation - initial API and implementation
+*******************************************************************************/
+package io.openliberty.tools.langserver.lemminx.util;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -20,10 +32,10 @@ import java.util.stream.Collectors;
 
 import org.eclipse.lemminx.dom.DOMDocument;
 
-import io.openliberty.lemminx.liberty.models.feature.Feature;
-import io.openliberty.lemminx.liberty.services.LibertyProjectsManager;
-import io.openliberty.lemminx.liberty.services.LibertyWorkspace;
-import io.openliberty.lemminx.liberty.services.SettingsService;
+import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
+import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
+import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
+import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 
 public class LibertyUtils {
 

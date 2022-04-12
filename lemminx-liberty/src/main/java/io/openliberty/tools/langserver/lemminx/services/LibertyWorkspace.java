@@ -1,9 +1,21 @@
-package io.openliberty.lemminx.liberty.services;
+/*******************************************************************************
+* Copyright (c) 2020, 2022 IBM Corporation and others.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Eclipse Public License v. 2.0 which is available at
+* http://www.eclipse.org/legal/epl-2.0.
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*     IBM Corporation - initial API and implementation
+*******************************************************************************/
+package io.openliberty.tools.langserver.lemminx.services;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import io.openliberty.lemminx.liberty.models.feature.Feature;
+import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
 
 public class LibertyWorkspace {
 

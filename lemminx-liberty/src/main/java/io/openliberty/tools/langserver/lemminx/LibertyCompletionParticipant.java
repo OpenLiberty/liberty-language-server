@@ -1,4 +1,16 @@
-package io.openliberty.lemminx.liberty;
+/*******************************************************************************
+* Copyright (c) 2020, 2022 IBM Corporation and others.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Eclipse Public License v. 2.0 which is available at
+* http://www.eclipse.org/legal/epl-2.0.
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*     IBM Corporation - initial API and implementation
+*******************************************************************************/
+package io.openliberty.tools.langserver.lemminx;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,11 +32,11 @@ import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
-import io.openliberty.lemminx.liberty.models.feature.Feature;
-import io.openliberty.lemminx.liberty.services.FeatureService;
-import io.openliberty.lemminx.liberty.services.SettingsService;
-import io.openliberty.lemminx.liberty.util.LibertyConstants;
-import io.openliberty.lemminx.liberty.util.LibertyUtils;
+import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
+import io.openliberty.tools.langserver.lemminx.services.FeatureService;
+import io.openliberty.tools.langserver.lemminx.services.SettingsService;
+import io.openliberty.tools.langserver.lemminx.util.LibertyConstants;
+import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
 

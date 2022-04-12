@@ -1,4 +1,16 @@
-package io.openliberty.lemminx.liberty.services;
+/*******************************************************************************
+* Copyright (c) 2020, 2022 IBM Corporation and others.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Eclipse Public License v. 2.0 which is available at
+* http://www.eclipse.org/legal/epl-2.0.
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*     IBM Corporation - initial API and implementation
+*******************************************************************************/
+package io.openliberty.tools.langserver.lemminx.services;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -25,11 +37,11 @@ import com.google.gson.JsonParseException;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager.ResourceToDeploy;
 
-import io.openliberty.lemminx.liberty.models.feature.Feature;
-import io.openliberty.lemminx.liberty.models.feature.FeatureInfo;
-import io.openliberty.lemminx.liberty.models.feature.WlpInformation;
-import io.openliberty.lemminx.liberty.util.LibertyConstants;
-import io.openliberty.lemminx.liberty.util.LibertyUtils;
+import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
+import io.openliberty.tools.langserver.lemminx.models.feature.FeatureInfo;
+import io.openliberty.tools.langserver.lemminx.models.feature.WlpInformation;
+import io.openliberty.tools.langserver.lemminx.util.LibertyConstants;
+import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 public class FeatureService {
 

@@ -1,4 +1,16 @@
-package io.openliberty.lemminx.liberty;
+/*******************************************************************************
+* Copyright (c) 2020, 2022 IBM Corporation and others.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Eclipse Public License v. 2.0 which is available at
+* http://www.eclipse.org/legal/epl-2.0.
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*     IBM Corporation - initial API and implementation
+*******************************************************************************/
+package io.openliberty.tools.langserver.lemminx;
 
 import org.eclipse.lemminx.services.extensions.ICompletionParticipant;
 import org.eclipse.lemminx.services.extensions.IHoverParticipant;
@@ -14,8 +26,8 @@ import org.eclipse.lsp4j.WorkspaceFolder;
 import java.util.List;
 import java.util.logging.Logger;
 
-import io.openliberty.lemminx.liberty.services.LibertyProjectsManager;
-import io.openliberty.lemminx.liberty.services.SettingsService;
+import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
+import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 
 public class LibertyExtension implements IXMLExtension {
 
