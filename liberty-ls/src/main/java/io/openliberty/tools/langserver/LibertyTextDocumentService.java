@@ -1,4 +1,16 @@
-package io.openliberty.libertyls;
+/*******************************************************************************
+* Copyright (c) 2020, 2022 IBM Corporation and others.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Eclipse Public License v. 2.0 which is available at
+* http://www.eclipse.org/legal/epl-2.0.
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*     IBM Corporation - initial API and implementation
+*******************************************************************************/
+package io.openliberty.tools.langserver;
 
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
@@ -6,8 +18,8 @@ import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
 import org.eclipse.lsp4j.services.TextDocumentService;
 
-import io.openliberty.libertyls.ls.LibertyTextDocument;
-import io.openliberty.libertyls.ls.LibertyTextDocuments;
+import io.openliberty.tools.langserver.ls.LibertyTextDocument;
+import io.openliberty.tools.langserver.ls.LibertyTextDocuments;
 
 import java.util.ArrayList;
 import java.util.Arrays;
