@@ -7,7 +7,7 @@
 		{
 			"type": "java",
 			"request": "attach",
-			"name": "Debug Attach to lemminx",
+			"name": "Debug attach liberty-lemminx",
 			"hostName": "localhost",
 			"projectName": "liberty-langserver-lemminx",
 			"port": 1054

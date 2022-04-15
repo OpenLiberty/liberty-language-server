@@ -12,3 +12,23 @@ Monorepo for projects providing IDE / language support for Open Liberty using th
 ## Building with VS Code
 
 To build the language server for Liberty configuration prototype with a VS Code Client, see the [liberty-ls-prototype branch](https://github.com/OpenLiberty/open-liberty-tools-vscode/tree/liberty-ls-prototype) of the Open Liberty Tools VS Code extension.
+
+## Debugging with VS Code
+
+Prerequisites: [Debugger for Java extension](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug) for VS Code
+
+1. Create a VS Code workspace with both [open-liberty-tools-vscode](https://github.com/OpenLiberty/open-liberty-tools-vscode) and this project at the root of the workspace. The folder structure should look something like this:
+```
+| > open-liberty-tools-vscode
+| v liberty-language-server
+| | > lemminx-liberty
+| | > liberty-ls
+```
+
+2. In the `open-liberty-tools-vscode` directory, run `npm run build`.
+
+3. Open the debug view, select and launch `Run Extension (open-liberty-tools-vscode)`. It will open a new window with the extension running in debug mode.
+
+4. In the same debug view, now select and launch one of the following to debug each respective project:
+    * `Debug attach liberty-lemminx`
+    * `Debug attach liberty-ls` (in progress)
