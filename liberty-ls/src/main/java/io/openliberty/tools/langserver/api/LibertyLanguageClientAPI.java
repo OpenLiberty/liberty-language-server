@@ -29,6 +29,7 @@ import org.eclipse.lsp4j.services.LanguageClient;
 public interface LibertyLanguageClientAPI extends LanguageClient {
     @JsonRequest("liberty/properties/hover")
     default CompletableFuture<Hover> getJavaHover(HoverParams params) {
+        params.getPosition();
         return CompletableFuture.completedFuture(null);
     }
 }

@@ -17,7 +17,9 @@ import java.util.logging.Logger;
 
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
+import org.eclipse.lsp4j.InitializedParams;
 import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
@@ -45,9 +47,21 @@ public class LibertyLanguageServer implements LanguageServer {
     public CompletableFuture<InitializeResult> initialize(InitializeParams params) {
         LOGGER.info("Initializing Liberty Language server");
 
-        ServerCapabilities serverCapabilities = new ServerCapabilities();
+        ServerCapabilities serverCapabilities = createServerCapabilities();
         InitializeResult initializeResult = new InitializeResult(serverCapabilities);
         return CompletableFuture.completedFuture(initializeResult);
+    }
+
+    @Override
+    public void initialized(InitializedParams params) {
+        LanguageServer.super.initialized(params);
+    }
+
+    private ServerCapabilities createServerCapabilities() {
+        ServerCapabilities capabilities = new ServerCapabilities();
+        capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
+        capabilities.setHoverProvider(Boolean.TRUE);
+        return capabilities;
     }
 
     public synchronized void updateSettings(Object initializationOptionsSettings) {
