@@ -22,8 +22,11 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
+import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import io.openliberty.tools.langserver.lemminx.util.*;
+
+import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
@@ -32,7 +35,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     @Override
     public void doDiagnostics(DOMDocument domDocument, List<Diagnostic> diagnostics,
             XMLValidationSettings validationSettings, CancelChecker cancelChecker) {
-        if (!LibertyUtils.isServerXMLFile(domDocument))
+        if (!LibertyUtils.isConfigXMLFile(domDocument))
             return;
         try {
             validateFeatures(domDocument, diagnostics);
@@ -44,16 +47,25 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
 
     private void validateFeatures(DOMDocument domDocument, List<Diagnostic> list) throws IOException {
         List<DOMNode> nodes = domDocument.getDocumentElement().getChildren();
-        DOMNode featureManager = null;
+        // DOMNode featureManager = null;
         // find <featureManager> element if it exists
         for (DOMNode node : nodes) {
             if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(node.getNodeName())) {
-                featureManager = node;
-                break;
+                validateFeature(domDocument, list, node);
+                // featureManager = node;
+                // break;
             }
+            if (LibertyConstants.INCLUDE_ELEMENT.equals(node.getNodeName())) {
+                scanIncludeConfigFiles(domDocument, list, node);
+            }
+
         }
+        
+    }
+
+    private void validateFeature(DOMDocument domDocument, List<Diagnostic> list, DOMNode node) {
         // No need for validation if there is no <featureManager>
-        if (featureManager == null) {
+        if (node == null) {
             return;
         }
 
@@ -64,7 +76,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         // Search for duplicate features
         // or features that do not exist
         Set<String> includedFeatures = new HashSet<>();
-        List<DOMNode> features = featureManager.getChildren();
+        List<DOMNode> features = node.getChildren();
         for (DOMNode featureNode : features) {
             DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
             // skip nodes that do not have any text value (ie. comments)
@@ -88,6 +100,28 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                     }
                 }
             }
+        }
+    }
+
+    /**
+     * Scans for configuration resource files and adds them into a growing workspace cache.
+     * 
+     * 1) Currently, this feature doesn't concern with disabling lang server support on invalidated config files.
+     * 2) As part of the Diagnostics stack, paths to config resources get added only if the file exists.
+     * @param domDocument
+     * @param list
+     * @param node
+     * @throws IOException
+     */
+    private void scanIncludeConfigFiles(DOMDocument domDocument, List<Diagnostic> list, DOMNode node) throws IOException {
+        String docXML = domDocument.getDocumentURI();
+        String configFilePath = docXML.substring(0, docXML.lastIndexOf(File.separator) + 1) + node.getAttribute("location");
+        File configFile = new File(configFilePath);
+        if (configFilePath != null && configFile.exists()) {
+            Range range = XMLPositionUtility.createRange(node.getStart(), node.getEnd(), domDocument);
+            String message = "INFO: Detected config resource " + configFile.getCanonicalPath();
+            LibertyProjectsManager.getInstance().getWorkspaceFolder(docXML).addConfigFile(configFile.getCanonicalPath());
+            list.add(new Diagnostic(range, message, DiagnosticSeverity.Information, "liberty-lemminx"));
         }
     }
 }

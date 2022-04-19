@@ -54,6 +54,19 @@ public class LibertyUtils {
         return file.getDocumentURI().endsWith("/" + LibertyConstants.SERVER_XML);
     }
 
+    public static boolean isConfigXMLFile(String filePath) {
+        try {
+            return isServerXMLFile(filePath) || 
+                LibertyProjectsManager.getInstance().getWorkspaceFolder(filePath).hasConfigFile(filePath);
+        } catch (IOException e) {
+            return isServerXMLFile(filePath) || false;
+        }
+    }
+
+    public static boolean isConfigXMLFile(DOMDocument file) {
+        return isConfigXMLFile(file.getDocumentURI());
+    }
+
     /**
      * Given a server.xml URI find the associated workspace folder and search that
      * folder for the most recently edited file that matches the given name.

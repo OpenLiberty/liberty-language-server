@@ -45,7 +45,7 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
       XSD_CLASSPATH_LOCATION);
 
   public String resolve(String baseLocation, String publicId, String systemId) {
-    if (LibertyUtils.isServerXMLFile(baseLocation)) {
+    if (LibertyUtils.isConfigXMLFile(baseLocation)) {
       try {
         Path serverXSDCacheFile = CacheResourcesManager.getResourceCachePath(SERVER_XSD_RESOURCE);
         return serverXSDCacheFile.toFile().toURI().toString();

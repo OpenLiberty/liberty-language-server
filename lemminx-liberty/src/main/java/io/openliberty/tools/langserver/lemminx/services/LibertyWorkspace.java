@@ -12,8 +12,12 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx.services;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
 
@@ -23,6 +27,7 @@ public class LibertyWorkspace {
     private String libertyVersion;
     private boolean isLibertyInstalled;
     private List<Feature> installedFeatureList;
+    private Set<String> configFiles;
 
     /**
      * Model of a Liberty Workspace. Each workspace indicates the
@@ -36,6 +41,7 @@ public class LibertyWorkspace {
         this.libertyVersion = null;
         this.isLibertyInstalled = false;
         this.installedFeatureList = new ArrayList<Feature>();
+        this.configFiles = new HashSet<String>();
     }
 
     public String getURI() {
@@ -62,8 +68,16 @@ public class LibertyWorkspace {
         return this.installedFeatureList;
     }
 
-    public void setInstalledFeatureList(List<Feature> installedFeatureList){
+    public void setInstalledFeatureList(List<Feature> installedFeatureList) {
         this.installedFeatureList = installedFeatureList;
+    }
+
+    public void addConfigFile(String fileString) {
+        configFiles.add(fileString);
+    }
+
+    public boolean hasConfigFile(String URI) throws IOException {
+        return this.configFiles.contains(new File(URI).getCanonicalPath());
     }
 
 }

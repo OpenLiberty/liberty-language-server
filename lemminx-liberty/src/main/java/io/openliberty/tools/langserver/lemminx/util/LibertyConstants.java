@@ -22,6 +22,7 @@ public final class LibertyConstants {
 
     public static final String FEATURE_MANAGER_ELEMENT = "featureManager";
     public static final String FEATURE_ELEMENT = "feature";
+    public static final String INCLUDE_ELEMENT = "include";
 
     public static final String PUBLIC_VISIBILITY = "PUBLIC";
 

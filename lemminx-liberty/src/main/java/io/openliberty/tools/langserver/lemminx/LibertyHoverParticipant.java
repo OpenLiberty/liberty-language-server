@@ -44,7 +44,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
 
 	@Override
 	public Hover onText(IHoverRequest request) {
-		if (!LibertyUtils.isServerXMLFile(request.getXMLDocument()))
+		if (!LibertyUtils.isConfigXMLFile(request.getXMLDocument()))
 			return null;
 
 		DOMElement parentElement = request.getParentElement();

@@ -43,7 +43,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
     @Override
     public void onXMLContent(ICompletionRequest request, ICompletionResponse response, CancelChecker cancelChecker)
             throws IOException, BadLocationException {
-        if (!LibertyUtils.isServerXMLFile(request.getXMLDocument()))
+        if (!LibertyUtils.isConfigXMLFile(request.getXMLDocument()))
             return;    
 
         LibertyUtils.getVersion(request.getXMLDocument());

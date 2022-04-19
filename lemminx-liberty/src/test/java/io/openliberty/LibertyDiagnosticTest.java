@@ -2,9 +2,19 @@ package io.openliberty;
 
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.WorkspaceFolder;
 import org.junit.jupiter.api.Test;
 
+import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
+
 import static org.eclipse.lemminx.XMLAssert.r;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LibertyDiagnosticTest {
 
@@ -60,4 +70,25 @@ public class LibertyDiagnosticTest {
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, invalid1, invalid2);
     }
 
+    @Test
+    public void testScanServerXmlInclude() throws IOException {
+        // LibertyWorkspace must be initialized
+        List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
+        initList.add(new WorkspaceFolder("src"));
+        LibertyProjectsManager.getInstance().setWorkspaceFolders(initList);
+
+        String serverXML = String.join(newLine, //
+                "<server description=\"default server\">", //
+                "    <include optional=\"true\" location=\"./resources/empty_server.xml\"/>", //
+                "    <include optional=\"false\" location=\"MISSING FILE\"/>", //
+                "</server>"
+        );
+        Diagnostic location1 = new Diagnostic();
+        location1.setRange(r(1, 4, 1, 70)); // range is whole include element
+        location1.setMessage("INFO: Detected config resource " + new File("src/test/resources/empty_server.xml").getCanonicalPath());
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, "src/test/server.xml", location1);
+
+        assertTrue(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0).hasConfigFile(new File("src/test/resources/empty_server.xml").getCanonicalPath()));
+        assertFalse(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0).hasConfigFile("MISSING FILE"));
+    }
 }
