@@ -55,7 +55,7 @@ public class LibertyUtils {
     }
 
     public static boolean isConfigXMLFile(String filePath) {
-        return LibertyProjectsManager.getInstance().getWorkspaceFolder(filePath).hasConfigFile(filePath) || isServerXMLFile(filePath);
+        return isServerXMLFile(filePath) || LibertyProjectsManager.getInstance().getWorkspaceFolder(filePath).hasConfigFile(filePath);
     }
 
     public static boolean isConfigXMLFile(DOMDocument file) {
