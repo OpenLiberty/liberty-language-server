@@ -14,7 +14,6 @@ package io.openliberty.tools.langserver.lemminx.services;
 
 import java.io.IOException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -64,7 +63,7 @@ public class LibertyProjectsManager {
      */
     public LibertyWorkspace getWorkspaceFolder(String serverXMLUri) {
         for (LibertyWorkspace folder : getInstance().getLibertyWorkspaceFolders()) {
-            if (serverXMLUri.contains(folder.getURI())) {
+            if (serverXMLUri.contains(folder.getWorkspaceString())) {
                 return folder;
             }
         }
@@ -74,11 +73,10 @@ public class LibertyProjectsManager {
     public void cleanUpTempDirs() {
         for (LibertyWorkspace folder : getInstance().getLibertyWorkspaceFolders()) {
             // search for liberty ls directory
-            String workspaceFolderURI = folder.getURI();
+            URI workspaceFolderURI = folder.getWorkspaceURI();
             try {
                 if (workspaceFolderURI != null) {
-                    URI rootURI = new URI(workspaceFolderURI);
-                    Path rootPath = Paths.get(rootURI);
+                    Path rootPath = Paths.get(workspaceFolderURI);
                     List<Path> matchingFiles = Files.walk(rootPath)
                             .filter(p -> (Files.isDirectory(p) && p.getFileName().endsWith(".libertyls")))
                             .collect(Collectors.toList());
@@ -90,7 +88,7 @@ public class LibertyProjectsManager {
                         }
                     }
                 }
-            } catch (IOException | URISyntaxException e) {
+            } catch (IOException e) {
                 LOGGER.warning("Could not clean up /.libertyls directory: " + e.getMessage());
             }
         }

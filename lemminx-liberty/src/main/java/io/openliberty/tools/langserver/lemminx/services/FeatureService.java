@@ -195,7 +195,7 @@ public class FeatureService {
     List<Feature> installedFeatures = new ArrayList<Feature>();
     try {
       LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(documentURI);
-      if (libertyWorkspace == null || libertyWorkspace.getURI() == null) {
+      if (libertyWorkspace == null || libertyWorkspace.getWorkspaceString() == null) {
         return installedFeatures;
       }
 

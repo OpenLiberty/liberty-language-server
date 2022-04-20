@@ -71,24 +71,33 @@ public class LibertyDiagnosticTest {
     }
 
     @Test
-    public void testScanServerXmlInclude() throws IOException {
+    public void testDiagnosticsForInclude() throws IOException {
         // LibertyWorkspace must be initialized
         List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
-        initList.add(new WorkspaceFolder("src"));
+        initList.add(new WorkspaceFolder(new File("src").toURI().toString()));
         LibertyProjectsManager.getInstance().setWorkspaceFolders(initList);
 
         String serverXML = String.join(newLine, //
                 "<server description=\"default server\">", //
-                "    <include optional=\"true\" location=\"./resources/empty_server.xml\"/>", //
+                "    <include optional=\"true\" location=\"./empty_server.xml\"/>", //
                 "    <include optional=\"false\" location=\"MISSING FILE\"/>", //
                 "</server>"
         );
-        Diagnostic location1 = new Diagnostic();
-        location1.setRange(r(1, 4, 1, 70)); // range is whole include element
-        location1.setMessage("INFO: Detected config resource " + new File("src/test/resources/empty_server.xml").getCanonicalPath());
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, "src/test/server.xml", location1);
+        // Diagnostic location1 = new Diagnostic();
+        File serverXMLFile = new File("src/test/resources/server.xml");
+        assertFalse(serverXMLFile.exists());
+        // Diagnostic will not be made if found
+        assertTrue(new File("src/test/resources/empty_server.xml").exists());
 
-        assertTrue(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0).hasConfigFile(new File("src/test/resources/empty_server.xml").getCanonicalPath()));
-        assertFalse(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0).hasConfigFile("MISSING FILE"));
+        Diagnostic location2 = new Diagnostic();
+        location2.setRange(r(2, 30, 2, 53));
+        location2.setMessage("The file at the specified location could not be found.");
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), location2);
+        
+        assertTrue(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0)
+                .hasConfigFile(new File("src/test/resources/empty_server.xml").getCanonicalPath()));
+
+        assertFalse(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0)
+                .hasConfigFile("MISSING FILE"));
     }
 }

@@ -55,12 +55,7 @@ public class LibertyUtils {
     }
 
     public static boolean isConfigXMLFile(String filePath) {
-        try {
-            return isServerXMLFile(filePath) || 
-                LibertyProjectsManager.getInstance().getWorkspaceFolder(filePath).hasConfigFile(filePath);
-        } catch (IOException e) {
-            return isServerXMLFile(filePath) || false;
-        }
+        return LibertyProjectsManager.getInstance().getWorkspaceFolder(filePath).hasConfigFile(filePath) || isServerXMLFile(filePath);
     }
 
     public static boolean isConfigXMLFile(DOMDocument file) {
@@ -77,12 +72,11 @@ public class LibertyUtils {
      */
     public static Path findFileInWorkspace(String serverXmlURI, String filename) {
         LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlURI);
-        if (libertyWorkspace.getURI() == null) {
+        if (libertyWorkspace.getWorkspaceURI() == null) {
             return null;
         }
         try {
-            URI rootURI = new URI(libertyWorkspace.getURI());
-            Path rootPath = Paths.get(rootURI);
+            Path rootPath = Paths.get(libertyWorkspace.getWorkspaceURI());
             List<Path> matchingFiles = Files.walk(rootPath)
                     .filter(p -> (Files.isRegularFile(p) && p.getFileName().endsWith(filename)))
                     .collect(Collectors.toList());
@@ -99,7 +93,7 @@ public class LibertyUtils {
                 }
             }
             return lastModified;
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             LOGGER.warning("Could not find: " + filename + ": " + e.getMessage());
             return null;
         }
@@ -123,7 +117,7 @@ public class LibertyUtils {
         // find workspace folder this serverXML belongs to
         LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXML.getDocumentURI());
 
-        if (libertyWorkspace == null || libertyWorkspace.getURI() == null) {
+        if (libertyWorkspace == null || libertyWorkspace.getWorkspaceString() == null) {
             return null;
         }
 

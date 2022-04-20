@@ -28,6 +28,9 @@ import io.openliberty.tools.langserver.lemminx.util.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
@@ -38,37 +41,27 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         if (!LibertyUtils.isConfigXMLFile(domDocument))
             return;
         try {
-            validateFeatures(domDocument, diagnostics);
+            validateDom(domDocument, diagnostics);
         } catch (IOException e) {
-            System.err.println("Error validating features");
+            System.err.println("Error validating document " + domDocument.getDocumentURI());
             System.err.println(e.getMessage());
         }
     }
 
-    private void validateFeatures(DOMDocument domDocument, List<Diagnostic> list) throws IOException {
+    private void validateDom(DOMDocument domDocument, List<Diagnostic> list) throws IOException {
         List<DOMNode> nodes = domDocument.getDocumentElement().getChildren();
-        // DOMNode featureManager = null;
-        // find <featureManager> element if it exists
+
         for (DOMNode node : nodes) {
             if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(node.getNodeName())) {
                 validateFeature(domDocument, list, node);
-                // featureManager = node;
-                // break;
+            } else if (LibertyConstants.INCLUDE_ELEMENT.equals(node.getNodeName())) {
+                monitorConfigFiles(domDocument, list, node);
             }
-            if (LibertyConstants.INCLUDE_ELEMENT.equals(node.getNodeName())) {
-                scanIncludeConfigFiles(domDocument, list, node);
-            }
-
         }
         
     }
 
     private void validateFeature(DOMDocument domDocument, List<Diagnostic> list, DOMNode node) {
-        // No need for validation if there is no <featureManager>
-        if (node == null) {
-            return;
-        }
-
         String libertyVersion =  LibertyUtils.getVersion(domDocument);
 
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
@@ -103,25 +96,28 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         }
     }
 
-    /**
-     * Scans for configuration resource files and adds them into a growing workspace cache.
-     * 
-     * 1) Currently, this feature doesn't concern with disabling lang server support on invalidated config files.
-     * 2) As part of the Diagnostics stack, paths to config resources get added only if the file exists.
-     * @param domDocument
-     * @param list
-     * @param node
-     * @throws IOException
-     */
-    private void scanIncludeConfigFiles(DOMDocument domDocument, List<Diagnostic> list, DOMNode node) throws IOException {
-        String docXML = domDocument.getDocumentURI();
-        String configFilePath = docXML.substring(0, docXML.lastIndexOf(File.separator) + 1) + node.getAttribute("location");
-        File configFile = new File(configFilePath);
-        if (configFilePath != null && configFile.exists()) {
-            Range range = XMLPositionUtility.createRange(node.getStart(), node.getEnd(), domDocument);
-            String message = "INFO: Detected config resource " + configFile.getCanonicalPath();
-            LibertyProjectsManager.getInstance().getWorkspaceFolder(docXML).addConfigFile(configFile.getCanonicalPath());
-            list.add(new Diagnostic(range, message, DiagnosticSeverity.Information, "liberty-lemminx"));
+    private void monitorConfigFiles(DOMDocument domDocument, List<Diagnostic> list, DOMNode node) {
+        String locAttribute = node.getAttribute("location");
+        if (locAttribute == null) {
+            return;
+        }
+        String docURIString = domDocument.getDocumentURI();
+        File configFile = locAttribute.startsWith("." + File.separator) ? 
+                new File(URI.create(docURIString.substring(0, docURIString.lastIndexOf(File.separator) + 1)).resolve(locAttribute).normalize()) :
+                new File(locAttribute);
+
+        DOMNode locNode = node.getAttributeNode("location");
+        Range range = XMLPositionUtility.createRange(locNode.getStart(), locNode.getEnd(), domDocument);
+        try {
+            if (configFile.exists()) {
+                LibertyProjectsManager.getInstance().getWorkspaceFolder(docURIString).addConfigFile(configFile.getCanonicalPath());
+            } else {
+                String message = "The file at the specified location could not be found.";
+                list.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, "liberty-lemminx"));
+            }
+        } catch (IllegalArgumentException | IOException e) {
+            String message = "The file at the specified location could not be found.";
+            list.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, "liberty-lemminx"));
         }
     }
 }
