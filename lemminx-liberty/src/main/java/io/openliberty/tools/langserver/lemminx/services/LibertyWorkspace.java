@@ -18,6 +18,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -27,6 +28,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
+import io.openliberty.tools.langserver.lemminx.util.LibertyConstants;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 public class LibertyWorkspace {
@@ -89,7 +91,7 @@ public class LibertyWorkspace {
     public void initConfigFileList() {
         try {
             List<Path> configPathsList = Files.find(Paths.get(getWorkspaceURI()), Integer.MAX_VALUE, (filePath, fileAttributes) -> 
-                    LibertyUtils.isServerXMLFile(filePath.toString()) || (fileAttributes.isDirectory() && filePath.toString().endsWith("configDropins")))
+                    LibertyUtils.isServerXMLFile(filePath.toString()) || isConfigDir(filePath, fileAttributes))
                     .collect(Collectors.toList());
             for (Path configPath : configPathsList) {
                 if (LibertyUtils.isServerXMLFile(configPath.toString())) {
@@ -107,7 +109,7 @@ public class LibertyWorkspace {
     public void scanXMLforInclude(Path filePath) {
         try {
             String content = new String(Files.readAllBytes(filePath));
-            Matcher m = Pattern.compile("<include.+location=[\"\'](.+)[\"\']/>").matcher(content);
+            Matcher m = Pattern.compile("<include[^<]+location=[\"\'](.+)[\"\']/>").matcher(content);
             while (m.find()) {
                 configFiles.add(filePath.getParent().resolve(m.group(1)).toFile().getCanonicalPath());
             }
@@ -116,6 +118,15 @@ public class LibertyWorkspace {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    public boolean isConfigDir(Path filePath, BasicFileAttributes fileAttributes) {
+        if (!fileAttributes.isDirectory()) {
+            return false;
+        }
+        return filePath.endsWith(LibertyConstants.WLP_USER_CONFIG_DIR) || 
+                filePath.endsWith(LibertyConstants.SERVER_CONFIG_DROPINS_DEFAULTS) || 
+                filePath.endsWith(LibertyConstants.SERVER_CONFIG_DROPINS_OVERRIDES);
     }
 
     public void addConfigFile(String fileString) {

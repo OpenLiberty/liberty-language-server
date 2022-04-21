@@ -61,7 +61,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         
     }
 
-    private void validateFeature(DOMDocument domDocument, List<Diagnostic> list, DOMNode node) {
+    private void validateFeature(DOMDocument domDocument, List<Diagnostic> list, DOMNode featureManager) {
         String libertyVersion =  LibertyUtils.getVersion(domDocument);
 
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
@@ -69,7 +69,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         // Search for duplicate features
         // or features that do not exist
         Set<String> includedFeatures = new HashSet<>();
-        List<DOMNode> features = node.getChildren();
+        List<DOMNode> features = featureManager.getChildren();
         for (DOMNode featureNode : features) {
             DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
             // skip nodes that do not have any text value (ie. comments)
