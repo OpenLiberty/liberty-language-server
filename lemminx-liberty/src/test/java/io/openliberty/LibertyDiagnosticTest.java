@@ -81,6 +81,9 @@ public class LibertyDiagnosticTest {
                 "<server description=\"default server\">", //
                 "    <include optional=\"true\" location=\"./empty_server.xml\"/>", //
                 "    <include optional=\"false\" location=\"MISSING FILE\"/>", //
+                "    <include", //
+                "            optional=\"true\" location=\"MULTI LINER\"/>", //
+                "    <include optional=\"false\" location=\"MISSING FILE.xml\"/>", //
                 "</server>"
         );
         // Diagnostic location1 = new Diagnostic();
@@ -91,13 +94,26 @@ public class LibertyDiagnosticTest {
 
         Diagnostic location2 = new Diagnostic();
         location2.setRange(r(2, 30, 2, 53));
-        location2.setMessage("The file at the specified location could not be found.");
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), location2);
+        location2.setMessage("The specified file is not an XML file.");
+
+        Diagnostic location3 = new Diagnostic();
+        location3.setRange(r(4, 28, 4, 50));
+        location3.setMessage("The specified file is not an XML file.");
         
+        Diagnostic location4 = new Diagnostic();
+        location4.setRange(r(5, 30, 5, 57));
+        location4.setMessage("The file at the specified location could not be found.");
+
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), location2, location3, location4);
+
         assertTrue(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0)
                 .hasConfigFile(new File("src/test/resources/empty_server.xml").getCanonicalPath()));
-
         assertFalse(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0)
                 .hasConfigFile("MISSING FILE"));
+        assertFalse(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0)
+                .hasConfigFile("MULTI LINER"));
+        assertFalse(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0)
+                .hasConfigFile("MISSING FILE.xml"));
     }
 }
