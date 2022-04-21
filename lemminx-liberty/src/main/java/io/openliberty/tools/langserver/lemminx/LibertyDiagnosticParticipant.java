@@ -29,8 +29,6 @@ import io.openliberty.tools.langserver.lemminx.util.*;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
@@ -101,25 +99,34 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         if (locAttribute == null) {
             return;
         }
-        String docURIString = domDocument.getDocumentURI().replace(File.separator, "/");    // URI requires
+
+        DOMNode locNode = node.getAttributeNode("location");
+        Range range = XMLPositionUtility.createRange(locNode.getStart(), locNode.getEnd(), domDocument);
+
+        if (!locAttribute.endsWith(".xml")) {
+            String message = "The specified file is not an XML file.";
+            list.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, "liberty-lemminx"));
+            return;
+        }
+
+        String docURIString = domDocument.getDocumentURI().replace(File.separator, "/");
         locAttribute = locAttribute.replace(File.separator, "/");
         File configFile = locAttribute.startsWith("./") ? 
                 new File(URI.create(docURIString.substring(0, docURIString.lastIndexOf("/") + 1))
                         .resolve(locAttribute).normalize()) :
                 new File(locAttribute);
 
-        DOMNode locNode = node.getAttributeNode("location");
-        Range range = XMLPositionUtility.createRange(locNode.getStart(), locNode.getEnd(), domDocument);
+
         try {
             if (configFile.exists()) {
                 LibertyProjectsManager.getInstance().getWorkspaceFolder(docURIString).addConfigFile(configFile.getCanonicalPath());
             } else {
                 String message = "The file at the specified location could not be found.";
-                list.add(new Diagnostic(range, message, DiagnosticSeverity.Hint, "liberty-lemminx"));
+                list.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, "liberty-lemminx"));
             }
         } catch (IllegalArgumentException | IOException e) {
             String message = "The file at the specified location could not be found.";
-            list.add(new Diagnostic(range, message, DiagnosticSeverity.Hint, "liberty-lemminx-exception"));
+            list.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, "liberty-lemminx-exception"));
         }
     }
 }
