@@ -104,7 +104,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         String docURIString = domDocument.getDocumentURI().replace(File.separator, "/");    // URI requires
         locAttribute = locAttribute.replace(File.separator, "/");
         File configFile = locAttribute.startsWith("./") ? 
-                new File(URI.create(docURIString.substring(0, docURIString.lastIndexOf(File.separator) + 1))
+                new File(URI.create(docURIString.substring(0, docURIString.lastIndexOf("/") + 1))
                         .resolve(locAttribute).normalize()) :
                 new File(locAttribute);
 
