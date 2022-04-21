@@ -101,10 +101,11 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         if (locAttribute == null) {
             return;
         }
-        String docURIString = domDocument.getDocumentURI();
+        String docURIString = domDocument.getDocumentURI().replace(File.separator, "/");    // URI requires
         locAttribute = locAttribute.replace(File.separator, "/");
-        File configFile = locAttribute.startsWith("." + File.separator) ? 
-                new File(URI.create(docURIString.substring(0, docURIString.lastIndexOf(File.separator) + 1)).resolve(locAttribute).normalize()) :
+        File configFile = locAttribute.startsWith("./") ? 
+                new File(URI.create(docURIString.substring(0, docURIString.lastIndexOf(File.separator) + 1))
+                        .resolve(locAttribute).normalize()) :
                 new File(locAttribute);
 
         DOMNode locNode = node.getAttributeNode("location");
@@ -114,11 +115,11 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 LibertyProjectsManager.getInstance().getWorkspaceFolder(docURIString).addConfigFile(configFile.getCanonicalPath());
             } else {
                 String message = "The file at the specified location could not be found.";
-                list.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, "liberty-lemminx"));
+                list.add(new Diagnostic(range, message, DiagnosticSeverity.Hint, "liberty-lemminx"));
             }
         } catch (IllegalArgumentException | IOException e) {
             String message = "The file at the specified location could not be found.";
-            list.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, "liberty-lemminx"));
+            list.add(new Diagnostic(range, message, DiagnosticSeverity.Hint, "liberty-lemminx-exception"));
         }
     }
 }
