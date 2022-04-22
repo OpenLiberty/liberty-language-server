@@ -18,7 +18,6 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +27,6 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
-import io.openliberty.tools.langserver.lemminx.util.LibertyConstants;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 public class LibertyWorkspace {
@@ -90,15 +88,11 @@ public class LibertyWorkspace {
 
     public void initConfigFileList() {
         try {
-            List<Path> configPathsList = Files.find(Paths.get(getWorkspaceURI()), Integer.MAX_VALUE, (filePath, fileAttributes) -> 
-                    LibertyUtils.isServerXMLFile(filePath.toString()) || isConfigDir(filePath, fileAttributes))
+            List<Path> serverXmlList = Files.find(Paths.get(getWorkspaceURI()), Integer.MAX_VALUE, (filePath, fileAttributes) -> 
+                    LibertyUtils.isServerXMLFile(filePath.toString()))
                     .collect(Collectors.toList());
-            for (Path configPath : configPathsList) {
-                if (LibertyUtils.isServerXMLFile(configPath.toString())) {
-                    scanXMLforInclude(configPath);
-                } else {
-                    Files.list(configPath).forEach(path -> configFiles.add(path.toString()));
-                }
+            for (Path serverXml : serverXmlList) {
+                scanForConfigLocations(serverXml);
             }
         } catch (IOException e) {
             // workspace URI does not exist
@@ -106,27 +100,30 @@ public class LibertyWorkspace {
         }
     }
 
-    public void scanXMLforInclude(Path filePath) {
+    // TODO: or use DOM
+    public void scanForConfigLocations(Path filePath) {
         try {
             String content = new String(Files.readAllBytes(filePath));
-            Matcher m = Pattern.compile("<include[^<]+location=[\"\'](.+)[\"\']/>").matcher(content);
+            // [^<] = All characters, including whitespaces/newlines, not '<'
+            // [\"\'] = Accept either " or ' as string indicators
+            // [\\s\\S]+? = All characters until first instance of <location> or </include>
+            StringBuilder regexsb = new StringBuilder();
+            regexsb.append("<include([^<]+location=[\"\']?(.+)[\"\']?/");                                // location attribute defined in same element as include
+            regexsb.append("|");                                                                         // or
+            regexsb.append(">[\\s\\S]+?<location>[\"\']?(.+)[\"\']?</location>[\\s\\S]+?</include)>");   // lazy, not greedy, search for location child element
+
+            Matcher m = Pattern.compile(regexsb.toString()).matcher(content);
+            
             while (m.find()) {
-                configFiles.add(filePath.getParent().resolve(m.group(1)).toFile().getCanonicalPath());
+                // Group 1 for first condition, Group 2 for second condition
+                String locationValue = (m.groupCount() <= 1) ? m.group(1) : m.group(2);
+                configFiles.add(filePath.getParent().resolve(locationValue).toFile().getCanonicalPath());
             }
         } catch (IOException e) {
             // specified config resources file does not exist
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public boolean isConfigDir(Path filePath, BasicFileAttributes fileAttributes) {
-        if (!fileAttributes.isDirectory()) {
-            return false;
-        }
-        return filePath.endsWith(LibertyConstants.WLP_USER_CONFIG_DIR) || 
-                filePath.endsWith(LibertyConstants.SERVER_CONFIG_DROPINS_DEFAULTS) || 
-                filePath.endsWith(LibertyConstants.SERVER_CONFIG_DROPINS_OVERRIDES);
     }
 
     public void addConfigFile(String fileString) {

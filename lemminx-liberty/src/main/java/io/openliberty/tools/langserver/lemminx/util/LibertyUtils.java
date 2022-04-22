@@ -14,8 +14,6 @@ package io.openliberty.tools.langserver.lemminx.util;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,8 +52,15 @@ public class LibertyUtils {
         return file.getDocumentURI().endsWith("/" + LibertyConstants.SERVER_XML);
     }
 
+    public static boolean isConfigDirFile(String filePath) {
+        return filePath.contains(LibertyConstants.WLP_USER_CONFIG_DIR) ||
+                filePath.contains(LibertyConstants.SERVER_CONFIG_DROPINS_DEFAULTS) ||
+                filePath.contains(LibertyConstants.SERVER_CONFIG_DROPINS_OVERRIDES);
+    }
+
     public static boolean isConfigXMLFile(String filePath) {
-        return isServerXMLFile(filePath) || LibertyProjectsManager.getInstance().getWorkspaceFolder(filePath).hasConfigFile(filePath);
+        return isServerXMLFile(filePath) || isConfigDirFile(filePath) ||
+                LibertyProjectsManager.getInstance().getWorkspaceFolder(filePath).hasConfigFile(filePath);
     }
 
     public static boolean isConfigXMLFile(DOMDocument file) {
