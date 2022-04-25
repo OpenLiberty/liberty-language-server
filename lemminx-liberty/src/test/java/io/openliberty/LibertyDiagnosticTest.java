@@ -2,9 +2,19 @@ package io.openliberty;
 
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.WorkspaceFolder;
 import org.junit.jupiter.api.Test;
 
+import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
+
 import static org.eclipse.lemminx.XMLAssert.r;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class LibertyDiagnosticTest {
 
@@ -60,4 +70,50 @@ public class LibertyDiagnosticTest {
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, invalid1, invalid2);
     }
 
+    @Test
+    public void testDiagnosticsForInclude() throws IOException {
+        // LibertyWorkspace must be initialized
+        List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
+        initList.add(new WorkspaceFolder(new File("src").toURI().toString()));
+        LibertyProjectsManager.getInstance().setWorkspaceFolders(initList);
+
+        String serverXML = String.join(newLine, //
+                "<server description=\"default server\">", //
+                "    <include optional=\"true\" location=\"./empty_server.xml\"/>", //
+                "    <include optional=\"false\" location=\"MISSING FILE\"/>", //
+                "    <include", //
+                "            optional=\"true\" location=\"MULTI LINER\"/>", //
+                "    <include optional=\"false\" location=\"MISSING FILE.xml\"/>", //
+                "</server>"
+        );
+        // Diagnostic location1 = new Diagnostic();
+        File serverXMLFile = new File("src/test/resources/server.xml");
+        assertFalse(serverXMLFile.exists());
+        // Diagnostic will not be made if found
+        assertTrue(new File("src/test/resources/empty_server.xml").exists());
+
+        Diagnostic location2 = new Diagnostic();
+        location2.setRange(r(2, 30, 2, 53));
+        location2.setMessage("The specified file is not an XML file.");
+
+        Diagnostic location3 = new Diagnostic();
+        location3.setRange(r(4, 28, 4, 50));
+        location3.setMessage("The specified file is not an XML file.");
+        
+        Diagnostic location4 = new Diagnostic();
+        location4.setRange(r(5, 30, 5, 57));
+        location4.setMessage("The file at the specified location could not be found.");
+
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), location2, location3, location4);
+
+        assertTrue(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0)
+                .hasConfigFile(new File("src/test/resources/empty_server.xml").getCanonicalPath()));
+        assertFalse(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0)
+                .hasConfigFile("MISSING FILE"));
+        assertFalse(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0)
+                .hasConfigFile("MULTI LINER"));
+        assertFalse(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0)
+                .hasConfigFile("MISSING FILE.xml"));
+    }
 }

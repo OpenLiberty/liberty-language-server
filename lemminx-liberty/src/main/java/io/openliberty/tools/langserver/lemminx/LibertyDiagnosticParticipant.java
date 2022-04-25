@@ -22,9 +22,13 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
+import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import io.openliberty.tools.langserver.lemminx.util.*;
+
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.*;
 
 public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
@@ -32,31 +36,30 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     @Override
     public void doDiagnostics(DOMDocument domDocument, List<Diagnostic> diagnostics,
             XMLValidationSettings validationSettings, CancelChecker cancelChecker) {
-        if (!LibertyUtils.isServerXMLFile(domDocument))
+        if (!LibertyUtils.isConfigXMLFile(domDocument))
             return;
         try {
-            validateFeatures(domDocument, diagnostics);
+            validateDom(domDocument, diagnostics);
         } catch (IOException e) {
-            System.err.println("Error validating features");
+            System.err.println("Error validating document " + domDocument.getDocumentURI());
             System.err.println(e.getMessage());
         }
     }
 
-    private void validateFeatures(DOMDocument domDocument, List<Diagnostic> list) throws IOException {
+    private void validateDom(DOMDocument domDocument, List<Diagnostic> list) throws IOException {
         List<DOMNode> nodes = domDocument.getDocumentElement().getChildren();
-        DOMNode featureManager = null;
-        // find <featureManager> element if it exists
+
         for (DOMNode node : nodes) {
             if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(node.getNodeName())) {
-                featureManager = node;
-                break;
+                validateFeature(domDocument, list, node);
+            } else if (LibertyConstants.INCLUDE_ELEMENT.equals(node.getNodeName())) {
+                monitorConfigFiles(domDocument, list, node);
             }
         }
-        // No need for validation if there is no <featureManager>
-        if (featureManager == null) {
-            return;
-        }
+        
+    }
 
+    private void validateFeature(DOMDocument domDocument, List<Diagnostic> list, DOMNode featureManager) {
         String libertyVersion =  LibertyUtils.getVersion(domDocument);
 
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
@@ -88,6 +91,42 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                     }
                 }
             }
+        }
+    }
+
+    private void monitorConfigFiles(DOMDocument domDocument, List<Diagnostic> list, DOMNode node) {
+        String locAttribute = node.getAttribute("location");
+        if (locAttribute == null) {
+            return;
+        }
+
+        DOMNode locNode = node.getAttributeNode("location");
+        Range range = XMLPositionUtility.createRange(locNode.getStart(), locNode.getEnd(), domDocument);
+
+        if (!locAttribute.endsWith(".xml")) {
+            String message = "The specified file is not an XML file.";
+            list.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, "liberty-lemminx"));
+            return;
+        }
+
+        String docURIString = domDocument.getDocumentURI().replace(File.separator, "/");
+        locAttribute = locAttribute.replace(File.separator, "/");
+        File configFile = locAttribute.startsWith("./") ? 
+                new File(URI.create(docURIString.substring(0, docURIString.lastIndexOf("/") + 1))
+                        .resolve(locAttribute).normalize()) :
+                new File(locAttribute);
+
+
+        try {
+            if (configFile.exists()) {
+                LibertyProjectsManager.getInstance().getWorkspaceFolder(docURIString).addConfigFile(configFile.getCanonicalPath());
+            } else {
+                String message = "The file at the specified location could not be found.";
+                list.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, "liberty-lemminx"));
+            }
+        } catch (IllegalArgumentException | IOException e) {
+            String message = "The file at the specified location could not be found.";
+            list.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, "liberty-lemminx-exception"));
         }
     }
 }

@@ -14,8 +14,6 @@ package io.openliberty.tools.langserver.lemminx.util;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -54,6 +52,21 @@ public class LibertyUtils {
         return file.getDocumentURI().endsWith("/" + LibertyConstants.SERVER_XML);
     }
 
+    public static boolean isConfigDirFile(String filePath) {
+        return filePath.contains(LibertyConstants.WLP_USER_CONFIG_DIR) ||
+                filePath.contains(LibertyConstants.SERVER_CONFIG_DROPINS_DEFAULTS) ||
+                filePath.contains(LibertyConstants.SERVER_CONFIG_DROPINS_OVERRIDES);
+    }
+
+    public static boolean isConfigXMLFile(String filePath) {
+        return isServerXMLFile(filePath) || isConfigDirFile(filePath) ||
+                LibertyProjectsManager.getInstance().getWorkspaceFolder(filePath).hasConfigFile(filePath);
+    }
+
+    public static boolean isConfigXMLFile(DOMDocument file) {
+        return isConfigXMLFile(file.getDocumentURI());
+    }
+
     /**
      * Given a server.xml URI find the associated workspace folder and search that
      * folder for the most recently edited file that matches the given name.
@@ -64,12 +77,11 @@ public class LibertyUtils {
      */
     public static Path findFileInWorkspace(String serverXmlURI, String filename) {
         LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlURI);
-        if (libertyWorkspace.getURI() == null) {
+        if (libertyWorkspace.getWorkspaceURI() == null) {
             return null;
         }
         try {
-            URI rootURI = new URI(libertyWorkspace.getURI());
-            Path rootPath = Paths.get(rootURI);
+            Path rootPath = Paths.get(libertyWorkspace.getWorkspaceURI());
             List<Path> matchingFiles = Files.walk(rootPath)
                     .filter(p -> (Files.isRegularFile(p) && p.getFileName().endsWith(filename)))
                     .collect(Collectors.toList());
@@ -86,7 +98,7 @@ public class LibertyUtils {
                 }
             }
             return lastModified;
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             LOGGER.warning("Could not find: " + filename + ": " + e.getMessage());
             return null;
         }
@@ -110,7 +122,7 @@ public class LibertyUtils {
         // find workspace folder this serverXML belongs to
         LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXML.getDocumentURI());
 
-        if (libertyWorkspace == null || libertyWorkspace.getURI() == null) {
+        if (libertyWorkspace == null || libertyWorkspace.getWorkspaceString() == null) {
             return null;
         }
 
