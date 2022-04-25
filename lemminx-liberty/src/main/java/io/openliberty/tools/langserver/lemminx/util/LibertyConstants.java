@@ -30,7 +30,7 @@ public final class LibertyConstants {
 
     public static final String DEFAULT_SERVER_VERSION = "20.0.0.9";
 
-    public static final String WLP_USER_CONFIG_DIR = String.join(File.separator, "usr", "shared", "config");
-    public static final String SERVER_CONFIG_DROPINS_DEFAULTS = String.join(File.separator, "configDropins", "defaults");
-    public static final String SERVER_CONFIG_DROPINS_OVERRIDES = String.join(File.separator, "configDropins", "overrides");
+    public static final String WLP_USER_CONFIG_DIR = File.separator + String.join(File.separator, "usr", "shared", "config") + File.separator;
+    public static final String SERVER_CONFIG_DROPINS_DEFAULTS = File.separator + String.join(File.separator, "configDropins", "defaults") + File.separator;
+    public static final String SERVER_CONFIG_DROPINS_OVERRIDES = File.separator + String.join(File.separator, "configDropins", "overrides") + File.separator;
 }
