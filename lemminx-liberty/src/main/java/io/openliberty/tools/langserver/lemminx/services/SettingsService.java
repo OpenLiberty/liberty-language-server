@@ -56,6 +56,17 @@ public class SettingsService {
     return null;
   }
 
+  public String getLibertyRuntime() {
+    if (settings != null) {
+      String runtime = settings.getRuntime();
+      if (runtime != null) {
+        return runtime;
+      }
+    }
+
+    return null;
+  }
+
   public int getRequestDelay() {
     if (settings != null) {
       int requestDelay = settings.getRequestDelay();

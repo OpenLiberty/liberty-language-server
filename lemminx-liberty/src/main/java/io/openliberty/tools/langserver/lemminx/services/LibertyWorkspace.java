@@ -33,6 +33,7 @@ public class LibertyWorkspace {
 
     private String workspaceFolderURI;
     private String libertyVersion;
+    private String libertyRuntime;
     private boolean isLibertyInstalled;
     private List<Feature> installedFeatureList;
     private Set<String> configFiles;
@@ -47,6 +48,7 @@ public class LibertyWorkspace {
     public LibertyWorkspace(String workspaceFolderURI) {
         this.workspaceFolderURI = workspaceFolderURI;
         this.libertyVersion = null;
+        this.libertyRuntime = null;
         this.isLibertyInstalled = false;
         this.installedFeatureList = new ArrayList<Feature>();
 
@@ -62,12 +64,24 @@ public class LibertyWorkspace {
         return URI.create(this.workspaceFolderURI);
     }
 
+    public File getDir() {
+        return new File(URI.create(getWorkspaceString()).getPath());
+    }
+
     public void setLibertyVersion(String libertyVersion) {
         this.libertyVersion = libertyVersion;
     }
 
     public String getLibertyVersion() {
         return this.libertyVersion;
+    }
+    
+    public void setLibertyRuntime(String libertyRuntime) {
+        this.libertyRuntime = libertyRuntime;
+    }
+    
+    public String getLibertyRuntime() {
+        return libertyRuntime;
     }
 
     public void setLibertyInstalled(boolean isLibertyInstalled) {

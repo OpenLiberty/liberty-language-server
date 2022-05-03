@@ -9,6 +9,6 @@
 		"request": "attach",
 		"hostName": "localhost",
 		"port": 1054,
-		"projectName": "lemminx-liberty"
+		"projectName": "liberty-langserver-lemminx"
 	}]
 }

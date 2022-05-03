@@ -12,8 +12,10 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx.util;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -77,6 +79,10 @@ public class LibertyUtils {
      */
     public static Path findFileInWorkspace(String serverXmlURI, String filename) {
         LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlURI);
+        return findFileInWorkspace(libertyWorkspace, filename);
+    }
+
+    public static Path findFileInWorkspace(LibertyWorkspace libertyWorkspace, String filename) {
         if (libertyWorkspace.getWorkspaceURI() == null) {
             return null;
         }
@@ -105,6 +111,49 @@ public class LibertyUtils {
     }
 
     /**
+     * Given a server.xml, determine Liberty runtime type of the LibertyWorkspace.
+     * 
+     * Will return 'wlp', 'ol', or null depending on the relevant property files found in the wlp/libs/version folder.
+     * 
+     * @param serverXMLUri server xml uri
+     * @return Liberty runtime or null
+     */
+    public static String getRuntimeInfo(String serverXMLUri) {
+
+        // return runtime set in settings if it exists
+        String libertyRuntime = SettingsService.getInstance().getLibertyRuntime();
+        if (libertyRuntime != null) {
+            return libertyRuntime;
+        }
+        // find workspace folder this serverXML belongs to
+        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXMLUri);
+
+        if (libertyWorkspace == null || libertyWorkspace.getWorkspaceURI() == null) {
+            return null;
+        }
+
+        String runtime = libertyWorkspace.getLibertyRuntime();
+
+        // return version from cache if set and Liberty is installed
+        if (runtime != null && libertyWorkspace.isLibertyInstalled()) {
+            return runtime;
+        }
+
+        if (findFileInWorkspace(serverXMLUri, "WebSphereApplicationServer.properties") != null ) {
+            runtime = "wlp";
+            libertyWorkspace.setLibertyRuntime(runtime);
+            return runtime;
+        } else if (findFileInWorkspace(serverXMLUri, "openliberty.properties") != null ) {
+            runtime = "ol";
+            libertyWorkspace.setLibertyRuntime(runtime);
+            return runtime;
+        } else {
+            // did not detect a new liberty properties file, return version from cache
+            return runtime;
+        }
+    }
+
+    /**
      * Given a server.xml find the version associated with the corresponding Liberty
      * workspace. If the version has not been set via the Settings Service, search for an
      * openliberty.properties file in the workspace and return the version from that
@@ -114,13 +163,17 @@ public class LibertyUtils {
      * @return version of Liberty or null
      */
     public static String getVersion(DOMDocument serverXML) {
+        return getVersion(serverXML.getDocumentURI());
+    }
+
+    public static String getVersion(String serverXMLUri) {
         // return version set in settings if it exists
         String libertyVersion = SettingsService.getInstance().getLibertyVersion();
         if (libertyVersion != null) {
             return libertyVersion;
         }
-        // find workspace folder this serverXML belongs to
-        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXML.getDocumentURI());
+        // find workspace folder this serverXMLUri belongs to
+        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXMLUri);
 
         if (libertyWorkspace == null || libertyWorkspace.getWorkspaceString() == null) {
             return null;
@@ -132,7 +185,7 @@ public class LibertyUtils {
         if (version != null && libertyWorkspace.isLibertyInstalled()) {
             return version;
         }
-        Path propertiesFile = findFileInWorkspace(serverXML.getDocumentURI(), "openliberty.properties");
+        Path propertiesFile = findFileInWorkspace(serverXMLUri, "openliberty.properties");
 
         // detected a new Liberty properties file, re-calculate version
         if (propertiesFile != null && propertiesFile.toFile().exists()) {
@@ -164,35 +217,35 @@ public class LibertyUtils {
         }
     }
 
-    // /**
-    //  * Return temp directory to store generated feature lists and schema. Creates
-    //  * temp directory if it does not exist.
-    //  * 
-    //  * @param folder WorkspaceFolderURI indicates where to create the temporary
-    //  *               directory
-    //  * @return temporary directory File object
-    //  */
-    // public static File getTempDir(String workspaceFolderURI) {
-    //     if (workspaceFolderURI == null) {
-    //         return null;
-    //     }
-    //     try {
-    //         URI rootURI = new URI(workspaceFolderURI);
-    //         Path rootPath = Paths.get(rootURI);
-    //         File file = rootPath.toFile();
-    //         File libertyLSFolder = new File(file, ".libertyls");
+    /**
+     * Return temp directory to store generated feature lists and schema. Creates
+     * temp directory if it does not exist.
+     * 
+     * @param folder WorkspaceFolderURI indicates where to create the temporary
+     *               directory
+     * @return temporary directory File object
+     */
+    public static File getTempDir(String workspaceFolderURI) {
+        if (workspaceFolderURI == null) {
+            return null;
+        }
+        try {
+            URI rootURI = new URI(workspaceFolderURI);
+            Path rootPath = Paths.get(rootURI);
+            File file = rootPath.toFile();
+            File libertyLSFolder = new File(file, ".libertyls");
 
-    //         if (!libertyLSFolder.exists()) {
-    //             if (!libertyLSFolder.mkdir()) {
-    //                 return null;
-    //             }
-    //         }
-    //         return file;
-    //     } catch (Exception e) {
-    //         LOGGER.warning("Unable to create temp dir: " + e.getMessage());
-    //     }
-    //     return null;
-    // }
+            if (!libertyLSFolder.exists()) {
+                if (!libertyLSFolder.mkdir()) {
+                    return null;
+                }
+            }
+            return libertyLSFolder;
+        } catch (Exception e) {
+            LOGGER.warning("Unable to create temp dir: " + e.getMessage());
+        }
+        return null;
+    }
 
     /**
      * Watches the parent directory of the Liberty properties file in a separate
