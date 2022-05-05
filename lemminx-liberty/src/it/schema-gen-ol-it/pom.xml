@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.openliberty.tools.test</groupId>
-    <artifactId>schema-gen-it</artifactId>
+    <artifactId>schema-gen-ol-it</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -82,8 +82,8 @@
                 <configuration>
                     <serverName>test</serverName>
                     <runtimeArtifact>
-                        <groupId>com.ibm.websphere.appserver.runtime</groupId>
-                        <artifactId>wlp-kernel</artifactId>
+                        <groupId>io.openliberty</groupId>
+                        <artifactId>openliberty-kernel</artifactId>
                         <version>22.0.0.3</version>
                     </runtimeArtifact>
                 </configuration>

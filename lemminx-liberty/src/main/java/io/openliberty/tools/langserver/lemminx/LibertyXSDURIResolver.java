@@ -118,30 +118,31 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
       xsdDestFile = new File(tempDir, libertyWorkspace.getLibertyRuntime() + "-" + libertyWorkspace.getLibertyVersion() + ".xsd");
     }
 
-    try {
-      String xsdDestPath = xsdDestFile.getCanonicalPath();
-
-      LOGGER.info("Generating schema file at: " + xsdDestPath);
-
-      ProcessBuilder pb = new ProcessBuilder("java", "-jar", schemaGenJarPath.toAbsolutePath().toString(), xsdDestPath); //Add locale param here
-      pb.directory(tempDir);
-      pb.redirectErrorStream(true);
-      pb.redirectOutput(new File(tempDir, "schemagen.log"));
-
-      Process proc = pb.start();
-      if (!proc.waitFor(30, TimeUnit.SECONDS)) {
-        proc.destroy();
-        throw new Exception("Exceeded 30 second timeout during schema file generation. Using cached schema.xsd file.");
+    if (!xsdDestFile.exists()) {
+      try {
+        String xsdDestPath = xsdDestFile.getCanonicalPath();
+  
+        LOGGER.info("Generating schema file at: " + xsdDestPath);
+  
+        ProcessBuilder pb = new ProcessBuilder("java", "-jar", schemaGenJarPath.toAbsolutePath().toString(), xsdDestPath); //Add locale param here
+        pb.directory(tempDir);
+        pb.redirectErrorStream(true);
+        pb.redirectOutput(new File(tempDir, "schemagen.log"));
+  
+        Process proc = pb.start();
+        if (!proc.waitFor(30, TimeUnit.SECONDS)) {
+          proc.destroy();
+          throw new Exception("Exceeded 30 second timeout during schema file generation. Using cached schema.xsd file.");
+        }
+  
+        LOGGER.info("Caching schema file with URI: " + xsdDestFile.toURI().toString());
+      } catch (Exception e) {
+        LOGGER.warning(e.getMessage());
+        return null;
       }
-
-      LOGGER.info("Caching schema file with URI: " + xsdDestFile.toURI().toString());
-      return xsdDestFile.toURI().toString();
-
-    } catch (Exception e) {
-      LOGGER.warning(e.getMessage());
     }
 
-    return null;
+    return xsdDestFile.toURI().toString();
   }
 
 }
