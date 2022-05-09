@@ -46,25 +46,11 @@ public class SettingsService {
   }
 
   public String getLibertyVersion() {
-    if (settings != null) {
-      String version = settings.getVersion();
-      if (version != null) {
-        return version;
-      }
-    }
-
-    return null;
+    return settings != null ? settings.getVersion() : null;
   }
 
   public String getLibertyRuntime() {
-    if (settings != null) {
-      String runtime = settings.getRuntime();
-      if (runtime != null) {
-        return runtime;
-      }
-    }
-
-    return null;
+    return settings != null ? settings.getRuntime() : null;
   }
 
   public int getRequestDelay() {

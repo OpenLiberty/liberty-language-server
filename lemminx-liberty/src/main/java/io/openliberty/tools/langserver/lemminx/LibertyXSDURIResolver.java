@@ -72,15 +72,19 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
           //Return schema URI as String, otherwise use cached schema.xsd file
           if (libertyWorkspace.isLibertyInstalled()) {
             Path schemaGenJarPath = LibertyUtils.findFileInWorkspace(libertyWorkspace, "ws-schemagen.jar");
-            LOGGER.info("Generating schema file from: " + schemaGenJarPath.toString());
-            String serverSchemaUri = generateServerSchemaXsd(libertyWorkspace, schemaGenJarPath);
-            if (serverSchemaUri != null && !serverSchemaUri.isEmpty()) {
-              return serverSchemaUri;
+            if (schemaGenJarPath != null) {
+              LOGGER.info("Generating schema file from: " + schemaGenJarPath.toString());
+              //Generate schema file
+              String serverSchemaUri = generateServerSchemaXsd(libertyWorkspace, schemaGenJarPath);
+              if (serverSchemaUri != null && !serverSchemaUri.isEmpty()) {
+                return serverSchemaUri;
+              }
             }
           }
         }
         Path serverXSDFile = CacheResourcesManager.getResourceCachePath(SERVER_XSD_RESOURCE);
-        return serverXSDFile.toFile().toURI().toString();
+        LOGGER.info("Using cached Liberty schema file located at: " + serverXSDFile.toString());
+        return serverXSDFile.toUri().toString();
       } catch (Exception e) {
         LOGGER.severe("Error: Unable to deploy server.xsd to lemminx cache.");
         e.printStackTrace();
@@ -111,6 +115,11 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
     //java -jar path/to/ws-schemagen.jar path/to/workspace/.libertyls/libertySchema.xsd
     File tempDir = LibertyUtils.getTempDir(libertyWorkspace.getWorkspaceURI().toString());
 
+    //If tempDir is null, generate the schema file in the same directory as ws-schemagen.jar 
+    if (tempDir == null) {
+      tempDir = new File(schemaGenJarPath.toString()).getParentFile();
+    }
+
     //TODO: (?) Add subfolders to tempDir: schema/xsd/liberty/server.xsd
     File xsdDestFile = new File(tempDir, "server.xsd");
     if (libertyWorkspace.getLibertyVersion()!= null && !libertyWorkspace.getLibertyVersion().isEmpty() &&
@@ -132,12 +141,14 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
         Process proc = pb.start();
         if (!proc.waitFor(30, TimeUnit.SECONDS)) {
           proc.destroy();
-          throw new Exception("Exceeded 30 second timeout during schema file generation. Using cached schema.xsd file.");
+          LOGGER.warning("Exceeded 30 second timeout during schema file generation. Using cached schema.xsd file.");
+          return null;
         }
-  
+
         LOGGER.info("Caching schema file with URI: " + xsdDestFile.toURI().toString());
       } catch (Exception e) {
         LOGGER.warning(e.getMessage());
+        LOGGER.warning("Due to an exception during schema file generation, a cached schema file will be used.");
         return null;
       }
     }
