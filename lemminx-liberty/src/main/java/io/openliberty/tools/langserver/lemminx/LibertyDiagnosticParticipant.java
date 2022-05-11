@@ -33,6 +33,12 @@ import java.util.*;
 
 public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
 
+    public static final String MISSING_FILE_CODE = "missing_file";
+    public static final String MISSING_FILE_MESSAGE = "The resource at the specified location could not be found:\n";
+
+    public static final String NOT_OPTIONAL_CODE = "not_optional";
+    public static final String NOT_OPTIONAL_MESSAGE = "The specified resource cannot be skipped. Check location value or set optional to true.";
+
     @Override
     public void doDiagnostics(DOMDocument domDocument, List<Diagnostic> diagnostics,
             XMLValidationSettings validationSettings, CancelChecker cancelChecker) {
@@ -109,6 +115,9 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             return;
         }
 
+        String optString = node.getAttribute("optional");
+        boolean required = optString == null ? false : optString.equals("false");
+
         String docURIString = domDocument.getDocumentURI().replace(File.separator, "/");
         locAttribute = locAttribute.replace(File.separator, "/");
         File configFile = locAttribute.startsWith("./") ? 
@@ -116,17 +125,22 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                         .resolve(locAttribute).normalize()) :
                 new File(locAttribute);
 
-
         try {
             if (configFile.exists()) {
                 LibertyProjectsManager.getInstance().getWorkspaceFolder(docURIString).addConfigFile(configFile.getCanonicalPath());
             } else {
-                String message = "The file at the specified location could not be found.";
-                list.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, "liberty-lemminx"));
+                if (optString != null && required) {
+                    DOMNode optNode = node.getAttributeNode("optional");
+                    Range optRange = XMLPositionUtility.createRange(optNode.getStart(), optNode.getEnd(), domDocument);
+                    list.add(new Diagnostic(optRange, NOT_OPTIONAL_MESSAGE, 
+                            DiagnosticSeverity.Error, "liberty-lemminx", NOT_OPTIONAL_CODE));
+                }
+                list.add(new Diagnostic(range, MISSING_FILE_MESSAGE + configFile.getCanonicalPath(), 
+                        DiagnosticSeverity.Warning, "liberty-lemminx", MISSING_FILE_CODE));
             }
         } catch (IllegalArgumentException | IOException e) {
-            String message = "The file at the specified location could not be found.";
-            list.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, "liberty-lemminx-exception"));
+            list.add(new Diagnostic(range, MISSING_FILE_MESSAGE + configFile.getAbsolutePath(), 
+                    DiagnosticSeverity.Warning, "liberty-lemminx-exception", MISSING_FILE_CODE));
         }
     }
 }

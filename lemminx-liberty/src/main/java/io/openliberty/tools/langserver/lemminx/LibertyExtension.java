@@ -12,6 +12,7 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx;
 
+import org.eclipse.lemminx.services.extensions.ICodeActionParticipant;
 import org.eclipse.lemminx.services.extensions.ICompletionParticipant;
 import org.eclipse.lemminx.services.extensions.IHoverParticipant;
 import org.eclipse.lemminx.services.extensions.IXMLExtension;
@@ -37,6 +38,7 @@ public class LibertyExtension implements IXMLExtension {
     private ICompletionParticipant completionParticipant;
     private IHoverParticipant hoverParticipant;
     private IDiagnosticsParticipant diagnosticsParticipant;
+    private ICodeActionParticipant codeActionsParticipant;
 
     @Override
     public void start(InitializeParams initializeParams, XMLExtensionsRegistry xmlExtensionsRegistry) {
@@ -59,6 +61,9 @@ public class LibertyExtension implements IXMLExtension {
 
         diagnosticsParticipant = new LibertyDiagnosticParticipant();
         xmlExtensionsRegistry.registerDiagnosticsParticipant(diagnosticsParticipant);
+
+        codeActionsParticipant = new LibertyCodeActionParticipant();
+        xmlExtensionsRegistry.registerCodeActionParticipant(codeActionsParticipant);
     }
 
     @Override
