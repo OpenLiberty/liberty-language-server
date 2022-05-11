@@ -94,4 +94,7 @@ public class LibertyProjectsManager {
         }
     }
 
+    public void cleanInstance() {
+        libertyWorkspaceFolders = new ArrayList<LibertyWorkspace>();
+    }
 }

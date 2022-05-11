@@ -12,10 +12,12 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx;
 
+import java.io.File;
 import java.net.URI;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
@@ -23,6 +25,8 @@ import org.eclipse.lemminx.uriresolver.IExternalGrammarLocationProvider;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager.ResourceToDeploy;
 import org.eclipse.lemminx.uriresolver.URIResolverExtension;
 
+import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
+import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGrammarLocationProvider {
@@ -44,11 +48,43 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
   public static final ResourceToDeploy SERVER_XSD_RESOURCE = new ResourceToDeploy(XSD_RESOURCE_URL,
       XSD_CLASSPATH_LOCATION);
 
+  /**
+   * Will return an existing xsd file or generate one from a Liberty installation if ones exists
+   * 
+   * @param baseLocation
+   * @param publicId
+   * @param systemId
+   * 
+   * @return Path to schema xsd resource
+   */
   public String resolve(String baseLocation, String publicId, String systemId) {
     if (LibertyUtils.isConfigXMLFile(baseLocation)) {
       try {
-        Path serverXSDCacheFile = CacheResourcesManager.getResourceCachePath(SERVER_XSD_RESOURCE);
-        return serverXSDCacheFile.toFile().toURI().toString();
+        String serverXMLUri = URI.create(baseLocation).toString();
+        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXMLUri);
+
+        if (libertyWorkspace != null) {
+          //Set workspace properties if not set 
+          LibertyUtils.getVersion(serverXMLUri);
+          LibertyUtils.getRuntimeInfo(serverXMLUri);
+
+          //Check workspace for Liberty installation and generate schema.xsd file
+          //Return schema URI as String, otherwise use cached schema.xsd file
+          if (libertyWorkspace.isLibertyInstalled()) {
+            Path schemaGenJarPath = LibertyUtils.findFileInWorkspace(libertyWorkspace, "ws-schemagen.jar");
+            if (schemaGenJarPath != null) {
+              LOGGER.info("Generating schema file from: " + schemaGenJarPath.toString());
+              //Generate schema file
+              String serverSchemaUri = generateServerSchemaXsd(libertyWorkspace, schemaGenJarPath);
+              if (serverSchemaUri != null && !serverSchemaUri.isEmpty()) {
+                return serverSchemaUri;
+              }
+            }
+          }
+        }
+        Path serverXSDFile = CacheResourcesManager.getResourceCachePath(SERVER_XSD_RESOURCE);
+        LOGGER.info("Using cached Liberty schema file located at: " + serverXSDFile.toString());
+        return serverXSDFile.toUri().toString();
       } catch (Exception e) {
         LOGGER.severe("Error: Unable to deploy server.xsd to lemminx cache.");
         e.printStackTrace();
@@ -67,6 +103,58 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
     Map<String, String> externalGrammar = new HashMap<>();
     externalGrammar.put(IExternalGrammarLocationProvider.NO_NAMESPACE_SCHEMA_LOCATION, xsdFile);
     return externalGrammar;
+  }
+
+  /**
+   * Generate the schema file for a LibertyWorkspace using the ws-schemagen.jar in the corresponding Liberty installation
+   * @param libertyWorkspace
+   * @param schemaGenJarPath
+   * @return Path to generated schema file.
+   */
+  private String generateServerSchemaXsd(LibertyWorkspace libertyWorkspace, Path schemaGenJarPath) {
+    //java -jar path/to/ws-schemagen.jar path/to/workspace/.libertyls/libertySchema.xsd
+    File tempDir = LibertyUtils.getTempDir(libertyWorkspace.getWorkspaceURI().toString());
+
+    //If tempDir is null, issue a warning for the current LibertyWorkspace URI and use the default cached schema file
+    if (tempDir == null) {
+      LOGGER.warning("Could not create a temporary directory for generating the schema file. The cached schema file will be used for the current workspace: " + libertyWorkspace.getWorkspaceString());
+      return null;
+    }
+
+    //TODO: (?) Add subfolders to tempDir: schema/xsd/liberty/server.xsd
+    File xsdDestFile = new File(tempDir, "server.xsd");
+    if (libertyWorkspace.getLibertyVersion()!= null && !libertyWorkspace.getLibertyVersion().isEmpty() &&
+        libertyWorkspace.getLibertyRuntime()!= null && !libertyWorkspace.getLibertyRuntime().isEmpty()) {
+      xsdDestFile = new File(tempDir, libertyWorkspace.getLibertyRuntime() + "-" + libertyWorkspace.getLibertyVersion() + ".xsd");
+    }
+
+    if (!xsdDestFile.exists()) {
+      try {
+        String xsdDestPath = xsdDestFile.getCanonicalPath();
+  
+        LOGGER.info("Generating schema file at: " + xsdDestPath);
+  
+        ProcessBuilder pb = new ProcessBuilder("java", "-jar", schemaGenJarPath.toAbsolutePath().toString(), xsdDestPath); //Add locale param here
+        pb.directory(tempDir);
+        pb.redirectErrorStream(true);
+        pb.redirectOutput(new File(tempDir, "schemagen.log"));
+  
+        Process proc = pb.start();
+        if (!proc.waitFor(30, TimeUnit.SECONDS)) {
+          proc.destroy();
+          LOGGER.warning("Exceeded 30 second timeout during schema file generation. Using cached schema.xsd file.");
+          return null;
+        }
+
+        LOGGER.info("Caching schema file with URI: " + xsdDestFile.toURI().toString());
+      } catch (Exception e) {
+        LOGGER.warning(e.getMessage());
+        LOGGER.warning("Due to an exception during schema file generation, a cached schema file will be used.");
+        return null;
+      }
+    }
+
+    return xsdDestFile.toURI().toString();
   }
 
 }

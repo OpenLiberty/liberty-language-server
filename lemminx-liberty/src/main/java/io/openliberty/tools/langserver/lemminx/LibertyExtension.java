@@ -65,6 +65,7 @@ public class LibertyExtension implements IXMLExtension {
     public void stop(XMLExtensionsRegistry xmlExtensionsRegistry) {
         // clean up .libertyls folders
         LibertyProjectsManager.getInstance().cleanUpTempDirs();
+        LibertyProjectsManager.getInstance().cleanInstance();
 
         xmlExtensionsRegistry.getResolverExtensionManager().unregisterResolver(xsdResolver);
         xmlExtensionsRegistry.unregisterCompletionParticipant(completionParticipant);
