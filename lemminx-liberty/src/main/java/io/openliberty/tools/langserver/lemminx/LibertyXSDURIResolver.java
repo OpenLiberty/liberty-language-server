@@ -117,7 +117,7 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
 
     //If tempDir is null, issue a warning for the current LibertyWorkspace URI and use the default cached schema file
     if (tempDir == null) {
-      LOGGER.warning("Could not find/create a .libertyls directory, a cached scema file will be used for the current workspace: " + libertyWorkspace.getWorkspaceString());
+      LOGGER.warning("Could not create a temporary directory for generating the schema file. The cached schema file will be used for the current workspace: " + libertyWorkspace.getWorkspaceString());
       return null;
     }
 
