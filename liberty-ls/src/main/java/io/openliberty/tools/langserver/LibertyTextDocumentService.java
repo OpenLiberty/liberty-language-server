@@ -20,7 +20,6 @@ import org.eclipse.lsp4j.services.TextDocumentService;
 
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 import io.openliberty.tools.langserver.ls.LibertyTextDocuments;
-import io.openliberty.tools.langserver.api.LibertyLanguageClientAPI;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -55,8 +54,7 @@ import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
-import io.openliberty.tools.langserver.hover.LibertyHoverProvider;
-import io.openliberty.tools.langserver.hover.LibertyServerEnvHoverProvider;
+import io.openliberty.tools.langserver.hover.LibertyPropertiesHoverProvider;
 
 public class LibertyTextDocumentService implements TextDocumentService {
 
@@ -108,14 +106,10 @@ public class LibertyTextDocumentService implements TextDocumentService {
 
     @Override
     public CompletableFuture<Hover> hover(HoverParams hoverParams) {
-        LOGGER.info("hover: " + hoverParams.getTextDocument());
+        LOGGER.info("hover: " + hoverParams.toString());
         String uri = hoverParams.getTextDocument().getUri();
         LibertyTextDocument textDocumentItem = documents.get(uri);
-        if (uri.endsWith(".env")) {
-            return new LibertyServerEnvHoverProvider(textDocumentItem).getHover(hoverParams.getPosition());
-        } else {
-            return new LibertyHoverProvider(textDocumentItem).getHover(hoverParams.getPosition());
-        }
+        return new LibertyPropertiesHoverProvider(textDocumentItem).getHover(hoverParams.getPosition());
     }
 
 

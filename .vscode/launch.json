@@ -11,6 +11,14 @@
 			"hostName": "localhost",
 			"projectName": "liberty-langserver-lemminx",
 			"port": 1054
+		},
+		{
+			"type": "java",
+			"request": "attach",
+			"name": "Debug attach liberty-ls",
+			"hostName": "localhost",
+			"projectName": "liberty-langserver",
+			"port": 1074
 		}
 	]
 }

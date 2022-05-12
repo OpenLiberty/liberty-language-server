@@ -38,8 +38,8 @@ public class LibertyLanguageServer implements LanguageServer {
 
     public LibertyLanguageServer() {
         // Workspace service handles workspace settings changes and calls update settings. 
-        workspaceService = new LibertyWorkspaceService(this);
-        textDocumentService = new LibertyTextDocumentService(this);
+        this.textDocumentService = new LibertyTextDocumentService(this);
+        this.workspaceService = new LibertyWorkspaceService(this);
     }
 
 
@@ -54,6 +54,7 @@ public class LibertyLanguageServer implements LanguageServer {
 
     @Override
     public void initialized(InitializedParams params) {
+        LOGGER.info("Initialized Liberty Language server");
         LanguageServer.super.initialized(params);
     }
 
@@ -65,6 +66,7 @@ public class LibertyLanguageServer implements LanguageServer {
     }
 
     public synchronized void updateSettings(Object initializationOptionsSettings) {
+        LOGGER.info("Updating settings...");
         if (initializationOptionsSettings == null) {
             return;
         }
