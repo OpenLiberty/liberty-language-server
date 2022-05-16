@@ -12,6 +12,7 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx.services;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -63,7 +64,13 @@ public class LibertyProjectsManager {
      */
     public LibertyWorkspace getWorkspaceFolder(String serverXMLUri) {
         for (LibertyWorkspace folder : getInstance().getLibertyWorkspaceFolders()) {
-            if (serverXMLUri.contains(folder.getWorkspaceString())) {
+            //Append workspaceDirUri with file separator to avoid bad matches
+            String workspaceDirUri = folder.getWorkspaceString();
+            if (!workspaceDirUri.endsWith(File.separator)) {
+                workspaceDirUri = workspaceDirUri + File.separator;
+            }
+
+            if (serverXMLUri.contains(workspaceDirUri)) {
                 return folder;
             }
         }

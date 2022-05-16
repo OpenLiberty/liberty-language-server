@@ -73,7 +73,6 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
           if (libertyWorkspace.isLibertyInstalled()) {
             Path schemaGenJarPath = LibertyUtils.findFileInWorkspace(libertyWorkspace, "ws-schemagen.jar");
             if (schemaGenJarPath != null) {
-              LOGGER.info("Generating schema file from: " + schemaGenJarPath.toString());
               //Generate schema file
               String serverSchemaUri = generateServerSchemaXsd(libertyWorkspace, schemaGenJarPath);
               if (serverSchemaUri != null && !serverSchemaUri.isEmpty()) {
@@ -130,6 +129,7 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
 
     if (!xsdDestFile.exists()) {
       try {
+        LOGGER.info("Generating schema file from: " + schemaGenJarPath.toString());
         String xsdDestPath = xsdDestFile.getCanonicalPath();
   
         LOGGER.info("Generating schema file at: " + xsdDestPath);
@@ -154,6 +154,7 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
       }
     }
 
+    LOGGER.info("Using schema file at: " + xsdDestFile.toURI().toString());
     return xsdDestFile.toURI().toString();
   }
 
