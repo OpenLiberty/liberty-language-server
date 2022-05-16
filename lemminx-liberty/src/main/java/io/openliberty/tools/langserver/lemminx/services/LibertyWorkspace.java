@@ -111,7 +111,7 @@ public class LibertyWorkspace {
             Matcher m = Pattern.compile(regex).matcher(content);
             while (m.find()) {
                 // m.group(0) contains whole include element, m.group(1) contains only location value
-                configFiles.add(filePath.getParent().resolve(m.group(1)).toFile().getCanonicalPath());
+                configFiles.add(new File(filePath.getParent().toFile(), m.group(1)).getCanonicalPath());
             }
         } catch (IOException e) {
             // specified config resources file does not exist

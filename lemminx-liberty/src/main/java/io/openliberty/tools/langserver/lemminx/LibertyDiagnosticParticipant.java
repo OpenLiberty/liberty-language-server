@@ -28,17 +28,15 @@ import io.openliberty.tools.langserver.lemminx.util.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.URI;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
 
     public static final String MISSING_FILE_CODE = "missing_file";
-    public static final String MISSING_FILE_MESSAGE = "The resource at the specified location could not be found:\n";
-
     public static final String NOT_OPTIONAL_CODE = "not_optional";
-    public static final String NOT_OPTIONAL_MESSAGE = "The specified resource cannot be skipped. Check location value or set optional to true.";
-
+    
     @Override
     public void doDiagnostics(DOMDocument domDocument, List<Diagnostic> diagnostics,
             XMLValidationSettings validationSettings, CancelChecker cancelChecker) {
@@ -59,7 +57,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(node.getNodeName())) {
                 validateFeature(domDocument, list, node);
             } else if (LibertyConstants.INCLUDE_ELEMENT.equals(node.getNodeName())) {
-                monitorConfigFiles(domDocument, list, node);
+                validateIncludeLocation(domDocument, list, node);
             }
         }
         
@@ -100,17 +98,29 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         }
     }
 
-    private void monitorConfigFiles(DOMDocument domDocument, List<Diagnostic> list, DOMNode node) {
+    /**
+     * Location checks:
+     * 1) Relative path; 2) Server config dir; 
+     * 3) Absolute path; 4) Web server
+     * 
+     * Checks in method: 1), 3)
+     * 2) performed in isConfigXMLFile
+     * 4) not yet implemented/determined
+     */
+    private void validateIncludeLocation(DOMDocument domDocument, List<Diagnostic> list, DOMNode node) {
         String locAttribute = node.getAttribute("location");
         if (locAttribute == null) {
+            return;
+        }
+        // skip diagnostic for not yet implemented behaviors/checks (URL + vars)
+        if (locAttribute.startsWith("http") || locAttribute.contains("$")) {
             return;
         }
 
         DOMNode locNode = node.getAttributeNode("location");
         Range range = XMLPositionUtility.createRange(locNode.getStart(), locNode.getEnd(), domDocument);
-
         if (!locAttribute.endsWith(".xml")) {
-            String message = "The specified file is not an XML file.";
+            String message = "The specified resource is not an XML file.";
             list.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, "liberty-lemminx"));
             return;
         }
@@ -118,28 +128,26 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         String optString = node.getAttribute("optional");
         boolean required = optString == null ? false : optString.equals("false");
 
-        String docURIString = domDocument.getDocumentURI().replace(File.separator, "/");
-        locAttribute = locAttribute.replace(File.separator, "/");
-        File configFile = locAttribute.startsWith("./") ? 
-                new File(URI.create(docURIString.substring(0, docURIString.lastIndexOf("/") + 1))
-                        .resolve(locAttribute).normalize()) :
-                new File(locAttribute);
-
+        File docParentFile = LibertyUtils.getDocumentAsFile(domDocument).getParentFile();
+        File configFile = new File(docParentFile, locAttribute);    
+        if (!configFile.exists()) {
+            configFile = new File(locAttribute);
+        }
         try {
             if (configFile.exists()) {
-                LibertyProjectsManager.getInstance().getWorkspaceFolder(docURIString).addConfigFile(configFile.getCanonicalPath());
+                LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI()).addConfigFile(configFile.getCanonicalPath());
             } else {
                 if (optString != null && required) {
                     DOMNode optNode = node.getAttributeNode("optional");
                     Range optRange = XMLPositionUtility.createRange(optNode.getStart(), optNode.getEnd(), domDocument);
-                    list.add(new Diagnostic(optRange, NOT_OPTIONAL_MESSAGE, 
+                    list.add(new Diagnostic(optRange, "The specified resource cannot be skipped. Check location value or set optional to true.", 
                             DiagnosticSeverity.Error, "liberty-lemminx", NOT_OPTIONAL_CODE));
                 }
-                list.add(new Diagnostic(range, MISSING_FILE_MESSAGE + configFile.getCanonicalPath(), 
+                list.add(new Diagnostic(range, "The resource at the specified location could not be found.", 
                         DiagnosticSeverity.Warning, "liberty-lemminx", MISSING_FILE_CODE));
             }
         } catch (IllegalArgumentException | IOException e) {
-            list.add(new Diagnostic(range, MISSING_FILE_MESSAGE + configFile.getAbsolutePath(), 
+            list.add(new Diagnostic(range, "The resource at the specified location could not be found.", 
                     DiagnosticSeverity.Warning, "liberty-lemminx-exception", MISSING_FILE_CODE));
         }
     }

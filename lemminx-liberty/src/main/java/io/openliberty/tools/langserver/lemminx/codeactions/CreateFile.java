@@ -14,12 +14,10 @@
 package io.openliberty.tools.langserver.lemminx.codeactions;
 
 import java.io.File;
-import java.net.URI;
 import java.util.List;
 
 import org.eclipse.lemminx.commons.CodeActionFactory;
 import org.eclipse.lemminx.dom.DOMDocument;
-import org.eclipse.lemminx.dom.DOMNode;
 import org.eclipse.lemminx.services.extensions.ICodeActionParticipant;
 import org.eclipse.lemminx.services.extensions.IComponentProvider;
 import org.eclipse.lemminx.settings.SharedSettings;
@@ -27,32 +25,29 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Range;
 
-import io.openliberty.tools.langserver.lemminx.LibertyDiagnosticParticipant;
+import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 public class CreateFile implements ICodeActionParticipant {
-    private static final String CREATE_CONFIG_FILE_TITLE = "Create missing config file with <server> tags included";
-    private static final String SERVER_TAGS_CONTENT = "<server>\n\n</server>";
+    private static final String EMPTY_SERVER_CONFIG = "<server>" + System.lineSeparator() + "</server>";
 
     @Override
     public void doCodeAction(Diagnostic diagnostic, Range range, DOMDocument document, List<CodeAction> codeActions,
             SharedSettings sharedSettings, IComponentProvider componentProvider) {
-        String fileURI;
+        try {
+            File parentFile = LibertyUtils.getDocumentAsFile(document).getParentFile();
+            String locationValue = document.findNodeAt(document.offsetAt(diagnostic.getRange().getEnd())).getAttribute("location");
+            codeActions.add(CodeActionFactory.createFile(
+                "Create the missing server config file relative from this file.", 
+                new File(parentFile, locationValue).getCanonicalPath(), 
+                EMPTY_SERVER_CONFIG, diagnostic));
 
-        if (diagnostic.getCode().getLeft().equals(LibertyDiagnosticParticipant.MISSING_FILE_CODE)) {
-            String message = diagnostic.getMessage();
-            fileURI = message.substring(message.indexOf("\n")+1);
-            codeActions.add(CodeActionFactory.createFile(CREATE_CONFIG_FILE_TITLE, fileURI, SERVER_TAGS_CONTENT, diagnostic));
-        } else {
-            try {
-                // attempt to extract location value from same node in Diagnostic range
-                String docURIString = document.getDocumentURI().replace(File.separator, "/");
-                DOMNode includeNode = document.findNodeAt(document.offsetAt(range.getEnd()));
-                fileURI = includeNode.getAttribute("location").replace(File.separator, "/");
-                fileURI = URI.create(docURIString.substring(0, docURIString.lastIndexOf("/")+1)).resolve(fileURI).normalize().toString();
-                codeActions.add(CodeActionFactory.createFile(CREATE_CONFIG_FILE_TITLE, fileURI, SERVER_TAGS_CONTENT, diagnostic));
-            } catch (Exception e) {
-                // do nothing
-            }
+            /* Uncomment to add option when the need is found */
+            // codeActions.add(CodeActionFactory.createFile(
+            //     "Create the missing server config file with location value as the absolute path.",
+            //     new File(locationValue).getCanonicalPath(), 
+            //     SERVER_TAGS_CONTENT, diagnostic));
+        } catch (Exception e) {
+            // BadLocationException not expected
         }
     }
 }

@@ -17,9 +17,9 @@ public class EditAttribute implements ICodeActionParticipant {
     public void doCodeAction(Diagnostic diagnostic, Range range, DOMDocument document, List<CodeAction> codeActions,
             SharedSettings sharedSettings, IComponentProvider componentProvider) {
         try {
-            String title = "Set optional attribute value from false to true";
+            String title = "Change the optional attribute from false to true.";
             String replaceText = "optional=\"true\"";
-            codeActions.add(CodeActionFactory.replace(title, range, replaceText, document.getTextDocument(), diagnostic));
+            codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), replaceText, document.getTextDocument(), diagnostic));
 
             // also build option to create file
             new CreateFile().doCodeAction(diagnostic, range, document, codeActions, sharedSettings, componentProvider);

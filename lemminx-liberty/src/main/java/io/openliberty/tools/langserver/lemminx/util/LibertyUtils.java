@@ -12,8 +12,10 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx.util;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -65,6 +67,15 @@ public class LibertyUtils {
 
     public static boolean isConfigXMLFile(DOMDocument file) {
         return isConfigXMLFile(file.getDocumentURI());
+    }
+
+    // Convenience methods
+    public static File getDocumentAsFile(DOMDocument document) {
+        return new File(getDocumentAsUri(document));
+    }
+
+    public static URI getDocumentAsUri(DOMDocument document) {
+        return URI.create(document.getDocumentURI());
     }
 
     /**
@@ -240,5 +251,4 @@ public class LibertyUtils {
             LOGGER.warning("Unable to watch properties file(s): " + e.toString());
         }
     }
-
 }
