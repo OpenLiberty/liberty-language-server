@@ -66,7 +66,7 @@ public class LibertyProjectsManager {
         for (LibertyWorkspace folder : getInstance().getLibertyWorkspaceFolders()) {
             //Append workspaceDirUri with file separator to avoid bad matches
             String workspaceDirUri = folder.getWorkspaceString();
-            if (!workspaceDirUri.endsWith(File.separator)) {
+            if (workspaceDirUri != null && !workspaceDirUri.endsWith(File.separator)) {
                 workspaceDirUri = workspaceDirUri + File.separator;
             }
 
