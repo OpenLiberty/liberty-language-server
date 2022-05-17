@@ -9,23 +9,19 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.model.propertiesfile;
 
-import java.util.ResourceBundle;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkupContent;
 
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
-import io.openliberty.tools.langserver.resources.ServerEnvOptions;
+import io.openliberty.tools.langserver.utils.Messages;
 
 public class PropertiesKeyInstance {
 
     private String propertyKey;
     private PropertiesEntryInstance propertyEntryInstance;
     private LibertyTextDocument textDocumentItem;
-
-    public static ResourceBundle serverenvKeys = ResourceBundle.getBundle("io.openliberty.tools.langserver.resources.ServerEnvOptions");
-    public static ResourceBundle bootstrapKeys = ResourceBundle.getBundle("io.openliberty.tools.langserver.resources.BootstrapPropertiesOptions");
 
     public PropertiesKeyInstance(String propertyKeyInstanceString, PropertiesEntryInstance propertyEntryInstance, LibertyTextDocument textDocumentItem) {
         this.propertyKey = propertyKeyInstanceString;
@@ -40,11 +36,7 @@ public class PropertiesKeyInstance {
     public CompletableFuture<Hover> getHover() {
         Hover hover = new Hover();
         String message = null;
-        if (textDocumentItem.getUri().endsWith("properties")) {
-            message = bootstrapKeys.getString(propertyKey);
-        } else {
-            message = serverenvKeys.getString(propertyKey);
-        }
+        message = Messages.getPropDescription(propertyKey);
         hover.setContents(new MarkupContent("markdown", message));
         return CompletableFuture.completedFuture(hover);
     }
