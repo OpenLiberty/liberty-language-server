@@ -75,6 +75,7 @@ public class LibertyExtension implements IXMLExtension {
         xmlExtensionsRegistry.unregisterCompletionParticipant(completionParticipant);
         xmlExtensionsRegistry.unregisterHoverParticipant(hoverParticipant);
         xmlExtensionsRegistry.unregisterDiagnosticsParticipant(diagnosticsParticipant);
+        xmlExtensionsRegistry.unregisterCodeActionParticipant(codeActionsParticipant);
     }
 
     // Do save is called on startup with a Settings update
