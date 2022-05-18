@@ -31,6 +31,8 @@ public class LibertyProjectsManager {
 
     private static final LibertyProjectsManager INSTANCE = new LibertyProjectsManager();
 
+    private static final String URI_SEPARATOR = "/";
+
     private List<LibertyWorkspace> libertyWorkspaceFolders;
 
     public static LibertyProjectsManager getInstance() {
@@ -66,8 +68,8 @@ public class LibertyProjectsManager {
         for (LibertyWorkspace folder : getInstance().getLibertyWorkspaceFolders()) {
             //Append workspaceDirUri with file separator to avoid bad matches
             String workspaceDirUri = folder.getWorkspaceString();
-            if (workspaceDirUri != null && !workspaceDirUri.endsWith(File.separator)) {
-                workspaceDirUri = workspaceDirUri + File.separator;
+            if (workspaceDirUri != null && !workspaceDirUri.endsWith(URI_SEPARATOR)) {
+                workspaceDirUri = workspaceDirUri + URI_SEPARATOR;
             }
 
             if (serverXMLUri.contains(workspaceDirUri)) {
