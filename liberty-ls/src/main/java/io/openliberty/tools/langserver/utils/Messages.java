@@ -10,6 +10,7 @@
 package io.openliberty.tools.langserver.utils;
 
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
@@ -26,6 +27,11 @@ public class Messages {
         bootstrapMessages = ResourceBundle.getBundle("BootstrapProperties", locale);
     }
 
+    /**
+     * Return description for property defined in server.env and bootstrap.properties files
+     * @param key
+     * @return Description of property
+     */
     public static String getPropDescription(String key) {
         if (serverenvMessages == null) {
             initializeBundles();

@@ -29,8 +29,12 @@ public class PropertiesKeyInstance {
         this.textDocumentItem = textDocumentItem;
     }
 
+    /**
+     * Returns the index of the end of the property key
+     * @return index of the end of the property key
+     */
     public int getEndPosition() {
-        return propertyKey.length();
+        return propertyKey.length()-1;
     }
 
     public CompletableFuture<Hover> getHover() {

@@ -46,18 +46,24 @@ public class PropertiesEntryInstance {
         this.propertyValueInstance = new PropertiesValueInstance(propertyValueInstanceString, propertyKeyInstance, textDocumentItem);
     }
 
+    /**
+     * Check if current position is within the range of the property key.
+     * @param position
+     * @return True if position is within the property key, otherwise False
+     */
     private boolean isOnEntryKey(Position position) {
         return position.getCharacter() <= propertyKeyInstance.getEndPosition();
     }
 
     public CompletableFuture<Hover> getHover(Position position) {
         if (!isComment) {
-            if (isOnEntryKey(position)) {
+            if (isOnEntryKey(position)) { // hover position is on property key
                 return propertyKeyInstance.getHover();
-            } else {
-                return propertyValueInstance.getHover();
+            } else {    // hover position is on property value, may be used for future functionality
+                // return propertyValueInstance.getHover();
             }
         }
-        return CompletableFuture.completedFuture(new Hover(new MarkupContent("plaintext", "this is a comment")));
+        // return empty Hover for property values and comments
+        return CompletableFuture.completedFuture(new Hover(new MarkupContent("plaintext", "")));
     }
 }
