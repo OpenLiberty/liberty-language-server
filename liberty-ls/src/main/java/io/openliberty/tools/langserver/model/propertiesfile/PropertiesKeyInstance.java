@@ -13,6 +13,8 @@ import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkupContent;
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
 
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 import io.openliberty.tools.langserver.utils.Messages;
@@ -37,11 +39,17 @@ public class PropertiesKeyInstance {
         return propertyKey.length()-1;
     }
 
-    public CompletableFuture<Hover> getHover() {
-        Hover hover = new Hover();
+    public CompletableFuture<Hover> getHover(Position position) {
         String message = null;
         message = Messages.getPropDescription(propertyKey);
-        hover.setContents(new MarkupContent("markdown", message));
+
+        // set hover range to highlight the entire key
+        int line = position.getLine();
+        Position rangeStart = new Position(line, 0);
+        Position rangeEnd = new Position(line, propertyKey.length());
+        Range range = new Range(rangeStart, rangeEnd);
+
+        Hover hover = new Hover(new MarkupContent("markdown", message), range);
         return CompletableFuture.completedFuture(hover);
     }
 

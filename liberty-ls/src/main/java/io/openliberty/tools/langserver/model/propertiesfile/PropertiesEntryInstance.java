@@ -58,7 +58,7 @@ public class PropertiesEntryInstance {
     public CompletableFuture<Hover> getHover(Position position) {
         if (!isComment) {
             if (isOnEntryKey(position)) { // hover position is on property key
-                return propertyKeyInstance.getHover();
+                return propertyKeyInstance.getHover(position);
             } else {    // hover position is on property value, may be used for future functionality
                 // return propertyValueInstance.getHover();
             }
