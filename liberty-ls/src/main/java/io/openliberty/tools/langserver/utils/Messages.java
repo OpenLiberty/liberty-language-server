@@ -40,10 +40,10 @@ public class Messages {
         if (serverEnvKeyFormat.matcher(key).matches()) { // server env
             message = serverenvMessages.getString(key);
         } else if (key.contains(".")) { // bootstrap property
-            message = bootstrapMessages.getString(key);
-            // 2nd lookup for properties that have a server.env equivalent
-            if (serverEnvKeyFormat.matcher(message).matches()) {
-                message = serverenvMessages.getString(message);
+            if (EquivalentProperties.hasEquivalentProperty(key)) { // bootstrap property has equivalent server.env property
+                message = serverenvMessages.getString(EquivalentProperties.getEquivalentProperty(key));
+            } else {
+                message = bootstrapMessages.getString(key);
             }
         }
         return message == null ? key : message;
