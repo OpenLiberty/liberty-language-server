@@ -3,7 +3,7 @@ package io.openliberty.tools.langserver.utils;
 import java.util.HashMap;
 
 public class EquivalentProperties {
-    private static HashMap bootstrapToServerEnvMap = new HashMap<String, String>() {{
+    private static HashMap<String, String> bootstrapToServerEnvMap = new HashMap<String, String>() {{
         put("com.ibm.ws.logging.json.field.mappings", "WLP_LOGGING_JSON_FIELD_MAPPINGS");
         put("com.ibm.ws.logging.log.directory", "LOG_DIR");
         put("com.ibm.ws.logging.console.format", "WLP_LOGGING_CONSOLE_FORMAT");
@@ -16,10 +16,7 @@ public class EquivalentProperties {
     }};
 
     public static String getEquivalentProperty(String bootstrapProperty) {
-        if (bootstrapToServerEnvMap.containsKey(bootstrapProperty)) {
-            return (String) bootstrapToServerEnvMap.get(bootstrapProperty);
-        }
-        return null;
+        return (String) bootstrapToServerEnvMap.get(bootstrapProperty);
     }
 
     public static boolean hasEquivalentProperty(String key) {
