@@ -50,8 +50,11 @@ import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.LocationLink;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.SymbolInformation;
+import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
+
+import io.openliberty.tools.langserver.hover.LibertyPropertiesHoverProvider;
 
 public class LibertyTextDocumentService implements TextDocumentService {
 
@@ -99,6 +102,14 @@ public class LibertyTextDocumentService implements TextDocumentService {
     private void validateAll() {
         List<String> allDocs = documents.all().stream().map(doc -> doc.getUri()).collect(Collectors.toList());
         validate(allDocs);
+    }
+
+    @Override
+    public CompletableFuture<Hover> hover(HoverParams hoverParams) {
+        LOGGER.info("hover: " + hoverParams.toString());
+        String uri = hoverParams.getTextDocument().getUri();
+        LibertyTextDocument textDocumentItem = documents.get(uri);
+        return new LibertyPropertiesHoverProvider(textDocumentItem).getHover(hoverParams.getPosition());
     }
 
 
