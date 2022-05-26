@@ -137,7 +137,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             if (configFile.exists()) {
                 LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI()).addConfigFile(configFile.getCanonicalPath());
             } else {
-                if (optString != null && required) {
+                if (required) {
                     DOMNode optNode = node.getAttributeNode("optional");
                     Range optRange = XMLPositionUtility.createRange(optNode.getStart(), optNode.getEnd(), domDocument);
                     list.add(new Diagnostic(optRange, "The specified resource cannot be skipped. Check location value or set optional to true.", 

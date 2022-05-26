@@ -15,6 +15,7 @@ package io.openliberty.tools.langserver.lemminx.codeactions;
 
 import java.io.File;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.lemminx.commons.CodeActionFactory;
 import org.eclipse.lemminx.dom.DOMDocument;
@@ -25,9 +26,12 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Range;
 
+import io.openliberty.tools.langserver.lemminx.LibertyExtension;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 public class CreateFile implements ICodeActionParticipant {
+    private static final Logger LOGGER = Logger.getLogger(LibertyExtension.class.getName());
+
     private static final String EMPTY_SERVER_CONFIG = "<server>" + System.lineSeparator() + "</server>";
 
     @Override
@@ -48,6 +52,7 @@ public class CreateFile implements ICodeActionParticipant {
             //     SERVER_TAGS_CONTENT, diagnostic));
         } catch (Exception e) {
             // BadLocationException not expected
+            LOGGER.warning("Could not generate code action for create file: " + e);
         }
     }
 }
