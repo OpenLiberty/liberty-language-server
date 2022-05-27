@@ -25,6 +25,7 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Range;
 
+import io.openliberty.tools.langserver.lemminx.codeactions.AddAttribute;
 import io.openliberty.tools.langserver.lemminx.codeactions.CreateFile;
 import io.openliberty.tools.langserver.lemminx.codeactions.EditAttribute;
 
@@ -53,6 +54,7 @@ public class LibertyCodeActionParticipant implements ICodeActionParticipant {
         if (codeActionParticipants.isEmpty()) {
             codeActionParticipants.put(LibertyDiagnosticParticipant.MISSING_FILE_CODE, new CreateFile());
             codeActionParticipants.put(LibertyDiagnosticParticipant.NOT_OPTIONAL_CODE, new EditAttribute());
+            codeActionParticipants.put(LibertyDiagnosticParticipant.IMPLICIT_NOT_OPTIONAL_CODE, new AddAttribute());
         }
     }
 }
