@@ -69,6 +69,15 @@ public class LibertyUtils {
         return isConfigXMLFile(file.getDocumentURI());
     }
 
+    // Convenience methods
+    public static File getDocumentAsFile(DOMDocument document) {
+        return new File(getDocumentAsUri(document));
+    }
+
+    public static URI getDocumentAsUri(DOMDocument document) {
+        return URI.create(document.getDocumentURI());
+    }
+
     /**
      * Given a server.xml URI find the associated workspace folder and search that
      * folder for the most recently edited file that matches the given name.
@@ -293,5 +302,4 @@ public class LibertyUtils {
             LOGGER.warning("Unable to watch properties file(s): " + e.toString());
         }
     }
-
 }

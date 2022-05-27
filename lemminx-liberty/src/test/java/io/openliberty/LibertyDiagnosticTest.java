@@ -80,32 +80,52 @@ public class LibertyDiagnosticTest {
         String serverXML = String.join(newLine, //
                 "<server description=\"default server\">", //
                 "    <include optional=\"true\" location=\"./empty_server.xml\"/>", //
-                "    <include optional=\"false\" location=\"MISSING FILE\"/>", //
+                "    <include optional=\"true\" location=\"/empty_server.xml\"/>", //
+                "    <include optional=\"true\" location=\"MISSING FILE\"/>", //
                 "    <include", //
                 "            optional=\"true\" location=\"MULTI LINER\"/>", //
                 "    <include optional=\"false\" location=\"MISSING FILE.xml\"/>", //
+                "    <include location=\"MISSING FILE.xml\"/>", //
                 "</server>"
         );
+        
         // Diagnostic location1 = new Diagnostic();
         File serverXMLFile = new File("src/test/resources/server.xml");
         assertFalse(serverXMLFile.exists());
         // Diagnostic will not be made if found
         assertTrue(new File("src/test/resources/empty_server.xml").exists());
 
-        Diagnostic location2 = new Diagnostic();
-        location2.setRange(r(2, 30, 2, 53));
-        location2.setMessage("The specified file is not an XML file.");
+        Diagnostic not_xml = new Diagnostic();
+        not_xml.setRange(r(3, 29, 3, 52));
+        not_xml.setMessage("The specified resource is not an XML file.");
 
-        Diagnostic location3 = new Diagnostic();
-        location3.setRange(r(4, 28, 4, 50));
-        location3.setMessage("The specified file is not an XML file.");
-        
-        Diagnostic location4 = new Diagnostic();
-        location4.setRange(r(5, 30, 5, 57));
-        location4.setMessage("The file at the specified location could not be found.");
+        Diagnostic multi_liner = new Diagnostic();
+        multi_liner.setRange(r(5, 28, 5, 50));
+        multi_liner.setMessage("The specified resource is not an XML file.");
+
+        Diagnostic not_optional = new Diagnostic();
+        not_optional.setRange(r(6, 13, 6, 29));
+        not_optional.setCode("not_optional");
+        not_optional.setMessage("The specified resource cannot be skipped. Check location value or set optional to true.");
+
+        Diagnostic missing_xml = new Diagnostic();
+        missing_xml.setRange(r(6, 30, 6, 57));
+        missing_xml.setCode("missing_file");
+        missing_xml.setMessage("The resource at the specified location could not be found.");
+
+        Diagnostic optional_not_defined = new Diagnostic();
+        optional_not_defined.setRange(r(7, 13, 7, 40));
+        optional_not_defined.setCode("implicit_not_optional");
+        optional_not_defined.setMessage("The specified resource cannot be skipped. Check location value or add optional attribute.");
+
+        Diagnostic missing_xml2 = new Diagnostic();
+        missing_xml2.setRange(r(7, 13, 7, 40));
+        missing_xml2.setCode("missing_file");
+        missing_xml2.setMessage("The resource at the specified location could not be found.");
 
 
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), location2, location3, location4);
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), 
+                not_xml, multi_liner, not_optional, missing_xml, optional_not_defined, missing_xml2);
 
         assertTrue(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0)
                 .hasConfigFile(new File("src/test/resources/empty_server.xml").getCanonicalPath()));
