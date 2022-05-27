@@ -30,7 +30,7 @@ public class EditAttribute implements ICodeActionParticipant {
     public void doCodeAction(Diagnostic diagnostic, Range range, DOMDocument document, List<CodeAction> codeActions,
             SharedSettings sharedSettings, IComponentProvider componentProvider) {
         try {
-            String title = "Change the optional attribute from false to true.";
+            String title = "Set the optional attribute to true.";
             String replaceText = "optional=\"true\"";
             codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), replaceText, document.getTextDocument(), diagnostic));
 

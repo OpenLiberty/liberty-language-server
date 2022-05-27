@@ -126,10 +126,10 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         }
 
         String optString = node.getAttribute("optional");
-        boolean required = optString == null ? false : optString.equals("false");
+        boolean required = optString == null ? true : optString.equals("false");
 
         File docParentFile = LibertyUtils.getDocumentAsFile(domDocument).getParentFile();
-        File configFile = new File(docParentFile, locAttribute);    
+        File configFile = new File(docParentFile, locAttribute);
         if (!configFile.exists()) {
             configFile = new File(locAttribute);
         }
