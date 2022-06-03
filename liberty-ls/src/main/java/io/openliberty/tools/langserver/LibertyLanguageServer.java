@@ -12,9 +12,11 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver;
 
+import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
+import org.eclipse.lsp4j.CompletionOptions;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.InitializedParams;
@@ -62,6 +64,7 @@ public class LibertyLanguageServer implements LanguageServer {
         ServerCapabilities capabilities = new ServerCapabilities();
         capabilities.setTextDocumentSync(TextDocumentSyncKind.Full);
         capabilities.setHoverProvider(Boolean.TRUE);
+        capabilities.setCompletionProvider(new CompletionOptions(Boolean.TRUE, Arrays.asList("=")));
         return capabilities;
     }
 

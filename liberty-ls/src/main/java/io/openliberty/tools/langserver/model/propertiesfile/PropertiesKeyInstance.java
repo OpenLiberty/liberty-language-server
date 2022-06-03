@@ -9,8 +9,10 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.model.propertiesfile;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.Position;
@@ -51,6 +53,11 @@ public class PropertiesKeyInstance {
 
         Hover hover = new Hover(new MarkupContent("markdown", message), range);
         return CompletableFuture.completedFuture(hover);
+    }
+
+    public CompletableFuture<List<CompletionItem>> getCompletions(Position position) {
+        // TODO: check textDocumentItem - should have different completions for bootstrap and server.env
+        
     }
 
     @Override
