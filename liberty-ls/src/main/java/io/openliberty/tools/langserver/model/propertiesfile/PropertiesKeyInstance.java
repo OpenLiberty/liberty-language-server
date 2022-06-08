@@ -11,6 +11,7 @@ package io.openliberty.tools.langserver.model.propertiesfile;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Hover;
@@ -56,8 +57,9 @@ public class PropertiesKeyInstance {
     }
 
     public CompletableFuture<List<CompletionItem>> getCompletions(Position position) {
-        // TODO: check textDocumentItem - should have different completions for bootstrap and server.env
-        
+        List<String> matches = Messages.getMatchingKeys("", textDocumentItem);
+        List<CompletionItem> results = matches.stream().map(s -> new CompletionItem(s)).collect(Collectors.toList());
+        return CompletableFuture.completedFuture(results);
     }
 
     @Override
