@@ -105,31 +105,20 @@ public class LibertyWorkspace {
             List<Path> serverXmlList = Files.find(Paths.get(getWorkspaceURI()), Integer.MAX_VALUE, (filePath, fileAttributes) -> 
                     LibertyUtils.isServerXMLFile(filePath.toString()))
                     .collect(Collectors.toList());
-            for (Path serverXml : serverXmlList) {
-                scanForConfigLocations(serverXml);
+            for (Path filePath : serverXmlList) {
+                String content = new String(Files.readAllBytes(filePath));
+                // [^<] = All characters, including whitespaces/newlines, not equivalent to '<'
+                // [\"\'] = Accept either " or ' as string indicators
+                // [\\s\\S]+? = Anything up to first closing tag
+                String regex = "<include[^<]+location=[\"\'](.+)[\"\'][\\s\\S]+?/>";
+                Matcher m = Pattern.compile(regex).matcher(content);
+                while (m.find()) {
+                    // m.group(0) contains whole include element, m.group(1) contains only location value
+                    configFiles.add(new File(filePath.getParent().toFile(), m.group(1)).getCanonicalPath());
+                }
             }
         } catch (IOException e) {
             // workspace URI does not exist
-            e.printStackTrace();
-        }
-    }
-
-    // TODO: or use DOM
-    public void scanForConfigLocations(Path filePath) {
-        try {
-            String content = new String(Files.readAllBytes(filePath));
-            // [^<] = All characters, including whitespaces/newlines, not equivalent to '<'
-            // [\"\'] = Accept either " or ' as string indicators
-            // [\\s\\S]+? = Anything up to first closing tag
-            String regex = "<include[^<]+location=[\"\'](.+)[\"\'][\\s\\S]+?/>";
-            Matcher m = Pattern.compile(regex).matcher(content);
-            while (m.find()) {
-                // m.group(0) contains whole include element, m.group(1) contains only location value
-                configFiles.add(new File(filePath.getParent().toFile(), m.group(1)).getCanonicalPath());
-            }
-        } catch (IOException e) {
-            // specified config resources file does not exist
-        } catch (Exception e) {
             e.printStackTrace();
         }
     }
