@@ -38,6 +38,12 @@ public class LibertyWorkspace {
     private List<Feature> installedFeatureList;
     private Set<String> configFiles;
 
+    // [^<] = All characters, including whitespaces/newlines, not equivalent to '<'
+    // [\"\'] = Accept either " or ' as string indicators
+    // [\\s\\S]+? = Anything up to first closing tag
+    private String regex = "<include[^<]+location=[\"\'](.+)[\"\'][\\s\\S]+?/>";
+    private Matcher m;
+
     /**
      * Model of a Liberty Workspace. Each workspace indicates the
      * workspaceFolderURI, the Liberty version associated (may be cached), and if an
@@ -102,24 +108,26 @@ public class LibertyWorkspace {
 
     public void initConfigFileList() {
         try {
-            List<Path> serverXmlList = Files.find(Paths.get(getWorkspaceURI()), Integer.MAX_VALUE, (filePath, fileAttributes) -> 
-                    LibertyUtils.isServerXMLFile(filePath.toString()))
-                    .collect(Collectors.toList());
-            for (Path filePath : serverXmlList) {
-                String content = new String(Files.readAllBytes(filePath));
-                // [^<] = All characters, including whitespaces/newlines, not equivalent to '<'
-                // [\"\'] = Accept either " or ' as string indicators
-                // [\\s\\S]+? = Anything up to first closing tag
-                String regex = "<include[^<]+location=[\"\'](.+)[\"\'][\\s\\S]+?/>";
-                Matcher m = Pattern.compile(regex).matcher(content);
-                while (m.find()) {
-                    // m.group(0) contains whole include element, m.group(1) contains only location value
-                    configFiles.add(new File(filePath.getParent().toFile(), m.group(1)).getCanonicalPath());
-                }
+            Files.find(Paths.get(getWorkspaceURI()), Integer.MAX_VALUE, 
+                    (filePath, fileAttributes) -> LibertyUtils.isServerXMLFile(filePath.toString()))
+                    .map(serverXML -> serverXML.getParent())
+                    .collect(Collectors.toSet())
+                    .forEach(filePath -> scanForconfigLocations(filePath));
+        } catch (IOException e) {
+            // workspaceURI not found
+        }
+    }
+
+    private void scanForconfigLocations(Path filePath) {
+        try {
+            String content = new String(Files.readAllBytes(filePath));
+            m = Pattern.compile(regex).matcher(content);
+            while (m.find()) {
+                // m.group(0) contains whole include element, m.group(1) contains only location value
+                configFiles.add(new File(filePath.toFile(), m.group(1)).getCanonicalPath());
             }
         } catch (IOException e) {
-            // workspace URI does not exist
-            e.printStackTrace();
+            return; // filePath could not be read, move on
         }
     }
 
