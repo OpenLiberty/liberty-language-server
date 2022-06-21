@@ -19,10 +19,7 @@ public class LibertyPropertiesCompletionProvider {
     }
 
     public CompletableFuture<List<CompletionItem>> getCompletions(Position position) {
-        if (textDocumentItem != null) {
-            String line = new ParserFileHelperUtil().getLine(textDocumentItem, position);
-            return new PropertiesEntryInstance(line, textDocumentItem).getCompletions(position);
-        }
-        return CompletableFuture.completedFuture(Collections.emptyList());
+        String line = new ParserFileHelperUtil().getLine(textDocumentItem, position);
+        return new PropertiesEntryInstance(line, textDocumentItem).getCompletions(position);
     }
 }
