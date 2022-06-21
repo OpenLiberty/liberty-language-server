@@ -23,6 +23,7 @@ import io.openliberty.tools.langserver.ls.LibertyTextDocuments;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
@@ -54,6 +55,7 @@ import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
+import io.openliberty.tools.langserver.completion.LibertyPropertiesCompletionProvider;
 import io.openliberty.tools.langserver.hover.LibertyPropertiesHoverProvider;
 
 public class LibertyTextDocumentService implements TextDocumentService {
@@ -112,6 +114,18 @@ public class LibertyTextDocumentService implements TextDocumentService {
         return new LibertyPropertiesHoverProvider(textDocumentItem).getHover(hoverParams.getPosition());
     }
 
+    @Override
+    public CompletableFuture<Either<List<CompletionItem>, CompletionList>> completion(CompletionParams completionParams) {
+        String uri = completionParams.getTextDocument().getUri();
+		LOGGER.info("completion: " + uri);
+        LibertyTextDocument textDocumentItem = documents.get(uri);
+        if (textDocumentItem != null) {
+            return new LibertyPropertiesCompletionProvider(textDocumentItem).getCompletions(completionParams.getPosition()).thenApply(Either::forLeft);
+        } else {
+            LOGGER.info("The document with uri " + uri + " has not been found in opened documents. Cannot provide completion.");
+            return CompletableFuture.completedFuture(Either.forLeft(Collections.emptyList()));
+        }
+    }
 
     private void validate(List<String> uris) {
         if (uris.isEmpty()) {

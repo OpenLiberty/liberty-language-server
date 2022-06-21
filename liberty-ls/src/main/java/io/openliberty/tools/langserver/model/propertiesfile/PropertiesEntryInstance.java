@@ -9,8 +9,10 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.model.propertiesfile;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.Position;
@@ -65,5 +67,14 @@ public class PropertiesEntryInstance {
         }
         // return empty Hover for property values and comments
         return CompletableFuture.completedFuture(new Hover(new MarkupContent("plaintext", "")));
+    }
+
+    public CompletableFuture<List<CompletionItem>> getCompletions(Position position) {
+        // TODO: may have to revisit this for proper completions. doing only keys for now
+        // if (isOnEntryKey(position)) {
+            return propertyKeyInstance.getCompletions(position);
+        // } else {
+        //     return propertyValueInstance.getCompletions(position);
+        // }
     }
 }

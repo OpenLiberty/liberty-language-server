@@ -9,8 +9,11 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.model.propertiesfile;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
+import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.Position;
@@ -51,6 +54,12 @@ public class PropertiesKeyInstance {
 
         Hover hover = new Hover(new MarkupContent("markdown", message), range);
         return CompletableFuture.completedFuture(hover);
+    }
+
+    public CompletableFuture<List<CompletionItem>> getCompletions(Position position) {
+        List<String> matches = Messages.getMatchingKeys("", textDocumentItem);
+        List<CompletionItem> results = matches.stream().map(s -> new CompletionItem(s)).collect(Collectors.toList());
+        return CompletableFuture.completedFuture(results);
     }
 
     @Override
