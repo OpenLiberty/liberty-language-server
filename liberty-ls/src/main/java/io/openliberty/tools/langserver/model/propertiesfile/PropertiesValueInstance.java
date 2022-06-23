@@ -46,4 +46,9 @@ public class PropertiesValueInstance {
         // TODO: read the property key, lookup what possible values can be used for it
         return CompletableFuture.completedFuture(Collections.emptyList());
     }
+
+    @Override
+    public String toString() {
+        return this.propertyValue;
+    }
 }

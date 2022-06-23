@@ -70,11 +70,9 @@ public class PropertiesEntryInstance {
     }
 
     public CompletableFuture<List<CompletionItem>> getCompletions(Position position) {
-        // TODO: may have to revisit this for proper completions. doing only keys for now
-        // if (isOnEntryKey(position)) {
-            return propertyKeyInstance.getCompletions(position);
-        // } else {
-        //     return propertyValueInstance.getCompletions(position);
-        // }
+        if (propertyValueInstance.toString() != null) {
+            return propertyValueInstance.getCompletions(position);
+        } 
+        return propertyKeyInstance.getCompletions(position);
     }
 }
