@@ -31,8 +31,10 @@ public class Messages {
         Locale locale = Locale.getDefault(); //TODO: properly set/get locale
         serverenvMessages = ResourceBundle.getBundle("ServerEnv", locale);
         bootstrapMessages = ResourceBundle.getBundle("BootstrapProperties", locale);
+
         serverPropertyKeys = Collections.list(serverenvMessages.getKeys());
         bootstrapPropertyKeys = Collections.list(bootstrapMessages.getKeys());
+        bootstrapPropertyKeys.addAll(EquivalentProperties.getBootstrapKeys()); // add bootstrap properties that are not listed in BootstrapProperties.properties
     }
 
     /**

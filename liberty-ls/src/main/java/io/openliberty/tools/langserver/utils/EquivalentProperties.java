@@ -1,6 +1,7 @@
 package io.openliberty.tools.langserver.utils;
 
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Maps bootstrap.properties keys to equivalent keys used in server.env
@@ -29,5 +30,9 @@ public class EquivalentProperties {
 
     public static boolean hasEquivalentProperty(String key) {
         return bootstrapToServerEnvMap.containsKey(key);
+    }
+
+    public static Set<String> getBootstrapKeys() {
+        return bootstrapToServerEnvMap.keySet();
     }
 }
