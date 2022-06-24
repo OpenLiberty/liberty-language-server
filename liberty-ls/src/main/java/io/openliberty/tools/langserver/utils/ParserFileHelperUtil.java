@@ -30,4 +30,12 @@ public class ParserFileHelperUtil {
         }
         return null;
     }
+
+    public static boolean isServerEnvFile(LibertyTextDocument tdi) {
+        return tdi.getUri().endsWith("server.env");
+    }
+
+    public static boolean isBootstrapPropertiesFile(LibertyTextDocument tdi) {
+        return tdi.getUri().endsWith("bootstrap.properties");
+    }
 }

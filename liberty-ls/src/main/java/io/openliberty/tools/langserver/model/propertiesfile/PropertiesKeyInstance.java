@@ -21,6 +21,8 @@ import org.eclipse.lsp4j.Range;
 
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 import io.openliberty.tools.langserver.utils.Messages;
+import io.openliberty.tools.langserver.utils.ParserFileHelperUtil;
+import io.openliberty.tools.langserver.utils.ServerPropertyValues;
 
 public class PropertiesKeyInstance {
 
@@ -60,6 +62,12 @@ public class PropertiesKeyInstance {
         List<String> matches = Messages.getMatchingKeys("", textDocumentItem);
         List<CompletionItem> results = matches.stream().map(s -> new CompletionItem(s)).collect(Collectors.toList());
         return CompletableFuture.completedFuture(results);
+    }
+
+    public List<CompletionItem> getValidValues() {
+        List<String> values = ServerPropertyValues.getValidValues(textDocumentItem, propertyKey);
+        List<CompletionItem> results = values.stream().map(s -> new CompletionItem(s)).collect(Collectors.toList());
+        return results;
     }
 
     @Override
