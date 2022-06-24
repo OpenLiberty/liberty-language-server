@@ -21,7 +21,6 @@ import org.eclipse.lsp4j.Range;
 
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 import io.openliberty.tools.langserver.utils.Messages;
-import io.openliberty.tools.langserver.utils.ParserFileHelperUtil;
 import io.openliberty.tools.langserver.utils.ServerPropertyValues;
 
 public class PropertiesKeyInstance {

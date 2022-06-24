@@ -13,7 +13,6 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.completion;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
