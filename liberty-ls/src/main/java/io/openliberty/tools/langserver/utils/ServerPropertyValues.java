@@ -1,6 +1,17 @@
+/*******************************************************************************
+* Copyright (c) 2022 IBM Corporation and others.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Eclipse Public License v. 2.0 which is available at
+* http://www.eclipse.org/legal/epl-2.0.
+*
+* SPDX-License-Identifier: EPL-2.0
+*******************************************************************************/
 package io.openliberty.tools.langserver.utils;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -45,10 +56,10 @@ public class ServerPropertyValues {
 
     public static List<String> getValidValues(LibertyTextDocument tdi, String key) {
         if (ParserFileHelperUtil.isBootstrapPropertiesFile(tdi)) {
-            return validBootstrapValues.get(key);
+            return validBootstrapValues.getOrDefault(key, Collections.emptyList());
         } else if (ParserFileHelperUtil.isServerEnvFile(tdi)) {
-            return validServerValues.get(key);
+            return validServerValues.getOrDefault(key, Collections.emptyList());
         }
-        return null;
+        return Collections.emptyList();
     }
 }
