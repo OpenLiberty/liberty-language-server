@@ -6,6 +6,9 @@ import java.util.List;
 
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 
+/**
+ * Maps property keys with their list of valid values for server.env and bootstrap.properties
+ */
 public class ServerPropertyValues {
     private final static List<String> LOGGING_SOURCE_VALUES = Arrays.asList("message", "trace", "accessLog", "ffdc", "audit");
     private final static List<String> BOOLEAN_VALUES = Arrays.asList("true", "false");
@@ -20,6 +23,7 @@ public class ServerPropertyValues {
         put("WLP_LOGGING_CONSOLE_SOURCE", LOGGING_SOURCE_VALUES);
         put("WLP_LOGGING_MESSAGE_FORMAT", Arrays.asList("simple", "json"));
         put("WLP_LOGGING_MESSAGE_SOURCE", LOGGING_SOURCE_VALUES);
+        put("WLP_LOGGING_APPS_WRITE_JSON", BOOLEAN_VALUES);
     }};
 
     private static HashMap<String, List<String>> validBootstrapValues = new HashMap<String, List<String>>() {{
