@@ -12,7 +12,9 @@ package io.openliberty.tools.langserver.utils;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
@@ -24,6 +26,8 @@ public class Messages {
     private static List<String> serverPropertyKeys = null;
     private static List<String> bootstrapPropertyKeys = null;
 
+    private static final Logger LOGGER = Logger.getLogger(Messages.class.getName());
+
     // Matches server.env key formats: all uppercase, possibly with underscores and additional uppercase words
     private static Pattern serverEnvKeyFormat = Pattern.compile("([A-Z]+)(_[A-Z]+)*");
 
@@ -31,8 +35,10 @@ public class Messages {
         Locale locale = Locale.getDefault(); //TODO: properly set/get locale
         serverenvMessages = ResourceBundle.getBundle("ServerEnv", locale);
         bootstrapMessages = ResourceBundle.getBundle("BootstrapProperties", locale);
+
         serverPropertyKeys = Collections.list(serverenvMessages.getKeys());
         bootstrapPropertyKeys = Collections.list(bootstrapMessages.getKeys());
+        bootstrapPropertyKeys.addAll(EquivalentProperties.getBootstrapKeys()); // add bootstrap properties that are not listed in BootstrapProperties.properties
     }
 
     /**
@@ -45,14 +51,19 @@ public class Messages {
             initializeBundles();
         }
         String message = null;
-        if (serverEnvKeyFormat.matcher(key).matches()) { // server env
-            message = serverenvMessages.getString(key);
-        } else if (key.contains(".")) { // bootstrap property
-            if (EquivalentProperties.hasEquivalentProperty(key)) { // bootstrap property has equivalent server.env property
-                message = serverenvMessages.getString(EquivalentProperties.getEquivalentProperty(key));
-            } else {
-                message = bootstrapMessages.getString(key);
+        try {
+            if (serverEnvKeyFormat.matcher(key).matches()) { // server env
+                message = serverenvMessages.getString(key);
+            } else if (key.contains(".")) { // bootstrap property
+                if (EquivalentProperties.hasEquivalentProperty(key)) { // bootstrap property has equivalent server.env property
+                    message = serverenvMessages.getString(EquivalentProperties.getEquivalentProperty(key));
+                } else {
+                    message = bootstrapMessages.getString(key);
+                }
             }
+        } catch (MissingResourceException e) {
+            // Caught to avoid unnecessary console output when hovering over invalid keys
+            LOGGER.fine("No property description found for: " + key);
         }
         return message == null ? key : message;
     }
@@ -74,7 +85,7 @@ public class Messages {
         } else if (filename.contains("bootstrap.properties")) { // bootstrap.properties file
             return bootstrapPropertyKeys;
         } else {
-            return null;
+            return Collections.emptyList();
         }
     }
 }

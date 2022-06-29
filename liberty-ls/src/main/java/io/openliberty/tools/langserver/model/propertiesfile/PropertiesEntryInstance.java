@@ -9,6 +9,7 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.model.propertiesfile;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -70,11 +71,12 @@ public class PropertiesEntryInstance {
     }
 
     public CompletableFuture<List<CompletionItem>> getCompletions(Position position) {
-        // TODO: may have to revisit this for proper completions. doing only keys for now
-        // if (isOnEntryKey(position)) {
+        if (!isComment) {
+            if (propertyValueInstance.toString() != null && !isOnEntryKey(position)) {
+                return propertyValueInstance.getCompletions(position);
+            } 
             return propertyKeyInstance.getCompletions(position);
-        // } else {
-        //     return propertyValueInstance.getCompletions(position);
-        // }
+        }
+        return CompletableFuture.completedFuture(Collections.emptyList());
     }
 }

@@ -9,7 +9,6 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.model.propertiesfile;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -43,7 +42,11 @@ public class PropertiesValueInstance {
     }
 
     public CompletableFuture<List<CompletionItem>> getCompletions(Position position) {
-        // TODO: read the property key, lookup what possible values can be used for it
-        return CompletableFuture.completedFuture(Collections.emptyList());
+        return CompletableFuture.completedFuture(key.getValidValues());
+    }
+
+    @Override
+    public String toString() {
+        return this.propertyValue;
     }
 }

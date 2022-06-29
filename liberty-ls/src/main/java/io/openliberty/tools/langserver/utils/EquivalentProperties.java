@@ -1,6 +1,16 @@
+/*******************************************************************************
+* Copyright (c) 2022 IBM Corporation and others.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Eclipse Public License v. 2.0 which is available at
+* http://www.eclipse.org/legal/epl-2.0.
+*
+* SPDX-License-Identifier: EPL-2.0
+*******************************************************************************/
 package io.openliberty.tools.langserver.utils;
 
 import java.util.HashMap;
+import java.util.Set;
 
 /**
  * Maps bootstrap.properties keys to equivalent keys used in server.env
@@ -29,5 +39,9 @@ public class EquivalentProperties {
 
     public static boolean hasEquivalentProperty(String key) {
         return bootstrapToServerEnvMap.containsKey(key);
+    }
+
+    public static Set<String> getBootstrapKeys() {
+        return bootstrapToServerEnvMap.keySet();
     }
 }

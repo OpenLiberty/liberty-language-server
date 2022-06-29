@@ -127,6 +127,12 @@ public class LibertyTextDocumentService implements TextDocumentService {
         }
     }
 
+    @Override
+    public CompletableFuture<CompletionItem> resolveCompletionItem(CompletionItem unresolved) {
+        LOGGER.info("resolveCompletionItem: " + unresolved.getLabel());
+        return CompletableFuture.completedFuture(unresolved);
+    }
+
     private void validate(List<String> uris) {
         if (uris.isEmpty()) {
             return;
