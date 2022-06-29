@@ -63,7 +63,7 @@ public class Messages {
             }
         } catch (MissingResourceException e) {
             // Caught to avoid unnecessary console output when hovering over invalid keys
-            LOGGER.fine("Can't find property description for: " + key);
+            LOGGER.fine("No property description found for: " + key);
         }
         return message == null ? key : message;
     }
