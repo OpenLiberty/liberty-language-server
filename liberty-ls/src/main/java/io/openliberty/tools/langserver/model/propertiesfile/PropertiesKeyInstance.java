@@ -66,6 +66,11 @@ public class PropertiesKeyInstance {
     public List<CompletionItem> getValidValues() {
         List<String> values = ServerPropertyValues.getValidValues(textDocumentItem, propertyKey);
         List<CompletionItem> results = values.stream().map(s -> new CompletionItem(s)).collect(Collectors.toList());
+        // Preselect the default.
+        // This uses the first item in the List as default. 
+        // (Check ServerPropertyValues.java) Currently sorted to have confirmed/sensible values as default.
+        CompletionItem first = results.get(0);
+        first.setPreselect(true);
         return results;
     }
 
