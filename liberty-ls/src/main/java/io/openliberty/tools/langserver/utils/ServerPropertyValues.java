@@ -23,6 +23,7 @@ import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 public class ServerPropertyValues {
     private final static List<String> LOGGING_SOURCE_VALUES = Arrays.asList("message", "trace", "accessLog", "ffdc", "audit");
     private final static List<String> BOOLEAN_VALUES = Arrays.asList("true", "false");
+    private final static List<String> BOOLEAN_VALUES_REVERSE = Arrays.asList("false", "true");
     private final static List<String> YES_NO_VALUES = Arrays.asList("y", "n");
     
     private static HashMap<String, List<String>> validServerValues = new HashMap<String, List<String>>() {{
@@ -34,16 +35,16 @@ public class ServerPropertyValues {
         put("WLP_LOGGING_CONSOLE_SOURCE", LOGGING_SOURCE_VALUES); //default "message"
         put("WLP_LOGGING_MESSAGE_FORMAT", Arrays.asList("SIMPLE", "JSON", "TBASIC")); // default "SIMPLE"
         put("WLP_LOGGING_MESSAGE_SOURCE", LOGGING_SOURCE_VALUES); //default "message"
-        put("WLP_LOGGING_APPS_WRITE_JSON", BOOLEAN_VALUES); //unknown default
+        put("WLP_LOGGING_APPS_WRITE_JSON", BOOLEAN_VALUES_REVERSE); //default false
     }};
 
     private static HashMap<String, List<String>> validBootstrapValues = new HashMap<String, List<String>>() {{
         put("com.ibm.ws.logging.copy.system.streams", BOOLEAN_VALUES); // default true
         put("com.ibm.ws.logging.newLogsOnStart", BOOLEAN_VALUES); // default true
-        put("com.ibm.ws.logging.isoDateFormat", Arrays.asList("false", "true")); // default false
+        put("com.ibm.ws.logging.isoDateFormat", BOOLEAN_VALUES_REVERSE); // default false
         put("com.ibm.ws.logging.trace.format", Arrays.asList("ENHANCED", "BASIC", "TBASIC", "ADVANCED")); // default "ENHANCED"
         put("websphere.log.provider", Arrays.asList("binaryLogging-1.0"));
-        put("com.ibm.hpel.log.bufferingEnabled", BOOLEAN_VALUES); // default undefined/disabled
+        put("com.ibm.hpel.log.bufferingEnabled", BOOLEAN_VALUES); // default true
         EquivalentProperties.getBootstrapKeys().forEach(
             bskey -> {
                 String serverEnvEquivalent = EquivalentProperties.getEquivalentProperty(bskey);
