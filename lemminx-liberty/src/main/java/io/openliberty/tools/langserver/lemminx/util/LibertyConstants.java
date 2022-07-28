@@ -28,8 +28,6 @@ public final class LibertyConstants {
 
     public static final String PUBLIC_VISIBILITY = "PUBLIC";
 
-    public static final String DEFAULT_SERVER_VERSION = "20.0.0.9";
-
     public static final String WLP_USER_CONFIG_DIR = File.separator + String.join(File.separator, "usr", "shared", "config") + File.separator;
     public static final String SERVER_CONFIG_DROPINS_DEFAULTS = File.separator + String.join(File.separator, "configDropins", "defaults") + File.separator;
     public static final String SERVER_CONFIG_DROPINS_OVERRIDES = File.separator + String.join(File.separator, "configDropins", "overrides") + File.separator;
