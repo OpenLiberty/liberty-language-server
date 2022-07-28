@@ -204,7 +204,7 @@ public class FeatureService {
         return libertyWorkspace.getInstalledFeatureList();
       }
 
-      Path featureListJAR = LibertyUtils.findFileInWorkspace(documentURI, "ws-featurelist.jar");
+      Path featureListJAR = LibertyUtils.findFileInWorkspace(documentURI, "bin/tools/ws-featurelist.jar");
 
       if (featureListJAR != null && featureListJAR.toFile().exists()) {
 

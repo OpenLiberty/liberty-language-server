@@ -88,17 +88,17 @@ public class LibertyUtils {
      */
     public static Path findFileInWorkspace(String serverXmlURI, String filename) {
         LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlURI);
-        return findFileInWorkspace(libertyWorkspace, filename);
+        return findFileInWorkspace(libertyWorkspace, Paths.get(filename));
     }
 
-    public static Path findFileInWorkspace(LibertyWorkspace libertyWorkspace, String filename) {
+    public static Path findFileInWorkspace(LibertyWorkspace libertyWorkspace, Path filePath) {
         if (libertyWorkspace.getWorkspaceURI() == null) {
             return null;
         }
         try {
             Path rootPath = Paths.get(libertyWorkspace.getWorkspaceURI());
             List<Path> matchingFiles = Files.walk(rootPath)
-                    .filter(p -> (Files.isRegularFile(p) && p.getFileName().endsWith(filename)))
+                    .filter(p -> (Files.isRegularFile(p) && p.endsWith(filePath)))
                     .collect(Collectors.toList());
             if (matchingFiles.isEmpty()) {
                 return null;
@@ -114,7 +114,7 @@ public class LibertyUtils {
             }
             return lastModified;
         } catch (IOException e) {
-            LOGGER.warning("Could not find: " + filename + ": " + e.getMessage());
+            LOGGER.warning("Could not find: " + filePath.toString() + ": " + e.getMessage());
             return null;
         }
     }
