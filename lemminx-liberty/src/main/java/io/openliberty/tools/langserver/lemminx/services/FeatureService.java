@@ -97,7 +97,7 @@ public class FeatureService {
   private List<Feature> getDefaultFeatureList() {
     try {
       if (defaultFeatureList == null) {
-        InputStream is = getClass().getClassLoader().getResourceAsStream("features-20.0.0.9.json");
+        InputStream is = getClass().getClassLoader().getResourceAsStream("features-22.0.0.6.json");
         InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
 
         // Only need the public features
