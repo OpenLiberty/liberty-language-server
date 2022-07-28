@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -204,7 +205,7 @@ public class FeatureService {
         return libertyWorkspace.getInstalledFeatureList();
       }
 
-      Path featureListJAR = LibertyUtils.findFileInWorkspace(documentURI, "bin/tools/ws-featurelist.jar");
+      Path featureListJAR = LibertyUtils.findFileInWorkspace(documentURI, Paths.get("bin", "tools", "ws-featurelist.jar"));
 
       if (featureListJAR != null && featureListJAR.toFile().exists()) {
 

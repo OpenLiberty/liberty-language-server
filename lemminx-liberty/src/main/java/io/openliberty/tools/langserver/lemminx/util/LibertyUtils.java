@@ -86,9 +86,9 @@ public class LibertyUtils {
      * @param filename
      * @return path to given file or null if could not be found
      */
-    public static Path findFileInWorkspace(String serverXmlURI, String filename) {
+    public static Path findFileInWorkspace(String serverXmlURI, Path filePath) {
         LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlURI);
-        return findFileInWorkspace(libertyWorkspace, Paths.get(filename));
+        return findFileInWorkspace(libertyWorkspace, filePath);
     }
 
     public static Path findFileInWorkspace(LibertyWorkspace libertyWorkspace, Path filePath) {
@@ -148,11 +148,11 @@ public class LibertyUtils {
             return runtime;
         }
 
-        if (findFileInWorkspace(serverXMLUri, "WebSphereApplicationServer.properties") != null ) {
+        if (findFileInWorkspace(serverXMLUri, Paths.get("WebSphereApplicationServer.properties")) != null ) {
             runtime = "wlp";
             libertyWorkspace.setLibertyRuntime(runtime);
             return runtime;
-        } else if (findFileInWorkspace(serverXMLUri, "openliberty.properties") != null ) {
+        } else if (findFileInWorkspace(serverXMLUri, Paths.get("openliberty.properties")) != null ) {
             runtime = "ol";
             libertyWorkspace.setLibertyRuntime(runtime);
             return runtime;
@@ -194,7 +194,7 @@ public class LibertyUtils {
         if (version != null && libertyWorkspace.isLibertyInstalled()) {
             return version;
         }
-        Path propertiesFile = findFileInWorkspace(serverXMLUri, "openliberty.properties");
+        Path propertiesFile = findFileInWorkspace(serverXMLUri, Paths.get("openliberty.properties"));
 
         // detected a new Liberty properties file, re-calculate version
         if (propertiesFile != null && propertiesFile.toFile().exists()) {

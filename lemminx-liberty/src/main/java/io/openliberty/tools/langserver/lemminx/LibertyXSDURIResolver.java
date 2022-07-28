@@ -72,7 +72,7 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
           //Check workspace for Liberty installation and generate schema.xsd file
           //Return schema URI as String, otherwise use cached schema.xsd file
           if (libertyWorkspace.isLibertyInstalled()) {
-            Path schemaGenJarPath = LibertyUtils.findFileInWorkspace(libertyWorkspace, Paths.get("bin/tools/ws-schemagen.jar"));
+            Path schemaGenJarPath = LibertyUtils.findFileInWorkspace(libertyWorkspace, Paths.get("bin", "tools", "ws-schemagen.jar"));
             if (schemaGenJarPath != null) {
               //Generate schema file
               String serverSchemaUri = generateServerSchemaXsd(libertyWorkspace, schemaGenJarPath);
