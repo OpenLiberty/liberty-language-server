@@ -33,7 +33,7 @@ public class LibertyLanguageServer implements LanguageServer {
     private static final Logger LOGGER = Logger.getLogger(LibertyLanguageServer.class.getName());
 
     private final WorkspaceService workspaceService;
-    private final TextDocumentService textDocumentService;
+    private final LibertyTextDocumentService textDocumentService;
 
     private LanguageClient languageClient;
 
@@ -88,7 +88,7 @@ public class LibertyLanguageServer implements LanguageServer {
     }
 
     @Override
-    public TextDocumentService getTextDocumentService() {
+    public LibertyTextDocumentService getTextDocumentService() {
         return this.textDocumentService;
     }
 

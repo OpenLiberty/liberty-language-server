@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
+import io.openliberty.tools.langserver.model.propertiesfile.PropertiesEntryInstance;
 
 /**
  * Maps property keys with their list of valid values for server.env and bootstrap.properties
@@ -54,6 +55,15 @@ public class ServerPropertyValues {
         );
     }};
 
+    public static boolean canValidateKeyValues(LibertyTextDocument tdi, String key) {
+        if (ParserFileHelperUtil.isBootstrapPropertiesFile(tdi)) {
+            return validBootstrapValues.containsKey(key);
+        } else if (ParserFileHelperUtil.isServerEnvFile(tdi)) {
+            return validServerValues.containsKey(key);
+        }
+        return false;
+    }
+
     public static List<String> getValidValues(LibertyTextDocument tdi, String key) {
         if (ParserFileHelperUtil.isBootstrapPropertiesFile(tdi)) {
             return validBootstrapValues.getOrDefault(key, Collections.emptyList());
@@ -61,5 +71,17 @@ public class ServerPropertyValues {
             return validServerValues.getOrDefault(key, Collections.emptyList());
         }
         return Collections.emptyList();
+    }
+
+    /**
+     * Reads input line, parses key and value. Checks if value is valid for the given key.
+     * @param line
+     * @return True if key has valid value, otherwise false
+     */
+    public static PropertiesValidationResult validateServerProperty(String line, LibertyTextDocument textDocumentItem) {
+        PropertiesEntryInstance entry = new PropertiesEntryInstance(line, textDocumentItem);
+        PropertiesValidationResult result = new PropertiesValidationResult(entry);
+        result.validateServerProperty();
+        return result;
     }
 }

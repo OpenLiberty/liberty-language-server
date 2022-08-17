@@ -49,6 +49,26 @@ public class PropertiesEntryInstance {
         this.propertyValueInstance = new PropertiesValueInstance(propertyValueInstanceString, propertyKeyInstance, textDocumentItem);
     }
 
+    public String getKey() {
+        return propertyKeyInstance.toString();
+    }
+
+    public String getValue() {
+        return propertyValueInstance.toString();
+    }
+
+    public boolean isComment() {
+        return isComment;
+    }
+
+    public String getLineContent() {
+        return line;
+    }
+
+    public LibertyTextDocument getTextDocument() {
+        return textDocumentItem;
+    }
+
     /**
      * Check if current position is within the range of the property key.
      * @param position
@@ -79,4 +99,8 @@ public class PropertiesEntryInstance {
         }
         return CompletableFuture.completedFuture(Collections.emptyList());
     }
+
+    // public Collection<Diagnostic> validate() {
+        
+    // }
 }
