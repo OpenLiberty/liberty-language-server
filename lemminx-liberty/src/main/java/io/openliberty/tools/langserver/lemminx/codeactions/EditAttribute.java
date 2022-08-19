@@ -17,25 +17,25 @@ import java.util.List;
 
 import org.eclipse.lemminx.commons.CodeActionFactory;
 import org.eclipse.lemminx.dom.DOMDocument;
-import org.eclipse.lemminx.services.extensions.ICodeActionParticipant;
-import org.eclipse.lemminx.services.extensions.IComponentProvider;
-import org.eclipse.lemminx.settings.SharedSettings;
+import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionParticipant;
+import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionRequest;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 public class EditAttribute implements ICodeActionParticipant {
 
     @Override
-    public void doCodeAction(Diagnostic diagnostic, Range range, DOMDocument document, List<CodeAction> codeActions,
-            SharedSettings sharedSettings, IComponentProvider componentProvider) {
+    public void doCodeAction(ICodeActionRequest request, List<CodeAction> codeActions, CancelChecker cancelChecker) {
+        Diagnostic diagnostic = request.getDiagnostic();
+        DOMDocument document = request.getDocument();
         try {
             String title = "Set the optional attribute to true.";
             String replaceText = "optional=\"true\"";
             codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), replaceText, document.getTextDocument(), diagnostic));
 
             // also build option to create file
-            new CreateFile().doCodeAction(diagnostic, range, document, codeActions, sharedSettings, componentProvider);
+            new CreateFile().doCodeAction(request, codeActions, cancelChecker);
         } catch (Exception e) {
             // do nothing
         }

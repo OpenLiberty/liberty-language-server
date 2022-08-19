@@ -10,8 +10,8 @@
     <url>https://github.com/OpenLiberty/liberty-language-server</url>
 
     <properties>
-        <lemminx.version>0.19.2-SNAPSHOT</lemminx.version>
-    </properties>
+        <lemminx.version>0.21.0</lemminx.version>
+      </properties>
 
     <scm>
         <connection>scm:git:git@github.com:OpenLiberty/liberty-language-server.git</connection>
