@@ -36,8 +36,7 @@ import io.openliberty.tools.langserver.utils.ServerPropertyValues;
 public class LibertyPropertiesDiagnosticService  {
 
     private static final Logger LOGGER = Logger.getLogger(LibertyPropertiesDiagnosticService.class.getName());
-    static final Locale locale = Locale.getDefault();
-    private static final ResourceBundle DiagnosticMessages = ResourceBundle.getBundle("DiagnosticMessages", locale);
+    private static final ResourceBundle DiagnosticMessages = ResourceBundle.getBundle("DiagnosticMessages", Locale.getDefault());
 
 
     public Map<String, PropertiesValidationResult> compute(String text, LibertyTextDocument openedDocument) {
@@ -69,7 +68,6 @@ public class LibertyPropertiesDiagnosticService  {
             String lineContentInError = errorEntry.getKey();
             List<Diagnostic> invalidValueDiagnostics = computeInvalidValuesDiagnostic(validationResult, lineContentInError);
             lspDiagnostics.addAll(invalidValueDiagnostics);
-            LOGGER.info("Creating diagnostic for error on line " + validationResult.getLineNumber() + ": " + lineContentInError);
         }
         return lspDiagnostics;
     }
@@ -80,7 +78,6 @@ public class LibertyPropertiesDiagnosticService  {
         if (validationResult.hasErrors()) {
             String message = MessageFormat.format(DiagnosticMessages.getString("INVALID_PROPERTY_VALUE"), validationResult.getValue(), validationResult.getKey());
             lspDiagnostics.add(new Diagnostic(computeRange(validationResult, lineContentInError, validationResult.getValue()), message));
-            LOGGER.info("Found invalid value for line " + validationResult.getLineNumber() + " with value " + validationResult.getValue());
         }
         return lspDiagnostics;
     }

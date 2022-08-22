@@ -99,8 +99,4 @@ public class PropertiesEntryInstance {
         }
         return CompletableFuture.completedFuture(Collections.emptyList());
     }
-
-    // public Collection<Diagnostic> validate() {
-        
-    // }
 }
