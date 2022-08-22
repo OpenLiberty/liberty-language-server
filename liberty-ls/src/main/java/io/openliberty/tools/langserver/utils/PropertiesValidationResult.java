@@ -55,6 +55,10 @@ public class PropertiesValidationResult {
         return hasErrors;
     }
 
+    public String getKey() {
+        return entry.getKey();
+    }
+
     public String getValue() {
         return entry.getValue();
     }

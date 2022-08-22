@@ -15,11 +15,14 @@ package io.openliberty.tools.langserver.diagnostic;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 import org.eclipse.lsp4j.Diagnostic;
@@ -33,6 +36,9 @@ import io.openliberty.tools.langserver.utils.ServerPropertyValues;
 public class LibertyPropertiesDiagnosticService  {
 
     private static final Logger LOGGER = Logger.getLogger(LibertyPropertiesDiagnosticService.class.getName());
+    static final Locale locale = Locale.getDefault();
+    private static final ResourceBundle DiagnosticMessages = ResourceBundle.getBundle("DiagnosticMessages", locale);
+
 
     public Map<String, PropertiesValidationResult> compute(String text, LibertyTextDocument openedDocument) {
         Map<String, PropertiesValidationResult> errors = new HashMap<>();
@@ -72,7 +78,8 @@ public class LibertyPropertiesDiagnosticService  {
             String lineContentInError) {
         List<Diagnostic> lspDiagnostics = new ArrayList<>();
         if (validationResult.hasErrors()) {
-            lspDiagnostics.add(new Diagnostic(computeRange(validationResult, lineContentInError, validationResult.getValue()), "Test Diagnostic"));
+            String message = MessageFormat.format(DiagnosticMessages.getString("INVALID_PROPERTY_VALUE"), validationResult.getValue(), validationResult.getKey());
+            lspDiagnostics.add(new Diagnostic(computeRange(validationResult, lineContentInError, validationResult.getValue()), message));
             LOGGER.info("Found invalid value for line " + validationResult.getLineNumber() + " with value " + validationResult.getValue());
         }
         return lspDiagnostics;
