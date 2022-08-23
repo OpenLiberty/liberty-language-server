@@ -45,6 +45,7 @@ public class ServerPropertyValues {
         put("com.ibm.ws.logging.trace.format", Arrays.asList("ENHANCED", "BASIC", "TBASIC", "ADVANCED")); // default "ENHANCED"
         put("websphere.log.provider", Arrays.asList("binaryLogging-1.0"));
         put("com.ibm.hpel.log.bufferingEnabled", BOOLEAN_VALUES_DEFAULT_TRUE); // default true
+        put("com.ibm.hpel.trace.bufferingEnabled", BOOLEAN_VALUES_DEFAULT_TRUE); // default true
         EquivalentProperties.getBootstrapKeys().forEach(
             bskey -> {
                 String serverEnvEquivalent = EquivalentProperties.getEquivalentProperty(bskey);
