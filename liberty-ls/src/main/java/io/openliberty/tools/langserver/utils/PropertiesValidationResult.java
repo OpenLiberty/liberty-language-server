@@ -62,4 +62,12 @@ public class PropertiesValidationResult {
     public String getValue() {
         return entry.getValue();
     }
+
+    public String getInvalidValueMessageTemplate() {
+        if (ParserFileHelperUtil.isBootstrapPropertiesFile(textDocumentItem)) {
+            return "INVALID_PROPERTY_VALUE";
+        } else {
+            return "INVALID_VARIABLE_VALUE";
+        }
+    }
 }

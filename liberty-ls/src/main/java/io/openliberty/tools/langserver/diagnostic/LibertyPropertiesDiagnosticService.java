@@ -76,7 +76,8 @@ public class LibertyPropertiesDiagnosticService  {
             String lineContentInError) {
         List<Diagnostic> lspDiagnostics = new ArrayList<>();
         if (validationResult.hasErrors()) {
-            String message = MessageFormat.format(DiagnosticMessages.getString("INVALID_PROPERTY_VALUE"), validationResult.getValue(), validationResult.getKey());
+            String messageTemplate = DiagnosticMessages.getString(validationResult.getInvalidValueMessageTemplate());
+            String message = MessageFormat.format(messageTemplate, validationResult.getValue(), validationResult.getKey());
             lspDiagnostics.add(new Diagnostic(computeRange(validationResult, lineContentInError, validationResult.getValue()), message));
         }
         return lspDiagnostics;
