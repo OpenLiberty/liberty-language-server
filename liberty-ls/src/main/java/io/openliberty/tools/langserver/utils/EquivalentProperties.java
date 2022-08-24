@@ -28,20 +28,32 @@ public class EquivalentProperties {
         put("com.ibm.ws.json.access.log.fields", "WLP_LOGGING_JSON_ACCESS_LOG_FIELDS");
     }};
 
+    private static HashMap<String, String> serverEnvToBootstrapMap = new HashMap<String, String>() {{
+        bootstrapToServerEnvMap.forEach((key, value) -> this.put(value, key));
+    }};
+
     /**
-     * Returns the equivalent server.env property for the provided bootstrap property
-     * @param bootstrapProperty
+     * Returns the equivalent server.env property for the provided bootstrap property, or vice versa
+     * @param key
      * @return
      */
-    public static String getEquivalentProperty(String bootstrapProperty) {
-        return (String) bootstrapToServerEnvMap.get(bootstrapProperty);
+    public static String getEquivalentProperty(String key) {
+        String equivalentProperty = bootstrapToServerEnvMap.get(key);
+        if (equivalentProperty == null) {
+            equivalentProperty = serverEnvToBootstrapMap.get(key);
+        }
+        return equivalentProperty;
     }
 
     public static boolean hasEquivalentProperty(String key) {
-        return bootstrapToServerEnvMap.containsKey(key);
+        return bootstrapToServerEnvMap.containsKey(key) || serverEnvToBootstrapMap.containsKey(key);
     }
 
     public static Set<String> getBootstrapKeys() {
         return bootstrapToServerEnvMap.keySet();
+    }
+
+    public static Set<String> getServerVarKeys() {
+        return serverEnvToBootstrapMap.keySet();
     }
 }

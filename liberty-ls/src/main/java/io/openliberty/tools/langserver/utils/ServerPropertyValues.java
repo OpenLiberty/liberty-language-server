@@ -12,7 +12,9 @@ package io.openliberty.tools.langserver.utils;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 import io.openliberty.tools.langserver.model.propertiesfile.PropertiesEntryInstance;
@@ -56,6 +58,20 @@ public class ServerPropertyValues {
         );
     }};
 
+    private static Set<String> caseSensitiveProperties = new HashSet<String>() {{
+        add("WLP_DEBUG_SUSPEND");
+        add("WLP_DEBUG_REMOTE");
+        add("WLP_LOGGING_CONSOLE_SOURCE");
+        add("WLP_LOGGING_MESSAGE_SOURCE");
+        EquivalentProperties.getServerVarKeys().forEach(
+            serverKey -> {
+                if(this.contains(serverKey)) {
+                    this.add(EquivalentProperties.getEquivalentProperty(serverKey));
+                }
+            }
+        );
+    }};
+
     public static boolean canValidateKeyValues(LibertyTextDocument tdi, String key) {
         if (ParserFileHelperUtil.isBootstrapPropertiesFile(tdi)) {
             return validBootstrapValues.containsKey(key);
@@ -72,6 +88,10 @@ public class ServerPropertyValues {
             return validServerValues.getOrDefault(key, Collections.emptyList());
         }
         return Collections.emptyList();
+    }
+
+    public static boolean isCaseSensitive(String key) {
+        return caseSensitiveProperties.contains(key);
     }
 
     /**

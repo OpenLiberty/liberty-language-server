@@ -36,11 +36,16 @@ public class PropertiesValidationResult {
         if (entry.isComment() || !ServerPropertyValues.canValidateKeyValues(textDocumentItem, entry.getKey())) {
             return;
         }
-        List<String> validValues = ServerPropertyValues.getValidValues(textDocumentItem, entry.getKey());
-        if (!validValues.stream().anyMatch(entry.getValue()::equalsIgnoreCase)) { // check if validValues contains the property value, ignoring case
-            hasErrors = true;
-            return;
+        String property = entry.getKey();
+        List<String> validValues = ServerPropertyValues.getValidValues(textDocumentItem, property);
+        if(ServerPropertyValues.isCaseSensitive(property)) {
+            // if case-sensitive, check if value is valid
+            hasErrors = !validValues.contains(entry.getValue());
+        } else {
+            // ignoring case, check if value is valid
+            hasErrors = !validValues.stream().anyMatch(entry.getValue()::equalsIgnoreCase);
         }
+        return;
     }
 
     public void setLineNumber(Integer lineNumber) {
