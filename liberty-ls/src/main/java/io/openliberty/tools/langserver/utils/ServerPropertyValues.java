@@ -12,9 +12,12 @@ package io.openliberty.tools.langserver.utils;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
+import io.openliberty.tools.langserver.model.propertiesfile.PropertiesEntryInstance;
 
 /**
  * Maps property keys with their list of valid values for server.env and bootstrap.properties
@@ -44,6 +47,7 @@ public class ServerPropertyValues {
         put("com.ibm.ws.logging.trace.format", Arrays.asList("ENHANCED", "BASIC", "TBASIC", "ADVANCED")); // default "ENHANCED"
         put("websphere.log.provider", Arrays.asList("binaryLogging-1.0"));
         put("com.ibm.hpel.log.bufferingEnabled", BOOLEAN_VALUES_DEFAULT_TRUE); // default true
+        put("com.ibm.hpel.trace.bufferingEnabled", BOOLEAN_VALUES_DEFAULT_TRUE); // default true
         EquivalentProperties.getBootstrapKeys().forEach(
             bskey -> {
                 String serverEnvEquivalent = EquivalentProperties.getEquivalentProperty(bskey);
@@ -54,6 +58,29 @@ public class ServerPropertyValues {
         );
     }};
 
+    private static Set<String> caseSensitiveProperties = new HashSet<String>() {{
+        add("WLP_DEBUG_SUSPEND");
+        add("WLP_DEBUG_REMOTE");
+        add("WLP_LOGGING_CONSOLE_SOURCE");
+        add("WLP_LOGGING_MESSAGE_SOURCE");
+        EquivalentProperties.getServerVarKeys().forEach(
+            serverKey -> {
+                if(this.contains(serverKey)) {
+                    this.add(EquivalentProperties.getEquivalentProperty(serverKey));
+                }
+            }
+        );
+    }};
+
+    public static boolean canValidateKeyValues(LibertyTextDocument tdi, String key) {
+        if (ParserFileHelperUtil.isBootstrapPropertiesFile(tdi)) {
+            return validBootstrapValues.containsKey(key);
+        } else if (ParserFileHelperUtil.isServerEnvFile(tdi)) {
+            return validServerValues.containsKey(key);
+        }
+        return false;
+    }
+
     public static List<String> getValidValues(LibertyTextDocument tdi, String key) {
         if (ParserFileHelperUtil.isBootstrapPropertiesFile(tdi)) {
             return validBootstrapValues.getOrDefault(key, Collections.emptyList());
@@ -61,5 +88,21 @@ public class ServerPropertyValues {
             return validServerValues.getOrDefault(key, Collections.emptyList());
         }
         return Collections.emptyList();
+    }
+
+    public static boolean isCaseSensitive(String key) {
+        return caseSensitiveProperties.contains(key);
+    }
+
+    /**
+     * Reads input line, parses key and value. Checks if value is valid for the given key.
+     * @param line
+     * @return True if key has valid value, otherwise false
+     */
+    public static PropertiesValidationResult validateServerProperty(String line, LibertyTextDocument textDocumentItem) {
+        PropertiesEntryInstance entry = new PropertiesEntryInstance(line, textDocumentItem);
+        PropertiesValidationResult result = new PropertiesValidationResult(entry);
+        result.validateServerProperty();
+        return result;
     }
 }

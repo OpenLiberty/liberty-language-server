@@ -56,6 +56,8 @@ import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 import io.openliberty.tools.langserver.completion.LibertyPropertiesCompletionProvider;
+import io.openliberty.tools.langserver.diagnostic.DiagnosticRunner;
+import io.openliberty.tools.langserver.diagnostic.LibertyPropertiesDiagnosticService;
 import io.openliberty.tools.langserver.hover.LibertyPropertiesHoverProvider;
 
 public class LibertyTextDocumentService implements TextDocumentService {
@@ -71,11 +73,16 @@ public class LibertyTextDocumentService implements TextDocumentService {
         this.libertyLanguageServer = libertyls;
     }
 
+    public LibertyTextDocument getOpenedDocument(String uri) {
+        return documents.get(uri);
+    }
+
     @Override
     public void didOpen(DidOpenTextDocumentParams params) {
         LibertyTextDocument document = documents.onDidOpenTextDocument(params);
         String uri = document.getUri();
         validate(Arrays.asList(uri));
+        new DiagnosticRunner(libertyLanguageServer).compute(params);
     }
 
     @Override
@@ -83,6 +90,7 @@ public class LibertyTextDocumentService implements TextDocumentService {
         LibertyTextDocument document = documents.onDidChangeTextDocument(params);
         String uri = document.getUri();
         validate(Arrays.asList(uri));
+        new DiagnosticRunner(libertyLanguageServer).compute(params);
     }
 
     @Override
