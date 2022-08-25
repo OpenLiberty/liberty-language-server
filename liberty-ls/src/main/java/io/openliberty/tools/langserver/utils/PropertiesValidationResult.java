@@ -15,12 +15,15 @@ package io.openliberty.tools.langserver.utils;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.commons.lang3.Range;
+
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 import io.openliberty.tools.langserver.model.propertiesfile.PropertiesEntryInstance;
 
 public class PropertiesValidationResult {
     Integer lineNumber;
     boolean hasErrors;
+    String diagnosticType;
     PropertiesEntryInstance entry;
     LibertyTextDocument textDocumentItem;
     
@@ -32,18 +35,46 @@ public class PropertiesValidationResult {
         this.hasErrors = false;
     }
 
+    /**
+     * Validates if line has valid value for the provided key. Returns a PropertiesValidationResult object containing validation information.
+     * @param line
+     * @param textDocumentItem
+     * @return PropertiesValidationResult with information
+     */
+    public static PropertiesValidationResult validateServerProperty(String line, LibertyTextDocument textDocumentItem) {
+        PropertiesEntryInstance entry = new PropertiesEntryInstance(line, textDocumentItem);
+        PropertiesValidationResult result = new PropertiesValidationResult(entry);
+        result.validateServerProperty();
+        return result;
+    }
+
     public void validateServerProperty() {
-        if (entry.isComment() || !ServerPropertyValues.canValidateKeyValues(textDocumentItem, entry.getKey())) {
+        if (entry.isComment()) {
             return;
         }
         String property = entry.getKey();
-        List<String> validValues = ServerPropertyValues.getValidValues(textDocumentItem, property);
-        if(ServerPropertyValues.isCaseSensitive(property)) {
-            // if case-sensitive, check if value is valid
-            hasErrors = !validValues.contains(entry.getValue());
-        } else {
-            // ignoring case, check if value is valid
-            hasErrors = !validValues.stream().anyMatch(entry.getValue()::equalsIgnoreCase);
+        String value = entry.getValue();
+
+        if (ServerPropertyValues.usesPredefinedValues(textDocumentItem, property)) {
+            List<String> validValues = ServerPropertyValues.getValidValues(textDocumentItem, property);
+            if(ServerPropertyValues.isCaseSensitive(property)) {
+                // if case-sensitive, check if value is valid
+                hasErrors = !validValues.contains(value);
+            } else {
+                // ignoring case, check if value is valid
+                hasErrors = !validValues.stream().anyMatch(value::equalsIgnoreCase);
+            }
+            diagnosticType = ParserFileHelperUtil.isBootstrapPropertiesFile(textDocumentItem) ? 
+                                            "INVALID_PROPERTY_VALUE" : "INVALID_VARIABLE_VALUE";
+        } else if (ServerPropertyValues.usesIntegerRangeValue(property)) {
+            Range<Integer> range = ServerPropertyValues.getIntegerRange(property);
+            if(ServerPropertyValues.usesTimeUnit(property)) {
+                // TODO: split integer and unit, validate both
+            } else {
+                hasErrors = !range.contains(Integer.parseInt(value));
+            }
+            diagnosticType = ParserFileHelperUtil.isBootstrapPropertiesFile(textDocumentItem) ? 
+                                            "INVALID_PROPERTY_INTEGER_RANGE" : "INVALID_VARIABLE_INTEGER_RANGE";
         }
         return;
     }
@@ -68,11 +99,7 @@ public class PropertiesValidationResult {
         return entry.getValue();
     }
 
-    public String getInvalidValueMessageTemplate() {
-        if (ParserFileHelperUtil.isBootstrapPropertiesFile(textDocumentItem)) {
-            return "INVALID_PROPERTY_VALUE";
-        } else {
-            return "INVALID_VARIABLE_VALUE";
-        }
+    public String getDiagnosticType() {
+        return diagnosticType;
     }
 }
