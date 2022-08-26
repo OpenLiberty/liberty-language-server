@@ -38,6 +38,10 @@ public class LibertyWorkspace {
     private List<Feature> installedFeatureList;
     private Set<String> configFiles;
 
+    // devc vars
+    private String containerName;
+    private boolean runningContainer;
+
     /**
      * Model of a Liberty Workspace. Each workspace indicates the
      * workspaceFolderURI, the Liberty version associated (may be cached), and if an
@@ -51,6 +55,8 @@ public class LibertyWorkspace {
         this.libertyRuntime = null;
         this.isLibertyInstalled = false;
         this.installedFeatureList = new ArrayList<Feature>();
+        this.containerName = null;
+        this.runningContainer = false;
 
         this.configFiles = new HashSet<String>();
         initConfigFileList();
@@ -59,7 +65,7 @@ public class LibertyWorkspace {
     public String getWorkspaceString() {
         return this.workspaceFolderURI;
     }
-    
+
     public URI getWorkspaceURI() {
         return URI.create(this.workspaceFolderURI);
     }
@@ -75,11 +81,11 @@ public class LibertyWorkspace {
     public String getLibertyVersion() {
         return this.libertyVersion;
     }
-    
+
     public void setLibertyRuntime(String libertyRuntime) {
         this.libertyRuntime = libertyRuntime;
     }
-    
+
     public String getLibertyRuntime() {
         return libertyRuntime;
     }
@@ -100,10 +106,27 @@ public class LibertyWorkspace {
         this.installedFeatureList = installedFeatureList;
     }
 
-    public void initConfigFileList() {
+    public String getContainerName() {
+        return containerName;
+    }
+
+    public void setContainerName(String containerName) {
+        this.containerName = containerName;
+    }
+
+    public boolean hasRunningContainer() {
+        return this.runningContainer;
+    }
+
+    public void setRunningContainer(boolean container) {
+        this.runningContainer = container;
+    }
+
+    private void initConfigFileList() {
         try {
-            List<Path> serverXmlList = Files.find(Paths.get(getWorkspaceURI()), Integer.MAX_VALUE, (filePath, fileAttributes) -> 
-                    LibertyUtils.isServerXMLFile(filePath.toString()))
+            List<Path> serverXmlList = Files
+                    .find(Paths.get(getWorkspaceURI()), Integer.MAX_VALUE,
+                            (filePath, fileAttributes) -> LibertyUtils.isServerXMLFile(filePath.toString()))
                     .collect(Collectors.toList());
             for (Path serverXml : serverXmlList) {
                 scanForConfigLocations(serverXml);
@@ -115,7 +138,7 @@ public class LibertyWorkspace {
     }
 
     // TODO: or use DOM
-    public void scanForConfigLocations(Path filePath) {
+    private void scanForConfigLocations(Path filePath) {
         try {
             String content = new String(Files.readAllBytes(filePath));
             // [^<] = All characters, including whitespaces/newlines, not equivalent to '<'
@@ -141,7 +164,7 @@ public class LibertyWorkspace {
     public boolean hasConfigFile(String fileString) {
         try {
             fileString = fileString.startsWith("file:") ? 
-                    new File(URI.create(fileString)).getCanonicalPath() : 
+                    new File(URI.create(fileString)).getCanonicalPath() :
                     new File(fileString).getCanonicalPath();
             return this.configFiles.contains(fileString);
         } catch (IOException e) {

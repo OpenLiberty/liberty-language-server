@@ -30,9 +30,15 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
 import org.eclipse.lemminx.dom.DOMDocument;
 
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
+import io.openliberty.tools.langserver.lemminx.models.settings.DevcMetadata;
+import io.openliberty.tools.langserver.lemminx.services.DockerService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
@@ -148,18 +154,15 @@ public class LibertyUtils {
             return runtime;
         }
 
-        if (findFileInWorkspace(serverXMLUri, Paths.get("WebSphereApplicationServer.properties")) != null ) {
-            runtime = "wlp";
-            libertyWorkspace.setLibertyRuntime(runtime);
-            return runtime;
-        } else if (findFileInWorkspace(serverXMLUri, Paths.get("openliberty.properties")) != null ) {
+        if (findFileInWorkspace(serverXMLUri, Paths.get("openliberty.properties")) != null) {
             runtime = "ol";
-            libertyWorkspace.setLibertyRuntime(runtime);
-            return runtime;
-        } else {
-            // did not detect a new liberty properties file, return version from cache
-            return runtime;
+        } else if (findFileInWorkspace(serverXMLUri, Paths.get("WebSphereApplicationServer.properties")) != null ) {
+            runtime = "wlp";
         }
+        libertyWorkspace.setLibertyRuntime(runtime);
+
+        // did not detect a new liberty properties file, return version from cache
+        return runtime;
     }
 
     /**
@@ -194,6 +197,48 @@ public class LibertyUtils {
         if (version != null && libertyWorkspace.isLibertyInstalled()) {
             return version;
         }
+        
+        // todo: retrieve serverName
+        String serverName = "defaultServer";
+        Path devcMetadataFile = findFileInWorkspace(serverXMLUri, Paths.get(serverName + "-liberty-devc-metadata.xml"));
+
+        // detected a devc metadata file, calculate version
+        if (devcMetadataFile != null && devcMetadataFile.toFile().exists()) {
+            // new properties file, reset the installed features stored in the feature cache
+            // so that the installed features list will be regenerated as it may have
+            // changed between Liberty installations
+            libertyWorkspace.setInstalledFeatureList(new ArrayList<Feature>());
+
+            // add a file watcher on this file to monitor container health
+            watchFiles(devcMetadataFile, libertyWorkspace);
+
+            Properties prop = new Properties();
+            try {
+                DevcMetadata devcMetadata = unmarshalDevcMetadataFile(devcMetadataFile);
+
+                boolean containerAlive = devcMetadata.getContainerAlive();
+                String containerName = devcMetadata.getContainerName();
+                libertyWorkspace.setRunningContainer(containerAlive);
+                libertyWorkspace.setContainerName(containerName);
+                if (containerAlive) {
+                    DockerService docker = DockerService.getInstance();
+                    File containerPropertiesFile = new File(getTempDir(libertyWorkspace.getWorkspaceString()), "container.properties");
+                    docker.dockerCp(containerName, DockerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH.toString(), containerPropertiesFile.toString());
+                    FileInputStream fis = new FileInputStream(containerPropertiesFile);
+                    prop.load(fis);
+                    version = prop.getProperty("com.ibm.websphere.productVersion");
+                    libertyWorkspace.setLibertyVersion(version);
+                    libertyWorkspace.setLibertyInstalled(false);
+                    return version;
+                }
+                // if not alive, continue on
+            } catch (IOException e) {
+                LOGGER.warning("Failed to get version from running container specified by devc metadata file: " + devcMetadataFile.toString());
+                return null;
+            }
+        }
+
+        // consider todo: refactor logic
         Path propertiesFile = findFileInWorkspace(serverXMLUri, Paths.get("openliberty.properties"));
 
         // detected a new Liberty properties file, re-calculate version
@@ -220,9 +265,25 @@ public class LibertyUtils {
                         + e.getMessage());
                 return null;
             }
-        } else {
-            // did not detect a new liberty properties file, return version from cache
-            return version;
+        }
+        
+        // did not detect a new liberty properties file, return version from cache
+        return version;
+    }
+
+    /**
+     * Helper method to unmarshal/read the provided liberty-devc-metadata file.
+     * @param devcMetadataFile
+     * @return
+     */
+    private static DevcMetadata unmarshalDevcMetadataFile(Path devcMetadataFile) {
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(DevcMetadata.class);
+            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+            return (DevcMetadata)jaxbUnmarshaller.unmarshal(devcMetadataFile.toFile());
+        } catch (JAXBException e) {
+            LOGGER.warning("Unable to unmarshal the devc metadata file: " + devcMetadataFile.toString());
+            return null;
         }
     }
 
@@ -258,18 +319,23 @@ public class LibertyUtils {
 
     /**
      * Watches the parent directory of the Liberty properties file in a separate
-     * thread. If the the contents of the directory have been modified or deleted,
-     * the installation of Liberty has changed and the corresponding Liberty
-     * Workspace item is updated.
+     * thread or actively watches a liberty-devc-metadata file. If the the contents 
+     * have been modified or deleted, the installation of Liberty has changed and 
+     * the corresponding Liberty Workspace item is updated.
      * 
-     * @param propertiesFile   openliberty.properties file to watch
+     * @param watchFile        openliberty.properties or *-liberty-devc.metadata.xml to watch
      * @param libertyWorkspace Liberty Workspace object, updated to indicate if
      *                         there is an associated installation of Liberty
      */
-    public static void watchFiles(Path propertiesFile, LibertyWorkspace libertyWorkspace) {
+    public static void watchFiles(Path watchFile, LibertyWorkspace libertyWorkspace) {     
+        boolean isProperties = watchFile.endsWith("openliberty.properties");
         try {
             WatchService watcher = FileSystems.getDefault().newWatchService();
-            propertiesFile.getParent().register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
+            if (isProperties) {
+                watchFile.getParent().register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
+            } else {
+                watchFile.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
+            }
             thread = new Thread(() -> {
                 WatchKey watchKey = null;
                 try {
@@ -277,19 +343,30 @@ public class LibertyUtils {
                         watchKey = watcher.poll(5, TimeUnit.SECONDS);
                         if (watchKey != null) {
                             watchKey.pollEvents().stream().forEach(event -> {
-                                LOGGER.fine("Liberty properties file (" + propertiesFile + ") has been modified: "
-                                        + event.context());
-                                // if modified re-calculate version
-                                libertyWorkspace.setLibertyInstalled(false);
+                                if (isProperties) {
+                                    // if modified re-calculate version
+                                    LOGGER.fine("Liberty properties file (" + watchFile + ") has been modified: "
+                                    + event.context());
+                                    libertyWorkspace.setLibertyInstalled(false);
+                                } else {
+                                    // if modified, re-check container status
+                                    DevcMetadata devcMetadata = unmarshalDevcMetadataFile(watchFile);
+                                    libertyWorkspace.setRunningContainer(devcMetadata.getContainerAlive());
+                                }
                             });
 
                             // if watchkey.reset() returns false indicates that the parent folder has been
                             // deleted
                             boolean valid = watchKey.reset();
                             if (!valid) {
-                                // if deleted re-calculate version
-                                LOGGER.fine("Liberty properties file (" + propertiesFile + ") has been deleted");
-                                libertyWorkspace.setLibertyInstalled(false);
+                                if (isProperties) {
+                                    // if deleted re-calculate version
+                                    LOGGER.fine("Liberty properties file (" + watchFile + ") has been deleted");
+                                    libertyWorkspace.setLibertyInstalled(false);
+                                } else {
+                                    // metadata file deleted
+                                    libertyWorkspace.setRunningContainer(false);
+                                }
                             }
                         }
                     }
