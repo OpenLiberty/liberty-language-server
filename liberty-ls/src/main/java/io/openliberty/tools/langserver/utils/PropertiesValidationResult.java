@@ -14,6 +14,8 @@ package io.openliberty.tools.langserver.utils;
 
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.Range;
 
@@ -68,10 +70,27 @@ public class PropertiesValidationResult {
                                             "INVALID_PROPERTY_VALUE" : "INVALID_VARIABLE_VALUE";
         } else if (ServerPropertyValues.usesIntegerRangeValue(property)) {
             Range<Integer> range = ServerPropertyValues.getIntegerRange(property);
-            if(ServerPropertyValues.usesTimeUnit(property)) {
-                // TODO: split integer and unit, validate both
+            if (ServerPropertyValues.usesTimeUnit(property)) {
+                // for purgeMinTime - with or without unit (h or H) is acceptable.
+                try { // try parsing Integer if no units specified
+                    hasErrors = !range.contains(Integer.parseInt(value));
+                } catch (NumberFormatException e) { // contains unit (non-decimal char)
+                    // only accept integer followed by h or H
+                    Pattern integerAndTime = Pattern.compile("(^[0-9]+)([h|H]?)$");
+                    Matcher matcher = integerAndTime.matcher(value);
+                    if (matcher.find()) {
+                        Integer val = Integer.parseInt(matcher.group(1));
+                        hasErrors = !range.contains(val);
+                    } else { // did not contain or start with integer
+                        hasErrors = true;
+                    }
+                }
             } else {
-                hasErrors = !range.contains(Integer.parseInt(value));
+                try {
+                    hasErrors = !range.contains(Integer.parseInt(value));
+                } catch (NumberFormatException e) {
+                    hasErrors = true;
+                }
             }
             diagnosticType = ParserFileHelperUtil.isBootstrapPropertiesFile(textDocumentItem) ? 
                                             "INVALID_PROPERTY_INTEGER_RANGE" : "INVALID_VARIABLE_INTEGER_RANGE";

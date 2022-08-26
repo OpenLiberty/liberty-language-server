@@ -11,6 +11,7 @@ package io.openliberty.tools.langserver.model.propertiesfile;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.lsp4j.CompletionItem;
@@ -69,8 +70,12 @@ public class PropertiesKeyInstance {
         // Preselect the default.
         // This uses the first item in the List as default. 
         // (Check ServerPropertyValues.java) Currently sorted to have confirmed/sensible values as default.
-        CompletionItem first = results.get(0);
-        first.setPreselect(true);
+        try {
+            CompletionItem first = results.get(0);
+            first.setPreselect(true);
+        } catch (IndexOutOfBoundsException e) {
+            // just return empty results
+        }
         return results;
     }
 

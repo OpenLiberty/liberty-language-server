@@ -73,6 +73,7 @@ public class ServerPropertyValues {
         );
     }};
 
+    // TODO: it seems specifying Integers above MAX_VALUE breaks all diagnostics...
     private static HashMap<String, Range<Integer>> integerRangeValues = new HashMap<String, Range<Integer>>() {{
         put("WLP_DEBUG_ADDRESS", Range.between(1,65535));
         put("default.http.port", Range.between(1,65535));
@@ -83,10 +84,10 @@ public class ServerPropertyValues {
         put("com.ibm.ws.logging.max.files", Range.between(0, Integer.MAX_VALUE));
         put("com.ibm.ws.logging.max.file.size", Range.between(0, Integer.MAX_VALUE));
         put("com.ibm.hpel.log.purgeMaxSize", Range.between(0, Integer.MAX_VALUE));
-        put("com.ibm.hpel.log.purgeMinTime", Range.between(0, Integer.MAX_VALUE)); // TODO: need to verify time unit
+        put("com.ibm.hpel.log.purgeMinTime", Range.between(0, Integer.MAX_VALUE));
         put("com.ibm.hpel.log.fileSwitchTime", Range.between(0, 23));
         put("com.ibm.hpel.trace.purgeMaxSize", Range.between(0, Integer.MAX_VALUE));
-        put("com.ibm.hpel.trace.purgeMinTime", Range.between(0, Integer.MAX_VALUE)); // TODO: need to verify time unit
+        put("com.ibm.hpel.trace.purgeMinTime", Range.between(0, Integer.MAX_VALUE));
         put("com.ibm.hpel.trace.fileSwitchTime", Range.between(0, 23));
     }};
 

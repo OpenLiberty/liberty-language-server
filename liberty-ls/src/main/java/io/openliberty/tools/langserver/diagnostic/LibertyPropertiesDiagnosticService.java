@@ -93,7 +93,7 @@ public class LibertyPropertiesDiagnosticService  {
      */
     private Range computeRange(PropertiesValidationResult validationResult, String lineContentInError, String value) {
         int startCharacter, endCharacter;
-        int indexOfValue = lineContentInError.indexOf(value);
+        int indexOfValue = lineContentInError.lastIndexOf(value);
         if (indexOfValue != -1) {
             startCharacter = indexOfValue;
             endCharacter = indexOfValue + value.length();
