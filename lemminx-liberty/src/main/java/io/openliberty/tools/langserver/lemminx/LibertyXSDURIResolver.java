@@ -79,7 +79,7 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
                             //Generate schema file
                             serverSchemaUri = generateServerSchemaXsd(libertyWorkspace, schemaGenJarPath);
                         }
-                    } else if (libertyWorkspace.hasRunningContainer()) {
+                    } else if (libertyWorkspace.isContainerAlive()) {
                         DockerService docker = DockerService.getInstance();
                         serverSchemaUri = docker.generateServerSchemaXsdFromContainer(libertyWorkspace);
                     }
