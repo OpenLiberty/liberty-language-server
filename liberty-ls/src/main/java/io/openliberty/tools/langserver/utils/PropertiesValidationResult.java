@@ -12,6 +12,7 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.utils;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -79,8 +80,12 @@ public class PropertiesValidationResult {
                     Pattern integerAndTime = Pattern.compile("(^[0-9]+)([h|H]?)$");
                     Matcher matcher = integerAndTime.matcher(value);
                     if (matcher.find()) {
-                        Integer val = Integer.parseInt(matcher.group(1));
-                        hasErrors = !range.contains(val);
+                        try {
+                            int val = new BigInteger(matcher.group(1)).intValueExact();
+                            hasErrors = !range.contains(val);
+                        } catch (ArithmeticException ae) { // value too large for Integer
+                            hasErrors = true;
+                        }
                     } else { // did not contain or start with integer
                         hasErrors = true;
                     }
