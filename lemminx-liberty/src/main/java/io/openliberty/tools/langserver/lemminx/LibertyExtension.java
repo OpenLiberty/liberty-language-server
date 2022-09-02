@@ -14,6 +14,7 @@ package io.openliberty.tools.langserver.lemminx;
 
 import org.eclipse.lemminx.services.extensions.ICodeActionParticipant;
 import org.eclipse.lemminx.services.extensions.ICompletionParticipant;
+import org.eclipse.lemminx.services.extensions.IDocumentLinkParticipant;
 import org.eclipse.lemminx.services.extensions.IHoverParticipant;
 import org.eclipse.lemminx.services.extensions.IXMLExtension;
 import org.eclipse.lemminx.services.extensions.XMLExtensionsRegistry;
@@ -39,6 +40,7 @@ public class LibertyExtension implements IXMLExtension {
     private IHoverParticipant hoverParticipant;
     private IDiagnosticsParticipant diagnosticsParticipant;
     private ICodeActionParticipant codeActionsParticipant;
+    private IDocumentLinkParticipant documentLinkParticipant;
 
     @Override
     public void start(InitializeParams initializeParams, XMLExtensionsRegistry xmlExtensionsRegistry) {
@@ -64,6 +66,9 @@ public class LibertyExtension implements IXMLExtension {
 
         codeActionsParticipant = new LibertyCodeActionParticipant();
         xmlExtensionsRegistry.registerCodeActionParticipant(codeActionsParticipant);
+
+        documentLinkParticipant = new LibertyDocumentLinkParticipant();
+        xmlExtensionsRegistry.registerDocumentLinkParticipant(documentLinkParticipant);
     }
 
     @Override

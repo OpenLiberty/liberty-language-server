@@ -74,7 +74,7 @@ public class LibertyDiagnosticTest {
     public void testDiagnosticsForInclude() throws IOException {
         // LibertyWorkspace must be initialized
         List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
-        initList.add(new WorkspaceFolder(new File("src").toURI().toString()));
+        initList.add(new WorkspaceFolder(new File("src/test/resources").toURI().toString()));
         LibertyProjectsManager.getInstance().setWorkspaceFolders(initList);
 
         String serverXML = String.join(newLine, //
