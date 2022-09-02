@@ -36,6 +36,12 @@ public class LibertyDocumentLinkParticipant implements IDocumentLinkParticipant 
 
         for (DOMNode includeNode : includeDomNodes) {
             DOMAttr includeAttr = includeNode.getAttributeNode("location");
+            
+            String locAttr = includeAttr.getValue();
+            if (!locAttr.endsWith(".xml") || locAttr.startsWith("http") || locAttr.contains("$")) {
+                // ignoring http or $ vars until feature supported
+                continue;
+            }
             Range linkRange = XMLPositionUtility.selectAttributeValue(includeAttr);
             try {
                 String location = getResolvedLocation(document.getDocumentURI(), includeAttr.getValue());
@@ -44,9 +50,7 @@ public class LibertyDocumentLinkParticipant implements IDocumentLinkParticipant 
             } catch (MalformedURIException e) {
                 LOGGER.log(Level.SEVERE, "Creation of document link failed", e);
             }
-            
         }
-
     }
 
     private static String getResolvedLocation(String documentURI, String location) throws MalformedURIException {
