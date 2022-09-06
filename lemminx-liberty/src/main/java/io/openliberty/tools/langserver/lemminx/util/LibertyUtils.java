@@ -290,28 +290,24 @@ public class LibertyUtils {
      *                         there is an associated installation of Liberty
      */
     public static void watchFiles(Path watchFile, LibertyWorkspace libertyWorkspace) {     
-        boolean isProperties = watchFile.endsWith("openliberty.properties");
+        boolean isProperties = watchFile.endsWith("openliberty.properties"); // if false, watchFile is a metadata file
         try {
             WatchService watcher = FileSystems.getDefault().newWatchService();
-            if (isProperties) {
-                watchFile.getParent().register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
-            } else {
-                watchFile.register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
-            }
+            watchFile.getParent().register(watcher, StandardWatchEventKinds.ENTRY_MODIFY);
             thread = new Thread(() -> {
                 WatchKey watchKey = null;
                 try {
                     while (true) {
                         watchKey = watcher.poll(5, TimeUnit.SECONDS);
                         if (watchKey != null) {
-                            watchKey.pollEvents().stream().forEach(event -> {
+                            watchKey.pollEvents().stream().forEach(event -> {                                
                                 if (isProperties) {
                                     // if modified re-calculate version
                                     LOGGER.fine("Liberty properties file (" + watchFile + ") has been modified: "
                                     + event.context());
                                     libertyWorkspace.setLibertyInstalled(false);
-                                } else {
-                                    // if modified, re-check container status
+                                } else if (((Path)event.context()).toString().endsWith("-liberty-devc-metadata.xml")){
+                                    // watch and execute only on metadata files
                                     DevcMetadata devcMetadata = LibertyWorkspace.unmarshalDevcMetadataFile(watchFile);
                                     libertyWorkspace.setContainerAlive(devcMetadata.isContainerAlive());
                                 }
@@ -326,7 +322,7 @@ public class LibertyUtils {
                                     LOGGER.fine("Liberty properties file (" + watchFile + ") has been deleted");
                                     libertyWorkspace.setLibertyInstalled(false);
                                 } else {
-                                    // metadata file deleted
+                                    // build directory deleted
                                     libertyWorkspace.setContainerAlive(false);
                                 }
                             }
