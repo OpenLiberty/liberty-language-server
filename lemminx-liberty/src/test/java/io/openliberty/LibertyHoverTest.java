@@ -34,6 +34,25 @@ public class LibertyHoverTest {
         }
 
         @Test
+        public void testFeatureHoverTrim() throws BadLocationException {
+
+                String serverXML = String.join(newLine, //
+                                "<server description=\"Sample Liberty server\">", //
+                                "       <featureManager>", //
+                                "               <feature>j|axrs-2.1 </feature>", //
+                                "       </featureManager>", //
+                                "</server>" //
+                );
+
+                XMLAssert.assertHover(serverXML, serverXMLURI,
+                                "This feature enables support for Java API for RESTful Web Services v2.1.  "
+                                                + "JAX-RS annotations can be used to define web service clients and endpoints that comply with the REST architectural style. "
+                                                + "Endpoints are accessed through a common interface that is based on the HTTP standard methods.",
+                                r(2, 24, 2, 34));
+
+        }
+
+        @Test
         public void testXSDSchemaHover() throws BadLocationException, IOException {
                 String serverXSDURI = SERVER_XSD_RESOURCE.getDeployedPath().toUri().toString().replace("///", "/");
 

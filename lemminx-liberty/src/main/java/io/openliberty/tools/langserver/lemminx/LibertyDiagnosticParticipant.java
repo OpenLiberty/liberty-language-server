@@ -81,7 +81,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
             // skip nodes that do not have any text value (ie. comments)
             if (featureTextNode != null && featureTextNode.getTextContent() != null) {
-                String featureName = featureTextNode.getTextContent();
+                String featureName = featureTextNode.getTextContent().trim();
                 // if the feature is not a user defined feature and the feature does not exist in the list of
                 // supported features show a "Feature does not exist" diagnostic
                 if (!featureName.startsWith("usr:") && !FeatureService.getInstance().featureExists(featureName, libertyVersion, requestDelay, domDocument.getDocumentURI())) {

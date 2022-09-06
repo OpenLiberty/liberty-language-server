@@ -71,6 +71,19 @@ public class LibertyDiagnosticTest {
     }
 
     @Test
+    public void testTrimmedFeatureDiagnostic() {
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>jaxrs-2.1 </feature>",
+                "       </featureManager>", //
+                "</server>" //
+        );
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, null);
+    }
+
+    @Test
     public void testDiagnosticsForInclude() throws IOException {
         // LibertyWorkspace must be initialized
         List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
