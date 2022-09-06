@@ -1,3 +1,15 @@
+/*******************************************************************************
+* Copyright (c) 2022 IBM Corporation and others.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Eclipse Public License v. 2.0 which is available at
+* http://www.eclipse.org/legal/epl-2.0.
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*     IBM Corporation - initial API and implementation
+*******************************************************************************/
 package io.openliberty.tools.langserver.lemminx;
 
 import java.util.List;
@@ -24,14 +36,14 @@ public class LibertyDocumentLinkParticipant implements IDocumentLinkParticipant 
 
     @Override
     public void findDocumentLinks(DOMDocument document, List<DocumentLink> links) {
-
-        if (!LibertyUtils.isConfigXMLFile(document))
+        if (!LibertyUtils.isConfigXMLFile(document)) {
             return;
+        }
 
-        List<DOMNode> childNodes = document.getDocumentElement().getChildren();
+        List<DOMNode> nodes = document.getDocumentElement().getChildren();
 
         // collect all <include> nodes that are children of the document element
-        List<DOMNode> includeDomNodes = childNodes.stream().filter(n -> n.getNodeName().equals("include"))
+        List<DOMNode> includeDomNodes = nodes.stream().filter(n -> n.getNodeName().equals("include"))
                 .collect(Collectors.toList());
 
         for (DOMNode includeNode : includeDomNodes) {
