@@ -104,13 +104,10 @@ public class PropertiesValidationResult {
             diagnosticType = ParserFileHelperUtil.isBootstrapPropertiesFile(textDocumentItem) ? 
                                             "INVALID_PROPERTY_INTEGER_RANGE" : "INVALID_VARIABLE_INTEGER_RANGE";
         } else if (ServerPropertyValues.usesPackageNames(property)) { // defines packages
-            LOGGER.info("Checking osgi value for proper package names list. Value: " + value);
+            // simple check for comma-delimited list of Java packages
             Pattern packageList = Pattern.compile("^([a-z]+(\\.[a-z][a-z0-9]*)*)(,[a-z]+(\\.[a-z][a-z0-9]*)*)*$");
             Matcher matcher = packageList.matcher(value);
-            if (matcher.find()) {
-                LOGGER.info("Packages are aight");
-            } else {
-                LOGGER.info("Packages are not formatted correctly");
+            if (!matcher.find()) {
                 hasErrors = true;
             }
             diagnosticType = "INVALID_PACKAGE_LIST_FORMAT";
