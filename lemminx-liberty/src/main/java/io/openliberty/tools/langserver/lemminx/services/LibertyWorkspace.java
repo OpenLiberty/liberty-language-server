@@ -26,7 +26,12 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.JAXBException;
+import javax.xml.bind.Unmarshaller;
+
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
+import io.openliberty.tools.langserver.lemminx.models.settings.DevcMetadata;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 public class LibertyWorkspace {
@@ -37,6 +42,10 @@ public class LibertyWorkspace {
     private boolean isLibertyInstalled;
     private List<Feature> installedFeatureList;
     private Set<String> configFiles;
+
+    // devc vars
+    private String containerName;
+    private boolean containerAlive;
 
     /**
      * Model of a Liberty Workspace. Each workspace indicates the
@@ -51,6 +60,8 @@ public class LibertyWorkspace {
         this.libertyRuntime = null;
         this.isLibertyInstalled = false;
         this.installedFeatureList = new ArrayList<Feature>();
+        this.containerName = null;
+        this.containerAlive = false;
 
         this.configFiles = new HashSet<String>();
         initConfigFileList();
@@ -59,7 +70,7 @@ public class LibertyWorkspace {
     public String getWorkspaceString() {
         return this.workspaceFolderURI;
     }
-    
+
     public URI getWorkspaceURI() {
         return URI.create(this.workspaceFolderURI);
     }
@@ -75,11 +86,11 @@ public class LibertyWorkspace {
     public String getLibertyVersion() {
         return this.libertyVersion;
     }
-    
+
     public void setLibertyRuntime(String libertyRuntime) {
         this.libertyRuntime = libertyRuntime;
     }
-    
+
     public String getLibertyRuntime() {
         return libertyRuntime;
     }
@@ -100,10 +111,71 @@ public class LibertyWorkspace {
         this.installedFeatureList = installedFeatureList;
     }
 
-    public void initConfigFileList() {
+    public String getContainerName() {
+        return containerName;
+    }
+
+    public void setContainerName(String containerName) {
+        this.containerName = containerName;
+    }
+
+    public boolean isContainerAlive() {
+        return this.containerAlive;
+    }
+
+    public void setContainerAlive(boolean containerAlive) {
+        this.containerAlive = containerAlive;
+    }
+
+    /**
+     * Return the path of the first *-liberty-devc-metadata.xml 
+     * in the workspace with a running container
+     * @return Path of *-liberty-devc-metadata.xml
+     */
+    public Path findDevcMetadata() {
         try {
-            List<Path> serverXmlList = Files.find(Paths.get(getWorkspaceURI()), Integer.MAX_VALUE, (filePath, fileAttributes) -> 
-                    LibertyUtils.isServerXMLFile(filePath.toString()))
+            List<Path> metaDataList = Files
+                    .find(Paths.get(getWorkspaceURI()), Integer.MAX_VALUE,
+                            (filePath, fileAttributes) -> filePath.toString().endsWith("-liberty-devc-metadata.xml"))
+                    .collect(Collectors.toList());
+            for (Path metaDataFile : metaDataList) {
+                DevcMetadata devcMetadata = unmarshalDevcMetadataFile(metaDataFile);
+                if (devcMetadata.isContainerAlive()) {
+                    setContainerName(devcMetadata.getContainerName());
+                    setContainerAlive(true);
+                    return metaDataFile;
+                }
+            }
+            setContainerAlive(false);
+            return null;
+        } catch (IOException e) {
+            // workspace URI does not exist
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    /**
+     * Helper method to unmarshal/read the provided liberty-devc-metadata file.
+     * @param devcMetadataFile
+     * @return DevcMetadata object
+     */
+    public static DevcMetadata unmarshalDevcMetadataFile(Path devcMetadataFile) {
+        try {
+            JAXBContext jaxbContext = JAXBContext.newInstance(DevcMetadata.class);
+            Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+            return (DevcMetadata)jaxbUnmarshaller.unmarshal(devcMetadataFile.toFile());
+        } catch (JAXBException e) {
+            // LOGGER.warning("Unable to unmarshal the devc metadata file: " + devcMetadataFile.toString());
+            return null;
+        }
+    }
+
+    private void initConfigFileList() {
+        try {
+            List<Path> serverXmlList = Files
+                    .find(Paths.get(getWorkspaceURI()), Integer.MAX_VALUE,
+                            (filePath, fileAttributes) -> LibertyUtils.isServerXMLFile(filePath.toString()))
                     .collect(Collectors.toList());
             for (Path serverXml : serverXmlList) {
                 scanForConfigLocations(serverXml);
@@ -115,7 +187,7 @@ public class LibertyWorkspace {
     }
 
     // TODO: or use DOM
-    public void scanForConfigLocations(Path filePath) {
+    private void scanForConfigLocations(Path filePath) {
         try {
             String content = new String(Files.readAllBytes(filePath));
             // [^<] = All characters, including whitespaces/newlines, not equivalent to '<'
@@ -141,7 +213,7 @@ public class LibertyWorkspace {
     public boolean hasConfigFile(String fileString) {
         try {
             fileString = fileString.startsWith("file:") ? 
-                    new File(URI.create(fileString)).getCanonicalPath() : 
+                    new File(URI.create(fileString)).getCanonicalPath() :
                     new File(fileString).getCanonicalPath();
             return this.configFiles.contains(fileString);
         } catch (IOException e) {

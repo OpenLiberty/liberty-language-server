@@ -1,0 +1,5 @@
+<?xml version="1.0" ?>
+<devcModeMetaData>
+    <containerName>liberty-dev</containerName>
+    <containerAlive>false</containerAlive>
+</devcModeMetaData>
