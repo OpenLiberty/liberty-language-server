@@ -51,6 +51,10 @@ public class PropertiesValidationResult {
         return result;
     }
 
+    /**
+     * Raises hasErrors flag if invalid value is detected.
+     */
+    // Note: If setting hasErrors to true, MUST set diagnosticType as well for diagnostic message retrieval.
     public void validateServerProperty() {
         if (entry.isComment()) {
             return;
@@ -99,6 +103,17 @@ public class PropertiesValidationResult {
             }
             diagnosticType = ParserFileHelperUtil.isBootstrapPropertiesFile(textDocumentItem) ? 
                                             "INVALID_PROPERTY_INTEGER_RANGE" : "INVALID_VARIABLE_INTEGER_RANGE";
+        } else if (ServerPropertyValues.usesPackageNames(property)) { // defines packages
+            LOGGER.info("Checking osgi value for proper package names list. Value: " + value);
+            Pattern packageList = Pattern.compile("^([a-z]+(\\.[a-z][a-z0-9]*)*)(,[a-z]+(\\.[a-z][a-z0-9]*)*)*$");
+            Matcher matcher = packageList.matcher(value);
+            if (matcher.find()) {
+                LOGGER.info("Packages are aight");
+            } else {
+                LOGGER.info("Packages are not formatted correctly");
+                hasErrors = true;
+            }
+            diagnosticType = "INVALID_PACKAGE_LIST_FORMAT";
         }
         return;
     }

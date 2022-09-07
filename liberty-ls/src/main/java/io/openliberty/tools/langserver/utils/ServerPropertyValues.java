@@ -108,6 +108,10 @@ public class ServerPropertyValues {
         return key.endsWith("purgeMinTime");
     }
 
+    public static boolean usesPackageNames(String key) {
+        return key.equals("org.osgi.framework.bootdelegation");
+    }
+
     public static List<String> getValidValues(LibertyTextDocument tdi, String key) {
         if (ParserFileHelperUtil.isBootstrapPropertiesFile(tdi)) {
             return predefinedBootstrapValues.getOrDefault(key, Collections.emptyList());
