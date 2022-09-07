@@ -53,7 +53,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
 
 		// if we are hovering over text inside a <feature> element
 		if (LibertyConstants.FEATURE_ELEMENT.equals(parentElement.getTagName())) {
-			String featureName = request.getNode().getTextContent();
+			String featureName = request.getNode().getTextContent().trim();
 			return getHoverFeatureDescription(featureName, request.getXMLDocument());
 		}
 
