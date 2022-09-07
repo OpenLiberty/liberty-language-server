@@ -105,7 +105,7 @@ public class PropertiesValidationResult {
                                             "INVALID_PROPERTY_INTEGER_RANGE" : "INVALID_VARIABLE_INTEGER_RANGE";
         } else if (ServerPropertyValues.usesPackageNames(property)) { // defines packages
             // simple check for comma-delimited list of Java packages
-            Pattern packageList = Pattern.compile("^([a-z]+(\\.[a-z][a-z0-9]*)*)(,[a-z]+(\\.[a-z][a-z0-9]*)*)*$");
+            Pattern packageList = Pattern.compile("^([a-z_]+((\\.[a-z]|\\._[0-9])[a-z0-9_]*)*)(,[a-z_]+((\\.[a-z]|\\._[0-9])[a-z0-9_]*)*)*$");
             Matcher matcher = packageList.matcher(value);
             if (!matcher.find()) {
                 hasErrors = true;

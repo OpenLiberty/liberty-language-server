@@ -73,7 +73,6 @@ public class ServerPropertyValues {
         );
     }};
 
-    // TODO: it seems specifying Integers above MAX_VALUE breaks all diagnostics...
     private static HashMap<String, Range<Integer>> integerRangeValues = new HashMap<String, Range<Integer>>() {{
         put("WLP_DEBUG_ADDRESS", Range.between(1,65535));
         put("default.http.port", Range.between(1,65535));

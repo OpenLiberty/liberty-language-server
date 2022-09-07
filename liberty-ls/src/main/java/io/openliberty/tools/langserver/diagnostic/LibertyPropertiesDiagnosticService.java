@@ -78,6 +78,8 @@ public class LibertyPropertiesDiagnosticService  {
         if (validationResult.hasErrors()) {
             String property = validationResult.getKey();
             String messageTemplate = DiagnosticMessages.getString(validationResult.getDiagnosticType());
+            
+            // Currently the last arg (getIntegerRange) is only used for the Integer messages which use {2}. Otherwise null is passed and is ignored by the other messages.
             String message = MessageFormat.format(messageTemplate, validationResult.getValue(), property, ServerPropertyValues.getIntegerRange(property));
             lspDiagnostics.add(new Diagnostic(computeRange(validationResult, lineContentInError, validationResult.getValue()), message));
         }
