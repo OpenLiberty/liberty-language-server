@@ -17,12 +17,36 @@
         <lsp4j.version>0.14.0</lsp4j.version>
     </properties>
 
-    <scm>
-        <connection>scm:git:git@github.com:OpenLiberty/liberty-language-server.git</connection>
-        <developerConnection>scm:git:git@github.com:OpenLiberty/liberty-language-server.git</developerConnection>
-        <url>git@github.com:OpenLiberty/liberty-language-server.git</url>
-        <tag>HEAD</tag>
-    </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.eclipse.lsp4j</groupId>
+      <artifactId>org.eclipse.lsp4j</artifactId>
+      <version>${lsp4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.eclipse.lsp4j</groupId>
+      <artifactId>org.eclipse.lsp4j.jsonrpc</artifactId>
+      <version>${lsp4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.12.0</version>
+    </dependency>
+    <dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <version>4.11</version>
+      <scope>test</scope>
+    </dependency>
+  </dependencies>
+  
+  <scm>
+      <connection>scm:git:git@github.com:OpenLiberty/liberty-language-server.git</connection>
+      <developerConnection>scm:git:git@github.com:OpenLiberty/liberty-language-server.git</developerConnection>
+      <url>git@github.com:OpenLiberty/liberty-language-server.git</url>
+      <tag>HEAD</tag>
+  </scm>
 
 <distributionManagement>
     <snapshotRepository>

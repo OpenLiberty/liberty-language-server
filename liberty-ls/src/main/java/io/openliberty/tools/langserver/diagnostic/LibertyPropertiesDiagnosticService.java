@@ -47,7 +47,7 @@ public class LibertyPropertiesDiagnosticService  {
             int lineNumber = 0;
             try {
                 while ((line=br.readLine()) != null) {
-                    PropertiesValidationResult validationResult = ServerPropertyValues.validateServerProperty(line, openedDocument);
+                    PropertiesValidationResult validationResult = PropertiesValidationResult.validateServerProperty(line, openedDocument);
                     if (validationResult.hasErrors()) {
                         validationResult.setLineNumber(lineNumber);
                         errors.put(line, validationResult);
@@ -76,8 +76,11 @@ public class LibertyPropertiesDiagnosticService  {
             String lineContentInError) {
         List<Diagnostic> lspDiagnostics = new ArrayList<>();
         if (validationResult.hasErrors()) {
-            String messageTemplate = DiagnosticMessages.getString(validationResult.getInvalidValueMessageTemplate());
-            String message = MessageFormat.format(messageTemplate, validationResult.getValue(), validationResult.getKey());
+            String property = validationResult.getKey();
+            String messageTemplate = DiagnosticMessages.getString(validationResult.getDiagnosticType());
+            
+            // Currently the last arg (getIntegerRange) is only used for the Integer messages which use {2}. Otherwise null is passed and is ignored by the other messages.
+            String message = MessageFormat.format(messageTemplate, validationResult.getValue(), property, ServerPropertyValues.getIntegerRange(property));
             lspDiagnostics.add(new Diagnostic(computeRange(validationResult, lineContentInError, validationResult.getValue()), message));
         }
         return lspDiagnostics;
@@ -92,7 +95,7 @@ public class LibertyPropertiesDiagnosticService  {
      */
     private Range computeRange(PropertiesValidationResult validationResult, String lineContentInError, String value) {
         int startCharacter, endCharacter;
-        int indexOfValue = lineContentInError.indexOf(value);
+        int indexOfValue = lineContentInError.lastIndexOf(value);
         if (indexOfValue != -1) {
             startCharacter = indexOfValue;
             endCharacter = indexOfValue + value.length();

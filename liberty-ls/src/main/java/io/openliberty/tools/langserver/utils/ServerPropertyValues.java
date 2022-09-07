@@ -16,8 +16,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.apache.commons.lang3.Range;
+
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
-import io.openliberty.tools.langserver.model.propertiesfile.PropertiesEntryInstance;
 
 /**
  * Maps property keys with their list of valid values for server.env and bootstrap.properties
@@ -28,7 +29,7 @@ public class ServerPropertyValues {
     private final static List<String> BOOLEAN_VALUES_DEFAULT_FALSE = Arrays.asList("false", "true");
     private final static List<String> YES_NO_VALUES = Arrays.asList("y", "n");
     
-    private static HashMap<String, List<String>> validServerValues = new HashMap<String, List<String>>() {{
+    private static HashMap<String, List<String>> predefinedServerValues = new HashMap<String, List<String>>() {{
         put("WLP_DEBUG_SUSPEND", YES_NO_VALUES); // default yes
         put("WLP_DEBUG_REMOTE", YES_NO_VALUES); // default undefined/disabled, but will preselect "y" to enable
         
@@ -40,7 +41,7 @@ public class ServerPropertyValues {
         put("WLP_LOGGING_APPS_WRITE_JSON", BOOLEAN_VALUES_DEFAULT_FALSE); //default false
     }};
 
-    private static HashMap<String, List<String>> validBootstrapValues = new HashMap<String, List<String>>() {{
+    private static HashMap<String, List<String>> predefinedBootstrapValues = new HashMap<String, List<String>>() {{
         put("com.ibm.ws.logging.copy.system.streams", BOOLEAN_VALUES_DEFAULT_TRUE); // default true
         put("com.ibm.ws.logging.newLogsOnStart", BOOLEAN_VALUES_DEFAULT_TRUE); // default true
         put("com.ibm.ws.logging.isoDateFormat", BOOLEAN_VALUES_DEFAULT_FALSE); // default false
@@ -51,8 +52,8 @@ public class ServerPropertyValues {
         EquivalentProperties.getBootstrapKeys().forEach(
             bskey -> {
                 String serverEnvEquivalent = EquivalentProperties.getEquivalentProperty(bskey);
-                if(validServerValues.containsKey(serverEnvEquivalent)) {
-                    this.put(bskey, validServerValues.get(serverEnvEquivalent));
+                if(predefinedServerValues.containsKey(serverEnvEquivalent)) {
+                    this.put(bskey, predefinedServerValues.get(serverEnvEquivalent));
                 }
             }
         );
@@ -72,20 +73,49 @@ public class ServerPropertyValues {
         );
     }};
 
-    public static boolean canValidateKeyValues(LibertyTextDocument tdi, String key) {
+    private static HashMap<String, Range<Integer>> integerRangeValues = new HashMap<String, Range<Integer>>() {{
+        put("WLP_DEBUG_ADDRESS", Range.between(1,65535));
+        put("default.http.port", Range.between(1,65535));
+        put("default.https.port", Range.between(1,65535));
+        put("command.port", Range.between(-1,65535));
+        put("server.start.wait.time", Range.between(0, Integer.MAX_VALUE));
+        put("osgi.console", Range.between(1,65535));
+        put("com.ibm.ws.logging.max.files", Range.between(0, Integer.MAX_VALUE));
+        put("com.ibm.ws.logging.max.file.size", Range.between(0, Integer.MAX_VALUE));
+        put("com.ibm.hpel.log.purgeMaxSize", Range.between(0, Integer.MAX_VALUE));
+        put("com.ibm.hpel.log.purgeMinTime", Range.between(0, Integer.MAX_VALUE));
+        put("com.ibm.hpel.log.fileSwitchTime", Range.between(0, 23));
+        put("com.ibm.hpel.trace.purgeMaxSize", Range.between(0, Integer.MAX_VALUE));
+        put("com.ibm.hpel.trace.purgeMinTime", Range.between(0, Integer.MAX_VALUE));
+        put("com.ibm.hpel.trace.fileSwitchTime", Range.between(0, 23));
+    }};
+
+    public static boolean usesPredefinedValues(LibertyTextDocument tdi, String key) {
         if (ParserFileHelperUtil.isBootstrapPropertiesFile(tdi)) {
-            return validBootstrapValues.containsKey(key);
+            return predefinedBootstrapValues.containsKey(key);
         } else if (ParserFileHelperUtil.isServerEnvFile(tdi)) {
-            return validServerValues.containsKey(key);
+            return predefinedServerValues.containsKey(key);
         }
         return false;
     }
 
+    public static boolean usesIntegerRangeValue(String key) {
+        return integerRangeValues.containsKey(key);
+    }
+
+    public static boolean usesTimeUnit(String key) {
+        return key.endsWith("purgeMinTime");
+    }
+
+    public static boolean usesPackageNames(String key) {
+        return key.equals("org.osgi.framework.bootdelegation");
+    }
+
     public static List<String> getValidValues(LibertyTextDocument tdi, String key) {
         if (ParserFileHelperUtil.isBootstrapPropertiesFile(tdi)) {
-            return validBootstrapValues.getOrDefault(key, Collections.emptyList());
+            return predefinedBootstrapValues.getOrDefault(key, Collections.emptyList());
         } else if (ParserFileHelperUtil.isServerEnvFile(tdi)) {
-            return validServerValues.getOrDefault(key, Collections.emptyList());
+            return predefinedServerValues.getOrDefault(key, Collections.emptyList());
         }
         return Collections.emptyList();
     }
@@ -94,15 +124,7 @@ public class ServerPropertyValues {
         return caseSensitiveProperties.contains(key);
     }
 
-    /**
-     * Reads input line, parses key and value. Checks if value is valid for the given key.
-     * @param line
-     * @return True if key has valid value, otherwise false
-     */
-    public static PropertiesValidationResult validateServerProperty(String line, LibertyTextDocument textDocumentItem) {
-        PropertiesEntryInstance entry = new PropertiesEntryInstance(line, textDocumentItem);
-        PropertiesValidationResult result = new PropertiesValidationResult(entry);
-        result.validateServerProperty();
-        return result;
+    public static Range<Integer> getIntegerRange(String key) {
+        return integerRangeValues.get(key);
     }
 }
