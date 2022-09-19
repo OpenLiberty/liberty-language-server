@@ -143,4 +143,26 @@
             </plugin>
         </plugins>
     </build>
+    <repositories>
+        <repository>
+          <id>lemminx-releases</id>
+          <url>https://repo.eclipse.org/content/repositories/lemminx-releases/</url>
+          <snapshots>
+            <enabled>false</enabled>
+          </snapshots>
+          <releases>
+            <enabled>true</enabled>
+          </releases>
+        </repository>
+        <repository>
+          <id>lemminx-snapshots</id>
+          <url>https://repo.eclipse.org/content/repositories/lemminx-snapshots/</url>
+          <releases>
+            <enabled>false</enabled>
+          </releases>
+          <snapshots>
+            <enabled>true</enabled>
+          </snapshots>
+        </repository>
+      </repositories>
 </project>

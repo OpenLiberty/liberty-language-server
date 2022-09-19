@@ -17,13 +17,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.eclipse.lemminx.dom.DOMDocument;
-import org.eclipse.lemminx.services.extensions.ICodeActionParticipant;
-import org.eclipse.lemminx.services.extensions.IComponentProvider;
-import org.eclipse.lemminx.settings.SharedSettings;
+import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionParticipant;
+import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionRequest;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 import io.openliberty.tools.langserver.lemminx.codeactions.AddAttribute;
 import io.openliberty.tools.langserver.lemminx.codeactions.CreateFile;
@@ -38,19 +36,19 @@ public class LibertyCodeActionParticipant implements ICodeActionParticipant {
     }
 
     @Override
-    public void doCodeAction(Diagnostic diagnostic, Range range, DOMDocument document, List<CodeAction> codeActions,
-            SharedSettings sharedSettings, IComponentProvider componentProvider) {
+    public void doCodeAction(ICodeActionRequest request, List<CodeAction> codeActions, CancelChecker cancelChecker) {
+        Diagnostic diagnostic = request.getDiagnostic();
         if (diagnostic == null || diagnostic.getCode() == null || !diagnostic.getCode().isLeft()) {
             return;
         }
-        registerCodeActions(sharedSettings);
+        registerCodeActions();
         ICodeActionParticipant participant = codeActionParticipants.get(diagnostic.getCode().getLeft());
         if (participant != null) {
-            participant.doCodeAction(diagnostic, range, document, codeActions, sharedSettings, componentProvider);
+            participant.doCodeAction(request, codeActions, cancelChecker);
         }
     }
 
-    private void registerCodeActions(SharedSettings sharedSettings) {
+    private void registerCodeActions() {
         if (codeActionParticipants.isEmpty()) {
             codeActionParticipants.put(LibertyDiagnosticParticipant.MISSING_FILE_CODE, new CreateFile());
             codeActionParticipants.put(LibertyDiagnosticParticipant.NOT_OPTIONAL_CODE, new EditAttribute());
