@@ -22,8 +22,6 @@ import org.eclipse.lsp4j.launch.LSPLauncher.Builder;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
 
-import io.openliberty.tools.langserver.api.LibertyLanguageClientAPI;
-
 public class LibertyLanguageServerLauncher {
     public static void main(String[] args) {
         LibertyLanguageServer server = new LibertyLanguageServer();
@@ -51,7 +49,7 @@ public class LibertyLanguageServerLauncher {
      */
     public static Launcher<LanguageClient> createServerLauncher(LanguageServer server, InputStream in, OutputStream out,
         ExecutorService executorService) {
-            return new Builder<LanguageClient>().setLocalService(server).setRemoteInterface(LibertyLanguageClientAPI.class).setInput(in).setOutput(out)
+            return new Builder<LanguageClient>().setLocalService(server).setRemoteInterface(LanguageClient.class).setInput(in).setOutput(out)
                 .setExecutorService(executorService).create();
     }
 }
