@@ -82,8 +82,14 @@ public class Messages {
         }
         
         String filename = textDocument.getUri();
-        // remove completion results that don't contain the query string
-        Predicate<String> filter = s -> (!s.contains(query));
+        // remove completion results that don't contain the query string (case-insensitive search)
+        Predicate<String> filter = s -> {
+            for (int i = s.length() - query.length(); i >= 0; --i) {
+                if (s.regionMatches(true, i, query, 0, query.length()))
+                    return false;
+            }
+            return true;
+        };
         if (filename.contains("server.env")) { // server.env file
             List<String> keys = new ArrayList<String>(serverPropertyKeys);
             keys.removeIf(filter);

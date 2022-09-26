@@ -25,9 +25,9 @@ import io.openliberty.tools.langserver.ls.LibertyTextDocument;
  */
 public class ServerPropertyValues {
     public final static List<String> LOGGING_SOURCE_VALUES = Arrays.asList("message", "trace", "accessLog", "ffdc", "audit");
-    private final static List<String> BOOLEAN_VALUES_DEFAULT_TRUE = Arrays.asList("true", "false");
-    private final static List<String> BOOLEAN_VALUES_DEFAULT_FALSE = Arrays.asList("false", "true");
-    private final static List<String> YES_NO_VALUES = Arrays.asList("y", "n");
+    public final static List<String> BOOLEAN_VALUES_DEFAULT_TRUE = Arrays.asList("true", "false");
+    public final static List<String> BOOLEAN_VALUES_DEFAULT_FALSE = Arrays.asList("false", "true");
+    public final static List<String> YES_NO_VALUES = Arrays.asList("y", "n");
     
     private static HashMap<String, List<String>> predefinedServerValues = new HashMap<String, List<String>>() {{
         put("WLP_DEBUG_SUSPEND", YES_NO_VALUES); // default yes
