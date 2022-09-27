@@ -98,13 +98,8 @@ public class AbstractLibertyLanguageServerTest {
     private InitializeParams getInitParams() throws URISyntaxException {
         InitializeParams params = new InitializeParams();
         params.setProcessId(new Random().nextInt());
-        params.setWorkspaceFolders(getTestResource("/workspace"));
+        // params.setWorkspaceFolders(getTestResource("/workspace"));
         return null;
-    }
-
-    private List<WorkspaceFolder> getTestResource(String name) throws URISyntaxException {
-        WorkspaceFolder workspaceFolder = new WorkspaceFolder(AbstractLibertyLanguageServerTest.class.getResource(name).toURI().toString());
-        return Arrays.asList(workspaceFolder);
     }
 
     private TextDocumentItem createTestTextDocument(String text, String fileSuffix) {
