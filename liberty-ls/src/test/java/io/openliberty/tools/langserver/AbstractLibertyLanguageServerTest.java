@@ -103,7 +103,7 @@ public class AbstractLibertyLanguageServerTest {
     }
 
     private List<WorkspaceFolder> getTestResource(String name) throws URISyntaxException {
-        WorkspaceFolder workspaceFolder = new WorkspaceFolder(LibertyLanguageServerTest.class.getResource(name).toURI().toString());
+        WorkspaceFolder workspaceFolder = new WorkspaceFolder(AbstractLibertyLanguageServerTest.class.getResource(name).toURI().toString());
         return Arrays.asList(workspaceFolder);
     }
 
