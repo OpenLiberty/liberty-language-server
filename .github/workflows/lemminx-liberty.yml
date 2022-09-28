@@ -1,4 +1,4 @@
-name: Java CI - Lemminx Liberty
+name: Java CI - Lemminx Liberty & Liberty Language Server
 
 on:
   push:
@@ -19,6 +19,9 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - name: Build with Maven
+      - name: Build Lemminx Liberty
         working-directory: ./lemminx-liberty
+        run: mvn -B package --file pom.xml
+      - name: Build Liberty Language Server
+        working-directory: ./liberty-ls
         run: mvn -B package --file pom.xml

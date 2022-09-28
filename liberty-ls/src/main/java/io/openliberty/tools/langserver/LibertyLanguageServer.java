@@ -23,13 +23,15 @@ import org.eclipse.lsp4j.InitializedParams;
 import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.services.LanguageClient;
+import org.eclipse.lsp4j.services.LanguageClientAware;
 import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
 
-public class LibertyLanguageServer implements LanguageServer {
+public class LibertyLanguageServer extends AbstractLanguageServer implements LanguageServer, LanguageClientAware {
 
+    public static final String LANGUAGE_ID = "LANGUAGE_ID_LIBERTY";
     private static final Logger LOGGER = Logger.getLogger(LibertyLanguageServer.class.getName());
 
     private final WorkspaceService workspaceService;
@@ -77,13 +79,19 @@ public class LibertyLanguageServer implements LanguageServer {
     }
 
     @Override
+    public void connect(LanguageClient client) {
+        this.languageClient = client;
+    }
+
+    @Override
     public CompletableFuture<Object> shutdown() {
-        // TODO Auto-generated method stub
-        return null;
+        super.shutdownServer();
+        return CompletableFuture.completedFuture(new Object());
     }
 
     @Override
     public void exit() {
+        super.stopServer();
         System.exit(0);
     }
 

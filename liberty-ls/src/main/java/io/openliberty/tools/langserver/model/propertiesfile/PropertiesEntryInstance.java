@@ -95,7 +95,7 @@ public class PropertiesEntryInstance {
             if (propertyValueInstance.toString() != null && !isOnEntryKey(position)) {
                 return propertyValueInstance.getCompletions(position);
             } 
-            return propertyKeyInstance.getCompletions(position);
+            return propertyKeyInstance.getCompletions(this.getKey(), position);
         }
         return CompletableFuture.completedFuture(Collections.emptyList());
     }

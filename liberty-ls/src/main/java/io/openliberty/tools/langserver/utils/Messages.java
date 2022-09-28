@@ -9,11 +9,13 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.utils;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
@@ -80,10 +82,22 @@ public class Messages {
         }
         
         String filename = textDocument.getUri();
+        // remove completion results that don't contain the query string (case-insensitive search)
+        Predicate<String> filter = s -> {
+            for (int i = s.length() - query.length(); i >= 0; --i) {
+                if (s.regionMatches(true, i, query, 0, query.length()))
+                    return false;
+            }
+            return true;
+        };
         if (filename.contains("server.env")) { // server.env file
-            return serverPropertyKeys;
+            List<String> keys = new ArrayList<String>(serverPropertyKeys);
+            keys.removeIf(filter);
+            return keys;
         } else if (filename.contains("bootstrap.properties")) { // bootstrap.properties file
-            return bootstrapPropertyKeys;
+            List<String> keys = new ArrayList<String>(bootstrapPropertyKeys);
+            keys.removeIf(filter);
+            return keys;
         } else {
             return Collections.emptyList();
         }

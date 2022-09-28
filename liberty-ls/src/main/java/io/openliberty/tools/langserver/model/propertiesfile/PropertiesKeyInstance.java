@@ -58,8 +58,8 @@ public class PropertiesKeyInstance {
         return CompletableFuture.completedFuture(hover);
     }
 
-    public CompletableFuture<List<CompletionItem>> getCompletions(Position position) {
-        List<String> matches = Messages.getMatchingKeys("", textDocumentItem);
+    public CompletableFuture<List<CompletionItem>> getCompletions(String enteredText, Position position) {
+        List<String> matches = Messages.getMatchingKeys(enteredText, textDocumentItem);
         List<CompletionItem> results = matches.stream().map(s -> new CompletionItem(s)).collect(Collectors.toList());
         return CompletableFuture.completedFuture(results);
     }
