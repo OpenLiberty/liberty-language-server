@@ -38,7 +38,7 @@ public class LibertyWorkspaceIT {
         LibertyProjectsManager.getInstance().setWorkspaceFolders(testWorkspaceFolders);
 
         String schemaFileName = "ol-22.0.0.3.xsd";
-        File schemaFile = new File(LibertyUtils.getTempDir(testWorkspace.getUri()), schemaFileName);
+        File schemaFile = new File(LibertyUtils.getTempDir(LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlFile.toURI().toString())), schemaFileName);
         String serverGenXSDURI = schemaFile.toPath().toUri().toString().replace("///", "/");
 
         String serverXML = String.join(newLine, //

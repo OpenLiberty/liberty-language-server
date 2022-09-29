@@ -82,7 +82,7 @@ public class DockerService {
      * @throws IOException
      */
     public String generateServerSchemaXsdFromContainer(LibertyWorkspace libertyWorkspace) throws IOException {
-        File tempDir = LibertyUtils.getTempDir(libertyWorkspace.getWorkspaceString());
+        File tempDir = LibertyUtils.getTempDir(libertyWorkspace);
         String libertyRuntime = libertyWorkspace.getLibertyRuntime();
         String libertyVersion = libertyWorkspace.getLibertyVersion();
         String xsdFileName = (libertyVersion != null && libertyRuntime != null &&
