@@ -219,7 +219,7 @@ public class LibertyUtils {
                 
                 if (devcOn) {
                     DockerService docker = DockerService.getInstance();
-                    File containerPropertiesFile = new File(getTempDir(libertyWorkspace.getWorkspaceString()), "container.properties");
+                    File containerPropertiesFile = new File(getTempDir(libertyWorkspace), "container.properties");
                     docker.dockerCp(libertyWorkspace.getContainerName(), DockerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH.toString(), containerPropertiesFile.toString());
                     fis = new FileInputStream(containerPropertiesFile);
                 } else {
@@ -253,21 +253,21 @@ public class LibertyUtils {
      * Return temp directory to store generated feature lists and schema. Creates
      * temp directory if it does not exist.
      * 
-     * @param folder WorkspaceFolderURI indicates where to create the temporary
-     *               directory
+     * @param libertyWorkspace LibertyWorkspace where the temporary directory is made
+     *               
      * @return temporary directory File object
      */
-    public static File getTempDir(String workspaceFolderURI) {
-        if (workspaceFolderURI == null) {
+    public static File getTempDir(LibertyWorkspace libertyWorkspace) {
+        if (libertyWorkspace == null) {
             return null;
         }
         try {
-            URI rootURI = new URI(workspaceFolderURI);
-            Path rootPath = Paths.get(rootURI);
-            File file = rootPath.toFile();
-            File libertyLSFolder = new File(file, ".libertyls");
-
-            if (!libertyLSFolder.exists()) {
+            File libertyLSFolder = new File(libertyWorkspace.getDir(), ".libertyls"); //Default to workspaceDir/.libertyls
+            Path pluginConfigFilePath = findFileInWorkspace(libertyWorkspace,Paths.get("liberty-plugin-config.xml"));
+            if (pluginConfigFilePath != null) { //If liberty-plugin-config.xml exists use its parent directory: buildDir/.libertyls
+                libertyLSFolder = new File(pluginConfigFilePath.getParent().toFile(), ".libertyls");
+            }
+            if (libertyLSFolder != null && !libertyLSFolder.exists()) {
                 if (!libertyLSFolder.mkdir()) {
                     return null;
                 }

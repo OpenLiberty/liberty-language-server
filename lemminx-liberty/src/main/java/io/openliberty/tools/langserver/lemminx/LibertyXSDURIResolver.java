@@ -118,7 +118,7 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
      */
     private String generateServerSchemaXsd(LibertyWorkspace libertyWorkspace, Path schemaGenJarPath) {
         //java -jar path/to/ws-schemagen.jar path/to/workspace/.libertyls/libertySchema.xsd
-        File tempDir = LibertyUtils.getTempDir(libertyWorkspace.getWorkspaceURI().toString());
+        File tempDir = LibertyUtils.getTempDir(libertyWorkspace);
 
         //If tempDir is null, issue a warning for the current LibertyWorkspace URI and use the default cached schema file
         if (tempDir == null) {
