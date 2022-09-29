@@ -65,6 +65,9 @@ public class AbstractCompletionTest extends AbstractLibertyLanguageServerTest {
                 String nextItemDetail = nextItem.getDetail();
                 assertNotNull(nextItemDetail);
                 assertTrue("The CompletionItem actual detail: "+nextItemDetail+" did not match expected: "+detail, nextItemDetail.equals(detail));
+
+                CompletionItemKind kind = nextItem.getKind();
+                assertTrue("Unexpected CompletionItemKind: "+kind+" expected: "+CompletionItemKind.Text, kind == CompletionItemKind.Text);
             } else {
                 if (nextItem.getLabel().equals(key)) {
                     String nextItemDetail = nextItem.getDetail();
@@ -74,10 +77,10 @@ public class AbstractCompletionTest extends AbstractLibertyLanguageServerTest {
                 } else {
                     assertNotNull(nextItem.getDetail());
                 }
-            }
-            CompletionItemKind kind = nextItem.getKind();
-            assertTrue("Unexpected CompletionItemKind: "+kind+" expected: "+CompletionItemKind.Text, kind == CompletionItemKind.Text);
 
+                CompletionItemKind kind = nextItem.getKind();
+                assertTrue("Unexpected CompletionItemKind: "+kind+" expected: "+CompletionItemKind.Property, kind == CompletionItemKind.Property);
+            }
         }
         assertTrue(found);
     }
