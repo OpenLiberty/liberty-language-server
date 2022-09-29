@@ -44,6 +44,8 @@ public class ServerEnvCompletionTest extends AbstractCompletionTest {
             "WLP_LOGGING_APPS_WRITE_JSON",
             "WLP_LOGGING_JSON_ACCESS_LOG_FIELDS"
         );
+
+        checkCompletionContainsDetail(completionItems, "WLP_LOGGING_APPS_WRITE_JSON", "When the message log or console is in JSON format, this setting allows applications to write JSON-formatted messages to those destinations, without modification.");
     }
 
     @Test
@@ -72,7 +74,7 @@ public class ServerEnvCompletionTest extends AbstractCompletionTest {
         List<CompletionItem> completionItems = completions.get().getLeft();
         assertEquals(5, completionItems.size());
 
-        checkCompletionsContainAllStrings(completionItems, (String[])ServerPropertyValues.LOGGING_SOURCE_VALUES.toArray());
+        checkCompletionsContainAllStrings(completionItems, ServerPropertyValues.LOGGING_SOURCE_VALUES);
     }
 
     @Test
@@ -82,6 +84,8 @@ public class ServerEnvCompletionTest extends AbstractCompletionTest {
         assertEquals(4, completionItems.size());
 
         checkCompletionsContainAllStrings(completionItems, "DEV", "SIMPLE", "JSON", "TBASIC");
+
+        checkCompletionContainsDetail(completionItems, null, "This setting specifies the required format for the console. Valid values are `dev`, `simple`, or `json` format. By default, consoleFormat is set to `dev`.");
     }
 
     @Test
@@ -99,7 +103,7 @@ public class ServerEnvCompletionTest extends AbstractCompletionTest {
         List<CompletionItem> completionItems = completions.get().getLeft();
         assertEquals(2, completionItems.size());
 
-        checkCompletionsContainAllStrings(completionItems, (String[])ServerPropertyValues.YES_NO_VALUES.toArray());
+        checkCompletionsContainAllStrings(completionItems, ServerPropertyValues.YES_NO_VALUES);
 
     }
     
@@ -109,7 +113,7 @@ public class ServerEnvCompletionTest extends AbstractCompletionTest {
         List<CompletionItem> completionItems = completions.get().getLeft();
         assertEquals(2, completionItems.size());
 
-        checkCompletionsContainAllStrings(completionItems, (String[])ServerPropertyValues.BOOLEAN_VALUES_DEFAULT_TRUE.toArray());
+        checkCompletionsContainAllStrings(completionItems, ServerPropertyValues.BOOLEAN_VALUES_DEFAULT_TRUE);
     }
 
     protected CompletableFuture<Either<List<CompletionItem>, CompletionList>> getCompletion(String enteredText, Position position) throws URISyntaxException, InterruptedException, ExecutionException {

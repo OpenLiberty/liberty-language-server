@@ -42,6 +42,8 @@ public class BootstrapPropertyCompletionTest extends AbstractCompletionTest {
 
         checkCompletionsContainAllStrings(completionItems, 
             "com.ibm.hpel.log.purgeMaxSize", "com.ibm.hpel.log.purgeMinTime", "com.ibm.hpel.trace.purgeMaxSize", "com.ibm.hpel.trace.purgeMinTime");
+
+        checkCompletionContainsDetail(completionItems, "com.ibm.hpel.log.purgeMaxSize", "Specifies the maximum size for the binary log repository in megabytes. When the value for purgeMaxSize is specified with a value of more than `0`, cleanup based on repository size is enabled, otherwise it is disabled; a value of `0` means no limit. The default value is `50`.");
     }
 
     @Test
@@ -66,7 +68,7 @@ public class BootstrapPropertyCompletionTest extends AbstractCompletionTest {
         List<CompletionItem> completionItems = completions.get().getLeft();
         assertEquals(5, completionItems.size());
 
-        checkCompletionsContainAllStrings(completionItems, (String[])ServerPropertyValues.LOGGING_SOURCE_VALUES.toArray());
+        checkCompletionsContainAllStrings(completionItems, ServerPropertyValues.LOGGING_SOURCE_VALUES);
     }
 
     @Test
@@ -84,7 +86,9 @@ public class BootstrapPropertyCompletionTest extends AbstractCompletionTest {
         List<CompletionItem> completionItems = completions.get().getLeft();
         assertEquals(2, completionItems.size());
 
-        checkCompletionsContainAllStrings(completionItems, (String[])ServerPropertyValues.BOOLEAN_VALUES_DEFAULT_TRUE.toArray());
+        checkCompletionsContainAllStrings(completionItems, ServerPropertyValues.BOOLEAN_VALUES_DEFAULT_TRUE);
+
+        checkCompletionContainsDetail(completionItems, null, "If this setting is set to true, messages that are written to the `System.out` and `System.err` streams are copied to process stdout and stderr streams and so appear in the console.log file. If this setting is set to `false`, those messages are written to configured logs such as the `messages.log` file or `trace.log` file, but they are not copied to stdout and stderr and do not appear in console.log. The default value is `true`.");
     }
 
     @Test
