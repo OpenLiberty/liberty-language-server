@@ -15,6 +15,7 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.lsp4j.CompletionItem;
+import org.eclipse.lsp4j.CompletionItemKind;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.Position;
@@ -61,7 +62,30 @@ public class PropertiesKeyInstance {
     public CompletableFuture<List<CompletionItem>> getCompletions(String enteredText, Position position) {
         List<String> matches = Messages.getMatchingKeys(enteredText, textDocumentItem);
         List<CompletionItem> results = matches.stream().map(s -> new CompletionItem(s)).collect(Collectors.toList());
+        // set hover description as the 'detail' on the CompletionItem
+        setDetailsOnCompletionItems(results, null, false);
         return CompletableFuture.completedFuture(results);
+    }
+
+    // Iterate through the passed in CompletionItem List and do the following:
+    //
+    // * Set the 'detail' to the hover description. If the 'key' is null, use the 'label' from the CompletionItem to 
+    // get the hover description. 
+    // * Set the 'kind' to text. 
+    // * Set the default to the first item in the list if the 'setDefault' parameter is true. 
+    //
+    protected void setDetailsOnCompletionItems(List<CompletionItem> items, String key, boolean setDefault) {
+        boolean defaultSet = false;
+        for (CompletionItem item : items) {
+            if (setDefault && !defaultSet) {
+                item.setPreselect(true);
+                defaultSet = true;
+            }
+            String keyToUse = key == null ? item.getLabel() : key;
+            String desc = Messages.getPropDescription(keyToUse);
+            item.setDetail(desc);
+            item.setKind(CompletionItemKind.Text);
+        }
     }
 
     public List<CompletionItem> getValidValues() {
@@ -70,12 +94,7 @@ public class PropertiesKeyInstance {
         // Preselect the default.
         // This uses the first item in the List as default. 
         // (Check ServerPropertyValues.java) Currently sorted to have confirmed/sensible values as default.
-        try {
-            CompletionItem first = results.get(0);
-            first.setPreselect(true);
-        } catch (IndexOutOfBoundsException e) {
-            // just return empty results
-        }
+        setDetailsOnCompletionItems(results, propertyKey, true);
         return results;
     }
 
