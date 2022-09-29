@@ -84,7 +84,13 @@ public class PropertiesKeyInstance {
             String keyToUse = key == null ? item.getLabel() : key;
             String desc = Messages.getPropDescription(keyToUse);
             item.setDetail(desc);
-            item.setKind(CompletionItemKind.Text);
+            // if setDefault is true, we are dealing with values which are considered text.
+            // otherwise we are dealing with keys which are considered properties.
+            if (setDefault) {
+                item.setKind(CompletionItemKind.Text);
+            } else {
+                item.setKind(CompletionItemKind.Property);
+            }
         }
     }
 
