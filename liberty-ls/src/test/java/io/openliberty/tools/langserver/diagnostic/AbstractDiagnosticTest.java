@@ -9,21 +9,21 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.diagnostic;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.awaitility.Awaitility.await;
-
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.time.Duration;
+import java.util.List;
 
 import org.awaitility.core.ConditionFactory;
+import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
-import org.eclipse.lsp4j.DidSaveTextDocumentParams;
 import org.eclipse.lsp4j.Range;
-import org.eclipse.lsp4j.TextDocumentIdentifier;
 
 import io.openliberty.tools.langserver.AbstractLibertyLanguageServerTest;
 import io.openliberty.tools.langserver.LibertyLanguageServer;
@@ -35,8 +35,20 @@ public class AbstractDiagnosticTest extends AbstractLibertyLanguageServerTest {
 
     protected LibertyLanguageServer libertyLanguageServer;
 
-    protected void checkRange(Range range, int startLine, int startCharacter, int endLine, int endCharacter) {
-        
+    /**
+     * 
+     * @param range
+     * @param startLine
+     * @param startCharacter
+     * @param endCharacter
+     */
+    protected void checkRange(Range range, int startLine, int startCharacter, int endCharacter) {
+        int actualStartLine = range.getStart().getLine();
+        int actualStartChar = range.getStart().getCharacter();
+        int actualEndChar = range.getEnd().getCharacter();
+        assertEquals("Expected diagnostic on line " + startLine + ", but was " + actualStartLine, startLine, actualStartLine);
+        assertEquals("Exepcted diagnostic to start on character " + startCharacter + ", but was " + actualStartChar, startCharacter, actualStartChar);
+        assertEquals("Exepcted diagnostic to end on character " + endCharacter + ", but was " + actualEndChar, endCharacter, actualEndChar);
     }
 
     protected void testDiagnostic(String fileToTest, String extension, int expectedNumberOfErrors) throws FileNotFoundException {
@@ -52,6 +64,14 @@ public class AbstractDiagnosticTest extends AbstractLibertyLanguageServerTest {
 
         createAwait().untilAsserted(() -> assertNotNull(lastPublishedDiagnostics));
         createAwait().untilAsserted(() -> assertEquals(expectedNumberOfErrors, lastPublishedDiagnostics.getDiagnostics().size()));
+
+        checkHasNonEmptyMessage(lastPublishedDiagnostics.getDiagnostics());
+    }
+
+    private void checkHasNonEmptyMessage(List<Diagnostic> diagnostics) {
+        for (Diagnostic diag : diagnostics) {
+            assertFalse(diag.getMessage().isEmpty());
+        }
     }
 
     private ConditionFactory createAwait() {
