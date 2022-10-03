@@ -40,12 +40,12 @@ public class AbstractDiagnosticTest extends AbstractLibertyLanguageServerTest {
         return new Range(new Position(lineNumber, startChar), new Position(lineNumber, endChar));
     }
 
-    protected void testDiagnostic(String fileToTest, String extension, int expectedNumberOfErrors) throws FileNotFoundException {
-        File f = new File("src/test/resources/workspace/diagnostic/" + fileToTest + extension);
-        testDiagnostic(f, extension, expectedNumberOfErrors);
+    protected void testDiagnostic(String fileToTest, int expectedNumberOfErrors) throws FileNotFoundException {
+        File f = new File("src/test/resources/workspace/diagnostic/" + fileToTest);
+        testDiagnostic(f, expectedNumberOfErrors);
     }
 
-    protected void testDiagnostic(File file, String extension, int expectedNumberOfErrors) throws FileNotFoundException {
+    protected void testDiagnostic(File file, int expectedNumberOfErrors) throws FileNotFoundException {
         libertyLanguageServer = initializeLanguageServerWithFilename(new FileInputStream(file), file.toString());
 
         DidOpenTextDocumentParams params = new DidOpenTextDocumentParams(libertyLanguageServer.getTextDocumentService().getOpenedDocument(file.toString()));

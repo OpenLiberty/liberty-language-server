@@ -23,7 +23,7 @@ import org.junit.Test;
 public class BootstrapPropertyDiagnosticTest extends AbstractDiagnosticTest {
     @Test
     public void testBootstrapProperties() throws Exception {
-        testDiagnostic("bootstrap", 6);
+        testDiagnostic("bootstrap.properties", 6);
         List<Diagnostic> diags = lastPublishedDiagnostics.getDiagnostics();
         List<Range> expectedDiagnosticRanges = new ArrayList<Range>();
         // Checking invalid value: com.ibm.ws.logging.console.format=DEVd
@@ -44,9 +44,5 @@ public class BootstrapPropertyDiagnosticTest extends AbstractDiagnosticTest {
             assertTrue("Found diagnostic which the test did not account for: " + diag, found);
         }
         assertEquals("Did not find all the expected diagnostics. These expected ranges were not found: " + expectedDiagnosticRanges.toString(), 0, expectedDiagnosticRanges.size());
-    }
-
-    private void testDiagnostic(String file, int expectedNumberOfErrors) throws FileNotFoundException {
-        super.testDiagnostic(file, ".properties", expectedNumberOfErrors);
     }
 }

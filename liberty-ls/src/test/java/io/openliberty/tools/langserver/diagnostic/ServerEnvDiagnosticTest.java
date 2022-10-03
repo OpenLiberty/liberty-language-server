@@ -16,7 +16,7 @@ public class ServerEnvDiagnosticTest extends AbstractDiagnosticTest {
     @Test
     public void testServerEnv() throws Exception {
         // has invalid, case-sensitive, case-insensitive, and negative port integer values.
-        testDiagnostic("server", 3);
+        testDiagnostic("server.env", 3);
         List<Diagnostic> diags = lastPublishedDiagnostics.getDiagnostics();
         List<Range> expectedDiagnosticRanges = new ArrayList<Range>();
         // Checking invalid value: WLP_LOGGING_CONSOLE_FORMAT=asdf
@@ -31,9 +31,5 @@ public class ServerEnvDiagnosticTest extends AbstractDiagnosticTest {
             assertTrue("Found diagnostic which the test did not account for: " + diag, found);
         }
         assertEquals("Did not find all the expected diagnostics. These expected ranges were not found: " + expectedDiagnosticRanges.toString(), 0, expectedDiagnosticRanges.size());
-    }
-    
-    private void testDiagnostic(String file, int expectedNumberOfErrors) throws FileNotFoundException {
-        super.testDiagnostic(file, ".env", expectedNumberOfErrors);
     }
 }
