@@ -23,6 +23,7 @@ import java.util.List;
 import org.awaitility.core.ConditionFactory;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
+import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
 import io.openliberty.tools.langserver.AbstractLibertyLanguageServerTest;
@@ -35,20 +36,8 @@ public class AbstractDiagnosticTest extends AbstractLibertyLanguageServerTest {
 
     protected LibertyLanguageServer libertyLanguageServer;
 
-    /**
-     * 
-     * @param range
-     * @param startLine
-     * @param startCharacter
-     * @param endCharacter
-     */
-    protected void checkRange(Range range, int startLine, int startCharacter, int endCharacter) {
-        int actualStartLine = range.getStart().getLine();
-        int actualStartChar = range.getStart().getCharacter();
-        int actualEndChar = range.getEnd().getCharacter();
-        assertEquals("Expected diagnostic on line " + startLine + ", but was " + actualStartLine, startLine, actualStartLine);
-        assertEquals("Exepcted diagnostic to start on character " + startCharacter + ", but was " + actualStartChar, startCharacter, actualStartChar);
-        assertEquals("Exepcted diagnostic to end on character " + endCharacter + ", but was " + actualEndChar, endCharacter, actualEndChar);
+    protected Range createRange(int lineNumber, int startChar, int endChar) {
+        return new Range(new Position(lineNumber, startChar), new Position(lineNumber, endChar));
     }
 
     protected void testDiagnostic(String fileToTest, String extension, int expectedNumberOfErrors) throws FileNotFoundException {
