@@ -22,24 +22,8 @@ import org.junit.Test;
 
 public class BootstrapPropertyDiagnosticTest extends AbstractDiagnosticTest {
     @Test
-    public void testInvalidPort() throws Exception {
-        testDiagnostic("invalidport", 1);
-        Diagnostic diag = lastPublishedDiagnostics.getDiagnostics().get(0);
-        // Testing "default.http.port=0" on 2nd line (line 1, char 18-19)
-        checkRange(diag.getRange(), 1, 18, 19);
-    }
-
-    @Test
-    public void testInvalidBoolean() throws Exception {
-        testDiagnostic("invalidBoolean", 1);
-        Diagnostic diag = lastPublishedDiagnostics.getDiagnostics().get(0);
-        // Testing "com.ibm.ws.logging.copy.system.streams=yes" on 1st line (line 0, char 39-42)
-        checkRange(diag.getRange(), 0, 39, 42);
-    }
-
-    @Test
     public void testBootstrapProperties() throws Exception {
-        testDiagnostic("bootstrap", 5);
+        testDiagnostic("bootstrap", 6);
         List<Diagnostic> diags = lastPublishedDiagnostics.getDiagnostics();
         List<Range> expectedDiagnosticRanges = new ArrayList<Range>();
         // Checking invalid value: com.ibm.ws.logging.console.format=DEVd
@@ -52,6 +36,9 @@ public class BootstrapPropertyDiagnosticTest extends AbstractDiagnosticTest {
         expectedDiagnosticRanges.add(new Range(new Position(4, 18), new Position(4, 19)));
         // Checking invalid integer: com.ibm.hpel.log.purgeMaxSize=2147483648
         expectedDiagnosticRanges.add(new Range(new Position(6, 30), new Position(6, 40)));
+        // Checking invalid boolean: com.ibm.ws.logging.copy.system.streams=yes
+        expectedDiagnosticRanges.add(new Range(new Position(7, 39), new Position(7, 42)));
+        
         for (Diagnostic diag: diags) {
             expectedDiagnosticRanges.remove(diag.getRange());
         }
