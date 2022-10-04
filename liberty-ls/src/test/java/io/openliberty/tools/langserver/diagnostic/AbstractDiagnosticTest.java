@@ -13,11 +13,14 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.awaitility.core.ConditionFactory;
@@ -55,6 +58,18 @@ public class AbstractDiagnosticTest extends AbstractLibertyLanguageServerTest {
         createAwait().untilAsserted(() -> assertEquals(expectedNumberOfErrors, lastPublishedDiagnostics.getDiagnostics().size()));
 
         checkHasNonEmptyMessage(lastPublishedDiagnostics.getDiagnostics());
+    }
+
+    protected void checkDiagnosticsContainsRanges(Range... ranges) {
+        List<Diagnostic> diags = lastPublishedDiagnostics.getDiagnostics();
+        List<Range> expectedDiagnosticRanges = new LinkedList<Range>(Arrays.asList(ranges));
+
+        for (Diagnostic diag: diags) {
+            boolean found = expectedDiagnosticRanges.remove(diag.getRange());
+            assertTrue("Found diagnostic which the test did not account for: " + diag, found);
+        }
+        assertEquals("Did not find all the expected diagnostics. These expected ranges were not found: " + expectedDiagnosticRanges.toString(), 0, expectedDiagnosticRanges.size());
+
     }
 
     private void checkHasNonEmptyMessage(List<Diagnostic> diagnostics) {
