@@ -21,9 +21,9 @@ public class ServerEnvDiagnosticTest extends AbstractDiagnosticTest {
         List<Range> expectedDiagnosticRanges = new ArrayList<Range>();
         // Checking invalid value: WLP_LOGGING_CONSOLE_FORMAT=asdf
         expectedDiagnosticRanges.add(createRange(0, 27, 31));
-        // Checking case-sensitive property: WLP_LOGGING_CONSOLE_SOURCE=messagE
+        // Checking invalid case-sensitive property: WLP_LOGGING_CONSOLE_SOURCE=messagE
         expectedDiagnosticRanges.add(createRange(2, 27, 34));
-        // Checking valid port: WLP_DEBUG_ADDRESS=-2
+        // Checking invalid port: WLP_DEBUG_ADDRESS=-2
         expectedDiagnosticRanges.add(createRange(3, 18, 20));
         
         for (Diagnostic diag: diags) {

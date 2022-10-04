@@ -32,7 +32,7 @@ import io.openliberty.tools.langserver.LibertyLanguageServer;
 public class AbstractDiagnosticTest extends AbstractLibertyLanguageServerTest {
 
     protected static final Duration AWAIT_TIMEOUT = Duration.ofMillis(10000);
-	private static final Duration AWAIT_POLL_INTERVAL = Duration.ofMillis(5);
+    private static final Duration AWAIT_POLL_INTERVAL = Duration.ofMillis(5);
 
     protected LibertyLanguageServer libertyLanguageServer;
 
