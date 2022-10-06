@@ -68,8 +68,20 @@ public class AbstractLibertyLanguageServerTest {
         }
     }
 
+    protected LibertyLanguageServer initializeLanguageServerWithFilename(InputStream stream, String fileName) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(stream))) {
+            return initializeLanguageServerWithFilename(br.lines().collect(Collectors.joining("\n")), fileName);
+        } catch (ExecutionException | InterruptedException | URISyntaxException | IOException e) {
+            return null;
+        }
+    }
+
     private LibertyLanguageServer initializeLanguageServer(String text, String fileSuffix) throws URISyntaxException, InterruptedException, ExecutionException {
         return initializeLanguageServer(fileSuffix, createTestTextDocument(text, fileSuffix));
+    }
+
+    private LibertyLanguageServer initializeLanguageServerWithFilename(String text, String filename) throws URISyntaxException, InterruptedException, ExecutionException {
+        return initializeLanguageServer(filename.substring(filename.lastIndexOf(".")), createTestTextDocumentWithFilename(text, filename));
     }
 
     protected LibertyLanguageServer initializeLanguageServer(String fileSuffix, TextDocumentItem... items) throws URISyntaxException, InterruptedException, ExecutionException {

@@ -30,6 +30,7 @@ import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
+import io.openliberty.tools.langserver.utils.ParserFileHelperUtil;
 import io.openliberty.tools.langserver.utils.PropertiesValidationResult;
 import io.openliberty.tools.langserver.utils.ServerPropertyValues;
 
@@ -41,7 +42,7 @@ public class LibertyPropertiesDiagnosticService  {
 
     public Map<String, PropertiesValidationResult> compute(String text, LibertyTextDocument openedDocument) {
         Map<String, PropertiesValidationResult> errors = new HashMap<>();
-        if (openedDocument.getUri().endsWith("bootstrap.properties") || openedDocument.getUri().endsWith("server.env")) {
+        if (ParserFileHelperUtil.isBootstrapPropertiesFile(openedDocument) || ParserFileHelperUtil.isServerEnvFile(openedDocument)) {
             BufferedReader br = new BufferedReader(new StringReader(text));
             String line = null;
             int lineNumber = 0;
