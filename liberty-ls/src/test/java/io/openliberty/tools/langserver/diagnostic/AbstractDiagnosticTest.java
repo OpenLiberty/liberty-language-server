@@ -56,11 +56,9 @@ public class AbstractDiagnosticTest extends AbstractLibertyLanguageServerTest {
 
         createAwait().untilAsserted(() -> assertNotNull(lastPublishedDiagnostics));
         createAwait().untilAsserted(() -> assertEquals(expectedNumberOfErrors, lastPublishedDiagnostics.getDiagnostics().size()));
-
-        checkHasNonEmptyMessage(lastPublishedDiagnostics.getDiagnostics());
     }
 
-    protected void checkDiagnosticsContainsRanges(Range... ranges) {
+    protected void checkDiagnosticsContainsAllRanges(Range... ranges) {
         List<Diagnostic> diags = lastPublishedDiagnostics.getDiagnostics();
         List<Range> expectedDiagnosticRanges = new LinkedList<Range>(Arrays.asList(ranges));
 
@@ -69,13 +67,17 @@ public class AbstractDiagnosticTest extends AbstractLibertyLanguageServerTest {
             assertTrue("Found diagnostic which the test did not account for: " + diag, found);
         }
         assertEquals("Did not find all the expected diagnostics. These expected ranges were not found: " + expectedDiagnosticRanges.toString(), 0, expectedDiagnosticRanges.size());
-
     }
 
-    private void checkHasNonEmptyMessage(List<Diagnostic> diagnostics) {
-        for (Diagnostic diag : diagnostics) {
+    protected void checkDiagnosticsContainsMessages(String... messages) {
+        List<Diagnostic> diags = lastPublishedDiagnostics.getDiagnostics();
+        List<String> expectedMessages = new LinkedList<String>(Arrays.asList(messages));
+
+        for (Diagnostic diag : diags) {
             assertFalse(diag.getMessage().isEmpty());
+            expectedMessages.remove(diag.getMessage());
         }
+        assertEquals("Did not find all the expected diagnostic messages. These messages were not found: " + expectedMessages.toString(), 0, expectedMessages.size());
     }
 
     private ConditionFactory createAwait() {

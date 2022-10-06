@@ -14,8 +14,8 @@ import org.junit.Test;
 public class BootstrapPropertyDiagnosticTest extends AbstractDiagnosticTest {
     @Test
     public void testBootstrapProperties() throws Exception {
-        testDiagnostic("bootstrap.properties", 6);
-        checkDiagnosticsContainsRanges(
+        testDiagnostic("bootstrap.properties", 7);
+        checkDiagnosticsContainsAllRanges(
             // Checking invalid value: com.ibm.ws.logging.console.format=DEVd
             createRange(0, 34, 38),
             // Checking empty property: com.ibm.ws.logging.console.source=
@@ -27,7 +27,18 @@ public class BootstrapPropertyDiagnosticTest extends AbstractDiagnosticTest {
             // Checking invalid integer: com.ibm.hpel.log.purgeMaxSize=2147483648
             createRange(6, 30, 40),
             // Checking invalid boolean: com.ibm.ws.logging.copy.system.streams=yes
-            createRange(7, 39, 42)
+            createRange(7, 39, 42),
+            // Checking invalid package list: org.osgi.framework.bootdelegation=com.ibm.websphere,com.
+            createRange(8, 34, 56)
+        );
+        checkDiagnosticsContainsMessages(
+            "The value `DEVd` is not valid for the property `com.ibm.ws.logging.console.format`.",
+            "The value `` is not valid for the property `com.ibm.ws.logging.console.source`.",
+            "The value `binaryLogging-1.1` is not valid for the property `websphere.log.provider`.",
+            "The value `0` is not within the valid range `[1..65535]` for the property `default.http.port`.",
+            "The value `2147483648` is not within the valid range `[0..2147483647]` for the property `com.ibm.hpel.log.purgeMaxSize`.",
+            "The value `yes` is not valid for the property `com.ibm.ws.logging.copy.system.streams`.",
+            "This value must be a comma-delimited list of Java packages."
         );
     }
 }
