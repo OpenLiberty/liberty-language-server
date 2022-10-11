@@ -192,6 +192,7 @@ public class LibertyWorkspace {
     // TODO: or use DOM
     private void scanForConfigLocations(Path filePath) {
         try {
+            String workspacePath = this.getDir().getCanonicalPath();
             String content = new String(Files.readAllBytes(filePath));
             // [^<] = All characters, including whitespaces/newlines, not equivalent to '<'
             // [\"\'] = Accept either " or ' as string indicators
@@ -200,7 +201,12 @@ public class LibertyWorkspace {
             Matcher m = Pattern.compile(regex).matcher(content);
             while (m.find()) {
                 // m.group(0) contains whole include element, m.group(1) contains only location value
-                configFiles.add(new File(filePath.getParent().toFile(), m.group(1)).getCanonicalPath());
+                String locationFilePath = new File(filePath.getParent().toFile(), m.group(1)).getCanonicalPath();
+                if (locationFilePath.startsWith(workspacePath)) {
+                    // only recognize files that are in the same Liberty workspace 
+                    // this guards against path traversal vulnerabilities
+                    configFiles.add(locationFilePath);
+                }
             }
         } catch (IOException e) {
             // specified config resources file does not exist
