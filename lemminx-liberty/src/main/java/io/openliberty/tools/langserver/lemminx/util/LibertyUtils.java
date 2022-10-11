@@ -329,12 +329,12 @@ public class LibertyUtils {
                         }
                     }
                 } catch (InterruptedException e) {
-                    LOGGER.warning("Unable to watch properties file(s): " + e.toString());
+                    LOGGER.warning("Unable to watch properties file(s): " + e.getMessage());
                 }
             });
             thread.start();
         } catch (IOException e) {
-            LOGGER.warning("Unable to watch properties file(s): " + e.toString());
+            LOGGER.warning("Unable to watch properties file(s): " + e.getMessage());
         }
     }
 }

@@ -21,6 +21,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -35,6 +36,8 @@ import io.openliberty.tools.langserver.lemminx.models.settings.DevcMetadata;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 public class LibertyWorkspace {
+
+    private static final Logger LOGGER = Logger.getLogger(LibertyWorkspace.class.getName());
 
     private String workspaceFolderURI;
     private String libertyVersion;
@@ -150,7 +153,7 @@ public class LibertyWorkspace {
             return null;
         } catch (IOException e) {
             // workspace URI does not exist
-            e.printStackTrace();
+            LOGGER.warning("Workspace URI does not exist: " + e.getMessage());
             return null;
         }
     }
@@ -182,7 +185,7 @@ public class LibertyWorkspace {
             }
         } catch (IOException e) {
             // workspace URI does not exist
-            e.printStackTrace();
+            LOGGER.warning("Workspace URI does not exist: " + e.getMessage());
         }
     }
 
@@ -202,7 +205,7 @@ public class LibertyWorkspace {
         } catch (IOException e) {
             // specified config resources file does not exist
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.warning("Exception received when scanning for config files: " + e.getMessage());
         }
     }
 
