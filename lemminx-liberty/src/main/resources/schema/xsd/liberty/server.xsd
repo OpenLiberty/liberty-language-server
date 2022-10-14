@@ -24,25 +24,25 @@
                     </xsd:appinfo> 
                 </xsd:annotation> 
             </xsd:element> 
+            <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
+            </xsd:element> 
+            <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
+            </xsd:element> 
             <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
             </xsd:element> 
             <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
             </xsd:element> 
-            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
+            <xsd:element name="web-bnd" type="com.ibm.ws.javaee.dd.webbnd.WebBnd"> 
+            </xsd:element> 
+            <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
+            </xsd:element> 
+            <xsd:element name="application-ext" type="com.ibm.ws.javaee.dd.appext.ApplicationExt"> 
             </xsd:element> 
             <xsd:element name="application-client-bnd" type="com.ibm.ws.javaee.dd.clientbnd.ApplicationClientBnd"> 
             </xsd:element> 
             <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
             </xsd:element> 
-            <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
-            </xsd:element> 
-            <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
-            </xsd:element> 
-            <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
-            </xsd:element> 
-            <xsd:element name="web-bnd" type="com.ibm.ws.javaee.dd.webbnd.WebBnd"> 
-            </xsd:element> 
-            <xsd:element name="application-ext" type="com.ibm.ws.javaee.dd.appext.ApplicationExt"> 
+            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
             </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="location" use="required" type="location"> 
@@ -149,27 +149,27 @@
                     </xsd:appinfo> 
                 </xsd:annotation> 
             </xsd:element> 
+            <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
+            </xsd:element> 
+            <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
+            </xsd:element> 
             <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
             </xsd:element> 
             <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
             </xsd:element> 
-            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
-            </xsd:element> 
-            <xsd:element name="application-client-bnd" type="com.ibm.ws.javaee.dd.clientbnd.ApplicationClientBnd"> 
-            </xsd:element> 
-            <xsd:element name="resourceAdapter" type="com.ibm.ws.jca.embeddedResourceAdapter"> 
-            </xsd:element> 
-            <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
+            <xsd:element name="web-bnd" type="com.ibm.ws.javaee.dd.webbnd.WebBnd"> 
             </xsd:element> 
             <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
             </xsd:element> 
-            <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
-            </xsd:element> 
-            <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
-            </xsd:element> 
-            <xsd:element name="web-bnd" type="com.ibm.ws.javaee.dd.webbnd.WebBnd"> 
-            </xsd:element> 
             <xsd:element name="application-ext" type="com.ibm.ws.javaee.dd.appext.ApplicationExt"> 
+            </xsd:element> 
+            <xsd:element name="resourceAdapter" type="com.ibm.ws.jca.embeddedResourceAdapter"> 
+            </xsd:element> 
+            <xsd:element name="application-client-bnd" type="com.ibm.ws.javaee.dd.clientbnd.ApplicationClientBnd"> 
+            </xsd:element> 
+            <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
+            </xsd:element> 
+            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
             </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="location" use="required" type="location"> 
@@ -435,7 +435,7 @@
     </xsd:complexType> 
     <xsd:complexType name="com.ibm.ws.security.authentication.filter.remoteAddress"> 
         <xsd:annotation> 
-            <xsd:documentation>Specifies the remote host TCP/IP address of the client application that sent the HTTP request, for example, &lt;remoteAddress id="sample" ip="100.100.100.99" matchType="greaterThan"/&gt;.</xsd:documentation> 
+            <xsd:documentation>Specifies the remote host TCP/IP address of the client application that sent the HTTP request, for example, remoteAddress id="sample" ip="100.100.100.99" matchType="greaterThan".</xsd:documentation> 
             <xsd:appinfo> 
                 <ext:label>Remote Address</ext:label> 
             </xsd:appinfo> 
@@ -507,7 +507,7 @@
     </xsd:complexType> 
     <xsd:complexType name="com.ibm.ws.security.authentication.filter.requestUrl"> 
         <xsd:annotation> 
-            <xsd:documentation>Specifies the HTTP request URL, for example, &lt;requestUrl id="sample" urlPattern="/account/checking|/account/saving" matchType="contains"/&gt;.</xsd:documentation> 
+            <xsd:documentation>Specifies the HTTP request URL, for example, requestUrl id="sample" urlPattern="/account/checking|/account/saving" matchType="contains".</xsd:documentation> 
             <xsd:appinfo> 
                 <ext:label>Request URL</ext:label> 
             </xsd:appinfo> 
@@ -569,7 +569,7 @@
     </xsd:complexType> 
     <xsd:complexType name="com.ibm.ws.security.authentication.filter.requestHeader"> 
         <xsd:annotation> 
-            <xsd:documentation>Specifies the HTTP request header attribute name, for example, &lt;requestHeader id="sample" name="email" value="Kevin@yahoo.com|Steven@gmail.com" matchType="contains"/&gt;.</xsd:documentation> 
+            <xsd:documentation>Specifies the HTTP request header attribute name, for example, requestHeader id="sample" name="email" value="Kevin@yahoo.com|Steven@gmail.com" matchType="contains".</xsd:documentation> 
             <xsd:appinfo> 
                 <ext:label>Request Header</ext:label> 
             </xsd:appinfo> 
@@ -587,7 +587,7 @@
         </xsd:attribute> 
         <xsd:attribute name="value" use="optional" type="xsd:string"> 
             <xsd:annotation> 
-                <xsd:documentation>The value attribute specifies the value of the request header. If the value is not specified, then the name attribute is used for matching, for example, &lt;requestHeader id="sample" name="email" matchType="contains"/&gt;.</xsd:documentation> 
+                <xsd:documentation>The value attribute specifies the value of the request header. If the value is not specified, then the name attribute is used for matching, for example, requestHeader id="sample" name="email" matchType="contains".</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>Value</ext:label> 
                 </xsd:appinfo> 
@@ -639,7 +639,7 @@
     </xsd:complexType> 
     <xsd:complexType name="com.ibm.ws.security.authentication.filter.userAgent"> 
         <xsd:annotation> 
-            <xsd:documentation>Specifies the user agent, for example, &lt;userAgent id="sample" agent="Mozilla/5.0" matchType="contains"/&gt;.</xsd:documentation> 
+            <xsd:documentation>Specifies the user agent, for example, userAgent id="sample" agent="Mozilla/5.0" matchType="contains".</xsd:documentation> 
             <xsd:appinfo> 
                 <ext:label>User Agent</ext:label> 
             </xsd:appinfo> 
@@ -701,7 +701,7 @@
     </xsd:complexType> 
     <xsd:complexType name="com.ibm.ws.security.authentication.filter.cookie"> 
         <xsd:annotation> 
-            <xsd:documentation>Specifies the name of the cookie that the client sends in the HTTP request, for example, &lt;cookie id="sample" name="LtpaToken2" matchType="equals"/&gt;. If the cookie element is configured and there is no cookie in the HttpServletRequest, then the authentication filter sets the cookie name to blank.</xsd:documentation> 
+            <xsd:documentation>Specifies the name of the cookie that the client sends in the HTTP request, for example, cookie id="sample" name="LtpaToken2" matchType="equals". If the cookie element is configured and there is no cookie in the HttpServletRequest, then the authentication filter sets the cookie name to blank.</xsd:documentation> 
             <xsd:appinfo> 
                 <ext:label>Cookie</ext:label> 
             </xsd:appinfo> 
@@ -763,7 +763,7 @@
     </xsd:complexType> 
     <xsd:complexType name="com.ibm.ws.security.authentication.filter.webApp"> 
         <xsd:annotation> 
-            <xsd:documentation>Specifies the web application name, for example, &lt;webApp id="sample" name="app1|app2" matchType="notContain"/&gt;.</xsd:documentation> 
+            <xsd:documentation>Specifies the web application name, for example, webApp id="sample" name="app1|app2" matchType="notContain".</xsd:documentation> 
             <xsd:appinfo> 
                 <ext:label>Web Application</ext:label> 
             </xsd:appinfo> 
@@ -825,7 +825,7 @@
     </xsd:complexType> 
     <xsd:complexType name="com.ibm.ws.security.authentication.filter.host"> 
         <xsd:annotation> 
-            <xsd:documentation>Specifies the hostname, for example, &lt;host id="sample" name="host.mycomp.com" matchType="contains"/&gt;.</xsd:documentation> 
+            <xsd:documentation>Specifies the hostname, for example, host id="sample" name="host.mycomp.com" matchType="contains".</xsd:documentation> 
             <xsd:appinfo> 
                 <ext:label>Host</ext:label> 
             </xsd:appinfo> 
@@ -887,7 +887,7 @@
     </xsd:complexType> 
     <xsd:complexType name="com.ibm.ws.security.authentication.filter"> 
         <xsd:annotation> 
-            <xsd:documentation>Specifies a selection rule that represents conditions that are matched against the HTTP request headers. If all conditions are met, the HTTP request is selected for the authentication.</xsd:documentation> 
+            <xsd:documentation>Specifies a selection rule that represents conditions that are matched against the HTTP request headers. If all conditions are met, the HTTP request is selected for the authentication. When the value for the matchType attribute is notContain or contains, the filter supports a piped list of values.</xsd:documentation> 
             <xsd:appinfo> 
                 <ext:label>Authentication Filter</ext:label> 
             </xsd:appinfo> 
@@ -1066,27 +1066,27 @@
                     </xsd:appinfo> 
                 </xsd:annotation> 
             </xsd:element> 
+            <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
+            </xsd:element> 
+            <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
+            </xsd:element> 
             <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
             </xsd:element> 
             <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
             </xsd:element> 
-            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
-            </xsd:element> 
-            <xsd:element name="application-client-bnd" type="com.ibm.ws.javaee.dd.clientbnd.ApplicationClientBnd"> 
-            </xsd:element> 
-            <xsd:element name="resourceAdapter" type="com.ibm.ws.jca.embeddedResourceAdapter"> 
-            </xsd:element> 
-            <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
+            <xsd:element name="web-bnd" type="com.ibm.ws.javaee.dd.webbnd.WebBnd"> 
             </xsd:element> 
             <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
             </xsd:element> 
-            <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
-            </xsd:element> 
-            <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
-            </xsd:element> 
-            <xsd:element name="web-bnd" type="com.ibm.ws.javaee.dd.webbnd.WebBnd"> 
-            </xsd:element> 
             <xsd:element name="application-ext" type="com.ibm.ws.javaee.dd.appext.ApplicationExt"> 
+            </xsd:element> 
+            <xsd:element name="resourceAdapter" type="com.ibm.ws.jca.embeddedResourceAdapter"> 
+            </xsd:element> 
+            <xsd:element name="application-client-bnd" type="com.ibm.ws.javaee.dd.clientbnd.ApplicationClientBnd"> 
+            </xsd:element> 
+            <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
+            </xsd:element> 
+            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
             </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="location" use="required" type="location"> 
@@ -4626,17 +4626,17 @@
                     </xsd:appinfo> 
                 </xsd:annotation> 
             </xsd:element> 
+            <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
+            </xsd:element> 
             <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
-            </xsd:element> 
-            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
-            </xsd:element> 
-            <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
             </xsd:element> 
             <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
             </xsd:element> 
-            <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
-            </xsd:element> 
             <xsd:element name="application-ext" type="com.ibm.ws.javaee.dd.appext.ApplicationExt"> 
+            </xsd:element> 
+            <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
+            </xsd:element> 
+            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
             </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="location" use="required" type="location"> 
@@ -5663,6 +5663,22 @@
                 <xsd:documentation>Maximum number of log files that will be kept, before the oldest file is removed; a value of 0 means no limit.</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>Maximum log files</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="rolloverStartTime" use="optional" default="" type="xsd:string"> 
+            <xsd:annotation> 
+                <xsd:documentation>The scheduled time of day for logs to first roll over. The rollover interval duration begins at rollover start time. Valid values follow a 24-hour ISO-8601 datetime format of HH:MM, where 00:00 represents midnight. Padding zeros are required. If rolloverInterval is specified, the default value of rolloverStartTime is 00:00, midnight. If both rolloverInterval and rolloverStartTime are unspecified, time based log rollover is disabled.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Rollover start time for time based log rollover</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="rolloverInterval" use="optional" default="-1" type="minuteDuration"> 
+            <xsd:annotation> 
+                <xsd:documentation>The time interval in between log rollovers, in minutes if a unit of time is not specified. Specify a positive integer followed by a unit of time, which can be days (d), hours (h), or minutes (m). For example, specify 5 hours as 5h. You can include multiple values in a single entry. For example, 1d5h is equivalent to 1 day and 5 hours. If rolloverStartTime is specified, the default value of rolloverInterval is 1 day. If both rolloverInterval and rolloverStartTime are unspecified, time based log rollover is disabled. Specify a positive integer followed by a unit of time, which can be hours (h) or minutes (m). For example, specify 30 minutes as 30m. You can include multiple values in a single entry. For example, 1h30m is equivalent to 90 minutes.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Rollover interval for time based log rollover</ext:label> 
                 </xsd:appinfo> 
             </xsd:annotation> 
         </xsd:attribute> 
@@ -6751,13 +6767,13 @@
                     </xsd:appinfo> 
                 </xsd:annotation> 
             </xsd:element> 
-            <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
-            </xsd:element> 
-            <xsd:element name="customize" type="com.ibm.ws.jca.resourceAdapter.customize"> 
+            <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
             </xsd:element> 
             <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
             </xsd:element> 
-            <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
+            <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
+            </xsd:element> 
+            <xsd:element name="customize" type="com.ibm.ws.jca.resourceAdapter.customize"> 
             </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="location" use="required" type="location"> 
@@ -12794,7 +12810,7 @@
         </xsd:attribute> 
         <xsd:attribute name="URL" use="optional" type="xsd:string"> 
             <xsd:annotation> 
-                <xsd:documentation>URL for connecting to the database. Examples: jdbc:oracle:thin:@//localhost:1521/sample or jdbc:oracle:oci:@//localhost:1521/sample.</xsd:documentation> 
+                <xsd:documentation>JDBC driver property: URL. URL for connecting to the database. If a URL is configured, the Oracle JDBC driver ignores individual connection properties such as serverName and driverType. Oracle JDBC driver updates might impact this behavior. Examples: jdbc:oracle:thin:@//localhost:1521/sample or jdbc:oracle:oci:@//localhost:1521/sample.</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>URL</ext:label> 
                 </xsd:appinfo> 
@@ -13854,7 +13870,7 @@
         </xsd:attribute> 
         <xsd:attribute name="URL" use="optional" type="xsd:string"> 
             <xsd:annotation> 
-                <xsd:documentation>URL for connecting to the database. Examples: jdbc:oracle:thin:@//localhost:1521/sample or jdbc:oracle:oci:@//localhost:1521/sample.</xsd:documentation> 
+                <xsd:documentation>JDBC driver property: URL. URL for connecting to the database. If a URL is configured, the Oracle JDBC driver ignores individual connection properties such as serverName and driverType. Oracle JDBC driver updates might impact this behavior. Examples: jdbc:oracle:thin:@//localhost:1521/sample or jdbc:oracle:oci:@//localhost:1521/sample.</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>URL</ext:label> 
                 </xsd:appinfo> 
@@ -23205,6 +23221,15 @@
                 </xsd:appinfo> 
             </xsd:annotation> 
         </xsd:attribute> 
+        <xsd:attribute name="stackTraceSingleEntry" use="optional" default="false" type="booleanType"> 
+            <xsd:annotation> 
+                <xsd:documentation>Handle stack traces written to System.out/System.err as a single event in the logs. </xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Format stack traces as a single event in logs</ext:label> 
+                    <ext:variable>com.ibm.ws.logging.stackTraceSingleEntry</ext:variable> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
         <xsd:attribute name="consoleLogLevel" use="optional" default="AUDIT"> 
             <xsd:annotation> 
                 <xsd:documentation>The logging level used to filter messages written to system streams. The valid values are INFO, AUDIT, WARNING, ERROR, and OFF. By default, the consoleLogLevel is set to the WLP_LOGGING_CONSOLE_LOGLEVEL environment variable (if set), or AUDIT. Note: Before you change this value, consider the information in the section "Unable to interact with the Liberty server after modifying the console log level settings" in the topic Developer Tools known restrictions. Avoid trouble: Use the WLP_LOGGING_CONSOLE_LOGLEVEL environment variable or the com.ibm.ws.logging.console.level property, except in cases where you are trying to change the configuration dynamically after startup.</xsd:documentation> 
@@ -23299,6 +23324,24 @@
                 <xsd:appinfo> 
                     <ext:label>Allow apps to write JSON</ext:label> 
                     <ext:variable>com.ibm.ws.logging.apps.write.json</ext:variable> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="rolloverStartTime" use="optional" default="" type="xsd:string"> 
+            <xsd:annotation> 
+                <xsd:documentation>The scheduled time of day for logs to first roll over. The rollover interval duration begins at rollover start time. Valid values follow a 24-hour ISO-8601 datetime format of HH:MM, where 00:00 represents midnight. Padding zeros are required. If rolloverInterval is specified, the default value of rolloverStartTime is 00:00, midnight. If both rolloverInterval and rolloverStartTime are unspecified, time based log rollover is disabled. Note: rolloverStartTime does not apply to the console.log file.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Rollover start time for time based log rollover</ext:label> 
+                    <ext:variable>com.ibm.ws.logging.rollover.start.time</ext:variable> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="rolloverInterval" use="optional" default="-1" type="minuteDuration"> 
+            <xsd:annotation> 
+                <xsd:documentation>The time interval in between log rollovers, in minutes if a unit of time is not specified. Specify a positive integer followed by a unit of time, which can be days (d), hours (h), or minutes (m). For example, specify 5 hours as 5h. You can include multiple values in a single entry. For example, 1d5h is equivalent to 1 day and 5 hours. If rolloverStartTime is specified, the default value of rolloverInterval is 1 day. If both rolloverInterval and rolloverStartTime are unspecified, time based log rollover is disabled. Note: rolloverInterval does not apply to the console.log file. Specify a positive integer followed by a unit of time, which can be hours (h) or minutes (m). For example, specify 30 minutes as 30m. You can include multiple values in a single entry. For example, 1h30m is equivalent to 90 minutes.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Rollover interval for time based log rollover</ext:label> 
+                    <ext:variable>com.ibm.ws.logging.rollover.interval</ext:variable> 
                 </xsd:appinfo> 
             </xsd:annotation> 
         </xsd:attribute> 
@@ -24684,9 +24727,9 @@
             </xsd:appinfo> 
         </xsd:annotation> 
         <xsd:choice minOccurs="0" maxOccurs="unbounded"> 
-            <xsd:element name="jdbcTiming" type="com.ibm.ws.request.timing.jdbc.metatype"> 
-            </xsd:element> 
             <xsd:element name="servletTiming" type="com.ibm.ws.request.timing.servlet.metatype"> 
+            </xsd:element> 
+            <xsd:element name="jdbcTiming" type="com.ibm.ws.request.timing.jdbc.metatype"> 
             </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="slowRequestThreshold" use="optional" default="10s" type="duration"> 
@@ -25593,7 +25636,7 @@
         </xsd:attribute> 
         <xsd:attribute name="exposeWebInfOnDispatch" use="optional" default="false" type="booleanType"> 
             <xsd:annotation> 
-                <xsd:documentation>If true, a servlet can access files in the WEB-INF directory. If false (default), a servlet cannot access files the WEB-INF directory.</xsd:documentation> 
+                <xsd:documentation>When this property is set to true, a servlet can access static files in the WEB-INF directory. When this property is set to false, which is the default, a servlet cannot access static files in the WEB-INF directory.</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>Expose web info on dispatch</ext:label> 
                 </xsd:appinfo> 
@@ -25761,7 +25804,7 @@
         </xsd:attribute> 
         <xsd:attribute name="disableXPoweredBy" use="optional" type="booleanType"> 
             <xsd:annotation> 
-                <xsd:documentation>Disable setting the X-Powered-By header. The equivalent custom property in the full application server profile is com.ibm.ws.webcontainer.disablexpoweredby. For servlet-5.0 and newer Servlet features, the default value is true.</xsd:documentation> 
+                <xsd:documentation>When this property is set to true,  the X-Powered-By header is not set. In servlet-5.0 and later, the default value is true. In servlet-4.0 and earlier, the X-Powered-By header is set by default. This property is configurable only in servlet-5.0 and earlier. The equivalent custom property in the full application server profile is com.ibm.ws.webcontainer.disablexpoweredby.</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>Disable the X-Powered-By header</ext:label> 
                 </xsd:appinfo> 
@@ -30022,6 +30065,22 @@
                 <xsd:documentation>Defines the maximum time that an entry, which added to the page cache, is available. When the specified time has elapsed, the entry from the page cache is cleared. This needs to be configured based on the interval between pagination search requests executed on the system and the hardware system resources available. Specify a positive integer followed by a unit of time, which can be hours (h), minutes (m), seconds (s), or milliseconds (ms). For example, specify 500 milliseconds as 500ms. You can include multiple values in a single entry. For example, 1s500ms is equivalent to 1.5 seconds.</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>Page cache timeout</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="failedLoginDelayMin" use="optional" default="0s" type="duration"> 
+            <xsd:annotation> 
+                <xsd:documentation>The minimum delay for a failed login attempt. For example, 0s or 1000ms. The failed login delay adds a variable delay to requests where the login fails. To customize the maximum delay time, set the failedLoginDelayMax attribute. Specify a positive integer followed by a unit of time, which can be hours (h), minutes (m), seconds (s), or milliseconds (ms). For example, specify 500 milliseconds as 500ms. You can include multiple values in a single entry. For example, 1s500ms is equivalent to 1.5 seconds.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Failed login delay minimum</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="failedLoginDelayMax" use="optional" default="5s" type="duration"> 
+            <xsd:annotation> 
+                <xsd:documentation>The maximum delay for a failed login attempt. For example, 5s or 5000ms. The failed login delay adds a variable delay to requests where the login fails. To disable the failed login delay, set the value to 0s. The delay is intended to mitigate user enumeration style attacks; therefore, disabling it is not recommended. To customize the minimum delay time, set the failedLoginDelayMin attribute. Specify a positive integer followed by a unit of time, which can be hours (h), minutes (m), seconds (s), or milliseconds (ms). For example, specify 500 milliseconds as 500ms. You can include multiple values in a single entry. For example, 1s500ms is equivalent to 1.5 seconds.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Failed login delay maximum</ext:label> 
                 </xsd:appinfo> 
             </xsd:annotation> 
         </xsd:attribute> 

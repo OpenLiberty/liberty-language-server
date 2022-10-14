@@ -97,7 +97,8 @@ public class FeatureService {
   private List<Feature> getDefaultFeatureList() {
     try {
       if (defaultFeatureList == null) {
-        InputStream is = getClass().getClassLoader().getResourceAsStream("features-22.0.0.6.json");
+        // Changing this to not contain the version in the file name (same as the server.xsd) 
+        InputStream is = getClass().getClassLoader().getResourceAsStream("features.json");
         InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
 
         // Only need the public features
