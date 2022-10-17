@@ -1,6 +1,6 @@
 # Liberty Config Language Server
 
-Provides language server features for Liberty server configuration files.
+Provides language server features for Liberty server configuration files, which include `server.env`, `bootstrap.properties`, and `server.xml` files.
 
 Liberty Config Language Server adheres to the [language server protocol](https://github.com/Microsoft/language-server-protocol)
 and is available for use with the following clients.
@@ -14,26 +14,34 @@ and is available for use with the following clients.
 
 ### Completion for Liberty server configuration files
 * Completion for Liberty properties and values 
-![Completion for Liberty properties](./docs/images/property-completion.png) 
-![Completion for Liberty property values](./docs/images/property-value-completion.png)
+
+![Completion feature for Liberty properties in bootstrap.properties](./docs/images/property-completion.png) 
+![Completion feature for Liberty property values in bootstrap.properties](./docs/images/property-value-completion.png)
 * Completion for Liberty variables and values 
-![Completion for Liberty variables](./docs/images/variable-completion.png)
-![Completion for Liberty variable values](./docs/images/variable-value-completion.png)
+
+![Completion feature for Liberty variables in server.env](./docs/images/variable-completion.png)
+![Completion feature for Liberty variable values in server.env](./docs/images/variable-value-completion.png)
 * Completion for Liberty config in `server.xml`
-![Completion for Liberty config](./docs/images/feature-completion.png)
+
+![Completion feature for Liberty configuration in server.xml](./docs/images/feature-completion.png)
 
 ### Hover on Liberty server configuration files
 * Hover for Liberty properties and variables
-![Hover on Liberty properties](./docs/images/property-hover.png)
-![Hover on Liberty server variables](./docs/images/variable-hover.png)
-* Hover for Liberty config in `server.xml` ![Hover on Liberty features](./docs/images/feature-hover.png)
+
+![Hover feature on Liberty properties in bootstrap.properties](./docs/images/property-hover.png)
+![Hover feature on Liberty server variables in server.env](./docs/images/variable-hover.png)
+* Hover for Liberty config in `server.xml` 
+
+![Hover feature on Liberty features in server.xml](./docs/images/feature-hover.png)
 
 ### Diagnostics on Liberty server configuration files
 * Diagnostics on Liberty properties and variables
-![Diagnostics on Liberty properties](./docs/images/property-diagnostic.png)
-![Diagnostics on Liberty variables](./docs/images/variable-diagnostic.png)
+
+![Diagnostics on Liberty properties in bootstrap.properties](./docs/images/property-diagnostic.png)
+![Diagnostics on Liberty variables in server.env](./docs/images/variable-diagnostic.png)
 * Diagnostics for Liberty features
-![Diagnostics on Liberty features](./docs/images/feature-diagnostic.png)
+
+![Diagnostics on Liberty features in server.xml](./docs/images/feature-diagnostic.png)
 
 ## Contributing
 See the [CONTRIBUTING](./CONTRIBUTING.md) doc for more details.
