@@ -126,6 +126,45 @@ public class LibertyUtils {
     }
 
     /**
+     * Determine the runtime (ol or wlp) and the version from the installed Liberty for the
+     * passed in serverXML document. If Liberty is not installed, this method will return "-".
+     * If Liberty is installed, this method returns "runtime-version", e.g. "ol-22.0.0.6".
+     */
+    public static String getRuntimeAndVersionInfo(DOMDocument serverXML) {
+        String serverXMLUri = serverXML.getDocumentURI();
+        String runtime = getRuntimeInfo(serverXMLUri);
+        String version = getVersion(serverXMLUri);
+
+        if (runtime == null) {
+            runtime = "";
+        }
+
+        if (version == null) {
+            version = "";
+        }
+
+        return runtime + "-" + version;
+    }
+
+    public static String getVersionFromInfo(String runtimeAndVersionInfo) {
+        int index = runtimeAndVersionInfo.indexOf("-");
+        if (runtimeAndVersionInfo.length() > (index + 1)) {
+            return runtimeAndVersionInfo.substring(index + 1);
+        } else {
+            return null;
+        }
+    }
+
+    public static String getRuntimeFromInfo(String runtimeAndVersionInfo) {
+        int index = runtimeAndVersionInfo.indexOf("-");
+        if (index > 0) {
+            return runtimeAndVersionInfo.substring(0, index);
+        } else {
+            return null;
+        }
+    }
+
+    /**
      * Given a server.xml, determine Liberty runtime type of the LibertyWorkspace.
      * 
      * Will return 'wlp', 'ol', or null depending on the relevant property files found in the wlp/libs/version folder.

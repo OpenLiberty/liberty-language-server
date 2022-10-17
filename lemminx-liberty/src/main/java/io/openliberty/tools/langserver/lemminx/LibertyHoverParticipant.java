@@ -61,14 +61,17 @@ public class LibertyHoverParticipant implements IHoverParticipant {
 	}
 
 	private Hover getHoverFeatureDescription(String featureName, DOMDocument domDocument) {
-		String libertyVersion = LibertyUtils.getVersion(domDocument);
+            String libertyRuntimeVersionInfo = LibertyUtils.getRuntimeAndVersionInfo(domDocument);
+            String libertyVersion =  LibertyUtils.getVersionFromInfo(libertyRuntimeVersionInfo);
+            String libertyRuntime =  LibertyUtils.getRuntimeFromInfo(libertyRuntimeVersionInfo);
 
-		final int requestDelay = SettingsService.getInstance().getRequestDelay();
-		Optional<Feature> feature = FeatureService.getInstance().getFeature(featureName, libertyVersion, requestDelay, domDocument.getDocumentURI());
-		if (feature.isPresent()) {
-			return new Hover(new MarkupContent("plaintext", feature.get().getShortDescription()));
-		}
 
-		return null;
+            final int requestDelay = SettingsService.getInstance().getRequestDelay();
+            Optional<Feature> feature = FeatureService.getInstance().getFeature(featureName, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
+            if (feature.isPresent()) {
+                return new Hover(new MarkupContent("plaintext", feature.get().getShortDescription()));
+            }
+
+            return null;
 	}
 }

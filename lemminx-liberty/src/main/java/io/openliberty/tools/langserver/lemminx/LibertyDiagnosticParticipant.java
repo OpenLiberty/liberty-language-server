@@ -69,7 +69,9 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     }
 
     private void validateFeature(DOMDocument domDocument, List<Diagnostic> list, DOMNode featureManager) {
-        String libertyVersion =  LibertyUtils.getVersion(domDocument);
+        String libertyRuntimeVersionInfo = LibertyUtils.getRuntimeAndVersionInfo(domDocument);
+        String libertyVersion =  LibertyUtils.getVersionFromInfo(libertyRuntimeVersionInfo);
+        String libertyRuntime =  LibertyUtils.getRuntimeFromInfo(libertyRuntimeVersionInfo);
 
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
 
@@ -84,7 +86,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 String featureName = featureTextNode.getTextContent().trim();
                 // if the feature is not a user defined feature and the feature does not exist in the list of
                 // supported features show a "Feature does not exist" diagnostic
-                if (!featureName.startsWith("usr:") && !FeatureService.getInstance().featureExists(featureName, libertyVersion, requestDelay, domDocument.getDocumentURI())) {
+                if (!featureName.startsWith("usr:") && !FeatureService.getInstance().featureExists(featureName, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI())) {
                     Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
                             domDocument);
                     String message = "ERROR: The feature \"" + featureName + "\" does not exist.";
