@@ -50,8 +50,8 @@ and is available for use with the following clients.
 ### Liberty dev mode schema generation
 If [Liberty Maven Plugin](https://github.com/OpenLiberty/ci.maven) or [Liberty Gradle Plugin](https://github.com/OpenLiberty/ci.gradle) is configured with the Liberty project, Liberty Config Language Server will automatically generate a schema file based on the Liberty runtime and version to provide relevant information about the supported `server.xml` elements and Liberty features.
 
-> ### Note for dev mode for containers (devc)
-> For devc mode, a minimum version of Liberty Maven Plugin 3.7 or Liberty Gradle Plugin 3.5 is recommended. If an earlier version is used, the Liberty Config Language Server will not be able to generate a schema file for use with `server.xml` editing, and a default schema will be used instead.
+> ### Note for dev mode for containers
+> If using dev mode for containers, a minimum version of Liberty Maven Plugin 3.7 or Liberty Gradle Plugin 3.5 is recommended. If an earlier version is used, the Liberty Config Language Server will not be able to generate a schema file for use with `server.xml` editing, and a default schema will be used instead.
 ## Contributing
 See the [DEVELOPING](./DEVELOPING.md) and [CONTRIBUTING](./CONTRIBUTING.md) documents for more details.
 ## License
