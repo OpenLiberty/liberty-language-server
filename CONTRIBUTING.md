@@ -17,7 +17,7 @@ After we obtain the signed CLA, you are welcome to open a pull request, and the 
 
 ## Coding Standards
 Please ensure you follow the coding standards used throughout the existing code base. Some basic rules include:
-* All files must have a Copyright including the Eclipse Public License in the header.
+* All files must have a Copyright including the Eclipse Public License 2.0 in the header.
 * Indent with 4 spaces, no tabs.
 * Opening brace on same line as `if` / `else` / `for` / etc. statements. Closing brace on its own line.
 * All PRs must have a passing build.
