@@ -5,9 +5,9 @@ This repo contains a couple projects providing IDE / language support for Open L
 ## Projects
 
 * [lemminx-liberty](./lemminx-liberty) - an extension to the [Eclipse LemMinX](https://github.com/eclipse/lemminx) XML language server providing language features for the Liberty server.xml file.
-    * `mvn clean install` to build. Produces the `/lemminx-liberty/target/lemminx-liberty-1.0-SNAPSHOT.jar`.
+    * `mvn clean install` to build. Produces the `/lemminx-liberty/target/lemminx-liberty-x.x-SNAPSHOT.jar`.
 * [liberty-ls](./liberty-ls) - a language server providing language features for the Liberty bootstrap.properties and server.env files.
-    * `mvn clean install` to build. Produces the `/liberty-ls/target/liberty.ls-1.0-SNAPSHOT.jar`.
+    * `mvn clean install` to build. Produces the `/liberty-ls/target/liberty.ls-x.x-SNAPSHOT.jar`.
 
 To test the changes interactively, you must use a language client. 
 
@@ -15,7 +15,13 @@ Below, we will document how to build and test using the VS Code language client 
 
 ## Project setup in VS Code
 
-Clone the [Liberty Tools for VS Code](https://github.com/OpenLiberty/liberty-tools-vscode) repo as a sibling folder to this repo. Create a VS Code workspace these two repos at the root of the workspace. The folder structure should look something like this:
+### Prerequisites
+These projects require the following VS Code extensions to function:
+- [XML Language Support by Red Hat](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-xml) for `liberty-lemminx`
+- [Tools for MicroProfile](https://marketplace.visualstudio.com/items?itemName=redhat.vscode-microprofile) for `liberty-ls`
+
+### Setup
+Clone the [Liberty Tools for VS Code](https://github.com/OpenLiberty/liberty-tools-vscode) repo as a sibling folder to this repo. Create a VS Code workspace with these two repos at the root of the workspace. The folder structure should look something like this:
 ```
 | > liberty-tools-vscode
 | v liberty-language-server

@@ -10,9 +10,9 @@ Liberty Config Language Server adheres to the [language server protocol](https:/
 and is available for use with the following clients.
 
 # Client IDEs
-* [VS Code](https://github.com/OpenLiberty/liberty-tools-vscode)
-* [Eclipse](https://github.com/OpenLiberty/liberty-tools-eclipse)
-* [Intellij](https://github.com/OpenLiberty/liberty-tools-intellij)
+* [Liberty Tools for VS Code](https://github.com/OpenLiberty/liberty-tools-vscode)
+* [Liberty Tools for Eclipse](https://github.com/OpenLiberty/liberty-tools-eclipse)
+* [Liberty Tools for Intellij](https://github.com/OpenLiberty/liberty-tools-intellij)
 
 ## Features
 
@@ -25,7 +25,7 @@ and is available for use with the following clients.
 
 ![Screenshot of Liberty variable suggestions in a server.env file](./docs/images/variable-completion.png "Completion suggestions for Liberty variables in server.env")
 ![Screenshot of value suggestions for a Liberty variable in a server.env file. If there is a default value, it is preselected](./docs/images/variable-value-completion.png "Completion suggestions for Liberty variable values in server.env")
-* Completion for Liberty config in `server.xml`
+* Completion for Liberty XML configs
 
 ![Screenshot of Liberty feature suggestions in a feature block in a server.xml file](./docs/images/feature-completion.png "Completion suggestions for Liberty configuration in server.xml")
 
@@ -34,7 +34,7 @@ and is available for use with the following clients.
 
 ![Screenshot of a documentation dialog appearing when hovering over a Liberty property in a bootstrap.properties file](./docs/images/property-hover.png "Hover on Liberty properties in bootstrap.properties")
 ![Screenshot of a documentation dialog appearing when hovering over a Liberty variable in a server.env file](./docs/images/variable-hover.png "Hover on Liberty server variables in server.env")
-* Hover for Liberty config in `server.xml` 
+* Hover for Liberty XML configs
 
 ![Screenshot of feature documentation appearing when hovering over a Liberty feature in a server.xml file](./docs/images/feature-hover.png "Hover on Liberty features in server.xml")
 
@@ -43,14 +43,11 @@ and is available for use with the following clients.
 
 ![Screenshot showing diagnostics marking an invalid value for a Liberty property in a bootstrap.properties file. Hovering over the diagnostic will provide more details.](./docs/images/property-diagnostic.png "Diagnostics on Liberty properties in bootstrap.properties")
 ![Screenshot showing diagnostics marking an invalid value for a Liberty variable in a server.env file. Hovering over the diagnostic will provide more details.](./docs/images/variable-diagnostic.png "Diagnostics on Liberty variables in server.env")
-* Diagnostics for Liberty features
+* Diagnostics for Liberty XML configs
 
 ![Screenshot showing diagnostics marking an invalid feature defined in a server.xml file. Hovering over the diagnostic will provide more details.](./docs/images/feature-diagnostic.png "Diagnostics on Liberty features in server.xml")
 
 ## Contributing
 See the [DEVELOPING](./DEVELOPING.md) and [CONTRIBUTING](./CONTRIBUTING.md) documents for more details.
-
-## Feedback
-Open a [GitHub issue](https://github.com/OpenLiberty/liberty-language-server/issues).
 ## License
-Eclipse Public License - v 2. See [LICENSE](./LICENSE) file.
+Eclipse Public License - v 2.0 See [LICENSE](./LICENSE) file.
