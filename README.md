@@ -1,34 +1,58 @@
-# liberty-language-server
+# Liberty Config Language Server
 
-Monorepo for projects providing IDE / language support for Open Liberty using the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/).
+Provides language server features for Liberty server configuration files. Supported files include 
+- `server.env`
+- `bootstrap.properties`
+- `server.xml` (or any XML file) and its referenced XML files through the `<include>` element
+    - XML file must contain the root element `<server>` and exist in `src/main/liberty/config`, `configDropins/overrides`, `configDropins/defaults`, `usr/shared/config`, or `usr/servers` directory
 
-## Projects
+Liberty Config Language Server adheres to the [language server protocol](https://github.com/Microsoft/language-server-protocol)
+and is available for use with the following clients.
 
-* [lemminx-liberty](./lemminx-liberty) - an extension to the [Eclipse LemMinX](https://github.com/eclipse/lemminx) XML language server providing language features for the Liberty server.xml file.
-    * `mvn clean install` to build. Produces the `/lemminx-liberty/target/lemminx-liberty-1.0-SNAPSHOT.jar`.
-* [liberty-ls](./liberty-ls) - a language server providing language features for the Liberty bootstrap.properties and server.env files.
-    * `mvn clean install` to build. Produces the `/liberty-ls/target/liberty.ls-1.0-SNAPSHOT.jar`.
+# Client IDEs
+* [Liberty Tools for VS Code](https://github.com/OpenLiberty/liberty-tools-vscode)
+* [Liberty Tools for Eclipse](https://github.com/OpenLiberty/liberty-tools-eclipse)
+* [Liberty Tools for Intellij](https://github.com/OpenLiberty/liberty-tools-intellij)
 
-## Building with VS Code
+## Features
 
-To build the language server for Liberty configuration prototype with a VS Code Client, see the [liberty-ls-prototype branch](https://github.com/OpenLiberty/open-liberty-tools-vscode/tree/liberty-ls-prototype) of the Open Liberty Tools VS Code extension.
+### Completion for Liberty server configuration files
+* Completion for Liberty properties and values 
 
-## Debugging with VS Code
+![Screenshot of Liberty property name suggestions in a bootstrap.properties file](./docs/images/property-completion.png "Completion suggestions for Liberty properties in bootstrap.properties") 
+![Screenshot of value suggestions for a Liberty property in a bootstrap.properties file. If there is a default value, it is preselected.](./docs/images/property-value-completion.png "Completion suggestions for Liberty property values in bootstrap.properties")
+* Completion for Liberty variables and values 
 
-Prerequisites: [Debugger for Java extension](https://marketplace.visualstudio.com/items?itemName=vscjava.vscode-java-debug) for VS Code
+![Screenshot of Liberty variable suggestions in a server.env file](./docs/images/variable-completion.png "Completion suggestions for Liberty variables in server.env")
+![Screenshot of value suggestions for a Liberty variable in a server.env file. If there is a default value, it is preselected](./docs/images/variable-value-completion.png "Completion suggestions for Liberty variable values in server.env")
+* Completion for Liberty XML configs
 
-1. Create a VS Code workspace with both [open-liberty-tools-vscode](https://github.com/OpenLiberty/open-liberty-tools-vscode) and this project at the root of the workspace. The folder structure should look something like this:
-```
-| > open-liberty-tools-vscode
-| v liberty-language-server
-| | > lemminx-liberty
-| | > liberty-ls
-```
+![Screenshot of Liberty feature suggestions in a feature block in a server.xml file](./docs/images/feature-completion.png "Completion suggestions for Liberty configuration in server.xml")
 
-2. In the `open-liberty-tools-vscode` directory, run `npm run build`.
+### Hover on Liberty server configuration files
+* Hover for Liberty properties and variables
 
-3. Open the debug view, select and launch `Run Extension (open-liberty-tools-vscode)`. It will open a new window with the extension running in debug mode.
+![Screenshot of a documentation dialog appearing when hovering over a Liberty property in a bootstrap.properties file](./docs/images/property-hover.png "Hover on Liberty properties in bootstrap.properties")
+![Screenshot of a documentation dialog appearing when hovering over a Liberty variable in a server.env file](./docs/images/variable-hover.png "Hover on Liberty server variables in server.env")
+* Hover for Liberty XML configs
 
-4. In the same debug view, now select and launch one of the following to debug each respective project:
-    * `Debug attach liberty-lemminx`
-    * `Debug attach liberty-ls` (in progress)
+![Screenshot of feature documentation appearing when hovering over a Liberty feature in a server.xml file](./docs/images/feature-hover.png "Hover on Liberty features in server.xml")
+
+### Diagnostics on Liberty server configuration files
+* Diagnostics on Liberty properties and variables
+
+![Screenshot showing diagnostics marking an invalid value for a Liberty property in a bootstrap.properties file. Hovering over the diagnostic will provide more details.](./docs/images/property-diagnostic.png "Diagnostics on Liberty properties in bootstrap.properties")
+![Screenshot showing diagnostics marking an invalid value for a Liberty variable in a server.env file. Hovering over the diagnostic will provide more details.](./docs/images/variable-diagnostic.png "Diagnostics on Liberty variables in server.env")
+* Diagnostics for Liberty XML configs
+
+![Screenshot showing diagnostics marking an invalid feature defined in a server.xml file. Hovering over the diagnostic will provide more details.](./docs/images/feature-diagnostic.png "Diagnostics on Liberty features in server.xml")
+
+### Liberty dev mode schema generation
+If [Liberty Maven Plugin](https://github.com/OpenLiberty/ci.maven) or [Liberty Gradle Plugin](https://github.com/OpenLiberty/ci.gradle) is configured with the Liberty project, Liberty Config Language Server will automatically generate a schema file based on the Liberty runtime and version to provide relevant information about the supported `server.xml` elements and Liberty features.
+
+> ### Note for dev mode for containers
+> If using dev mode for containers, a minimum version of Liberty Maven Plugin 3.7 or Liberty Gradle Plugin 3.5 is recommended. If an earlier version is used, the Liberty Config Language Server will not be able to generate a schema file for use with `server.xml` editing, and a default schema will be used instead.
+## Contributing
+See the [DEVELOPING](./DEVELOPING.md) and [CONTRIBUTING](./CONTRIBUTING.md) documents for more details.
+## License
+Eclipse Public License - v 2.0 See [LICENSE](./LICENSE) file.

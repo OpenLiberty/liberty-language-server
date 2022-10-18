@@ -62,7 +62,7 @@ public class AbstractCompletionTest extends AbstractLibertyLanguageServerTest {
             CompletionItem nextItem = it.next();
             if (key == null) {
                 found = true;
-                String nextItemDetail = nextItem.getDetail();
+                String nextItemDetail = nextItem.getDocumentation().getRight().getValue();
                 assertNotNull(nextItemDetail);
                 assertTrue("The CompletionItem actual detail: "+nextItemDetail+" did not match expected: "+detail, nextItemDetail.equals(detail));
 
@@ -70,12 +70,12 @@ public class AbstractCompletionTest extends AbstractLibertyLanguageServerTest {
                 assertTrue("Unexpected CompletionItemKind: "+kind+" expected: "+CompletionItemKind.Text, kind == CompletionItemKind.Text);
             } else {
                 if (nextItem.getLabel().equals(key)) {
-                    String nextItemDetail = nextItem.getDetail();
+                    String nextItemDetail = nextItem.getDocumentation().getRight().getValue();
                     assertNotNull(nextItemDetail);
                     assertTrue("The CompletionItem actual detail: "+nextItemDetail+" did not match expected: "+detail, nextItemDetail.equals(detail));
                     found = true;
                 } else {
-                    assertNotNull(nextItem.getDetail());
+                    assertNotNull(nextItem.getDocumentation().getRight().getValue());
                 }
 
                 CompletionItemKind kind = nextItem.getKind();

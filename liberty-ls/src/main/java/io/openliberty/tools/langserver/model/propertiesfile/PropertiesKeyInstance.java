@@ -11,13 +11,13 @@ package io.openliberty.tools.langserver.model.propertiesfile;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionItemKind;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkupContent;
+import org.eclipse.lsp4j.MarkupKind;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
@@ -55,7 +55,7 @@ public class PropertiesKeyInstance {
         Position rangeEnd = new Position(line, propertyKey.length());
         Range range = new Range(rangeStart, rangeEnd);
 
-        Hover hover = new Hover(new MarkupContent("markdown", message), range);
+        Hover hover = new Hover(new MarkupContent(MarkupKind.MARKDOWN, message), range);
         return CompletableFuture.completedFuture(hover);
     }
 
@@ -69,7 +69,7 @@ public class PropertiesKeyInstance {
 
     // Iterate through the passed in CompletionItem List and do the following:
     //
-    // * Set the 'detail' to the hover description. If the 'key' is null, use the 'label' from the CompletionItem to 
+    // * Set the 'documentation' to the hover description. If the 'key' is null, use the 'label' from the CompletionItem to 
     // get the hover description. 
     // * Set the 'kind' to text. 
     // * Set the default to the first item in the list if the 'setDefault' parameter is true. 
@@ -83,7 +83,8 @@ public class PropertiesKeyInstance {
             }
             String keyToUse = key == null ? item.getLabel() : key;
             String desc = Messages.getPropDescription(keyToUse);
-            item.setDetail(desc);
+            MarkupContent markdown = new MarkupContent(MarkupKind.MARKDOWN, desc);
+            item.setDocumentation(markdown);
             // if setDefault is true, we are dealing with values which are considered text.
             // otherwise we are dealing with keys which are considered properties.
             if (setDefault) {
