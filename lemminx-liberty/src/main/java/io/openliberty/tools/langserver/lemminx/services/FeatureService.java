@@ -54,8 +54,8 @@ public class FeatureService {
   // shared between all Lemminx Language Feature Participants
 
   private static FeatureService instance;
-  private static String olFeatureEndpoint = "https://repo1.maven.org/maven2/io/openliberty/features/features/%s/features-%s.json";
-  private static String wlpFeatureEndpoint = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/features/features/%s/features-%s.json";
+  private static String olFeatureEndpoint = "https://repo1.maven.org/maven2/io/openliberty/features/features/%1$s/features-%1$s.json";
+  private static String wlpFeatureEndpoint = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/features/features/%1$s/features-%1$s.json";
 
   public static FeatureService getInstance() {
     if (instance == null) {
@@ -81,8 +81,8 @@ public class FeatureService {
    * @return list of features supported by the provided version of Liberty
    */
   private List<Feature> fetchFeaturesForVersion(String libertyVersion, String libertyRuntime) throws IOException, JsonParseException {
-    String featureEndpoint = libertyRuntime.equals("wlp") ? String.format(wlpFeatureEndpoint, libertyVersion, libertyVersion) : 
-                                                            String.format(olFeatureEndpoint, libertyVersion, libertyVersion);
+    String featureEndpoint = libertyRuntime.equals("wlp") ? String.format(wlpFeatureEndpoint, libertyVersion) : 
+                                                            String.format(olFeatureEndpoint, libertyVersion);
 
     InputStreamReader reader = new InputStreamReader(new URL(featureEndpoint).openStream());
 
