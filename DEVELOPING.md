@@ -32,7 +32,7 @@ Prerequisites: [Debugger for Java extension](https://marketplace.visualstudio.co
     
     a) Optionally, `vsce package` may be run next to ensure the VS Code extension can be built properly.
 
-2. Open the debug view, select and launch `Run Extension (liberty-tools-vscode)`. It will open a new window with the extension running in debug mode.
+2. Open the debug view, select and launch `Run Extension (liberty-tools-vscode)`. It will open a new window with the newly built extension running.
 
 ## Debugging the Liberty Config Language Server
 

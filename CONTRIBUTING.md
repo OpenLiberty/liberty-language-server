@@ -10,8 +10,8 @@ If you are contributing code changes via a pull request for anything except triv
 
 After we obtain the signed CLA, you are welcome to open a pull request, and the team will be notified for review. We ask you follow these steps through the submission process.
 1. Ensure you run a passing local maven build explained in the [DEVELOPING](./DEVELOPING.md) before opening a PR.
-2. Open PR's against the "main" branch.
-3. A label will be added "CLA signed" or "CLA trivial" depending on the nature of the change.
+2. Open PR's against the 'main' branch.
+3. A label will be added 'CLA signed' or 'CLA trivial' depending on the nature of the change.
 4. A team of "reviewers" will be notified, will perform a review, and if approved will merge the PR.
 5. If a reviewer has comments, questions or suggestions, those must be addressed before the PR is approved.
 
