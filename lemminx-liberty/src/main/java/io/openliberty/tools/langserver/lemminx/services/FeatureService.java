@@ -226,14 +226,15 @@ public class FeatureService {
           if (featureListJAR != null && featureListJAR.toFile().exists()) {
 
               File tempDir = LibertyUtils.getTempDir(libertyWorkspace);
+              String featureListFileName = "featurelist-"+libertyRuntime+"-"+libertyVersion+".xml";
 
               // If tempDir is null, issue a warning for the current LibertyWorkspace URI and use the default features.json
               if (tempDir == null) {
-                  LOGGER.warning("Could not create a temporary directory for generating the featurelist.xml file. The cached features.json file will be used for the current workspace: " + libertyWorkspace.getWorkspaceString());
+                  LOGGER.warning("Could not create a temporary directory for generating the " +  featureListFileName + " file. The cached features.json file will be used for the current workspace: " + libertyWorkspace.getWorkspaceString());
                   return installedFeatures;
               }
 
-              File featureListFile = new File(tempDir, "featurelist-"+libertyRuntime+"-"+libertyVersion+".xml");
+              File featureListFile = new File(tempDir, featureListFileName);
 
               ProcessBuilder pb = new ProcessBuilder("java", "-jar", featureListJAR.toAbsolutePath().toString(), featureListFile.getCanonicalPath());
               pb.directory(tempDir);
