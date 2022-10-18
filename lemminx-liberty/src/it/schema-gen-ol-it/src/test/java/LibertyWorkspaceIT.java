@@ -90,5 +90,11 @@ public class LibertyWorkspaceIT {
 
         XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, websocket);
         
+        // Verify that a feature list was NOT generated. It should have downloaded the features.json from Maven Central.
+        String featureListName = "featurelist-ol-22.0.0.3.xml";
+        File featurelistFile = new File(LibertyUtils.getTempDir(LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlFile.toURI().toString())), featureListName);
+
+        org.junit.jupiter.api.Assertions.assertFalse(featurelistFile.exists(), "Found unexpected generated featurelist file: "+featureListName);
+
     }
 }
