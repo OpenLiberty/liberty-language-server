@@ -41,7 +41,7 @@ public class LibertyWorkspaceIT {
         testWorkspaceFolders.add(testWorkspace);
         LibertyProjectsManager.getInstance().setWorkspaceFolders(testWorkspaceFolders);
 
-        String schemaFileName = "ol-22.0.0.3.xsd";
+        String schemaFileName = "wlp-18.0.0.1.xsd";
         File schemaFile = new File(LibertyUtils.getTempDir(LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlFile.toURI().toString())), schemaFileName);
         String serverGenXSDURI = schemaFile.toPath().toUri().toString().replace("///", "/");
 
@@ -70,31 +70,27 @@ public class LibertyWorkspaceIT {
         testWorkspaceFolders.add(testWorkspace);
         LibertyProjectsManager.getInstance().setWorkspaceFolders(testWorkspaceFolders);
 
+        String featureListName = "featurelist-wlp-18.0.0.1.xml";
+        File featurelistFile = new File(LibertyUtils.getTempDir(LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlFile.toURI().toString())), featureListName);
+
                 String serverXML = String.join(newLine, //
                                 "<server description=\"Sample Liberty server\">", //
                                 "       <featureManager>", //
                                 "               <feature>|</feature>", //
-                                "               <feature>mpConfig-1.4</feature>", //
+                                "               <feature>servlet-3.1</feature>", //
                                 "       </featureManager>", //
                                 "</server>" //
                 );
 
-        CompletionItem jaxrsCompletion = c("jaxrs-2.1", "jaxrs-2.1");
+        CompletionItem batchCompletion = c("batch-1.0", "batch-1.0");
 
-        // would be 226 if mpConfig-1.4 was not already specified - this is using ol-22.0.0.3
-        final int TOTAL_ITEMS = 225; // total number of available completion items
+        // this is using wlp-18.0.0.1 which did not have any features.json in Maven Central
+        // this causes the featurelist xml file to get generated in the .libertyls folder
+        final int TOTAL_ITEMS = 58; // total number of available completion items
 
-        XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, jaxrsCompletion);
-        
-        CompletionItem websocket = c("websocket-1.1", "websocket-1.1");
-
-        XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, websocket);
-        
-        // Verify that a feature list was NOT generated. It should have downloaded the features.json from Maven Central.
-        String featureListName = "featurelist-ol-22.0.0.3.xml";
-        File featurelistFile = new File(LibertyUtils.getTempDir(LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlFile.toURI().toString())), featureListName);
-
-        org.junit.jupiter.api.Assertions.assertFalse(featurelistFile.exists(), "Found unexpected generated featurelist file: "+featureListName);
+        XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, batchCompletion);
+                
+        org.junit.jupiter.api.Assertions.assertTrue(featurelistFile.exists(), "Did not find generated featurelist file: "+featureListName);
 
     }
 }

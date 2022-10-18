@@ -88,10 +88,12 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
     private List<CompletionItem> buildCompletionItems(DOMElement featureElement, DOMDocument domDocument,
             List<String> existingFeatures) {
 
-        String libertyVersion = LibertyUtils.getVersion(domDocument);
+        String libertyRuntimeVersionInfo = LibertyUtils.getRuntimeAndVersionInfo(domDocument);
+        String libertyVersion =  LibertyUtils.getVersionFromInfo(libertyRuntimeVersionInfo);
+        String libertyRuntime =  LibertyUtils.getRuntimeFromInfo(libertyRuntimeVersionInfo);
 
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
-        List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion, requestDelay, domDocument.getDocumentURI());
+        List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
 
         // filter out features that are already specified in the featureManager block
         List<CompletionItem> uniqueFeatureCompletionItems = features.stream()

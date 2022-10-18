@@ -1,0 +1,5 @@
+<server description="Sample Liberty server">
+        <featureManager>
+                <feature>jaxws-2.2</feature>
+        </featureManager>
+</server>
