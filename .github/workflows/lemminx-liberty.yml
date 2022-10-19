@@ -2,6 +2,7 @@ name: Java CI - Lemminx Liberty & Liberty Language Server
 
 on:
   push:
+    branches: '**'
   pull_request:
     branches: [main]
 
