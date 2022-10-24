@@ -48,7 +48,9 @@ and is available for use with the following clients.
 ![Screenshot showing diagnostics marking an invalid feature defined in a server.xml file. Hovering over the diagnostic will provide more details.](./docs/images/feature-diagnostic.png "Diagnostics on Liberty features in server.xml")
 
 ### Liberty dev mode schema generation
-If [Liberty Maven Plugin](https://github.com/OpenLiberty/ci.maven) or [Liberty Gradle Plugin](https://github.com/OpenLiberty/ci.gradle) is configured with the Liberty project, Liberty Config Language Server will automatically generate a schema file based on the Liberty runtime and version to provide relevant information about the supported `server.xml` elements and Liberty features.
+If [Liberty Maven Plugin](https://github.com/OpenLiberty/ci.maven) or [Liberty Gradle Plugin](https://github.com/OpenLiberty/ci.gradle) is configured with the Liberty project, Liberty Config Language Server will automatically generate a schema file based on the Liberty runtime and version to provide relevant information about the supported `server.xml` elements and Liberty features. A minimum version of Liberty Maven Plugin 3.7.1 or Liberty Gradle Plugin 3.5.1 is recommended. 
+
+Note: If an earlier version is used, the schema file will not be regenerated when additional features are installed. This could result in lack of hover, completion or diagnostic support for elements related to those newly installed features.
 
 > ### Note for dev mode for containers
 > If using dev mode for containers, a minimum version of Liberty Maven Plugin 3.7 or Liberty Gradle Plugin 3.5 is recommended. If an earlier version is used, the Liberty Config Language Server will not be able to generate a schema file for use with `server.xml` editing, and a default schema will be used instead.
