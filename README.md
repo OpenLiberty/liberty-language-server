@@ -1,22 +1,32 @@
 # Liberty Config Language Server
 
-Provides language server features for Liberty server configuration files. Supported files include 
-- `server.env`
-- `bootstrap.properties`
-- `server.xml` (or any XML file) and its referenced XML files through the `<include>` element
-    - XML file must contain the root element `<server>` and exist in `src/main/liberty/config`, `configDropins/overrides`, `configDropins/defaults`, `usr/shared/config`, or `usr/servers` directory
+The Liberty Config Language Server provides language server features for Liberty server configuration files through any of the supported client IDEs. It adheres to the [language server protocol](https://github.com/Microsoft/language-server-protocol).
 
-Liberty Config Language Server adheres to the [language server protocol](https://github.com/Microsoft/language-server-protocol)
-and is available for use with the following clients.
+## Client IDEs
 
-# Client IDEs
+The Liberty Config Language Server is available for use with the following clients.
+
 * [Liberty Tools for VS Code](https://github.com/OpenLiberty/liberty-tools-vscode)
 * [Liberty Tools for Eclipse](https://github.com/OpenLiberty/liberty-tools-eclipse)
 * [Liberty Tools for Intellij](https://github.com/OpenLiberty/liberty-tools-intellij)
 
+## Supported files
+
+Liberty Config Language Server features are avaialble for the following supported configuration files.
+
+- `server.env`
+- `bootstrap.properties`
+- `server.xml` (or any XML file) and any XML files that are  referenced through the `include` element in the `server.xml` file.
+    - XML files must contain the `server` root element and exist in the `src/main/liberty/config`, `configDropins/overrides`, `configDropins/defaults`, `usr/shared/config`, or `usr/servers` directory.
+
 ## Features
 
+The following language server features are avaialble through any of the supported client IDEs.
+
 ### Completion for Liberty server configuration files
+
+Start typing a Liberty property, variable, or XML configuration to view a list of possible options.
+
 * Completion for Liberty properties and values 
 
 ![Screenshot of Liberty property name suggestions in a bootstrap.properties file](./docs/images/property-completion.png "Completion suggestions for Liberty properties in bootstrap.properties") 
@@ -30,6 +40,9 @@ and is available for use with the following clients.
 ![Screenshot of Liberty feature suggestions in a feature block in a server.xml file](./docs/images/feature-completion.png "Completion suggestions for Liberty configuration in server.xml")
 
 ### Hover on Liberty server configuration files
+
+Hover your cursor over Liberty properties, variables, or XML configuration to view a description.
+
 * Hover for Liberty properties and variables
 
 ![Screenshot of a documentation dialog appearing when hovering over a Liberty property in a bootstrap.properties file](./docs/images/property-hover.png "Hover on Liberty properties in bootstrap.properties")
@@ -39,6 +52,9 @@ and is available for use with the following clients.
 ![Screenshot of feature documentation appearing when hovering over a Liberty feature in a server.xml file](./docs/images/feature-hover.png "Hover on Liberty features in server.xml")
 
 ### Diagnostics on Liberty server configuration files
+
+Diagnostics highlight potential problems in your configuration so you can find and fix them.
+
 * Diagnostics on Liberty properties and variables
 
 ![Screenshot showing diagnostics marking an invalid value for a Liberty property in a bootstrap.properties file. Hovering over the diagnostic will provide more details.](./docs/images/property-diagnostic.png "Diagnostics on Liberty properties in bootstrap.properties")
@@ -48,12 +64,13 @@ and is available for use with the following clients.
 ![Screenshot showing diagnostics marking an invalid feature defined in a server.xml file. Hovering over the diagnostic will provide more details.](./docs/images/feature-diagnostic.png "Diagnostics on Liberty features in server.xml")
 
 ### Liberty dev mode schema generation
-If [Liberty Maven Plugin](https://github.com/OpenLiberty/ci.maven) or [Liberty Gradle Plugin](https://github.com/OpenLiberty/ci.gradle) is configured with the Liberty project, Liberty Config Language Server will automatically generate a schema file based on the Liberty runtime and version to provide relevant information about the supported `server.xml` elements and Liberty features. A minimum version of Liberty Maven Plugin 3.7.1 or Liberty Gradle Plugin 3.5.1 is recommended. 
+If the [Liberty Maven Plugin](https://github.com/OpenLiberty/ci.maven) or [Liberty Gradle Plugin](https://github.com/OpenLiberty/ci.gradle) is configured with the Liberty project, Liberty Config Language Server automatically generates a schema file based on the Liberty runtime and version to provide relevant information about the supported `server.xml` elements and Liberty features. A minimum version of the Liberty Maven Plugin 3.7.1 or Liberty Gradle Plugin 3.5.1 is recommended.  If an earlier version of either plugin is used, the schema file will not be regenerated when additional features are installed. This limitation might result in lack of hover, completion, or diagnostic support for elements related to those newly installed features.
 
-Note: If an earlier version is used, the schema file will not be regenerated when additional features are installed. This could result in lack of hover, completion or diagnostic support for elements related to those newly installed features.
+Note: 
 
 > ### Note for dev mode for containers
-> If using dev mode for containers, a minimum version of Liberty Maven Plugin 3.7 or Liberty Gradle Plugin 3.5 is recommended. If an earlier version is used, the Liberty Config Language Server will not be able to generate a schema file for use with `server.xml` editing, and a default schema will be used instead.
+> If you are using dev mode for containers, a minimum version of the Liberty Maven Plugin 3.7 or Liberty Gradle Plugin 3.5 is recommended. If an earlier version is used, the Liberty Config Language Server cannot generate a schema file for use with `server.xml` editing and a default schema is used instead.
+
 ## Contributing
 See the [DEVELOPING](./DEVELOPING.md) and [CONTRIBUTING](./CONTRIBUTING.md) documents for more details.
 ## License
