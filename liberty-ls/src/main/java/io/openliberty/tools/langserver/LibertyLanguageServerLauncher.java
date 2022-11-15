@@ -16,18 +16,28 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Function;
 
 import org.eclipse.lsp4j.jsonrpc.Launcher;
+import org.eclipse.lsp4j.jsonrpc.MessageConsumer;
 import org.eclipse.lsp4j.launch.LSPLauncher.Builder;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageServer;
+
+import io.openliberty.tools.langserver.common.ParentProcessWatcher;
 
 public class LibertyLanguageServerLauncher {
     public static void main(String[] args) {
         LibertyLanguageServer server = new LibertyLanguageServer();
 
+        Function<MessageConsumer, MessageConsumer> wrapper;
+        wrapper = it -> it;
+        if (!"false".equals(System.getProperty("watchParentProcess"))) {
+           wrapper = new ParentProcessWatcher(server, wrapper);
+        }
+
         Launcher<LanguageClient> launcher = createServerLauncher(server, System.in, System.out,
-            Executors.newCachedThreadPool());
+            Executors.newCachedThreadPool(), wrapper);
 
         server.setLanguageClient(launcher.getRemoteProxy());
         launcher.startListening();
@@ -48,8 +58,14 @@ public class LibertyLanguageServerLauncher {
      *                        consumers
      */
     public static Launcher<LanguageClient> createServerLauncher(LanguageServer server, InputStream in, OutputStream out,
-        ExecutorService executorService) {
-            return new Builder<LanguageClient>().setLocalService(server).setRemoteInterface(LanguageClient.class).setInput(in).setOutput(out)
-                .setExecutorService(executorService).create();
+        ExecutorService executorService, Function<MessageConsumer, MessageConsumer> wrapper) {
+            return new Builder<LanguageClient>().
+                              setLocalService(server).
+                              setRemoteInterface(LanguageClient.class).
+                              setInput(in).
+                              setOutput(out).
+                              setExecutorService(executorService).
+                              wrapMessages(wrapper).
+                              create();
     }
 }

@@ -28,8 +28,9 @@ import org.eclipse.lsp4j.services.LanguageServer;
 import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
+import io.openliberty.tools.langserver.common.ParentProcessWatcher.ProcessLanguageServer;
 
-public class LibertyLanguageServer extends AbstractLanguageServer implements LanguageServer, LanguageClientAware {
+public class LibertyLanguageServer extends AbstractLanguageServer implements ProcessLanguageServer, LanguageClientAware {
 
     public static final String LANGUAGE_ID = "LANGUAGE_ID_LIBERTY";
     private static final Logger LOGGER = Logger.getLogger(LibertyLanguageServer.class.getName());
@@ -39,6 +40,7 @@ public class LibertyLanguageServer extends AbstractLanguageServer implements Lan
 
     private LanguageClient languageClient;
 
+    private Integer parentProcessId;
 
     public LibertyLanguageServer() {
         // Workspace service handles workspace settings changes and calls update settings. 
@@ -51,6 +53,8 @@ public class LibertyLanguageServer extends AbstractLanguageServer implements Lan
     public CompletableFuture<InitializeResult> initialize(InitializeParams params) {
         LOGGER.info("Initializing Liberty Language server");
 
+        this.parentProcessId = params.getProcessId();
+
         ServerCapabilities serverCapabilities = createServerCapabilities();
         InitializeResult initializeResult = new InitializeResult(serverCapabilities);
         return CompletableFuture.completedFuture(initializeResult);
@@ -59,7 +63,7 @@ public class LibertyLanguageServer extends AbstractLanguageServer implements Lan
     @Override
     public void initialized(InitializedParams params) {
         LOGGER.info("Initialized Liberty Language server");
-        LanguageServer.super.initialized(params);
+        //super.initialized(params);
     }
 
     private ServerCapabilities createServerCapabilities() {
@@ -91,8 +95,18 @@ public class LibertyLanguageServer extends AbstractLanguageServer implements Lan
 
     @Override
     public void exit() {
+        exit(0);
+    }
+
+    @Override
+    public void exit(int exitCode) {
         super.stopServer();
-        System.exit(0);
+        System.exit(exitCode);
+    }
+
+    @Override
+    public long getParentProcessId() {
+        return parentProcessId != null ? parentProcessId : 0;
     }
 
     @Override
