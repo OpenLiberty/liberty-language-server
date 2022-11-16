@@ -16,7 +16,7 @@ Liberty Config Language Server features are avaialble for the following configur
 
 - `server.env`
 - `bootstrap.properties`
-- `server.xml` (or any XML file) and any XML files that are  referenced through the `include` element in the `server.xml` file.
+- `server.xml` (or any XML file) and any XML files that are referenced through the `include` element in the `server.xml` file.
     - XML files must contain the `server` root element and exist in the `src/main/liberty/config`, `configDropins/overrides`, `configDropins/defaults`, `usr/shared/config`, or `usr/servers` directory.
 
 ## Features
