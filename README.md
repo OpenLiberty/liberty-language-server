@@ -4,7 +4,7 @@ The Liberty Config Language Server provides language server features for Liberty
 
 ## Client IDEs
 
-The Liberty Config Language Server is available for use with the following clients.
+The Liberty Config Language Server is included in the following client IDEs.
 
 * [Liberty Tools for VS Code](https://github.com/OpenLiberty/liberty-tools-vscode)
 * [Liberty Tools for Eclipse](https://github.com/OpenLiberty/liberty-tools-eclipse)
