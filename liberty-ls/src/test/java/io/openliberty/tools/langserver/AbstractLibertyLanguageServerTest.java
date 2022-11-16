@@ -111,7 +111,7 @@ public class AbstractLibertyLanguageServerTest {
         InitializeParams params = new InitializeParams();
         params.setProcessId(new Random().nextInt());
         // params.setWorkspaceFolders(getTestResource("/workspace"));
-        return null;
+        return params;
     }
 
     private TextDocumentItem createTestTextDocument(String text, String fileSuffix) {
