@@ -12,7 +12,7 @@ The Liberty Config Language Server is available for use with the following clien
 
 ## Supported files
 
-Liberty Config Language Server features are avaialble for the following supported configuration files.
+Liberty Config Language Server features are avaialble for the following configuration files.
 
 - `server.env`
 - `bootstrap.properties`
@@ -29,15 +29,15 @@ Start typing a Liberty property, variable, or XML configuration to view a list o
 
 * Completion for Liberty properties and values 
 
-![Screenshot of Liberty property name suggestions in a bootstrap.properties file](./docs/images/property-completion.png "Completion suggestions for Liberty properties in bootstrap.properties") 
-![Screenshot of value suggestions for a Liberty property in a bootstrap.properties file. If there is a default value, it is preselected.](./docs/images/property-value-completion.png "Completion suggestions for Liberty property values in bootstrap.properties")
+![Screen capture of Liberty property name suggestions in a bootstrap.properties file](./docs/images/property-completion.png "Completion suggestions for Liberty properties in bootstrap.properties") 
+![Screen capture of value suggestions for a Liberty property in a bootstrap.properties file. If there is a default value, it is preselected.](./docs/images/property-value-completion.png "Completion suggestions for Liberty property values in bootstrap.properties")
 * Completion for Liberty variables and values 
 
-![Screenshot of Liberty variable suggestions in a server.env file](./docs/images/variable-completion.png "Completion suggestions for Liberty variables in server.env")
-![Screenshot of value suggestions for a Liberty variable in a server.env file. If there is a default value, it is preselected](./docs/images/variable-value-completion.png "Completion suggestions for Liberty variable values in server.env")
+![Screen capture of Liberty variable suggestions in a server.env file](./docs/images/variable-completion.png "Completion suggestions for Liberty variables in server.env")
+![Screen capture of value suggestions for a Liberty variable in a server.env file. If there is a default value, it is preselected](./docs/images/variable-value-completion.png "Completion suggestions for Liberty variable values in server.env")
 * Completion for Liberty XML configs
 
-![Screenshot of Liberty feature suggestions in a feature block in a server.xml file](./docs/images/feature-completion.png "Completion suggestions for Liberty configuration in server.xml")
+![Screen capture of Liberty feature suggestions in a feature block in a server.xml file](./docs/images/feature-completion.png "Completion suggestions for Liberty configuration in server.xml")
 
 ### Hover on Liberty server configuration files
 
@@ -45,23 +45,25 @@ Hover your cursor over Liberty properties, variables, or XML configuration to vi
 
 * Hover for Liberty properties and variables
 
-![Screenshot of a documentation dialog appearing when hovering over a Liberty property in a bootstrap.properties file](./docs/images/property-hover.png "Hover on Liberty properties in bootstrap.properties")
-![Screenshot of a documentation dialog appearing when hovering over a Liberty variable in a server.env file](./docs/images/variable-hover.png "Hover on Liberty server variables in server.env")
+![Screen capture of a documentation dialog appearing when hovering over a Liberty property in a bootstrap.properties file](./docs/images/property-hover.png "Hover on Liberty properties in bootstrap.properties")
+![Screen capture of a documentation dialog appearing when hovering over a Liberty variable in a server.env file](./docs/images/variable-hover.png "Hover on Liberty server variables in server.env")
+
 * Hover for Liberty XML configs
 
-![Screenshot of feature documentation appearing when hovering over a Liberty feature in a server.xml file](./docs/images/feature-hover.png "Hover on Liberty features in server.xml")
+![Screen capture of feature documentation appearing when hovering over a Liberty feature in a server.xml file](./docs/images/feature-hover.png "Hover on Liberty features in server.xml")
 
 ### Diagnostics on Liberty server configuration files
 
-Diagnostics highlight potential problems in your configuration so you can find and fix them.
+Diagnostics highlight potential problems in your configuration, such as invlaid values. 
 
 * Diagnostics on Liberty properties and variables
 
-![Screenshot showing diagnostics marking an invalid value for a Liberty property in a bootstrap.properties file. Hovering over the diagnostic will provide more details.](./docs/images/property-diagnostic.png "Diagnostics on Liberty properties in bootstrap.properties")
-![Screenshot showing diagnostics marking an invalid value for a Liberty variable in a server.env file. Hovering over the diagnostic will provide more details.](./docs/images/variable-diagnostic.png "Diagnostics on Liberty variables in server.env")
+![Screen capture showing diagnostics marking an invalid value for a Liberty property in a bootstrap.properties file. Hovering over the diagnostic will provide more details.](./docs/images/property-diagnostic.png "Diagnostics on Liberty properties in bootstrap.properties")
+![Screen capture showing diagnostics marking an invalid value for a Liberty variable in a server.env file. Hovering over the diagnostic will provide more details.](./docs/images/variable-diagnostic.png "Diagnostics on Liberty variables in server.env")
+
 * Diagnostics for Liberty XML configs
 
-![Screenshot showing diagnostics marking an invalid feature defined in a server.xml file. Hovering over the diagnostic will provide more details.](./docs/images/feature-diagnostic.png "Diagnostics on Liberty features in server.xml")
+![Screen capture showing diagnostics marking an invalid feature defined in a server.xml file. Hovering over the diagnostic will provide more details.](./docs/images/feature-diagnostic.png "Diagnostics on Liberty features in server.xml")
 
 ### Liberty dev mode schema generation
 If the [Liberty Maven Plugin](https://github.com/OpenLiberty/ci.maven) or [Liberty Gradle Plugin](https://github.com/OpenLiberty/ci.gradle) is configured with the Liberty project, Liberty Config Language Server automatically generates a schema file based on the Liberty runtime and version to provide relevant information about the supported `server.xml` elements and Liberty features. A minimum version of the Liberty Maven Plugin 3.7.1 or Liberty Gradle Plugin 3.5.1 is recommended.  If an earlier version of either plugin is used, the schema file will not be regenerated when additional features are installed. This limitation might result in lack of hover, completion, or diagnostic support for elements related to those newly installed features.
