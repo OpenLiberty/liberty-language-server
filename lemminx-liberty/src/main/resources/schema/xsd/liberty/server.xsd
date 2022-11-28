@@ -24,25 +24,25 @@
                     </xsd:appinfo> 
                 </xsd:annotation> 
             </xsd:element> 
+            <xsd:element name="application-ext" type="com.ibm.ws.javaee.dd.appext.ApplicationExt"> 
+            </xsd:element> 
+            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
+            </xsd:element> 
+            <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
+            </xsd:element> 
+            <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
+            </xsd:element> 
+            <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
+            </xsd:element> 
+            <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
+            </xsd:element> 
             <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
             </xsd:element> 
             <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
             </xsd:element> 
-            <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
-            </xsd:element> 
-            <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
-            </xsd:element> 
             <xsd:element name="web-bnd" type="com.ibm.ws.javaee.dd.webbnd.WebBnd"> 
             </xsd:element> 
-            <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
-            </xsd:element> 
-            <xsd:element name="application-ext" type="com.ibm.ws.javaee.dd.appext.ApplicationExt"> 
-            </xsd:element> 
             <xsd:element name="application-client-bnd" type="com.ibm.ws.javaee.dd.clientbnd.ApplicationClientBnd"> 
-            </xsd:element> 
-            <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
-            </xsd:element> 
-            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
             </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="location" use="required" type="location"> 
@@ -149,27 +149,27 @@
                     </xsd:appinfo> 
                 </xsd:annotation> 
             </xsd:element> 
+            <xsd:element name="resourceAdapter" type="com.ibm.ws.jca.embeddedResourceAdapter"> 
+            </xsd:element> 
+            <xsd:element name="application-ext" type="com.ibm.ws.javaee.dd.appext.ApplicationExt"> 
+            </xsd:element> 
+            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
+            </xsd:element> 
+            <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
+            </xsd:element> 
+            <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
+            </xsd:element> 
+            <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
+            </xsd:element> 
+            <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
+            </xsd:element> 
             <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
             </xsd:element> 
             <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
             </xsd:element> 
-            <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
-            </xsd:element> 
-            <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
-            </xsd:element> 
             <xsd:element name="web-bnd" type="com.ibm.ws.javaee.dd.webbnd.WebBnd"> 
             </xsd:element> 
-            <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
-            </xsd:element> 
-            <xsd:element name="application-ext" type="com.ibm.ws.javaee.dd.appext.ApplicationExt"> 
-            </xsd:element> 
-            <xsd:element name="resourceAdapter" type="com.ibm.ws.jca.embeddedResourceAdapter"> 
-            </xsd:element> 
             <xsd:element name="application-client-bnd" type="com.ibm.ws.javaee.dd.clientbnd.ApplicationClientBnd"> 
-            </xsd:element> 
-            <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
-            </xsd:element> 
-            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
             </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="location" use="required" type="location"> 
@@ -1066,27 +1066,27 @@
                     </xsd:appinfo> 
                 </xsd:annotation> 
             </xsd:element> 
+            <xsd:element name="resourceAdapter" type="com.ibm.ws.jca.embeddedResourceAdapter"> 
+            </xsd:element> 
+            <xsd:element name="application-ext" type="com.ibm.ws.javaee.dd.appext.ApplicationExt"> 
+            </xsd:element> 
+            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
+            </xsd:element> 
+            <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
+            </xsd:element> 
+            <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
+            </xsd:element> 
+            <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
+            </xsd:element> 
+            <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
+            </xsd:element> 
             <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
             </xsd:element> 
             <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
             </xsd:element> 
-            <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
-            </xsd:element> 
-            <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
-            </xsd:element> 
             <xsd:element name="web-bnd" type="com.ibm.ws.javaee.dd.webbnd.WebBnd"> 
             </xsd:element> 
-            <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
-            </xsd:element> 
-            <xsd:element name="application-ext" type="com.ibm.ws.javaee.dd.appext.ApplicationExt"> 
-            </xsd:element> 
-            <xsd:element name="resourceAdapter" type="com.ibm.ws.jca.embeddedResourceAdapter"> 
-            </xsd:element> 
             <xsd:element name="application-client-bnd" type="com.ibm.ws.javaee.dd.clientbnd.ApplicationClientBnd"> 
-            </xsd:element> 
-            <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
-            </xsd:element> 
-            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
             </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="location" use="required" type="location"> 
@@ -2144,6 +2144,14 @@
                     </xsd:appinfo> 
                 </xsd:annotation> 
             </xsd:element> 
+            <xsd:element name="properties" type="com.ibm.ws.classloading.bell.properties"> 
+                <xsd:annotation> 
+                    <xsd:documentation>Name="Value" pairs the system will pass to a service implementation at creation and update. The service implementation class must declare a public constructor, or a public method named updateBell, with a single parameter of type java.util.Map&lt;String, String&gt;.</xsd:documentation> 
+                    <xsd:appinfo> 
+                        <ext:label>Properties</ext:label> 
+                    </xsd:appinfo> 
+                </xsd:annotation> 
+            </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="libraryRef" use="optional" type="pidType"> 
             <xsd:annotation> 
@@ -2154,12 +2162,56 @@
                 </xsd:appinfo> 
             </xsd:annotation> 
         </xsd:attribute> 
+        <xsd:attribute name="spiVisibility" use="optional" default="false" type="booleanType"> 
+            <xsd:annotation> 
+                <xsd:documentation>Indicates whether the system makes feature SPI packages visible to the library referenced by the BELL. Enable SPI visibility whenever the BELL provides services that use feature SPI.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Enable SPI visibility</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
         <xsd:anyAttribute processContents="skip"> 
         </xsd:anyAttribute> 
     </xsd:complexType> 
     <xsd:complexType name="com.ibm.ws.classloading.bell-factory"> 
         <xsd:complexContent> 
             <xsd:extension base="com.ibm.ws.classloading.bell"> 
+                <xsd:attribute name="id" type="factoryIdType" use="optional"> 
+                    <xsd:annotation> 
+                        <xsd:documentation>A unique configuration ID.</xsd:documentation> 
+                        <xsd:appinfo> 
+                            <ext:label>ID</ext:label> 
+                        </xsd:appinfo> 
+                    </xsd:annotation> 
+                </xsd:attribute> 
+            </xsd:extension> 
+        </xsd:complexContent> 
+    </xsd:complexType> 
+    <xsd:complexType name="com.ibm.ws.classloading.bell.properties"> 
+        <xsd:annotation> 
+            <xsd:documentation>Name="Value" pairs the system will pass to a service implementation at creation and update. The service implementation class must declare a public constructor, or a public method named updateBell, with a single parameter of type java.util.Map&lt;String, String&gt;.</xsd:documentation> 
+            <xsd:appinfo> 
+                <ext:label>Properties</ext:label> 
+                <ext:extraProperties/> 
+            </xsd:appinfo> 
+        </xsd:annotation><!--Idiom for "empty element context" (whitespace accepted and ignored)--> 
+        <xsd:sequence> 
+            <xsd:sequence/> 
+        </xsd:sequence> 
+        <xsd:attribute name="internal.properties" type="internalPropertiesType" use="optional"> 
+            <xsd:annotation> 
+                <xsd:documentation>Name="Value" pairs the system will pass to a service implementation at creation and update. The service implementation class must declare a public constructor, or a public method named updateBell, with a single parameter of type java.util.Map&lt;String, String&gt;.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Properties</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:anyAttribute processContents="skip"> 
+        </xsd:anyAttribute> 
+    </xsd:complexType> 
+    <xsd:complexType name="com.ibm.ws.classloading.bell.properties-factory"> 
+        <xsd:complexContent> 
+            <xsd:extension base="com.ibm.ws.classloading.bell.properties"> 
                 <xsd:attribute name="id" type="factoryIdType" use="optional"> 
                     <xsd:annotation> 
                         <xsd:documentation>A unique configuration ID.</xsd:documentation> 
@@ -2348,6 +2400,14 @@
                 <xsd:documentation>Allow an application to login with just an identity in the hashtable properties. Use this option only when you have applications that require this and have other means to validate the identity.</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>Allow hashtable login with ID only</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="useDisplayNameForSecurityName" use="optional" default="false" type="booleanType"> 
+            <xsd:annotation> 
+                <xsd:documentation>Specifies whether to return displayName for programmatic APIs like getRemoteUser, getCallerPrincipal, getUserPrincipal when using Custom User Registry.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Use displayName as securityName in customUR</ext:label> 
                 </xsd:appinfo> 
             </xsd:annotation> 
         </xsd:attribute> 
@@ -4626,17 +4686,17 @@
                     </xsd:appinfo> 
                 </xsd:annotation> 
             </xsd:element> 
-            <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
-            </xsd:element> 
-            <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
-            </xsd:element> 
-            <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
-            </xsd:element> 
             <xsd:element name="application-ext" type="com.ibm.ws.javaee.dd.appext.ApplicationExt"> 
+            </xsd:element> 
+            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
             </xsd:element> 
             <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
             </xsd:element> 
-            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
+            <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
+            </xsd:element> 
+            <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
+            </xsd:element> 
+            <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
             </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="location" use="required" type="location"> 
@@ -6767,13 +6827,13 @@
                     </xsd:appinfo> 
                 </xsd:annotation> 
             </xsd:element> 
-            <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
-            </xsd:element> 
-            <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
+            <xsd:element name="customize" type="com.ibm.ws.jca.resourceAdapter.customize"> 
             </xsd:element> 
             <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
             </xsd:element> 
-            <xsd:element name="customize" type="com.ibm.ws.jca.resourceAdapter.customize"> 
+            <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
+            </xsd:element> 
+            <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
             </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="location" use="required" type="location"> 
@@ -13477,6 +13537,11 @@
                     <xsd:enumeration value="NativeAuthentication"> 
                         <xsd:annotation> 
                             <xsd:documentation>NativeAuthentication</xsd:documentation> 
+                        </xsd:annotation> 
+                    </xsd:enumeration> 
+                    <xsd:enumeration value="NTLM"> 
+                        <xsd:annotation> 
+                            <xsd:documentation>NTLM</xsd:documentation> 
                         </xsd:annotation> 
                     </xsd:enumeration> 
                 </xsd:restriction> 
@@ -20931,7 +20996,7 @@
         </xsd:attribute> 
         <xsd:attribute name="scanInterval" use="optional" default="0" type="duration"> 
             <xsd:annotation> 
-                <xsd:documentation>Scanning interval to check the fileset for changes as a long with a time unit suffix h-hour, m-minute, s-second, ms-millisecond (e.g. 2ms or 5s). Disabled (scanInterval=0) by default. Specify a positive integer followed by a unit of time, which can be hours (h), minutes (m), seconds (s), or milliseconds (ms). For example, specify 500 milliseconds as 500ms. You can include multiple values in a single entry. For example, 1s500ms is equivalent to 1.5 seconds.</xsd:documentation> 
+                <xsd:documentation>The scanning interval to determine whether files are added or removed from the fileset. The individual files are not scanned. The suffix for the interval of time is h-hour, m-minute, s-second, and ms-millisecond, for example, 2ms or 5s. The scanning interval is disabled by default and is disabled manually by setting the scan interval, scanInterval, to 0. Specify a positive integer followed by a unit of time, which can be hours (h), minutes (m), seconds (s), or milliseconds (ms). For example, specify 500 milliseconds as 500ms. You can include multiple values in a single entry. For example, 1s500ms is equivalent to 1.5 seconds.</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>Scan interval</ext:label> 
                 </xsd:appinfo> 
@@ -24727,9 +24792,9 @@
             </xsd:appinfo> 
         </xsd:annotation> 
         <xsd:choice minOccurs="0" maxOccurs="unbounded"> 
-            <xsd:element name="servletTiming" type="com.ibm.ws.request.timing.servlet.metatype"> 
-            </xsd:element> 
             <xsd:element name="jdbcTiming" type="com.ibm.ws.request.timing.jdbc.metatype"> 
+            </xsd:element> 
+            <xsd:element name="servletTiming" type="com.ibm.ws.request.timing.servlet.metatype"> 
             </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="slowRequestThreshold" use="optional" default="10s" type="duration"> 
@@ -29813,7 +29878,7 @@
         </xsd:attribute> 
         <xsd:attribute name="allowAuthenticationFailOverToAuthMethod" use="optional"> 
             <xsd:annotation> 
-                <xsd:documentation>Specifies the authentication fail over method that will be used when the certificate authentication fails or if the certificate is missing. Valid values are BASIC, FORM and APP_DEFINED. APP_DEFINED is only valid when overrideHttpAuthMethod attribute is set to CLIENT_CERT. When APP_DEFINED is set, the authentication method which is  configured in the application is used.</xsd:documentation> 
+                <xsd:documentation>Specifies the authentication failover method that is used when the certificate authentication fails or if the certificate is missing. Valid values are BASIC, FORM, and APP_DEFINED. APP_DEFINED is only valid when overrideHttpAuthMethod attribute is set to CLIENT_CERT. When APP_DEFINED is set, the authentication method that is configured in the application is used.</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>Failover method when certificate login fails</ext:label> 
                 </xsd:appinfo> 
@@ -29822,17 +29887,17 @@
                 <xsd:restriction base="xsd:string"> 
                     <xsd:enumeration value="BASIC"> 
                         <xsd:annotation> 
-                            <xsd:documentation>%allowAuthenticationFailOverToAuthMethod.BASIC</xsd:documentation> 
+                            <xsd:documentation>BASIC</xsd:documentation> 
                         </xsd:annotation> 
                     </xsd:enumeration> 
                     <xsd:enumeration value="FORM"> 
                         <xsd:annotation> 
-                            <xsd:documentation>%allowAuthenticationFailOverToAuthMethod.FORM</xsd:documentation> 
+                            <xsd:documentation>FORM</xsd:documentation> 
                         </xsd:annotation> 
                     </xsd:enumeration> 
                     <xsd:enumeration value="APP_DEFINED"> 
                         <xsd:annotation> 
-                            <xsd:documentation>%allowAuthenticationFailOverToAuthMethod.APP_DEFINED</xsd:documentation> 
+                            <xsd:documentation>APP_DEFINED</xsd:documentation> 
                         </xsd:annotation> 
                     </xsd:enumeration> 
                 </xsd:restriction> 
@@ -29913,7 +29978,7 @@
                     </xsd:enumeration> 
                     <xsd:enumeration value="Lax"> 
                         <xsd:annotation> 
-                            <xsd:documentation>%sameSiteCookieLax</xsd:documentation> 
+                            <xsd:documentation>Set the SSO cookie SameSite attribute value to Lax</xsd:documentation> 
                         </xsd:annotation> 
                     </xsd:enumeration> 
                     <xsd:enumeration value="None"> 
@@ -30823,209 +30888,6 @@
     <xsd:complexType name="com.ibm.ws.persistence.databaseStore-factory"> 
         <xsd:complexContent> 
             <xsd:extension base="com.ibm.ws.persistence.databaseStore"> 
-                <xsd:attribute name="id" type="factoryIdType" use="optional"> 
-                    <xsd:annotation> 
-                        <xsd:documentation>A unique configuration ID.</xsd:documentation> 
-                        <xsd:appinfo> 
-                            <ext:label>ID</ext:label> 
-                        </xsd:appinfo> 
-                    </xsd:annotation> 
-                </xsd:attribute> 
-            </xsd:extension> 
-        </xsd:complexContent> 
-    </xsd:complexType> 
-    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorization.group"> 
-        <xsd:annotation> 
-            <xsd:documentation>Group that has the security role.</xsd:documentation> 
-            <xsd:appinfo> 
-                <ext:label>Group</ext:label> 
-            </xsd:appinfo> 
-        </xsd:annotation><!--Idiom for "empty element context" (whitespace accepted and ignored)--> 
-        <xsd:sequence> 
-            <xsd:sequence/> 
-        </xsd:sequence> 
-        <xsd:attribute name="name" use="required" type="xsd:string"> 
-            <xsd:annotation> 
-                <xsd:documentation>Name of a group that has the security role.</xsd:documentation> 
-                <xsd:appinfo> 
-                    <ext:label>Group name</ext:label> 
-                </xsd:appinfo> 
-            </xsd:annotation> 
-        </xsd:attribute> 
-        <xsd:attribute name="access-id" use="optional" type="xsd:string"> 
-            <xsd:annotation> 
-                <xsd:documentation>A group access ID in the general form group:realmName/groupUniqueId. A value will be generated if one is not specified.</xsd:documentation> 
-                <xsd:appinfo> 
-                    <ext:label>Group access ID</ext:label> 
-                </xsd:appinfo> 
-            </xsd:annotation> 
-        </xsd:attribute> 
-        <xsd:anyAttribute processContents="skip"> 
-        </xsd:anyAttribute> 
-    </xsd:complexType> 
-    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorization.group-factory"> 
-        <xsd:complexContent> 
-            <xsd:extension base="com.ibm.ws.webcontainer.security.feature.authorization.group"> 
-                <xsd:attribute name="id" type="factoryIdType" use="optional"> 
-                    <xsd:annotation> 
-                        <xsd:documentation>A unique configuration ID.</xsd:documentation> 
-                        <xsd:appinfo> 
-                            <ext:label>ID</ext:label> 
-                        </xsd:appinfo> 
-                    </xsd:annotation> 
-                </xsd:attribute> 
-            </xsd:extension> 
-        </xsd:complexContent> 
-    </xsd:complexType> 
-    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorization.user"> 
-        <xsd:annotation> 
-            <xsd:documentation>User who has the security role.</xsd:documentation> 
-            <xsd:appinfo> 
-                <ext:label>User</ext:label> 
-            </xsd:appinfo> 
-        </xsd:annotation><!--Idiom for "empty element context" (whitespace accepted and ignored)--> 
-        <xsd:sequence> 
-            <xsd:sequence/> 
-        </xsd:sequence> 
-        <xsd:attribute name="name" use="required" type="xsd:string"> 
-            <xsd:annotation> 
-                <xsd:documentation>Name of a user who has the security role.</xsd:documentation> 
-                <xsd:appinfo> 
-                    <ext:label>User name</ext:label> 
-                </xsd:appinfo> 
-            </xsd:annotation> 
-        </xsd:attribute> 
-        <xsd:attribute name="access-id" use="optional" type="xsd:string"> 
-            <xsd:annotation> 
-                <xsd:documentation>A user access ID in the general form user:realmName/userUniqueId. A value will be generated if one is not specified.</xsd:documentation> 
-                <xsd:appinfo> 
-                    <ext:label>User access ID</ext:label> 
-                </xsd:appinfo> 
-            </xsd:annotation> 
-        </xsd:attribute> 
-        <xsd:anyAttribute processContents="skip"> 
-        </xsd:anyAttribute> 
-    </xsd:complexType> 
-    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorization.user-factory"> 
-        <xsd:complexContent> 
-            <xsd:extension base="com.ibm.ws.webcontainer.security.feature.authorization.user"> 
-                <xsd:attribute name="id" type="factoryIdType" use="optional"> 
-                    <xsd:annotation> 
-                        <xsd:documentation>A unique configuration ID.</xsd:documentation> 
-                        <xsd:appinfo> 
-                            <ext:label>ID</ext:label> 
-                        </xsd:appinfo> 
-                    </xsd:annotation> 
-                </xsd:attribute> 
-            </xsd:extension> 
-        </xsd:complexContent> 
-    </xsd:complexType> 
-    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorizationConfig"> 
-        <xsd:annotation> 
-            <xsd:documentation>A collection of role names and mappings of the roles to users, groups, or special subjects</xsd:documentation> 
-            <xsd:appinfo> 
-                <ext:label>Feature Authorization Role Mapping</ext:label> 
-            </xsd:appinfo> 
-        </xsd:annotation> 
-        <xsd:sequence> 
-            <xsd:element name="security-role" minOccurs="0" maxOccurs="unbounded" type="com.ibm.ws.webcontainer.security.feature.authorizationConfig.role-factory"> 
-            </xsd:element> 
-        </xsd:sequence> 
-        <xsd:anyAttribute processContents="skip"> 
-        </xsd:anyAttribute> 
-    </xsd:complexType> 
-    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorizationConfig-factory"> 
-        <xsd:complexContent> 
-            <xsd:extension base="com.ibm.ws.webcontainer.security.feature.authorizationConfig"> 
-                <xsd:attribute name="id" type="factoryIdType" use="optional"> 
-                    <xsd:annotation> 
-                        <xsd:documentation>A unique configuration ID.</xsd:documentation> 
-                        <xsd:appinfo> 
-                            <ext:label>ID</ext:label> 
-                        </xsd:appinfo> 
-                    </xsd:annotation> 
-                </xsd:attribute> 
-            </xsd:extension> 
-        </xsd:complexContent> 
-    </xsd:complexType> 
-    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorizationConfig.role"> 
-        <xsd:annotation> 
-            <xsd:documentation>A role that is mapped to users and groups in a user registry.</xsd:documentation> 
-            <xsd:appinfo> 
-                <ext:label>Security Role</ext:label> 
-            </xsd:appinfo> 
-        </xsd:annotation> 
-        <xsd:choice minOccurs="0" maxOccurs="unbounded"> 
-            <xsd:element name="user" type="com.ibm.ws.webcontainer.security.feature.authorization.user-factory"> 
-            </xsd:element> 
-            <xsd:element name="group" type="com.ibm.ws.webcontainer.security.feature.authorization.group-factory"> 
-            </xsd:element> 
-            <xsd:element name="special-subject" type="com.ibm.ws.webcontainer.security.feature.authorization.specialsubject-factory"> 
-            </xsd:element> 
-        </xsd:choice> 
-        <xsd:attribute name="name" use="required" type="xsd:string"> 
-            <xsd:annotation> 
-                <xsd:documentation>Role name.</xsd:documentation> 
-                <xsd:appinfo> 
-                    <ext:label>Role name</ext:label> 
-                </xsd:appinfo> 
-            </xsd:annotation> 
-        </xsd:attribute> 
-        <xsd:anyAttribute processContents="skip"> 
-        </xsd:anyAttribute> 
-    </xsd:complexType> 
-    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorizationConfig.role-factory"> 
-        <xsd:complexContent> 
-            <xsd:extension base="com.ibm.ws.webcontainer.security.feature.authorizationConfig.role"> 
-                <xsd:attribute name="id" type="factoryIdType" use="optional"> 
-                    <xsd:annotation> 
-                        <xsd:documentation>A unique configuration ID.</xsd:documentation> 
-                        <xsd:appinfo> 
-                            <ext:label>ID</ext:label> 
-                        </xsd:appinfo> 
-                    </xsd:annotation> 
-                </xsd:attribute> 
-            </xsd:extension> 
-        </xsd:complexContent> 
-    </xsd:complexType> 
-    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorization.specialsubject"> 
-        <xsd:annotation> 
-            <xsd:documentation>Special subject that has the security role.</xsd:documentation> 
-            <xsd:appinfo> 
-                <ext:label>Special Subject</ext:label> 
-            </xsd:appinfo> 
-        </xsd:annotation><!--Idiom for "empty element context" (whitespace accepted and ignored)--> 
-        <xsd:sequence> 
-            <xsd:sequence/> 
-        </xsd:sequence> 
-        <xsd:attribute name="type" use="required"> 
-            <xsd:annotation> 
-                <xsd:documentation>One of the following special subject types: ALL_AUTHENTICATED_USERS, EVERYONE.</xsd:documentation> 
-                <xsd:appinfo> 
-                    <ext:label>Special subject type</ext:label> 
-                </xsd:appinfo> 
-            </xsd:annotation> 
-            <xsd:simpleType> 
-                <xsd:restriction base="xsd:string"> 
-                    <xsd:enumeration value="ALL_AUTHENTICATED_USERS"> 
-                        <xsd:annotation> 
-                            <xsd:documentation>All authenticated users.</xsd:documentation> 
-                        </xsd:annotation> 
-                    </xsd:enumeration> 
-                    <xsd:enumeration value="EVERYONE"> 
-                        <xsd:annotation> 
-                            <xsd:documentation>All users for every request, even if the request was not authenticated.</xsd:documentation> 
-                        </xsd:annotation> 
-                    </xsd:enumeration> 
-                </xsd:restriction> 
-            </xsd:simpleType> 
-        </xsd:attribute> 
-        <xsd:anyAttribute processContents="skip"> 
-        </xsd:anyAttribute> 
-    </xsd:complexType> 
-    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorization.specialsubject-factory"> 
-        <xsd:complexContent> 
-            <xsd:extension base="com.ibm.ws.webcontainer.security.feature.authorization.specialsubject"> 
                 <xsd:attribute name="id" type="factoryIdType" use="optional"> 
                     <xsd:annotation> 
                         <xsd:documentation>A unique configuration ID.</xsd:documentation> 
@@ -32090,6 +31952,200 @@
     <xsd:complexType name="io.openliberty.grpc.clientConfig-factory"> 
         <xsd:complexContent> 
             <xsd:extension base="io.openliberty.grpc.clientConfig"> 
+                <xsd:attribute name="id" type="factoryIdType" use="optional"> 
+                    <xsd:annotation> 
+                        <xsd:documentation>A unique configuration ID.</xsd:documentation> 
+                        <xsd:appinfo> 
+                            <ext:label>ID</ext:label> 
+                        </xsd:appinfo> 
+                    </xsd:annotation> 
+                </xsd:attribute> 
+            </xsd:extension> 
+        </xsd:complexContent> 
+    </xsd:complexType> 
+    <xsd:complexType name="io.openliberty.jcache.properties"> 
+        <xsd:annotation> 
+            <xsd:documentation>Vendor-specific JCache configuration properties, which are passed to the CachingProvider when the CacheManager instance is obtained.</xsd:documentation> 
+            <xsd:appinfo> 
+                <ext:label>JCache Properties</ext:label> 
+                <ext:extraProperties/> 
+            </xsd:appinfo> 
+        </xsd:annotation><!--Idiom for "empty element context" (whitespace accepted and ignored)--> 
+        <xsd:sequence> 
+            <xsd:sequence/> 
+        </xsd:sequence> 
+        <xsd:attribute name="internal.properties" type="internalPropertiesType" use="optional"> 
+            <xsd:annotation> 
+                <xsd:documentation>List of vendor-specific JCache configuration properties, which are passed to the CachingProvider when the CacheManager is obtained.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Vendor specific properties</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:anyAttribute processContents="skip"> 
+        </xsd:anyAttribute> 
+    </xsd:complexType> 
+    <xsd:complexType name="io.openliberty.jcache.cachemanager"> 
+        <xsd:annotation> 
+            <xsd:documentation>Configuration for the JCache CacheManager.</xsd:documentation> 
+            <xsd:appinfo> 
+                <ext:label>JCache CacheManager</ext:label> 
+            </xsd:appinfo> 
+        </xsd:annotation> 
+        <xsd:choice minOccurs="0" maxOccurs="unbounded"> 
+            <xsd:element name="cachingProvider" type="io.openliberty.jcache.cachingprovider"> 
+                <xsd:annotation> 
+                    <xsd:documentation>The JCache CachingProvider that this JCache CacheManager instance uses.</xsd:documentation> 
+                    <xsd:appinfo> 
+                        <ext:label>JCache CachingProvider</ext:label> 
+                    </xsd:appinfo> 
+                </xsd:annotation> 
+            </xsd:element> 
+            <xsd:element name="properties" type="io.openliberty.jcache.properties"> 
+            </xsd:element> 
+        </xsd:choice> 
+        <xsd:attribute name="cachingProviderRef" use="optional" type="pidType"> 
+            <xsd:annotation> 
+                <xsd:documentation>The JCache CachingProvider that this JCache CacheManager instance uses.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>JCache caching provider reference</ext:label> 
+                    <ext:reference>cachingProvider</ext:reference> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="uri" use="optional" type="location"> 
+            <xsd:annotation> 
+                <xsd:documentation>Vendor-specific JCache configuration URI, which is passed to the CachingProvider when the CacheManager instance is obtained.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>JCache caching provider URI</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:anyAttribute processContents="skip"> 
+        </xsd:anyAttribute> 
+    </xsd:complexType> 
+    <xsd:complexType name="io.openliberty.jcache.cachemanager-factory"> 
+        <xsd:complexContent> 
+            <xsd:extension base="io.openliberty.jcache.cachemanager"> 
+                <xsd:attribute name="id" type="factoryIdType" use="optional"> 
+                    <xsd:annotation> 
+                        <xsd:documentation>A unique configuration ID.</xsd:documentation> 
+                        <xsd:appinfo> 
+                            <ext:label>ID</ext:label> 
+                        </xsd:appinfo> 
+                    </xsd:annotation> 
+                </xsd:attribute> 
+            </xsd:extension> 
+        </xsd:complexContent> 
+    </xsd:complexType> 
+    <xsd:complexType name="io.openliberty.jcache.cache"> 
+        <xsd:annotation> 
+            <xsd:documentation>Configuration for JCache Cache.</xsd:documentation> 
+            <xsd:appinfo> 
+                <ext:label>JCache Cache</ext:label> 
+            </xsd:appinfo> 
+        </xsd:annotation> 
+        <xsd:sequence> 
+            <xsd:element name="cacheManager" minOccurs="0" maxOccurs="1" type="io.openliberty.jcache.cachemanager"> 
+                <xsd:annotation> 
+                    <xsd:documentation>The JCache CacheManager instance that manages this cache.</xsd:documentation> 
+                    <xsd:appinfo> 
+                        <ext:label>JCache CacheManager</ext:label> 
+                    </xsd:appinfo> 
+                </xsd:annotation> 
+            </xsd:element> 
+        </xsd:sequence> 
+        <xsd:attribute name="cacheManagerRef" use="optional" type="pidType"> 
+            <xsd:annotation> 
+                <xsd:documentation>The JCache CacheManager instance that manages this cache.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>JCache cache manager reference</ext:label> 
+                    <ext:reference>cacheManager</ext:reference> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="name" use="required" type="xsd:string"> 
+            <xsd:annotation> 
+                <xsd:documentation>The JCache cache name to use for caching. If this cache does not exist, it is created at runtime. The name must be unique for a given CacheManager instance.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>JCache name</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:anyAttribute processContents="skip"> 
+        </xsd:anyAttribute> 
+    </xsd:complexType> 
+    <xsd:complexType name="io.openliberty.jcache.cache-factory"> 
+        <xsd:complexContent> 
+            <xsd:extension base="io.openliberty.jcache.cache"> 
+                <xsd:attribute name="id" type="factoryIdType" use="optional"> 
+                    <xsd:annotation> 
+                        <xsd:documentation>A unique configuration ID.</xsd:documentation> 
+                        <xsd:appinfo> 
+                            <ext:label>ID</ext:label> 
+                        </xsd:appinfo> 
+                    </xsd:annotation> 
+                </xsd:attribute> 
+            </xsd:extension> 
+        </xsd:complexContent> 
+    </xsd:complexType> 
+    <xsd:complexType name="io.openliberty.jcache.cachingprovider"> 
+        <xsd:annotation> 
+            <xsd:documentation>Configuration for the JCache CachingProvider</xsd:documentation> 
+            <xsd:appinfo> 
+                <ext:label>JCache CachingProvider</ext:label> 
+            </xsd:appinfo> 
+        </xsd:annotation> 
+        <xsd:choice minOccurs="0" maxOccurs="unbounded"> 
+            <xsd:element name="jCacheLibrary" type="com.ibm.ws.classloading.sharedlibrary"> 
+                <xsd:annotation> 
+                    <xsd:documentation>A library that contains the JCache implementation.</xsd:documentation> 
+                    <xsd:appinfo> 
+                        <ext:label>JCache Implementation Library</ext:label> 
+                    </xsd:appinfo> 
+                </xsd:annotation> 
+            </xsd:element> 
+            <xsd:element name="commonLibrary" type="com.ibm.ws.classloading.sharedlibrary-factory"> 
+                <xsd:annotation> 
+                    <xsd:documentation>A library or libraries that contain any classes that might be stored in the cache.</xsd:documentation> 
+                    <xsd:appinfo> 
+                        <ext:label>Common Library</ext:label> 
+                    </xsd:appinfo> 
+                </xsd:annotation> 
+            </xsd:element> 
+        </xsd:choice> 
+        <xsd:attribute name="jCacheLibraryRef" use="optional" type="pidType"> 
+            <xsd:annotation> 
+                <xsd:documentation>A library that contains the JCache implementation.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>JCache implementation library reference</ext:label> 
+                    <ext:reference>library</ext:reference> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="providerClass" use="optional" type="xsd:string"> 
+            <xsd:annotation> 
+                <xsd:documentation>The fully-qualified class name of the JCache javax.cache.CachingProvider instance.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>JCache caching provider class</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="commonLibraryRef" use="optional" type="pidListType"> 
+            <xsd:annotation> 
+                <xsd:documentation>A library or libraries that contain any classes that might be stored in the cache.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Common library reference</ext:label> 
+                    <ext:reference>library</ext:reference> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:anyAttribute processContents="skip"> 
+        </xsd:anyAttribute> 
+    </xsd:complexType> 
+    <xsd:complexType name="io.openliberty.jcache.cachingprovider-factory"> 
+        <xsd:complexContent> 
+            <xsd:extension base="io.openliberty.jcache.cachingprovider"> 
                 <xsd:attribute name="id" type="factoryIdType" use="optional"> 
                     <xsd:annotation> 
                         <xsd:documentation>A unique configuration ID.</xsd:documentation> 
@@ -35696,11 +35752,27 @@
                 </xsd:appinfo> 
             </xsd:annotation> 
         </xsd:attribute> 
+        <xsd:attribute name="disableInitialRequestCookie" use="optional" default="false" type="booleanType"> 
+            <xsd:annotation> 
+                <xsd:documentation>When too many authentication requests are created by Service Provider and redirected to IdP due to the application SSO setup, set this attribute to true to prevent creation of the initial request cookie. The default is false.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Disable initial request cookie creation</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
         <xsd:attribute name="disableLtpaCookie" use="optional" default="true" type="booleanType"> 
             <xsd:annotation> 
                 <xsd:documentation>Do not create an LTPA Token during processing of the SAML Assertion. Create a cookie of the specific Service Provider instead.</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>Disable LTPA token</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="spCookieName" use="optional" type="xsd:string"> 
+            <xsd:annotation> 
+                <xsd:documentation>Specifies a cookie name for the SAML service provider. The service provider will provide one by default.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>SAML server provider cookie name</ext:label> 
                 </xsd:appinfo> 
             </xsd:annotation> 
         </xsd:attribute> 
@@ -35863,6 +35935,14 @@
             </xsd:element> 
             <xsd:element name="properties" type="com.ibm.ws.session.cache.properties"> 
             </xsd:element> 
+            <xsd:element name="cacheManager" type="io.openliberty.jcache.cachemanager"> 
+                <xsd:annotation> 
+                    <xsd:documentation>The JCache CacheManager reference that is used to get the HTTP session JCache caches.</xsd:documentation> 
+                    <xsd:appinfo> 
+                        <ext:label>JCache CacheManager</ext:label> 
+                    </xsd:appinfo> 
+                </xsd:annotation> 
+            </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="writeContents" use="optional" default="ONLY_SET_ATTRIBUTES"> 
             <xsd:annotation> 
@@ -35970,6 +36050,15 @@
                 <xsd:appinfo> 
                     <ext:label>Cache name separator</ext:label> 
                     <ext:group id="performance"/> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="cacheManagerRef" use="optional" type="pidType"> 
+            <xsd:annotation> 
+                <xsd:documentation>The JCache CacheManager reference that is used to get the HTTP session JCache caches.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>JCache cache manager reference</ext:label> 
+                    <ext:reference>cacheManager</ext:reference> 
                 </xsd:appinfo> 
             </xsd:annotation> 
         </xsd:attribute> 
@@ -38142,6 +38231,209 @@
         <xsd:anyAttribute processContents="skip"> 
         </xsd:anyAttribute> 
     </xsd:complexType> 
+    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorization.group"> 
+        <xsd:annotation> 
+            <xsd:documentation>Group that has the security role.</xsd:documentation> 
+            <xsd:appinfo> 
+                <ext:label>Group</ext:label> 
+            </xsd:appinfo> 
+        </xsd:annotation><!--Idiom for "empty element context" (whitespace accepted and ignored)--> 
+        <xsd:sequence> 
+            <xsd:sequence/> 
+        </xsd:sequence> 
+        <xsd:attribute name="name" use="required" type="xsd:string"> 
+            <xsd:annotation> 
+                <xsd:documentation>Name of a group that has the security role.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Group name</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="access-id" use="optional" type="xsd:string"> 
+            <xsd:annotation> 
+                <xsd:documentation>A group access ID in the general form group:realmName/groupUniqueId. A value will be generated if one is not specified.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Group access ID</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:anyAttribute processContents="skip"> 
+        </xsd:anyAttribute> 
+    </xsd:complexType> 
+    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorization.group-factory"> 
+        <xsd:complexContent> 
+            <xsd:extension base="com.ibm.ws.webcontainer.security.feature.authorization.group"> 
+                <xsd:attribute name="id" type="factoryIdType" use="optional"> 
+                    <xsd:annotation> 
+                        <xsd:documentation>A unique configuration ID.</xsd:documentation> 
+                        <xsd:appinfo> 
+                            <ext:label>ID</ext:label> 
+                        </xsd:appinfo> 
+                    </xsd:annotation> 
+                </xsd:attribute> 
+            </xsd:extension> 
+        </xsd:complexContent> 
+    </xsd:complexType> 
+    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorization.user"> 
+        <xsd:annotation> 
+            <xsd:documentation>User who has the security role.</xsd:documentation> 
+            <xsd:appinfo> 
+                <ext:label>User</ext:label> 
+            </xsd:appinfo> 
+        </xsd:annotation><!--Idiom for "empty element context" (whitespace accepted and ignored)--> 
+        <xsd:sequence> 
+            <xsd:sequence/> 
+        </xsd:sequence> 
+        <xsd:attribute name="name" use="required" type="xsd:string"> 
+            <xsd:annotation> 
+                <xsd:documentation>Name of a user who has the security role.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>User name</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="access-id" use="optional" type="xsd:string"> 
+            <xsd:annotation> 
+                <xsd:documentation>A user access ID in the general form user:realmName/userUniqueId. A value will be generated if one is not specified.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>User access ID</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:anyAttribute processContents="skip"> 
+        </xsd:anyAttribute> 
+    </xsd:complexType> 
+    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorization.user-factory"> 
+        <xsd:complexContent> 
+            <xsd:extension base="com.ibm.ws.webcontainer.security.feature.authorization.user"> 
+                <xsd:attribute name="id" type="factoryIdType" use="optional"> 
+                    <xsd:annotation> 
+                        <xsd:documentation>A unique configuration ID.</xsd:documentation> 
+                        <xsd:appinfo> 
+                            <ext:label>ID</ext:label> 
+                        </xsd:appinfo> 
+                    </xsd:annotation> 
+                </xsd:attribute> 
+            </xsd:extension> 
+        </xsd:complexContent> 
+    </xsd:complexType> 
+    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorizationConfig"> 
+        <xsd:annotation> 
+            <xsd:documentation>A collection of role names and mappings of the roles to users, groups, or special subjects</xsd:documentation> 
+            <xsd:appinfo> 
+                <ext:label>Feature Authorization Role Mapping</ext:label> 
+            </xsd:appinfo> 
+        </xsd:annotation> 
+        <xsd:sequence> 
+            <xsd:element name="security-role" minOccurs="0" maxOccurs="unbounded" type="com.ibm.ws.webcontainer.security.feature.authorizationConfig.role-factory"> 
+            </xsd:element> 
+        </xsd:sequence> 
+        <xsd:anyAttribute processContents="skip"> 
+        </xsd:anyAttribute> 
+    </xsd:complexType> 
+    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorizationConfig-factory"> 
+        <xsd:complexContent> 
+            <xsd:extension base="com.ibm.ws.webcontainer.security.feature.authorizationConfig"> 
+                <xsd:attribute name="id" type="factoryIdType" use="optional"> 
+                    <xsd:annotation> 
+                        <xsd:documentation>A unique configuration ID.</xsd:documentation> 
+                        <xsd:appinfo> 
+                            <ext:label>ID</ext:label> 
+                        </xsd:appinfo> 
+                    </xsd:annotation> 
+                </xsd:attribute> 
+            </xsd:extension> 
+        </xsd:complexContent> 
+    </xsd:complexType> 
+    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorizationConfig.role"> 
+        <xsd:annotation> 
+            <xsd:documentation>A role that is mapped to users and groups in a user registry.</xsd:documentation> 
+            <xsd:appinfo> 
+                <ext:label>Security Role</ext:label> 
+            </xsd:appinfo> 
+        </xsd:annotation> 
+        <xsd:choice minOccurs="0" maxOccurs="unbounded"> 
+            <xsd:element name="user" type="com.ibm.ws.webcontainer.security.feature.authorization.user-factory"> 
+            </xsd:element> 
+            <xsd:element name="group" type="com.ibm.ws.webcontainer.security.feature.authorization.group-factory"> 
+            </xsd:element> 
+            <xsd:element name="special-subject" type="com.ibm.ws.webcontainer.security.feature.authorization.specialsubject-factory"> 
+            </xsd:element> 
+        </xsd:choice> 
+        <xsd:attribute name="name" use="required" type="xsd:string"> 
+            <xsd:annotation> 
+                <xsd:documentation>Role name.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Role name</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:anyAttribute processContents="skip"> 
+        </xsd:anyAttribute> 
+    </xsd:complexType> 
+    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorizationConfig.role-factory"> 
+        <xsd:complexContent> 
+            <xsd:extension base="com.ibm.ws.webcontainer.security.feature.authorizationConfig.role"> 
+                <xsd:attribute name="id" type="factoryIdType" use="optional"> 
+                    <xsd:annotation> 
+                        <xsd:documentation>A unique configuration ID.</xsd:documentation> 
+                        <xsd:appinfo> 
+                            <ext:label>ID</ext:label> 
+                        </xsd:appinfo> 
+                    </xsd:annotation> 
+                </xsd:attribute> 
+            </xsd:extension> 
+        </xsd:complexContent> 
+    </xsd:complexType> 
+    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorization.specialsubject"> 
+        <xsd:annotation> 
+            <xsd:documentation>Special subject that has the security role.</xsd:documentation> 
+            <xsd:appinfo> 
+                <ext:label>Special Subject</ext:label> 
+            </xsd:appinfo> 
+        </xsd:annotation><!--Idiom for "empty element context" (whitespace accepted and ignored)--> 
+        <xsd:sequence> 
+            <xsd:sequence/> 
+        </xsd:sequence> 
+        <xsd:attribute name="type" use="required"> 
+            <xsd:annotation> 
+                <xsd:documentation>One of the following special subject types: ALL_AUTHENTICATED_USERS, EVERYONE.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Special subject type</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+            <xsd:simpleType> 
+                <xsd:restriction base="xsd:string"> 
+                    <xsd:enumeration value="ALL_AUTHENTICATED_USERS"> 
+                        <xsd:annotation> 
+                            <xsd:documentation>All authenticated users.</xsd:documentation> 
+                        </xsd:annotation> 
+                    </xsd:enumeration> 
+                    <xsd:enumeration value="EVERYONE"> 
+                        <xsd:annotation> 
+                            <xsd:documentation>All users for every request, even if the request was not authenticated.</xsd:documentation> 
+                        </xsd:annotation> 
+                    </xsd:enumeration> 
+                </xsd:restriction> 
+            </xsd:simpleType> 
+        </xsd:attribute> 
+        <xsd:anyAttribute processContents="skip"> 
+        </xsd:anyAttribute> 
+    </xsd:complexType> 
+    <xsd:complexType name="com.ibm.ws.webcontainer.security.feature.authorization.specialsubject-factory"> 
+        <xsd:complexContent> 
+            <xsd:extension base="com.ibm.ws.webcontainer.security.feature.authorization.specialsubject"> 
+                <xsd:attribute name="id" type="factoryIdType" use="optional"> 
+                    <xsd:annotation> 
+                        <xsd:documentation>A unique configuration ID.</xsd:documentation> 
+                        <xsd:appinfo> 
+                            <ext:label>ID</ext:label> 
+                        </xsd:appinfo> 
+                    </xsd:annotation> 
+                </xsd:attribute> 
+            </xsd:extension> 
+        </xsd:complexContent> 
+    </xsd:complexType> 
     <xsd:complexType name="com.ibm.ws.wsat.service.wsatconfigservice"> 
         <xsd:annotation> 
             <xsd:documentation>Configuration properties for the Web Services Atomic Transaction feature.</xsd:documentation> 
@@ -39103,7 +39395,6 @@
             <xsd:element name="wsocOutbound" type="com.ibm.ws.wsoc.outbound.wsocOutbound"/> 
             <xsd:element name="federatedRepository" type="com.ibm.ws.security.wim.core.config-factory"/> 
             <xsd:element name="databaseStore" type="com.ibm.ws.persistence.databaseStore-factory"/> 
-            <xsd:element name="authorization-roles" type="com.ibm.ws.webcontainer.security.feature.authorizationConfig-factory"/> 
             <xsd:element name="acmeCA" type="com.ibm.ws.security.acme.config"/> 
             <xsd:element name="acmeTransportConfig" type="com.ibm.ws.security.acme.transport-factory"/> 
             <xsd:element name="acmeRevocationChecker" type="com.ibm.ws.security.acme.revocation-factory"/> 
@@ -39113,6 +39404,9 @@
             <xsd:element name="distributedMap" type="com.ibm.ws.cache-factory"/> 
             <xsd:element name="grpc" type="io.openliberty.grpc.serverConfig-factory"/> 
             <xsd:element name="grpcClient" type="io.openliberty.grpc.clientConfig-factory"/> 
+            <xsd:element name="cacheManager" type="io.openliberty.jcache.cachemanager-factory"/> 
+            <xsd:element name="cache" type="io.openliberty.jcache.cache-factory"/> 
+            <xsd:element name="cachingProvider" type="io.openliberty.jcache.cachingprovider-factory"/> 
             <xsd:element name="jwtBuilder" type="com.ibm.ws.security.jwt.builder-factory"/> 
             <xsd:element name="jwtConsumer" type="com.ibm.ws.security.jwt.consumer-factory"/> 
             <xsd:element name="jwtSso" type="com.ibm.ws.security.jwtsso"/> 
@@ -39134,6 +39428,7 @@
             <xsd:element name="okdServiceLogin" type="com.ibm.ws.security.social.okdServiceLogin-factory"/> 
             <xsd:element name="oauth2Login" type="com.ibm.ws.security.social.oauth2login-factory"/> 
             <xsd:element name="spnego" type="com.ibm.ws.security.spnego"/> 
+            <xsd:element name="authorization-roles" type="com.ibm.ws.webcontainer.security.feature.authorizationConfig-factory"/> 
             <xsd:element name="wsAtomicTransaction" type="com.ibm.ws.wsat.service.wsatconfigservice"/> 
             <xsd:element name="wsSecurityProvider" type="com.ibm.ws.wssecurity.config"/> 
             <xsd:element name="wsSecurityClient" type="com.ibm.ws.wssecurity.client.config"/> 
