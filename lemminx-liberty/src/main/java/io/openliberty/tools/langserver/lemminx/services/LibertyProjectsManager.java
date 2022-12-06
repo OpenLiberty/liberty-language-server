@@ -20,8 +20,13 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collection;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 import org.eclipse.lsp4j.WorkspaceFolder;
 
@@ -33,25 +38,82 @@ public class LibertyProjectsManager {
 
     private static final String URI_SEPARATOR = "/";
 
-    private List<LibertyWorkspace> libertyWorkspaceFolders;
+    private Map<String, LibertyWorkspace> libertyWorkspaceFolders;
 
     public static LibertyProjectsManager getInstance() {
         return INSTANCE;
     }
 
     private LibertyProjectsManager() {
-        libertyWorkspaceFolders = new ArrayList<LibertyWorkspace>();
+        libertyWorkspaceFolders = new HashMap<String,LibertyWorkspace>();
     }
 
     public void setWorkspaceFolders(List<WorkspaceFolder> workspaceFolders) {
         for (WorkspaceFolder folder : workspaceFolders) {
-            LibertyWorkspace libertyWorkspace = new LibertyWorkspace(folder.getUri());
-            this.libertyWorkspaceFolders.add(libertyWorkspace);
+            // Add logic here to see if child folders are sub-modules in a multi-module project.
+            // If child folder is a Liberty project (has src/main/liberty/config/server.xml),
+            // then create a LibertyWorkspace for it and do not create one for the parent folder.
+
+            String workspaceUriString = folder.getUri();
+
+            if (this.libertyWorkspaceFolders.containsKey(workspaceUriString)) {
+                continue;
+            }
+
+            URI workspaceUri =  URI.create(workspaceUriString);
+            Path workspacePath = Paths.get(workspaceUri);
+            Path serverXmlPath = Paths.get("src", "main", "liberty", "config", "server.xml");
+            List<Path> serverXmlFiles = null;
+
+            try {
+                serverXmlFiles = LibertyUtils.findFilesInDirectory(workspacePath, serverXmlPath);
+            } catch (IOException e) {
+                LOGGER.warning("Received exception while searching for server.xml files in: " + workspacePath + " exception: " + e.getMessage());
+            }
+
+            if ((serverXmlFiles == null) || serverXmlFiles.isEmpty() || (serverXmlFiles.size() == 1)) {
+                LOGGER.info("Adding Liberty workspace: " + workspaceUriString);
+                LibertyWorkspace libertyWorkspace = new LibertyWorkspace(workspaceUriString);
+                this.libertyWorkspaceFolders.put(workspaceUriString, libertyWorkspace);
+            } else {
+                boolean addedSubModule = false;
+
+                List<Path> childrenDirs = null;
+                String lastChildDirPath = null;
+
+                try {
+                    childrenDirs = Files.walk(workspacePath, 1)
+                                        .filter(Files::isDirectory)
+                                        .collect(Collectors.toList());
+
+                    for (Path nextChildDir : childrenDirs) {
+                        lastChildDirPath = nextChildDir.toUri().toString().replace("///", "/");;
+                        if (nextChildDir.equals(workspacePath) || this.libertyWorkspaceFolders.containsKey(lastChildDirPath)) {
+                            continue;
+                        }
+                        List<Path> serverXmlFile = LibertyUtils.findFilesInDirectory(nextChildDir, serverXmlPath);
+                        if (!serverXmlFile.isEmpty()) {
+                            LibertyWorkspace libertyWorkspace = new LibertyWorkspace(lastChildDirPath);
+                            this.libertyWorkspaceFolders.put(lastChildDirPath, libertyWorkspace);
+                            addedSubModule = true;
+                            LOGGER.info("Adding Liberty workspace for sub-module: " + lastChildDirPath);
+                        }
+                    }
+                } catch (IOException e) {
+                    LOGGER.warning("Received exception while processing workspace folder: " + lastChildDirPath);
+                }
+
+                if (!addedSubModule) {
+                    LibertyWorkspace libertyWorkspace = new LibertyWorkspace(workspaceUriString);
+                    this.libertyWorkspaceFolders.put(workspaceUriString, libertyWorkspace);
+                    LOGGER.info("Adding Liberty workspace by default: " + workspaceUriString);
+                }
+            }
         }
     }
 
-    public List<LibertyWorkspace> getLibertyWorkspaceFolders() {
-        return this.libertyWorkspaceFolders;
+    public Collection<LibertyWorkspace> getLibertyWorkspaceFolders() {
+        return this.libertyWorkspaceFolders.values();
     }
 
     public String getLibertyVersion(LibertyWorkspace libertyWorkspace) {
@@ -104,6 +166,6 @@ public class LibertyProjectsManager {
     }
 
     public void cleanInstance() {
-        libertyWorkspaceFolders = new ArrayList<LibertyWorkspace>();
+        libertyWorkspaceFolders = new HashMap<String, LibertyWorkspace>();
     }
 }
