@@ -93,13 +93,10 @@ public class LibertyProjectsManager {
                         }
                         List<Path> serverXmlFile = LibertyUtils.findFilesInDirectory(nextChildDir, serverXmlPath);
                         if (!serverXmlFile.isEmpty()) {
-                            Path pomFile = Paths.get(nextChildDir.toUri().getPath(), "pom.xml");
-                            if (pomFile.toFile().exists()) {
-                                LibertyWorkspace libertyWorkspace = new LibertyWorkspace(lastChildDirPath);
-                                this.libertyWorkspaceFolders.put(lastChildDirPath, libertyWorkspace);
-                                addedSubModule = true;
-                                LOGGER.info("Adding Liberty workspace for sub-module: " + lastChildDirPath);
-                            }
+                            LibertyWorkspace libertyWorkspace = new LibertyWorkspace(lastChildDirPath);
+                            this.libertyWorkspaceFolders.put(lastChildDirPath, libertyWorkspace);
+                            addedSubModule = true;
+                            LOGGER.info("Adding Liberty workspace for sub-module: " + lastChildDirPath);
                         }
                     }
                 } catch (IOException e) {
