@@ -20,6 +20,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collection;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -35,14 +38,14 @@ public class LibertyProjectsManager {
 
     private static final String URI_SEPARATOR = "/";
 
-    private List<LibertyWorkspace> libertyWorkspaceFolders;
+    private Map<String, LibertyWorkspace> libertyWorkspaceFolders;
 
     public static LibertyProjectsManager getInstance() {
         return INSTANCE;
     }
 
     private LibertyProjectsManager() {
-        libertyWorkspaceFolders = new ArrayList<LibertyWorkspace>();
+        libertyWorkspaceFolders = new HashMap<String,LibertyWorkspace>();
     }
 
     public void setWorkspaceFolders(List<WorkspaceFolder> workspaceFolders) {
@@ -52,6 +55,11 @@ public class LibertyProjectsManager {
             // then create a LibertyWorkspace for it and do not create one for the parent folder.
 
             String workspaceUriString = folder.getUri();
+
+            if (this.libertyWorkspaceFolders.containsKey(workspaceUriString)) {
+                continue;
+            }
+
             URI workspaceUri =  URI.create(workspaceUriString);
             Path workspacePath = Paths.get(workspaceUri);
             Path serverXmlPath = Paths.get("src", "main", "liberty", "config", "server.xml");
@@ -66,7 +74,7 @@ public class LibertyProjectsManager {
             if ((serverXmlFiles == null) || serverXmlFiles.isEmpty() || (serverXmlFiles.size() == 1)) {
                 LOGGER.info("Adding Liberty workspace: " + workspaceUriString);
                 LibertyWorkspace libertyWorkspace = new LibertyWorkspace(workspaceUriString);
-                this.libertyWorkspaceFolders.add(libertyWorkspace);
+                this.libertyWorkspaceFolders.put(workspaceUriString, libertyWorkspace);
             } else {
                 boolean addedSubModule = false;
 
@@ -80,7 +88,7 @@ public class LibertyProjectsManager {
 
                     for (Path nextChildDir : childrenDirs) {
                         lastChildDirPath = nextChildDir.toUri().toString().replace("///", "/");;
-                        if (nextChildDir.equals(workspacePath)) {
+                        if (nextChildDir.equals(workspacePath) || this.libertyWorkspaceFolders.containsKey(lastChildDirPath)) {
                             continue;
                         }
                         List<Path> serverXmlFile = LibertyUtils.findFilesInDirectory(nextChildDir, serverXmlPath);
@@ -88,7 +96,7 @@ public class LibertyProjectsManager {
                             Path pomFile = Paths.get(nextChildDir.toUri().getPath(), "pom.xml");
                             if (pomFile.toFile().exists()) {
                                 LibertyWorkspace libertyWorkspace = new LibertyWorkspace(lastChildDirPath);
-                                this.libertyWorkspaceFolders.add(libertyWorkspace);
+                                this.libertyWorkspaceFolders.put(lastChildDirPath, libertyWorkspace);
                                 addedSubModule = true;
                                 LOGGER.info("Adding Liberty workspace for sub-module: " + lastChildDirPath);
                             }
@@ -100,15 +108,15 @@ public class LibertyProjectsManager {
 
                 if (!addedSubModule) {
                     LibertyWorkspace libertyWorkspace = new LibertyWorkspace(workspaceUriString);
-                    this.libertyWorkspaceFolders.add(libertyWorkspace);
+                    this.libertyWorkspaceFolders.put(workspaceUriString, libertyWorkspace);
                     LOGGER.info("Adding Liberty workspace by default: " + workspaceUriString);
                 }
             }
         }
     }
 
-    public List<LibertyWorkspace> getLibertyWorkspaceFolders() {
-        return this.libertyWorkspaceFolders;
+    public Collection<LibertyWorkspace> getLibertyWorkspaceFolders() {
+        return this.libertyWorkspaceFolders.values();
     }
 
     public String getLibertyVersion(LibertyWorkspace libertyWorkspace) {
@@ -161,6 +169,6 @@ public class LibertyProjectsManager {
     }
 
     public void cleanInstance() {
-        libertyWorkspaceFolders = new ArrayList<LibertyWorkspace>();
+        libertyWorkspaceFolders = new HashMap<String, LibertyWorkspace>();
     }
 }

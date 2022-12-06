@@ -6,6 +6,7 @@ import org.eclipse.lsp4j.WorkspaceFolder;
 import org.junit.jupiter.api.Test;
 
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
+import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 
 import static org.eclipse.lemminx.XMLAssert.r;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -15,6 +16,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collection;
 
 public class LibertyDiagnosticTest {
 
@@ -140,13 +142,14 @@ public class LibertyDiagnosticTest {
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), 
                 not_xml, multi_liner, not_optional, missing_xml, optional_not_defined, missing_xml2);
 
-        assertTrue(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0)
-                .hasConfigFile(new File("src/test/resources/empty_server.xml").getCanonicalPath()));
-        assertFalse(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0)
-                .hasConfigFile("MISSING FILE"));
-        assertFalse(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0)
-                .hasConfigFile("MULTI LINER"));
-        assertFalse(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders().get(0)
-                .hasConfigFile("MISSING FILE.xml"));
+        Collection<LibertyWorkspace> workspaceFolders = LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders();
+        assertTrue(workspaceFolders.size() == 1);
+
+        LibertyWorkspace libWorkspace = workspaceFolders.iterator().next();
+
+        assertTrue(libWorkspace.hasConfigFile(new File("src/test/resources/empty_server.xml").getCanonicalPath()));
+        assertFalse(libWorkspace.hasConfigFile("MISSING FILE"));
+        assertFalse(libWorkspace.hasConfigFile("MULTI LINER"));
+        assertFalse(libWorkspace.hasConfigFile("MISSING FILE.xml"));
     }
 }
