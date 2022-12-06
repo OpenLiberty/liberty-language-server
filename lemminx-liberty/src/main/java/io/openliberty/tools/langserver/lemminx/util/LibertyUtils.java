@@ -85,6 +85,22 @@ public class LibertyUtils {
     }
 
     /**
+     * Search the dir path for all files that match the given name. If none are found,
+     * an empty List is returned.
+     * 
+     * @param dir Path to search under
+     * @param filePath Path to match
+     * @return List<Path> collection of Path that match the given filePath in the specified dir Path.
+     */
+    public static List<Path> findFilesInDirectory(Path dir, Path filePath) throws IOException {
+        List<Path> matchingFiles = Files.walk(dir)
+                .filter(p -> (Files.isRegularFile(p) && p.endsWith(filePath)))
+                .collect(Collectors.toList());
+
+        return matchingFiles;
+    }
+
+    /**
      * Given a server.xml URI find the associated workspace folder and search that
      * folder for the most recently edited file that matches the given name.
      * 
@@ -103,9 +119,7 @@ public class LibertyUtils {
         }
         try {
             Path rootPath = Paths.get(libertyWorkspace.getWorkspaceURI());
-            List<Path> matchingFiles = Files.walk(rootPath)
-                    .filter(p -> (Files.isRegularFile(p) && p.endsWith(filePath)))
-                    .collect(Collectors.toList());
+            List<Path> matchingFiles = findFilesInDirectory(rootPath, filePath);
             if (matchingFiles.isEmpty()) {
                 return null;
             }

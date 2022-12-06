@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.openliberty.tools.test</groupId>
-    <artifactId>featurelist-gen-ol-it</artifactId>
+    <artifactId>multi-mod-schema-gen-ol-modIt</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -59,11 +59,6 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <groupId>io.openliberty.tools</groupId>
-                    <artifactId>liberty-maven-plugin</artifactId>
-                    <version>3.7.1</version>
-                </plugin>
-                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.1</version>
@@ -76,27 +71,6 @@
             </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>io.openliberty.tools</groupId>
-                <artifactId>liberty-maven-plugin</artifactId>
-                <configuration>
-                    <serverName>test</serverName>
-                    <runtimeArtifact>
-                        <groupId>io.openliberty.beta</groupId>
-                        <artifactId>openliberty-runtime</artifactId>
-                        <version>22.0.0.13-beta</version>
-                    </runtimeArtifact>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>install-server</id>
-                        <phase>pre-integration-test</phase>
-                        <goals>
-                            <goal>create</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
