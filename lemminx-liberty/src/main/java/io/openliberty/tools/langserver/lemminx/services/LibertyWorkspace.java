@@ -229,4 +229,10 @@ public class LibertyWorkspace {
             return false;
         }
     }
+
+    @Override
+    public String toString() {
+        return workspaceFolderURI;
+    }
+
 }
