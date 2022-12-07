@@ -7,8 +7,8 @@ The Liberty Config Language Server provides language server features for Liberty
 The Liberty Config Language Server is included in the following client IDEs.
 
 * [Liberty Tools for VS Code](https://github.com/OpenLiberty/liberty-tools-vscode)
-* [Liberty Tools for Eclipse](https://github.com/OpenLiberty/liberty-tools-eclipse)
-* [Liberty Tools for Intellij](https://github.com/OpenLiberty/liberty-tools-intellij)
+* [Liberty Tools for Eclipse IDE](https://github.com/OpenLiberty/liberty-tools-eclipse)
+* [Liberty Tools for IntelliJ IDEA](https://github.com/OpenLiberty/liberty-tools-intellij)
 
 ## Supported files
 
