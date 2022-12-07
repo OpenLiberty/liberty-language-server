@@ -72,6 +72,12 @@
             <resource>
                 <directory>src/main/resources</directory>
             </resource>
+            <resource>
+                <directory>${project.basedir}/..</directory>
+                <includes>
+                    <include>NOTICES</include>
+                </includes>
+            </resource>
         </resources>
         <plugins>
             <plugin>
@@ -107,12 +113,16 @@
                                         <Main-Class>io.openliberty.tools.langserver.LibertyLanguageServerLauncher</Main-Class>
                                     </manifestEntries>
                                 </transformer>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
-                                <transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
-                                    <addHeader>false</addHeader>
-                                </transformer>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.DontIncludeResourceTransformer">
-                                    <resource>.html</resource>
+                                    <resources>
+                                        <resource>.html</resource>
+                                        <resource>.html</resource>
+                                        <resource>META-INF/NOTICE</resource>
+                                        <resource>META-INF/NOTICE.txt</resource>
+                                        <resource>META-INF/NOTICE.md</resource>
+                                        <resource>META-INF/LICENSE.txt</resource>
+                                        <resource>META-INF/LICENSE.md</resource>
+                                    </resources>
                                 </transformer>
                             </transformers>
                         </configuration>
