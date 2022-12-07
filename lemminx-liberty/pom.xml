@@ -36,6 +36,9 @@
     <build>
         <resources>
             <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+            <resource>
                 <directory>${project.basedir}/..</directory>
                 <includes>
                     <include>NOTICES</include>
