@@ -22,7 +22,7 @@ jobs:
           java-version: 17
       - name: Build Lemminx Liberty
         working-directory: ./lemminx-liberty
-        run: mvn -B package --file pom.xml
+        run: mvn clean install
       - name: Build Liberty Language Server
         working-directory: ./liberty-ls
         run: mvn -B package --file pom.xml
