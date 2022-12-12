@@ -90,7 +90,11 @@ public class LibertyProjectsManager {
 
                     for (Path nextChildDir : childrenDirs) {
                         lastChildDirPath = nextChildDir.toUri().toString().replace("///", "/");
-                        if (nextChildDir.equals(workspacePath) || this.libertyWorkspaceFolders.containsKey(lastChildDirPath)) {
+                        if (nextChildDir.equals(workspacePath)) {
+                            continue; // skip parent module
+                        } else if (this.libertyWorkspaceFolders.containsKey(lastChildDirPath)) {
+                            // this sub-module was already added but we still don't want to add the parent module
+                            addedSubModule = true; 
                             continue;
                         }
                         List<Path> serverXmlFile = LibertyUtils.findFilesInDirectory(nextChildDir, serverXmlPath);
