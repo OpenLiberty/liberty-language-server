@@ -11,7 +11,7 @@
 
     <properties>
         <lemminx.version>0.22.0</lemminx.version>
-      </properties>
+    </properties>
 
     <scm>
         <connection>scm:git:git@github.com:OpenLiberty/liberty-language-server.git</connection>
@@ -133,7 +133,7 @@
                     <autoVersionSubmodules>true</autoVersionSubmodules>
                     <useReleaseProfile>false</useReleaseProfile>
                     <releaseProfiles>sonatype-oss-release</releaseProfiles>
-                    <goals>deploy</goals>
+                    <goals>verify</goals>
                 </configuration>
             </plugin>
         </plugins>
@@ -239,6 +239,9 @@
                         <groupId>org.apache.maven.plugins</groupId>
                         <artifactId>maven-javadoc-plugin</artifactId>
                         <version>3.4.1</version>
+                        <configuration>
+                            <failOnError>false</failOnError>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>attach-javadocs</id>
@@ -255,7 +258,7 @@
                         <executions>
                             <execution>
                                 <id>sign-artifacts</id>
-                                <phase>verify</phase>
+                                <phase>pre-integration-test</phase>
                                 <goals>
                                     <goal>sign</goal>
                                 </goals>
