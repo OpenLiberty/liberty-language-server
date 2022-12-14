@@ -135,9 +135,10 @@
                 <version>3.0.0-M6</version>
                 <configuration>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
+                    <tagNameFormat>liberty-langserver-${project.version}</tagNameFormat>
                     <useReleaseProfile>false</useReleaseProfile>
                     <releaseProfiles>sonatype-oss-release</releaseProfiles>
-                    <goals>verify</goals>
+                    <goals>deploy</goals>
                 </configuration>
             </plugin>
         </plugins>
