@@ -29,6 +29,6 @@ public final class LibertyConstants {
     public static final String PUBLIC_VISIBILITY = "PUBLIC";
 
     public static final String WLP_USER_CONFIG_DIR = "/usr/shared/config/";
-    public static final String SERVER_CONFIG_DROPINS_DEFAULTS = "/configDropins/default/";
+    public static final String SERVER_CONFIG_DROPINS_DEFAULTS = "/configDropins/defaults/";
     public static final String SERVER_CONFIG_DROPINS_OVERRIDES = "/configDropins/overrides";
 }
