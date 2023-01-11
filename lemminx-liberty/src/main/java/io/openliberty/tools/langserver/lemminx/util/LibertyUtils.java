@@ -1,4 +1,4 @@
-/*******************************************************************************
+ /*******************************************************************************
 * Copyright (c) 2020, 2022 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
@@ -58,19 +58,19 @@ public class LibertyUtils {
 
     public static boolean isServerXMLFile(DOMDocument file) {
         return file.getDocumentURI().endsWith("/" + LibertyConstants.SERVER_XML);
-    }
+    } 
 
     public static boolean isConfigDirFile(String filePath) {
-        if (File.separator.equals("\\")) {
-            filePath = filePath.replace("\\", "/");
-        }
-
         return filePath.contains(LibertyConstants.WLP_USER_CONFIG_DIR) ||
                 filePath.contains(LibertyConstants.SERVER_CONFIG_DROPINS_DEFAULTS) ||
                 filePath.contains(LibertyConstants.SERVER_CONFIG_DROPINS_OVERRIDES);
     }
 
     public static boolean isConfigXMLFile(String filePath) {
+        if (File.separator.equals("\\")) {
+            filePath = filePath.replace("\\", "/");
+        }
+
         return isServerXMLFile(filePath) || isConfigDirFile(filePath) ||
                 LibertyProjectsManager.getInstance().getWorkspaceFolder(filePath).hasConfigFile(filePath);
     }

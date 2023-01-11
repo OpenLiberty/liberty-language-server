@@ -1,18 +1,18 @@
 package io.openliberty;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.junit.jupiter.api.Test;
 
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
+import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 public class LibertyWorkspaceTest {
     
@@ -29,5 +29,23 @@ public class LibertyWorkspaceTest {
         // assertNotNull(libertyWorkspace.findDevcMetadata());
         // assertEquals("liberty-dev", libertyWorkspace.getContainerName());
         // assertTrue(libertyWorkspace.isContainerAlive());
+    }
+
+    @Test
+    public void testBackslashConfigDetection() throws IOException {
+        // run test on Windows
+        if (File.separator.equals("/")) {
+            return;
+        }
+
+        File mockXML = new File("src/test/resources/configDropins/defaults/my.xml");
+        String filePathString = mockXML.getCanonicalPath();
+        URI filePathURI = mockXML.toURI();
+
+        assertFalse(LibertyUtils.isConfigDirFile(filePathString));
+        assertTrue(LibertyUtils.isConfigDirFile(filePathURI.toString()));
+        // mock replacement
+        filePathString = filePathString.replace("\\", "/");
+        assertTrue(LibertyUtils.isConfigDirFile(filePathString));
     }
 }
