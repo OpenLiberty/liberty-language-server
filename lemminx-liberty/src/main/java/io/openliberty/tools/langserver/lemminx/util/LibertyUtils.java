@@ -61,6 +61,10 @@ public class LibertyUtils {
     }
 
     public static boolean isConfigDirFile(String filePath) {
+        if (File.separator.equals("\\")) {
+            filePath = filePath.replace("\\", "/");
+        }
+
         return filePath.contains(LibertyConstants.WLP_USER_CONFIG_DIR) ||
                 filePath.contains(LibertyConstants.SERVER_CONFIG_DROPINS_DEFAULTS) ||
                 filePath.contains(LibertyConstants.SERVER_CONFIG_DROPINS_OVERRIDES);
