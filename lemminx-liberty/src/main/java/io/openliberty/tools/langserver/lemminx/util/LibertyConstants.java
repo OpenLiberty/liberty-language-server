@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2022 IBM Corporation and others.
+* Copyright (c) 2020, 2023 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -11,8 +11,6 @@
 *     IBM Corporation - initial API and implementation
 *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx.util;
-
-import java.io.File;
 
 public final class LibertyConstants {
     private LibertyConstants() {
@@ -28,7 +26,8 @@ public final class LibertyConstants {
 
     public static final String PUBLIC_VISIBILITY = "PUBLIC";
 
-    public static final String WLP_USER_CONFIG_DIR = File.separator + String.join(File.separator, "usr", "shared", "config") + File.separator;
-    public static final String SERVER_CONFIG_DROPINS_DEFAULTS = File.separator + String.join(File.separator, "configDropins", "defaults") + File.separator;
-    public static final String SERVER_CONFIG_DROPINS_OVERRIDES = File.separator + String.join(File.separator, "configDropins", "overrides") + File.separator;
+    // following URI standard of using "/"
+    public static final String WLP_USER_CONFIG_DIR = "/usr/shared/config/";
+    public static final String SERVER_CONFIG_DROPINS_DEFAULTS = "/configDropins/defaults/";
+    public static final String SERVER_CONFIG_DROPINS_OVERRIDES = "/configDropins/overrides/";
 }
