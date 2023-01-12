@@ -62,7 +62,7 @@ public class PropertiesValidationResult {
         String property = entry.getKey();
         String value = entry.getValue();
         
-        // check whitespace around equals sign (=)
+        // check whitespace around equal sign (=)
         LOGGER.info("Validating property line: " + entry.getLineContent());
         if (ParserFileHelperUtil.isServerEnvFile(textDocumentItem)) {
             if (property.endsWith(" ") || value.startsWith(" ")) {
@@ -145,6 +145,10 @@ public class PropertiesValidationResult {
         return entry.getValue();
     }
 
+    /**
+     * Get the diagnostic type, documented in DiagnosticMessages.properties
+     * @return String indicating the type of diagnostic
+     */
     public String getDiagnosticType() {
         return diagnosticType;
     }

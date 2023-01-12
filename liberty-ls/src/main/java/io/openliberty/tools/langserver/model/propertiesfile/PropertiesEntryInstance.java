@@ -19,6 +19,7 @@ import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.Position;
 
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
+import io.openliberty.tools.langserver.utils.ParserFileHelperUtil;
 
 public class PropertiesEntryInstance {
     private PropertiesKeyInstance propertyKeyInstance;
@@ -44,6 +45,13 @@ public class PropertiesEntryInstance {
         } else {
             propertyKeyInstanceString = line;
             propertyValueInstanceString = null;
+        }
+        // In bootstrap.properties files, ignore whitespaces before and after keys and values
+        if (ParserFileHelperUtil.isBootstrapPropertiesFile(textDocumentItem)) {
+            propertyKeyInstanceString = propertyKeyInstanceString.trim();
+            if (propertyValueInstanceString != null) {
+                propertyValueInstanceString = propertyValueInstanceString.trim();
+            }
         }
         this.propertyKeyInstance = new PropertiesKeyInstance(propertyKeyInstanceString, this, textDocumentItem);
         this.propertyValueInstance = new PropertiesValueInstance(propertyValueInstanceString, propertyKeyInstance, textDocumentItem);

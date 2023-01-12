@@ -124,6 +124,11 @@ public class ServerPropertyValues {
         return caseSensitiveProperties.contains(key);
     }
 
+    /**
+     * Get integer range for given property, or null if the property does not use integers.
+     * @param key Property name
+     * @return Integer range for given property, otherwise null if the property does not use integers.
+     */
     public static Range<Integer> getIntegerRange(String key) {
         return integerRangeValues.get(key);
     }
