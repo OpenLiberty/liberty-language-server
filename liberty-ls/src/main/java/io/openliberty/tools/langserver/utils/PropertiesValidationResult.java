@@ -66,15 +66,9 @@ public class PropertiesValidationResult {
         // check whitespace around equal sign (=)
         LOGGER.info("Validating property line: " + entry.getLineContent());
         if (ParserFileHelperUtil.isServerEnvFile(textDocumentItem)) {
-            if (entry.getLineContent().contains(" ")) {
-                if (property.endsWith(" ")) {
-                    startChar = property.trim().length();
-                    endChar = entry.getLineContent().indexOf("=");
-                }
-                if (value.startsWith(" ")) {
-                    startChar = entry.getLineContent().indexOf("=") + 1;
-                    endChar = entry.getLineContent().length() - value.trim().length();
-                }
+            if (property.endsWith(" ") || value.startsWith(" ")) {
+                startChar = property.trim().length();
+                endChar = entry.getLineContent().length() - value.trim().length();
                 hasErrors = true;
                 diagnosticType = "SERVER_ENV_INVALID_WHITESPACE";
                 return;
