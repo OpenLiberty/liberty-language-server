@@ -82,30 +82,36 @@ public class LibertyPropertiesDiagnosticService  {
             
             // Currently the last arg (getIntegerRange) is only used for the Integer messages which use {2}. Otherwise null is passed and is ignored by the other messages.
             String message = MessageFormat.format(messageTemplate, validationResult.getValue(), property, ServerPropertyValues.getIntegerRange(property));
-            lspDiagnostics.add(new Diagnostic(computeRange(validationResult, lineContentInError, validationResult.getValue()), message));
+            lspDiagnostics.add(new Diagnostic(computeRange(validationResult, lineContentInError), message));
         }
         return lspDiagnostics;
     }
 
     /**
-     * Finds the given string in the entry line, returns Range containing position information for the given string.
+     * Returns a Range containing position information for the diagnostic
      * @param validationResult
      * @param lineContentInError - Line entry from property file.
-     * @param value - String to look for to highlight for diagnostic.
      * @return
      */
-    private Range computeRange(PropertiesValidationResult validationResult, String lineContentInError, String value) {
-        int startCharacter, endCharacter;
-        int indexOfValue = lineContentInError.lastIndexOf(value);
-        if (indexOfValue != -1) {
-            startCharacter = indexOfValue;
-            endCharacter = indexOfValue + value.length();
-        } else {
-            startCharacter = 0;
-            endCharacter = lineContentInError.length();
-        }
+    private Range computeRange(PropertiesValidationResult validationResult, String lineContentInError) {
+        int equalIndex = lineContentInError.indexOf("=");
         int lineNumber = validationResult.getLineNumber();
-        return new Range(new Position(lineNumber, startCharacter), new Position(lineNumber, endCharacter));
+        Integer startChar = validationResult.getStartChar();
+        Integer endChar = validationResult.getEndChar();
+        // use range if given
+        if (startChar != null && endChar != null) {
+            return new Range(new Position(lineNumber, startChar), new Position(lineNumber, endChar));
+        }
+
+        // otherwise calculate range
+        if (startChar != null) {
+            // currently unused. use either whole line or equal index
+            endChar = lineContentInError.length();
+        } else if (endChar != null) {
+            startChar = equalIndex + 1;
+        }
+        return new Range(new Position(lineNumber, startChar), new Position(lineNumber, endChar));
+
     }
     
 }
