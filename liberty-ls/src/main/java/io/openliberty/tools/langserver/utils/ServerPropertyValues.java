@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2023 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -124,6 +124,11 @@ public class ServerPropertyValues {
         return caseSensitiveProperties.contains(key);
     }
 
+    /**
+     * Get integer range for given property, or null if the property does not use integers.
+     * @param key Property name
+     * @return Integer range for given property, otherwise null if the property does not use integers.
+     */
     public static Range<Integer> getIntegerRange(String key) {
         return integerRangeValues.get(key);
     }

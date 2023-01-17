@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2023 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -64,7 +64,7 @@ public class AbstractDiagnosticTest extends AbstractLibertyLanguageServerTest {
 
         for (Diagnostic diag: diags) {
             boolean found = expectedDiagnosticRanges.remove(diag.getRange());
-            assertTrue("Found diagnostic which the test did not account for: " + diag, found);
+            assertTrue("Found diagnostic which the test did not account for: \"" + diag.getMessage() + "\" at " + diag.getRange(), found);
         }
         assertEquals("Did not find all the expected diagnostics. These expected ranges were not found: " + expectedDiagnosticRanges.toString(), 0, expectedDiagnosticRanges.size());
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2023 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -24,7 +24,7 @@ import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 import io.openliberty.tools.langserver.model.propertiesfile.PropertiesEntryInstance;
 
 public class PropertiesValidationResult {
-    Integer lineNumber;
+    Integer lineNumber, startChar = null, endChar = null;
     boolean hasErrors;
     String diagnosticType;
     PropertiesEntryInstance entry;
@@ -32,7 +32,7 @@ public class PropertiesValidationResult {
     
     private static final Logger LOGGER = Logger.getLogger(PropertiesValidationResult.class.getName());
 
-    public PropertiesValidationResult(PropertiesEntryInstance entry) {
+    private PropertiesValidationResult(PropertiesEntryInstance entry) {
         this.entry = entry;
         this.textDocumentItem = entry.getTextDocument();
         this.hasErrors = false;
@@ -40,19 +40,21 @@ public class PropertiesValidationResult {
 
     /**
      * Validates if line has valid value for the provided key. Returns a PropertiesValidationResult object containing validation information.
-     * @param line
+     * @param line - String of line content
      * @param textDocumentItem
-     * @return PropertiesValidationResult with information
+     * @return PropertiesValidationResult with information about any errors
      */
-    public static PropertiesValidationResult validateServerProperty(String line, LibertyTextDocument textDocumentItem) {
+    public static PropertiesValidationResult validateServerProperty(String line, LibertyTextDocument textDocumentItem, Integer lineNumber) {
         PropertiesEntryInstance entry = new PropertiesEntryInstance(line, textDocumentItem);
         PropertiesValidationResult result = new PropertiesValidationResult(entry);
+        result.setLineNumber(lineNumber);
         result.validateServerProperty();
         return result;
     }
 
     /**
-     * Raises hasErrors flag if invalid value is detected.
+     * Validates property, raises hasErrors flag and sets the diagnostic type if error is detected. 
+     * Sets the start and/or end character for the error.
      */
     // Note: If setting hasErrors to true, MUST set diagnosticType as well for diagnostic message retrieval.
     public void validateServerProperty() {
@@ -61,6 +63,18 @@ public class PropertiesValidationResult {
         }
         String property = entry.getKey();
         String value = entry.getValue();
+        
+        // check whitespace around equal sign (=)
+        LOGGER.info("Validating property line: " + entry.getLineContent());
+        if (ParserFileHelperUtil.isServerEnvFile(textDocumentItem)) {
+            if (property.endsWith(" ") || value.startsWith(" ")) {
+                startChar = property.trim().length();
+                endChar = entry.getLineContent().length() - value.trim().length();
+                hasErrors = true;
+                diagnosticType = "SERVER_ENV_INVALID_WHITESPACE";
+                return;
+            }
+        }
 
         if (ServerPropertyValues.usesPredefinedValues(textDocumentItem, property)) {
             List<String> validValues = ServerPropertyValues.getValidValues(textDocumentItem, property);
@@ -112,6 +126,7 @@ public class PropertiesValidationResult {
             }
             diagnosticType = "INVALID_PACKAGE_LIST_FORMAT";
         }
+        endChar = entry.getLineContent().length();
         return;
     }
 
@@ -121,6 +136,14 @@ public class PropertiesValidationResult {
 
     public int getLineNumber() {
         return this.lineNumber;
+    }
+
+    public Integer getStartChar() {
+        return this.startChar;
+    }
+
+    public Integer getEndChar() {
+        return this.endChar;
     }
 
     public boolean hasErrors() {
@@ -135,6 +158,10 @@ public class PropertiesValidationResult {
         return entry.getValue();
     }
 
+    /**
+     * Get the diagnostic type, documented in DiagnosticMessages.properties
+     * @return String indicating the type of diagnostic
+     */
     public String getDiagnosticType() {
         return diagnosticType;
     }
