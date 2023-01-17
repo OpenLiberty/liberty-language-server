@@ -48,9 +48,8 @@ public class LibertyPropertiesDiagnosticService  {
             int lineNumber = 0;
             try {
                 while ((line=br.readLine()) != null) {
-                    PropertiesValidationResult validationResult = PropertiesValidationResult.validateServerProperty(line, openedDocument);
+                    PropertiesValidationResult validationResult = PropertiesValidationResult.validateServerProperty(line, openedDocument, lineNumber);
                     if (validationResult.hasErrors()) {
-                        validationResult.setLineNumber(lineNumber);
                         errors.put(line, validationResult);
                     }
                     lineNumber++;
@@ -98,20 +97,10 @@ public class LibertyPropertiesDiagnosticService  {
         int lineNumber = validationResult.getLineNumber();
         Integer startChar = validationResult.getStartChar();
         Integer endChar = validationResult.getEndChar();
-        // use range if given
-        if (startChar != null && endChar != null) {
-            return new Range(new Position(lineNumber, startChar), new Position(lineNumber, endChar));
-        }
 
-        // otherwise calculate range
-        if (startChar != null) {
-            // currently unused. use either whole line or equal index
-            endChar = lineContentInError.length();
-        } else if (endChar != null) {
-            startChar = equalIndex + 1;
-        }
-        return new Range(new Position(lineNumber, startChar), new Position(lineNumber, endChar));
-
+        Position start = startChar == null ? new Position(lineNumber, equalIndex +1) : new Position(lineNumber, startChar);
+        Position end = endChar == null ? new Position(lineNumber, lineContentInError.length()) : new Position(lineNumber, endChar);
+        return new Range(start, end);
     }
     
 }

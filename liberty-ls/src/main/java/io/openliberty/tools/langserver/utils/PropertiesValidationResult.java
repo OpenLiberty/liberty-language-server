@@ -32,7 +32,7 @@ public class PropertiesValidationResult {
     
     private static final Logger LOGGER = Logger.getLogger(PropertiesValidationResult.class.getName());
 
-    public PropertiesValidationResult(PropertiesEntryInstance entry) {
+    private PropertiesValidationResult(PropertiesEntryInstance entry) {
         this.entry = entry;
         this.textDocumentItem = entry.getTextDocument();
         this.hasErrors = false;
@@ -44,9 +44,10 @@ public class PropertiesValidationResult {
      * @param textDocumentItem
      * @return PropertiesValidationResult with information about any errors
      */
-    public static PropertiesValidationResult validateServerProperty(String line, LibertyTextDocument textDocumentItem) {
+    public static PropertiesValidationResult validateServerProperty(String line, LibertyTextDocument textDocumentItem, Integer lineNumber) {
         PropertiesEntryInstance entry = new PropertiesEntryInstance(line, textDocumentItem);
         PropertiesValidationResult result = new PropertiesValidationResult(entry);
+        result.setLineNumber(lineNumber);
         result.validateServerProperty();
         return result;
     }
