@@ -1,5 +1,7 @@
 # Development setup for Liberty Config Language Server
 
+> Note: Starting with the [Liberty LemMinX Language Server 1.0-M1 early release](https://github.com/OpenLiberty/liberty-language-server/releases/tag/lemminx-liberty-1.0-M1) and [Liberty Config Language Server 1.0-M1 early release](https://github.com/OpenLiberty/liberty-language-server/releases/tag/liberty-langserver-1.0-M1), Java 17 is required.
+
 This repo contains a couple projects providing IDE / language support for Open Liberty using the [Language Server Protocol](https://microsoft.github.io/language-server-protocol/).
 
 ## Projects
