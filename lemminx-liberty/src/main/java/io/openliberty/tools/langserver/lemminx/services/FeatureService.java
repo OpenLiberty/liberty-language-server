@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2022 IBM Corporation and others.
+* Copyright (c) 2020, 2023 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -30,9 +30,9 @@ import java.util.Optional;
 import java.util.logging.Logger;
 import java.util.concurrent.TimeUnit;
 
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.JAXBException;
-import javax.xml.bind.Unmarshaller;
+import jakarta.xml.bind.JAXBContext;
+import jakarta.xml.bind.JAXBException;
+import jakarta.xml.bind.Unmarshaller;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
@@ -248,22 +248,7 @@ public class FeatureService {
                   return installedFeatures;
               }
 
-              JAXBContext jaxbContext = JAXBContext.newInstance(FeatureInfo.class);
-              Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
-              FeatureInfo featureInfo = (FeatureInfo) jaxbUnmarshaller.unmarshal(featureListFile);
-         
-              if ((featureInfo.getFeatures() != null) && (featureInfo.getFeatures().size() > 0)) {
-                  for (int i = 0; i < featureInfo.getFeatures().size(); i++) {
-                      Feature f = featureInfo.getFeatures().get(i);
-                      f.setShortDescription(f.getDescription());
-                      WlpInformation wlpInfo = new WlpInformation(f.getName());
-                      f.setWlpInformation(wlpInfo);
-                  }
-                  installedFeatures = featureInfo.getFeatures();
-                  libertyWorkspace.setInstalledFeatureList(installedFeatures);
-              } else {
-                  LOGGER.warning("Unable to get installed features for current Liberty workspace: " + libertyWorkspace.getWorkspaceString());
-              }
+              installedFeatures = readFeaturesFromFeatureListFile(installedFeatures, libertyWorkspace, featureListFile);
           } else {
               LOGGER.warning("Unable to generate the feature list for the current Liberty workspace:" + libertyWorkspace.getWorkspaceString());
           }
@@ -273,6 +258,27 @@ public class FeatureService {
 
       LOGGER.fine("Returning installed features: " + installedFeatures.size());
       return installedFeatures;
+  }
+
+  public List<Feature> readFeaturesFromFeatureListFile(List<Feature> installedFeatures, LibertyWorkspace libertyWorkspace,
+      File featureListFile) throws JAXBException {
+    JAXBContext jaxbContext = JAXBContext.newInstance(FeatureInfo.class);
+    Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
+    FeatureInfo featureInfo = (FeatureInfo) jaxbUnmarshaller.unmarshal(featureListFile);
+     
+    if ((featureInfo.getFeatures() != null) && (featureInfo.getFeatures().size() > 0)) {
+        for (int i = 0; i < featureInfo.getFeatures().size(); i++) {
+            Feature f = featureInfo.getFeatures().get(i);
+            f.setShortDescription(f.getDescription());
+            WlpInformation wlpInfo = new WlpInformation(f.getName());
+            f.setWlpInformation(wlpInfo);
+        }
+        installedFeatures = featureInfo.getFeatures();
+        libertyWorkspace.setInstalledFeatureList(installedFeatures);
+    } else {
+        LOGGER.warning("Unable to get installed features for current Liberty workspace: " + libertyWorkspace.getWorkspaceString());
+    }
+    return installedFeatures;
   }
 
 }
