@@ -230,13 +230,13 @@ PROJECTS
 
 JAXB Runtime
 
-  Copyright (c) 2018 Oracle and/or its affiliates. All rights reserved.
-  Maven coordinates: https://repo1.maven.org/maven2/org/glassfish/jaxb/jaxb-runtime/2.3.3
+  Copyright (c) 2013, 2022 Oracle and/or its affiliates. All rights reserved.
+  Maven coordinates: https://repo1.maven.org/maven2/org/glassfish/jaxb/jaxb-runtime/4.0.0
 
 Jakarta XML Binding API
 
-  Copyright (c) 2017, 2018 Oracle and/or its affiliates. All rights reserved.
-  Maven coordinates: https://repo1.maven.org/maven2/jakarta/xml/bind/jakarta.xml.bind-api/2.3.3
+  Copyright (c) 2018, 2022 Oracle and/or its affiliates. All rights reserved.
+  Maven coordinates: https://repo1.maven.org/maven2/jakarta/xml/bind/jakarta.xml.bind-api/4.0.0
 
 TXW2 Runtime
 
