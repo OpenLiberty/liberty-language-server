@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2023 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -65,7 +65,7 @@ public class Messages {
             }
         } catch (MissingResourceException e) {
             // Caught to avoid unnecessary console output when hovering over invalid keys
-            LOGGER.fine("No property description found for: " + key);
+            LOGGER.info("No property description found for: " + key);
         }
         return message == null ? key : message;
     }
