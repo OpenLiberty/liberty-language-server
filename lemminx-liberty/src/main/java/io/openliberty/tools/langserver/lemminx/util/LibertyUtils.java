@@ -360,7 +360,7 @@ public class LibertyUtils {
                             watchKey.pollEvents().stream().forEach(event -> {                                
                                 if (isProperties) {
                                     // if modified re-calculate version
-                                    LOGGER.fine("Liberty properties file (" + watchFile + ") has been modified: "
+                                    LOGGER.info("Liberty properties file (" + watchFile + ") has been modified: "
                                     + event.context());
                                     libertyWorkspace.setLibertyInstalled(false);
                                 } else if (((Path)event.context()).toString().endsWith("-liberty-devc-metadata.xml")){
@@ -376,7 +376,7 @@ public class LibertyUtils {
                             if (!valid) {
                                 if (isProperties) {
                                     // if deleted re-calculate version
-                                    LOGGER.fine("Liberty properties file (" + watchFile + ") has been deleted");
+                                    LOGGER.info("Liberty properties file (" + watchFile + ") has been deleted");
                                     libertyWorkspace.setLibertyInstalled(false);
                                 } else {
                                     // build directory deleted

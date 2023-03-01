@@ -89,7 +89,7 @@ public class FeatureService {
     // Only need the public features
     ArrayList<Feature> publicFeatures = readPublicFeatures(reader);
 
-    LOGGER.fine("Returning public features from Maven: " + publicFeatures.size());
+    LOGGER.info("Returning public features from Maven: " + publicFeatures.size());
     return publicFeatures;
   }
 
@@ -108,7 +108,7 @@ public class FeatureService {
         // Only need the public features
         defaultFeatureList = readPublicFeatures(reader);
       }
-      LOGGER.fine("Returning default feature list");
+      LOGGER.info("Returning default feature list");
       return defaultFeatureList;
 
     } catch (JsonParseException e) {
@@ -158,11 +158,11 @@ public class FeatureService {
 
     // if the features are already cached in the feature cache
     if (featureCache.containsKey(featureCacheKey)) {
-        LOGGER.fine("Getting cached features for: " + featureCacheKey);
+        LOGGER.info("Getting cached features for: " + featureCacheKey);
         return featureCache.get(featureCacheKey);
     }
 
-    LOGGER.fine("Getting features for: " + featureCacheKey);
+    LOGGER.info("Getting features for: " + featureCacheKey);
 
     // else need to fetch the features from maven central
     try {
@@ -256,7 +256,7 @@ public class FeatureService {
           LOGGER.warning("Unable to get installed features: " + e);
       }
 
-      LOGGER.fine("Returning installed features: " + installedFeatures.size());
+      LOGGER.info("Returning installed features: " + installedFeatures.size());
       return installedFeatures;
   }
 
