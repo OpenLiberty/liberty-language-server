@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2023 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -42,7 +42,7 @@ public class CreateFile implements ICodeActionParticipant {
             String locationValue = document.findNodeAt(document.offsetAt(diagnostic.getRange().getEnd())).getAttribute("location");
             codeActions.add(CodeActionFactory.createFile(
                 "Create the missing server config file relative from this file.", 
-                new File(parentFile, locationValue).getCanonicalPath(), 
+                new File(parentFile, locationValue).toURI().toString(), 
                 EMPTY_SERVER_CONFIG, diagnostic));
 
             /* Uncomment to add option when the need is found */
