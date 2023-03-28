@@ -41,8 +41,8 @@ public class CreateFile implements ICodeActionParticipant {
             File parentFile = LibertyUtils.getDocumentAsFile(document).getParentFile();
             String locationValue = document.findNodeAt(document.offsetAt(diagnostic.getRange().getEnd())).getAttribute("location");
             codeActions.add(CodeActionFactory.createFile(
-                "Create the missing server config file relative from this file.", 
-                new File(parentFile, locationValue).getCanonicalPath(), 
+                "Create the missing server config file relative from this file.",
+                new File(parentFile, locationValue).toURI().toString(), 
                 EMPTY_SERVER_CONFIG, diagnostic));
 
             /* Uncomment to add option when the need is found */
