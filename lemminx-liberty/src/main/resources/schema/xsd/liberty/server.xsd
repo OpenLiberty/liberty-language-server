@@ -24,25 +24,25 @@
                     </xsd:appinfo> 
                 </xsd:annotation> 
             </xsd:element> 
-            <xsd:element name="application-ext" type="com.ibm.ws.javaee.dd.appext.ApplicationExt"> 
-            </xsd:element> 
-            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
-            </xsd:element> 
-            <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
-            </xsd:element> 
             <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
             </xsd:element> 
             <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
             </xsd:element> 
-            <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
-            </xsd:element> 
             <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
             </xsd:element> 
-            <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
+            <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
+            </xsd:element> 
+            <xsd:element name="application-client-bnd" type="com.ibm.ws.javaee.dd.clientbnd.ApplicationClientBnd"> 
             </xsd:element> 
             <xsd:element name="web-bnd" type="com.ibm.ws.javaee.dd.webbnd.WebBnd"> 
             </xsd:element> 
-            <xsd:element name="application-client-bnd" type="com.ibm.ws.javaee.dd.clientbnd.ApplicationClientBnd"> 
+            <xsd:element name="application-ext" type="com.ibm.ws.javaee.dd.appext.ApplicationExt"> 
+            </xsd:element> 
+            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
+            </xsd:element> 
+            <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
+            </xsd:element> 
+            <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
             </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="location" use="required" type="location"> 
@@ -149,27 +149,27 @@
                     </xsd:appinfo> 
                 </xsd:annotation> 
             </xsd:element> 
-            <xsd:element name="resourceAdapter" type="com.ibm.ws.jca.embeddedResourceAdapter"> 
+            <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
+            </xsd:element> 
+            <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
+            </xsd:element> 
+            <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
+            </xsd:element> 
+            <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
+            </xsd:element> 
+            <xsd:element name="application-client-bnd" type="com.ibm.ws.javaee.dd.clientbnd.ApplicationClientBnd"> 
+            </xsd:element> 
+            <xsd:element name="web-bnd" type="com.ibm.ws.javaee.dd.webbnd.WebBnd"> 
             </xsd:element> 
             <xsd:element name="application-ext" type="com.ibm.ws.javaee.dd.appext.ApplicationExt"> 
             </xsd:element> 
             <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
             </xsd:element> 
-            <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
-            </xsd:element> 
-            <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
-            </xsd:element> 
-            <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
-            </xsd:element> 
-            <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
-            </xsd:element> 
-            <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
+            <xsd:element name="resourceAdapter" type="com.ibm.ws.jca.embeddedResourceAdapter"> 
             </xsd:element> 
             <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
             </xsd:element> 
-            <xsd:element name="web-bnd" type="com.ibm.ws.javaee.dd.webbnd.WebBnd"> 
-            </xsd:element> 
-            <xsd:element name="application-client-bnd" type="com.ibm.ws.javaee.dd.clientbnd.ApplicationClientBnd"> 
+            <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
             </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="location" use="required" type="location"> 
@@ -1066,27 +1066,27 @@
                     </xsd:appinfo> 
                 </xsd:annotation> 
             </xsd:element> 
-            <xsd:element name="resourceAdapter" type="com.ibm.ws.jca.embeddedResourceAdapter"> 
+            <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
+            </xsd:element> 
+            <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
+            </xsd:element> 
+            <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
+            </xsd:element> 
+            <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
+            </xsd:element> 
+            <xsd:element name="application-client-bnd" type="com.ibm.ws.javaee.dd.clientbnd.ApplicationClientBnd"> 
+            </xsd:element> 
+            <xsd:element name="web-bnd" type="com.ibm.ws.javaee.dd.webbnd.WebBnd"> 
             </xsd:element> 
             <xsd:element name="application-ext" type="com.ibm.ws.javaee.dd.appext.ApplicationExt"> 
             </xsd:element> 
             <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
             </xsd:element> 
-            <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
-            </xsd:element> 
-            <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
-            </xsd:element> 
-            <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
-            </xsd:element> 
-            <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
-            </xsd:element> 
-            <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
+            <xsd:element name="resourceAdapter" type="com.ibm.ws.jca.embeddedResourceAdapter"> 
             </xsd:element> 
             <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
             </xsd:element> 
-            <xsd:element name="web-bnd" type="com.ibm.ws.javaee.dd.webbnd.WebBnd"> 
-            </xsd:element> 
-            <xsd:element name="application-client-bnd" type="com.ibm.ws.javaee.dd.clientbnd.ApplicationClientBnd"> 
+            <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
             </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="location" use="required" type="location"> 
@@ -2420,9 +2420,16 @@
             <xsd:appinfo> 
                 <ext:label>Authentication Cache</ext:label> 
             </xsd:appinfo> 
-        </xsd:annotation><!--Idiom for "empty element context" (whitespace accepted and ignored)--> 
+        </xsd:annotation> 
         <xsd:sequence> 
-            <xsd:sequence/> 
+            <xsd:element name="cache" minOccurs="0" maxOccurs="1" type="io.openliberty.jcache.cache"> 
+                <xsd:annotation> 
+                    <xsd:documentation>The JCache cache reference that is used as the authentication cache.</xsd:documentation> 
+                    <xsd:appinfo> 
+                        <ext:label>JCache Cache Reference</ext:label> 
+                    </xsd:appinfo> 
+                </xsd:annotation> 
+            </xsd:element> 
         </xsd:sequence> 
         <xsd:attribute name="initialSize" use="optional" default="50" type="intType"> 
             <xsd:annotation> 
@@ -2456,6 +2463,15 @@
                 </xsd:appinfo> 
             </xsd:annotation> 
         </xsd:attribute> 
+        <xsd:attribute name="cacheRef" use="optional" type="pidType"> 
+            <xsd:annotation> 
+                <xsd:documentation>The JCache cache reference that is used as the authentication cache.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>JCache cache reference</ext:label> 
+                    <ext:reference>cache</ext:reference> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
         <xsd:anyAttribute processContents="skip"> 
         </xsd:anyAttribute> 
     </xsd:complexType> 
@@ -2482,6 +2498,35 @@
                 <xsd:documentation>The location of an MIT style krb5.conf configuration file. The location is passed to the JDK implementation of the Kerberos APIs by using the java.security.krb5.conf system property. If unspecified, the krb5.conf file is searched for according to the JDK implementation of the Kerberos APIs.</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>Kerberos conf file</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:anyAttribute processContents="skip"> 
+        </xsd:anyAttribute> 
+    </xsd:complexType> 
+    <xsd:complexType name="io.openliberty.cdi.configuration"> 
+        <xsd:annotation> 
+            <xsd:documentation>Defines the behavior of the Contexts and Dependency Injection (CDI).</xsd:documentation> 
+            <xsd:appinfo> 
+                <ext:label>Contexts And Dependency Injection</ext:label> 
+            </xsd:appinfo> 
+        </xsd:annotation><!--Idiom for "empty element context" (whitespace accepted and ignored)--> 
+        <xsd:sequence> 
+            <xsd:sequence/> 
+        </xsd:sequence> 
+        <xsd:attribute name="enableImplicitBeanArchives" use="optional" type="booleanType"> 
+            <xsd:annotation> 
+                <xsd:documentation>The implicit bean archives are scanned for any bean discoveries. The default value is true. Only applies to CDI 1.2 or newer.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Enable scanning implicit bean archives</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="emptyBeansXmlCDI3Compatibility" use="optional" type="booleanType"> 
+            <xsd:annotation> 
+                <xsd:documentation>CDI 4.0 and later consider an archive with an empty beans.xml file to be an implicit bean archive (bean-discovery-mode=ANNOTATED). This property allows an empty beans.xml file to be treated as it was in CDI 3.0 (bean-discovery-mode=ALL). The default value is false. Only applies to CDI 4.0 or newer.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>CDI 3.0 compatibility for empty beans.xml files</ext:label> 
                 </xsd:appinfo> 
             </xsd:annotation> 
         </xsd:attribute> 
@@ -4686,17 +4731,17 @@
                     </xsd:appinfo> 
                 </xsd:annotation> 
             </xsd:element> 
-            <xsd:element name="application-ext" type="com.ibm.ws.javaee.dd.appext.ApplicationExt"> 
-            </xsd:element> 
-            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
-            </xsd:element> 
             <xsd:element name="managed-bean-bnd" type="com.ibm.ws.javaee.dd.managedbean.ManagedBeanBnd"> 
             </xsd:element> 
             <xsd:element name="ejb-jar-ext" type="com.ibm.ws.javaee.dd.ejbext.EJBJarExt"> 
             </xsd:element> 
-            <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
+            <xsd:element name="application-ext" type="com.ibm.ws.javaee.dd.appext.ApplicationExt"> 
+            </xsd:element> 
+            <xsd:element name="application-bnd" type="com.ibm.ws.javaee.dd.appbnd.ApplicationBnd"> 
             </xsd:element> 
             <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
+            </xsd:element> 
+            <xsd:element name="ejb-jar-bnd" type="com.ibm.ws.javaee.dd.ejbbnd.EJBJarBnd"> 
             </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="location" use="required" type="location"> 
@@ -6827,11 +6872,11 @@
                     </xsd:appinfo> 
                 </xsd:annotation> 
             </xsd:element> 
-            <xsd:element name="customize" type="com.ibm.ws.jca.resourceAdapter.customize"> 
+            <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
             </xsd:element> 
             <xsd:element name="webservices-bnd" type="com.ibm.ws.javaee.ddmodel.wsbnd.WebservicesBnd"> 
             </xsd:element> 
-            <xsd:element name="web-ext" type="com.ibm.ws.javaee.dd.webext.WebExt"> 
+            <xsd:element name="customize" type="com.ibm.ws.jca.resourceAdapter.customize"> 
             </xsd:element> 
             <xsd:element name="appProperties" type="com.ibm.ws.appconfig.appProperties"> 
             </xsd:element> 
@@ -23410,6 +23455,15 @@
                 </xsd:appinfo> 
             </xsd:annotation> 
         </xsd:attribute> 
+        <xsd:attribute name="maxFfdcAge" use="optional" default="-1" type="minuteDuration"> 
+            <xsd:annotation> 
+                <xsd:documentation>The maximum wanted age before an FFDC file is deleted. Specify a positive integer followed by a unit of time, which can be days (d), hours (h), or minutes (m). For example, specify 2 days as 2d. You can include multiple values in a single entry. For example, 2d6h is equivalent to 2 days and 6 hours. Everyday at midnight, any FFDC file that reaches the maximum age is deleted. By default, FFDC files are not deleted based on file age. Specify a positive integer followed by a unit of time, which can be hours (h) or minutes (m). For example, specify 30 minutes as 30m. You can include multiple values in a single entry. For example, 1h30m is equivalent to 90 minutes.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Maximum age before an FFDC file is deleted</ext:label> 
+                    <ext:variable>com.ibm.ws.logging.max.ffdc.age</ext:variable> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
         <xsd:anyAttribute processContents="skip"> 
         </xsd:anyAttribute> 
     </xsd:complexType> 
@@ -24321,6 +24375,22 @@
                 </xsd:appinfo> 
             </xsd:annotation> 
         </xsd:attribute> 
+        <xsd:attribute name="tokenAge" use="optional" default="0s" type="duration"> 
+            <xsd:annotation> 
+                <xsd:documentation>Specifies the allowed token age in seconds when validating the JSON web token. This attribute is used only in versions 2.1 and later of the MP-JWT feature. The issued at (iat) claim must be present in the JWT token. The configured number of seconds since iat must not have elapsed. If it has elapsed, then the request is rejected with an unauthorized response. The specified token age overrides the mp.jwt.verify.token.age MicroProfile Config property if it is configured. Specify a positive integer followed by a unit of time, which can be hours (h), minutes (m), seconds (s), or milliseconds (ms). For example, specify 500 milliseconds as 500ms. You can include multiple values in a single entry. For example, 1s500ms is equivalent to 1.5 seconds.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Time allowed since the JWT token was issued</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="keyManagementKeyAlgorithm" use="optional" type="xsd:string"> 
+            <xsd:annotation> 
+                <xsd:documentation>Specifies the decryption algorithm that is used to decrypt the Content Encryption Key. This attribute is used only in versions 2.1 and later of the MP-JWT feature. The specified decryption algorithm overrides the mp.jwt.decrypt.key.algorithm MicroProfile Config property if it is configured.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Key management key algorithm</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
         <xsd:attribute name="ignoreApplicationAuthMethod" use="optional" default="true" type="booleanType"> 
             <xsd:annotation> 
                 <xsd:documentation>Ignore the configured authentication method in the application. Allow legacy applications that do not configure MP-JWT as their authentication method to use MicroProfile JWT token if one is included in the request.</xsd:documentation> 
@@ -24455,15 +24525,31 @@
             <xsd:appinfo> 
                 <ext:label>MicroProfile Metrics</ext:label> 
             </xsd:appinfo> 
-        </xsd:annotation><!--Idiom for "empty element context" (whitespace accepted and ignored)--> 
+        </xsd:annotation> 
         <xsd:sequence> 
-            <xsd:sequence/> 
+            <xsd:element name="library" minOccurs="0" maxOccurs="1" type="com.ibm.ws.classloading.sharedlibrary"> 
+                <xsd:annotation> 
+                    <xsd:documentation>Identifies User provided Micrometer binaries and dependencies</xsd:documentation> 
+                    <xsd:appinfo> 
+                        <ext:label>Shared Library</ext:label> 
+                    </xsd:appinfo> 
+                </xsd:annotation> 
+            </xsd:element> 
         </xsd:sequence> 
         <xsd:attribute name="authentication" use="optional" default="true" type="booleanType"> 
             <xsd:annotation> 
                 <xsd:documentation>Indicates whether or not users should provide user name and password when accessing metrics endpoint.</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>Enable authentication</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="libraryRef" use="optional" type="pidType"> 
+            <xsd:annotation> 
+                <xsd:documentation>Identifies User provided Micrometer binaries and dependencies</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Shared library reference</ext:label> 
+                    <ext:reference>library</ext:reference> 
                 </xsd:appinfo> 
             </xsd:annotation> 
         </xsd:attribute> 
@@ -26040,6 +26126,14 @@
                 <xsd:documentation>When this property is set to true, during startup, ServletContainerInitializer implementors that use the HandlesTypes annotation do not receive classes that are specified as HandlesTypes parameters.</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>Disable returning handlesTypes parameters</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="skipEncodedCharVerification" use="optional" default="false" type="booleanType"> 
+            <xsd:annotation> 
+                <xsd:documentation>A request is rejected if the request URI contains the %23, %2E, %2F, or %5C encoded characters. When this property is set to true, the request URI is not checked for these encoded characters. This property is available starting in servlet 6.0, and default value is false.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Skip verification of encoded characters in URI</ext:label> 
                 </xsd:appinfo> 
             </xsd:annotation> 
         </xsd:attribute> 
@@ -29118,19 +29212,19 @@
             </xsd:appinfo> 
         </xsd:annotation> 
         <xsd:choice minOccurs="0" maxOccurs="unbounded"> 
-            <xsd:element name="sslOptions" type="com.ibm.ws.sslchannel.options"> 
-                <xsd:annotation> 
-                    <xsd:documentation>SSL protocol options for the WAS JMS endpoint.</xsd:documentation> 
-                    <xsd:appinfo> 
-                        <ext:label>SSL Options</ext:label> 
-                    </xsd:appinfo> 
-                </xsd:annotation> 
-            </xsd:element> 
             <xsd:element name="tcpOptions" type="com.ibm.ws.tcpchannel.options"> 
                 <xsd:annotation> 
                     <xsd:documentation>TCP protocol options for the WAS JMS endpoint. </xsd:documentation> 
                     <xsd:appinfo> 
                         <ext:label>TCP Options</ext:label> 
+                    </xsd:appinfo> 
+                </xsd:annotation> 
+            </xsd:element> 
+            <xsd:element name="sslOptions" type="com.ibm.ws.sslchannel.options"> 
+                <xsd:annotation> 
+                    <xsd:documentation>SSL protocol options for the WAS JMS endpoint.</xsd:documentation> 
+                    <xsd:appinfo> 
+                        <ext:label>SSL Options</ext:label> 
                     </xsd:appinfo> 
                 </xsd:annotation> 
             </xsd:element> 
@@ -29167,21 +29261,21 @@
                 </xsd:appinfo> 
             </xsd:annotation> 
         </xsd:attribute> 
-        <xsd:attribute name="sslOptionsRef" use="optional" type="pidType"> 
-            <xsd:annotation> 
-                <xsd:documentation>SSL protocol options for the WAS JMS endpoint.</xsd:documentation> 
-                <xsd:appinfo> 
-                    <ext:label>SSL options reference</ext:label> 
-                    <ext:reference>sslOptions</ext:reference> 
-                </xsd:appinfo> 
-            </xsd:annotation> 
-        </xsd:attribute> 
         <xsd:attribute name="tcpOptionsRef" use="optional" default="defaultTCPOptions" type="pidType"> 
             <xsd:annotation> 
                 <xsd:documentation>TCP protocol options for the WAS JMS endpoint. </xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>TCP options reference</ext:label> 
                     <ext:reference>tcpOptions</ext:reference> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="sslOptionsRef" use="optional" type="pidType"> 
+            <xsd:annotation> 
+                <xsd:documentation>SSL protocol options for the WAS JMS endpoint.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>SSL options reference</ext:label> 
+                    <ext:reference>sslOptions</ext:reference> 
                 </xsd:appinfo> 
             </xsd:annotation> 
         </xsd:attribute> 
@@ -29198,7 +29292,7 @@
         <xsd:choice minOccurs="0" maxOccurs="unbounded"> 
             <xsd:element name="fileStore" type="com.ibm.ws.sib.fileStore"> 
                 <xsd:annotation> 
-                    <xsd:documentation>Messaging file store.</xsd:documentation> 
+                    <xsd:documentation>Messaging file store. Important: Do not delete any of the file store files. Deleting them can lead to corruption of the message store. If any of these files are deleted accidentally, then delete the remaining files and restart the messaging engine. The messaging engine restarts in a clean state, but all messages are lost.</xsd:documentation> 
                     <xsd:appinfo> 
                         <ext:label>File Store</ext:label> 
                     </xsd:appinfo> 
@@ -29242,7 +29336,7 @@
     </xsd:complexType> 
     <xsd:complexType name="com.ibm.ws.sib.fileStore"> 
         <xsd:annotation> 
-            <xsd:documentation>Messaging file store.</xsd:documentation> 
+            <xsd:documentation>Messaging file store. Important: Do not delete any of the file store files. Deleting them can lead to corruption of the message store. If any of these files are deleted accidentally, then delete the remaining files and restart the messaging engine. The messaging engine restarts in a clean state, but all messages are lost.</xsd:documentation> 
             <xsd:appinfo> 
                 <ext:label>File Store</ext:label> 
             </xsd:appinfo> 
@@ -29685,9 +29779,16 @@
             <xsd:appinfo> 
                 <ext:label>Web Container Application Security</ext:label> 
             </xsd:appinfo> 
-        </xsd:annotation><!--Idiom for "empty element context" (whitespace accepted and ignored)--> 
+        </xsd:annotation> 
         <xsd:sequence> 
-            <xsd:sequence/> 
+            <xsd:element name="loggedOutCookieCache" minOccurs="0" maxOccurs="1" type="io.openliberty.jcache.cache"> 
+                <xsd:annotation> 
+                    <xsd:documentation>The JCache cache reference that is used as the logged-out-cookie cache.</xsd:documentation> 
+                    <xsd:appinfo> 
+                        <ext:label>JCache Cache Reference</ext:label> 
+                    </xsd:appinfo> 
+                </xsd:annotation> 
+            </xsd:element> 
         </xsd:sequence> 
         <xsd:attribute name="allowFailOverToBasicAuth" use="optional" default="false" type="booleanType"> 
             <xsd:annotation> 
@@ -29993,6 +30094,15 @@
                     </xsd:enumeration> 
                 </xsd:restriction> 
             </xsd:simpleType> 
+        </xsd:attribute> 
+        <xsd:attribute name="loggedOutCookieCacheRef" use="optional" type="pidType"> 
+            <xsd:annotation> 
+                <xsd:documentation>The JCache cache reference that is used as the logged-out-cookie cache.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>JCache cache reference</ext:label> 
+                    <ext:reference>cache</ext:reference> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
         </xsd:attribute> 
         <xsd:anyAttribute processContents="skip"> 
         </xsd:anyAttribute> 
@@ -31692,9 +31802,9 @@
                     </xsd:appinfo> 
                 </xsd:annotation> 
             </xsd:element> 
-            <xsd:element name="diskCache" type="com.ibm.ws.cache.disk"> 
-            </xsd:element> 
             <xsd:element name="cacheGroup" type="com.ibm.ws.cache.cacheGroup"> 
+            </xsd:element> 
+            <xsd:element name="diskCache" type="com.ibm.ws.cache.disk"> 
             </xsd:element> 
         </xsd:choice> 
         <xsd:attribute name="id" use="required" type="xsd:string"> 
@@ -32200,7 +32310,7 @@
         </xsd:attribute> 
         <xsd:attribute name="jwkEnabled" use="optional" default="false" type="booleanType"> 
             <xsd:annotation> 
-                <xsd:documentation>Indicates whether to use JWK to sign the token. When JWK is enabled, the JWT builder dynamically generates key pairs and signs the JWT token with the private key. To validate the signature, the JWT consumer can retrieve the key from the JWK API, which has the format https://&lt;host_name&gt;:&lt;ssl_port&gt;/jwt/ibm/api/&lt;jwtBuilder_configuration_id&gt;/jwk.</xsd:documentation> 
+                <xsd:documentation>Indicates whether to use JWK to sign the token. When JWK is enabled, the JWT builder dynamically generates key pairs and signs the JWT token with the private key. To validate the signature, the JWT consumer can retrieve the key from the JWK API, which has the format https://&lt;host_name&gt;:&lt;ssl_port&gt;/jwt/ibm/api/&lt;jwtBuilder_configuration_id&gt;/jwk. When this attribute is set to true, the value for the keyAlias attribute is ignored.</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>Enable JSON web key (JWK)</ext:label> 
                 </xsd:appinfo> 
@@ -32314,7 +32424,7 @@
         </xsd:attribute> 
         <xsd:attribute name="keyAlias" use="optional" type="xsd:string"> 
             <xsd:annotation> 
-                <xsd:documentation>A key alias name that is used to locate the private key for signing the token with an asymmetric algorithm.</xsd:documentation> 
+                <xsd:documentation>A key alias name that is used to locate the private key for signing the token with an asymmetric algorithm. When the jwkEnabled attribute is set to true, the value for this attribute is ignored.</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>Key alias name</ext:label> 
                 </xsd:appinfo> 
@@ -32513,7 +32623,7 @@
         </xsd:attribute> 
         <xsd:attribute name="jwkEnabled" use="optional" default="false" type="booleanType"> 
             <xsd:annotation> 
-                <xsd:documentation>Indicates whether to use JWK to sign the token. When JWK is enabled, the JWT builder dynamically generates key pairs and signs the JWT token with the private key. To validate the signature, the JWT consumer can retrieve the key from the JWK API, which has the format https://&lt;host_name&gt;:&lt;ssl_port&gt;/jwt/ibm/api/&lt;jwtBuilder_configuration_id&gt;/jwk.</xsd:documentation> 
+                <xsd:documentation>Indicates whether to use JWK to sign the token. When JWK is enabled, the JWT builder dynamically generates key pairs and signs the JWT token with the private key. To validate the signature, the JWT consumer can retrieve the key from the JWK API, which has the format https://&lt;host_name&gt;:&lt;ssl_port&gt;/jwt/ibm/api/&lt;jwtBuilder_configuration_id&gt;/jwk. When this attribute is set to true, the value for the keyAlias attribute is ignored.</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>Enable JSON web key (JWK)</ext:label> 
                 </xsd:appinfo> 
@@ -34912,9 +35022,9 @@
         </xsd:attribute> 
         <xsd:attribute name="jwkEnabled" use="optional" default="false" type="booleanType"> 
             <xsd:annotation> 
-                <xsd:documentation>Enables or disables JWK.</xsd:documentation> 
+                <xsd:documentation>When JWK is enabled, the OpenID Connect provider dynamically generates key pairs for signing JWT tokens that it creates. To validate the signature, the client can retrieve the key from the JWK endpoint, which has the format https://&lt;host_name&gt;:&lt;port_number&gt;/oidc/endpoint/&lt;provider_id&gt;/jwk. When this attribute is false, the provider will use the key that is specified by the keyAliasName attribute to sign the JWT. The provider will still make that key available as a JWK from the JWK endpoint if this attribute is false.</xsd:documentation> 
                 <xsd:appinfo> 
-                    <ext:label>Enable JSON web key(JWK)</ext:label> 
+                    <ext:label>Enable JSON web key (JWK)</ext:label> 
                 </xsd:appinfo> 
             </xsd:annotation> 
         </xsd:attribute> 
@@ -35818,7 +35928,7 @@
         </xsd:attribute> 
         <xsd:attribute name="reAuthnOnAssertionExpire" use="optional" default="false" type="booleanType"> 
             <xsd:annotation> 
-                <xsd:documentation>Authenticate the incoming HTTP request again when a SAML Assertion is about to expire.  </xsd:documentation> 
+                <xsd:documentation>Authenticate the incoming HTTP request again when the NotOnOrAfter value in the Conditions element of the SAML Assertion is expired.</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>Authenticate again when assertion expires</ext:label> 
                 </xsd:appinfo> 
@@ -35826,7 +35936,7 @@
         </xsd:attribute> 
         <xsd:attribute name="reAuthnCushion" use="optional" default="0m" type="duration"> 
             <xsd:annotation> 
-                <xsd:documentation>The time period to authenticate again when a SAML Assertion is about to expire, which is indicated by either the statement NotOnOrAfter or the attribute SessionNotOnOrAfter of the SAML Assertion. Specify a positive integer followed by a unit of time, which can be hours (h), minutes (m), seconds (s), or milliseconds (ms). For example, specify 500 milliseconds as 500ms. You can include multiple values in a single entry. For example, 1s500ms is equivalent to 1.5 seconds.</xsd:documentation> 
+                <xsd:documentation>The time period to authenticate the user again when the Subject associated with a SAML Assertion is about to expire. This cushion is applied to both the NotOnOrAfter value in the Conditions element and the SessionNotOnOrAfter attribute of the SAML Assertion. Specify a positive integer followed by a unit of time, which can be hours (h), minutes (m), seconds (s), or milliseconds (ms). For example, specify 500 milliseconds as 500ms. You can include multiple values in a single entry. For example, 1s500ms is equivalent to 1.5 seconds.</xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>Cushion time to authenticate again</ext:label> 
                 </xsd:appinfo> 
@@ -36049,6 +36159,15 @@
                 <xsd:documentation>The single character used to separate the session meta cache name. The default value should usually be used. </xsd:documentation> 
                 <xsd:appinfo> 
                     <ext:label>Cache name separator</ext:label> 
+                    <ext:group id="performance"/> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="appInCacheName" use="optional" default="false" type="booleanType"> 
+            <xsd:annotation> 
+                <xsd:documentation>By default, per-application JCache session cache names are generated by using the context root. When the JCache session caches are distributed across multiple servers, multiple applications with the same context root might exist that must not share a session cache. When this option is enabled, application names are included in JCache cache names to help avoid conflicting JCache cache names. The default value is false. </xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Use the application name in the cache names</ext:label> 
                     <ext:group id="performance"/> 
                 </xsd:appinfo> 
             </xsd:annotation> 
@@ -39289,6 +39408,7 @@
             <xsd:element name="authentication" type="com.ibm.ws.security.authentication"/> 
             <xsd:element name="authCache" type="com.ibm.ws.security.authentication.cache"/> 
             <xsd:element name="kerberos" type="com.ibm.ws.security.kerberos.auth.KerberosService"/> 
+            <xsd:element name="cdi" type="io.openliberty.cdi.configuration"/> 
             <xsd:element name="cdi12" type="com.ibm.ws.cdi12.cdiContainer"/> 
             <xsd:element name="channelfw" type="com.ibm.ws.channelfw"/> 
             <xsd:element name="tcpOptions" type="com.ibm.ws.tcpchannel.options-factory"/> 
