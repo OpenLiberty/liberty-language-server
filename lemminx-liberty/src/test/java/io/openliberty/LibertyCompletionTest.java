@@ -75,8 +75,8 @@ public class LibertyCompletionTest {
                 CompletionItem websocket = c("websocket-1.1", "websocket-1.1");
                 CompletionItem microProfileCompletion = c("microProfile-2.2", "microProfile-2.2");
 
-                // would be 228 if mpConfig-1.4 was not already specified
-                final int TOTAL_ITEMS = 227; // total number of available completion items
+                // would be 261 if mpConfig-1.4 was not already specified
+                final int TOTAL_ITEMS = 260; // total number of available completion items
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, jaxrsCompletion, websocket,
                                 microProfileCompletion);
