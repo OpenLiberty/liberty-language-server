@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2022 IBM Corporation and others.
+* Copyright (c) 2020, 2023 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,10 +14,11 @@ package io.openliberty.tools.langserver.lemminx;
 
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.dom.DOMElement;
-import org.eclipse.lemminx.services.extensions.IHoverParticipant;
-import org.eclipse.lemminx.services.extensions.IHoverRequest;
+import org.eclipse.lemminx.services.extensions.hover.IHoverParticipant;
+import org.eclipse.lemminx.services.extensions.hover.IHoverRequest;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkupContent;
+import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 import io.openliberty.tools.langserver.lemminx.models.feature.*;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
@@ -28,22 +29,22 @@ import java.util.Optional;
 public class LibertyHoverParticipant implements IHoverParticipant {
 
 	@Override
-	public Hover onAttributeName(IHoverRequest request) {
+	public Hover onAttributeName(IHoverRequest request, CancelChecker cancelChecker) {
 		return null;
 	}
 
 	@Override
-	public Hover onAttributeValue(IHoverRequest request) {
+	public Hover onAttributeValue(IHoverRequest request, CancelChecker cancelChecker) {
 		return null;
 	}
 
 	@Override
-	public Hover onTag(IHoverRequest request) {
+	public Hover onTag(IHoverRequest request, CancelChecker cancelChecker) {
 		return null;
 	}
 
 	@Override
-	public Hover onText(IHoverRequest request) {
+	public Hover onText(IHoverRequest request, CancelChecker cancelChecker) {
 		if (!LibertyUtils.isConfigXMLFile(request.getXMLDocument()))
 			return null;
 
