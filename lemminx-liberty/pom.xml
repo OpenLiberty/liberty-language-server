@@ -4,13 +4,13 @@
     <groupId>io.openliberty.tools</groupId>
     <artifactId>liberty-langserver-lemminx</artifactId>
     <packaging>jar</packaging>
-    <version>1.1-SNAPSHOT</version>
+    <version>2.0-SNAPSHOT</version>
 
     <name>lemminx-liberty</name>
     <url>https://github.com/OpenLiberty/liberty-language-server</url>
 
     <properties>
-        <lemminx.version>0.22.0</lemminx.version>
+        <lemminx.version>0.25.0</lemminx.version>
     </properties>
 
     <scm>
