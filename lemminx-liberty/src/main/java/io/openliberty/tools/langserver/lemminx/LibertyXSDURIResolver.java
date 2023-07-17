@@ -60,42 +60,49 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
      * @return Path to schema xsd resource as URI.toString()
      */
     public String resolve(String baseLocation, String publicId, String systemId) {
-        if (LibertyUtils.isConfigXMLFile(baseLocation)) {
-            try {
-                String serverXMLUri = URI.create(baseLocation).toString();
-                LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXMLUri);
-
-                if (libertyWorkspace != null) {
-                    //Set workspace properties if not set 
-                    LibertyUtils.getVersion(serverXMLUri);
-                    LibertyUtils.getRuntimeInfo(serverXMLUri);
-
-                    //Check workspace for Liberty installation and generate schema.xsd file
-                    //Return schema URI as String, otherwise use cached schema.xsd file
-                    String serverSchemaUri = null;
-                    if (libertyWorkspace.isLibertyInstalled()) {
-                        Path schemaGenJarPath = LibertyUtils.findFileInWorkspace(libertyWorkspace, Paths.get("bin", "tools", "ws-schemagen.jar"));
-                        if (schemaGenJarPath != null) {
-                            //Generate schema file
-                            serverSchemaUri = generateServerSchemaXsd(libertyWorkspace, schemaGenJarPath);
-                        }
-                    } else if (libertyWorkspace.isContainerAlive()) {
-                        DockerService docker = DockerService.getInstance();
-                        serverSchemaUri = docker.generateServerSchemaXsdFromContainer(libertyWorkspace);
-                    }
-                    if (serverSchemaUri != null && !serverSchemaUri.isEmpty()) {
-                        return serverSchemaUri;
-                    }
-                }
-                Path serverXSDFile = CacheResourcesManager.getResourceCachePath(SERVER_XSD_RESOURCE);
-                LOGGER.info("Using cached Liberty schema file located at: " + serverXSDFile.toString());
-                return serverXSDFile.toUri().toString();
-            } catch (Exception e) {
-                LOGGER.severe("Error: Unable to deploy server.xsd to lemminx cache.");
-                e.printStackTrace();
-            }
+        if (!LibertyUtils.isConfigXMLFile(baseLocation)) {
+            return null;
         }
-        return null;
+
+        try {
+            String serverXMLUri = URI.create(baseLocation).toString();
+            LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXMLUri);
+
+            if (libertyWorkspace != null) {
+                //Set workspace properties if not set 
+                LibertyUtils.getVersion(serverXMLUri);
+                LibertyUtils.getRuntimeInfo(serverXMLUri);
+
+                //Check workspace for Liberty installation and generate schema.xsd file
+                //Return schema URI as String, otherwise use cached schema.xsd file
+                String serverSchemaUri = null;
+                if (libertyWorkspace.isLibertyInstalled()) {
+                    Path schemaGenJarPath = LibertyUtils.findFileInWorkspace(libertyWorkspace, Paths.get("bin", "tools", "ws-schemagen.jar"));
+                    if (schemaGenJarPath != null) {
+                        //Generate schema file
+                        serverSchemaUri = generateServerSchemaXsd(libertyWorkspace, schemaGenJarPath);
+                    }
+                } else if (libertyWorkspace.isContainerAlive()) {
+                    DockerService docker = DockerService.getInstance();
+                    serverSchemaUri = docker.generateServerSchemaXsdFromContainer(libertyWorkspace);
+                }
+                if (serverSchemaUri != null && !serverSchemaUri.isEmpty()) {
+                    return serverSchemaUri;
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.severe("Error: Unable to generate the Liberty schema from the target Liberty runtime.");
+            e.printStackTrace();
+        }
+
+        try {
+            Path serverXSDFile = CacheResourcesManager.getResourceCachePath(SERVER_XSD_RESOURCE);
+            LOGGER.info("Using cached Liberty schema file located at: " + serverXSDFile.toString());
+            return serverXSDFile.toUri().toString();
+        } catch (Exception e) {
+            LOGGER.severe("Error: Unable to retrieve default cached Liberty schema file.");
+            return null;
+        }
     }
 
     @Override
