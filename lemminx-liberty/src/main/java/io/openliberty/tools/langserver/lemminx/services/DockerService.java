@@ -41,14 +41,10 @@ public class DockerService {
         return instance;
     }
 
-    // saved paths 
-    public static final Path DEFAULT_CONTAINER_WLP_DIR = Paths.get("opt", "ol", "wlp");
-
-    public static final Path DEFAULT_CONTAINER_OL_PROPERTIES_PATH = 
-            DEFAULT_CONTAINER_WLP_DIR.resolve(Paths.get("lib", "versions", "openliberty.properties"));
-    public static final Path DEFAULT_CONTAINER_SCHEMAGEN_JAR_PATH = 
-            DEFAULT_CONTAINER_WLP_DIR.resolve(Paths.get("bin", "tools", "ws-schemagen.jar"));
-
+    // Liberty images use Unix path
+    public static final String DEFAULT_CONTAINER_WLP_DIR = "opt/ol/wlp/";
+    public static final String DEFAULT_CONTAINER_OL_PROPERTIES_PATH = DEFAULT_CONTAINER_WLP_DIR + "lib/versions/openliberty.properties";
+    public static final String DEFAULT_CONTAINER_SCHEMAGEN_JAR_PATH = DEFAULT_CONTAINER_WLP_DIR + "bin/tools/ws-schemagen.jar";
 
     /** ===== Public Methods ===== **/
 
@@ -120,17 +116,18 @@ public class DockerService {
             p.waitFor(DOCKER_TIMEOUT, TimeUnit.SECONDS);
             // After waiting for the process, handle the error case and normal termination.
             if (p.exitValue() != 0) {
-                LOGGER.severe("Error running docker command, return value=" + p.exitValue());
+                LOGGER.severe("Received exit value=" + p.exitValue() + " when running Docker command: " + command);
                 // read messages from standard err
                 char[] d = new char[1023];
                 new InputStreamReader(p.getErrorStream()).read(d);
+                LOGGER.severe("RuntimeException " + new String(d).trim()+" RC="+p.exitValue());
                 throw new RuntimeException(new String(d).trim()+" RC="+p.exitValue());
             }
             result = readStdOut(p);
         } catch (IllegalThreadStateException  e) {
             // the timeout was too short and the docker command has not yet completed. There is no exit value.
             LOGGER.warning("IllegalThreadStateException, message="+e.getMessage());
-            throw new RuntimeException("The docker command did not complete within the timeout period: " + DOCKER_TIMEOUT + " seconds. ");
+            throw new RuntimeException("The Docker command did not complete within the timeout period: " + DOCKER_TIMEOUT + " seconds. ");
         } catch (InterruptedException | IOException e) {
             // If a runtime exception occurred in the server task, log and rethrow
             throw new RuntimeException(e.getMessage());
