@@ -91,7 +91,7 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
                 }
             }
         } catch (Exception e) {
-            LOGGER.severe("Error: Unable to deploy server.xsd to LemMinX cache.");
+            LOGGER.severe("Error: Unable to generate the Liberty schema from the target Liberty runtime.");
             e.printStackTrace();
         }
 
@@ -100,7 +100,7 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
             LOGGER.info("Using cached Liberty schema file located at: " + serverXSDFile.toString());
             return serverXSDFile.toUri().toString();
         } catch (Exception e) {
-            LOGGER.severe("CacheResourceManager failed to retrieve or create cache Liberty schema file.");
+            LOGGER.severe("Error: Unable to retrieve default cached Liberty schema file.");
             return null;
         }
     }
