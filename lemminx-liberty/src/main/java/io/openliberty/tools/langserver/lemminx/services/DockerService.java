@@ -74,7 +74,7 @@ public class DockerService {
     /**
      * Generate the schema file for a LibertyWorkspace using the ws-schemagen.jar from the corresponding container
      * @param containerName
-     * @return Path to generated schema file.
+     * @return Path to generated schema file or null if failed.
      * @throws IOException
      */
     public String generateServerSchemaXsdFromContainer(LibertyWorkspace libertyWorkspace) throws IOException {
@@ -96,6 +96,10 @@ public class DockerService {
             dockerExec(libertyWorkspace.getContainerName(), cmd);
             // extract xsd file to local/temp dir
             dockerCp(libertyWorkspace.getContainerName(), containerOutputFileString, tempDir.getCanonicalPath());
+        }
+        // (re)confirm xsd generation
+        if (!xsdFile.exists()) {
+            return null;
         }
         LOGGER.info("Using schema file at: " + xsdFile.toURI().toString());
         return xsdFile.toURI().toString();
@@ -120,8 +124,9 @@ public class DockerService {
                 // read messages from standard err
                 char[] d = new char[1023];
                 new InputStreamReader(p.getErrorStream()).read(d);
-                LOGGER.severe("RuntimeException " + new String(d).trim()+" RC="+p.exitValue());
-                throw new RuntimeException(new String(d).trim()+" RC="+p.exitValue());
+                String stdErrString = new String(d).trim()+" RC="+p.exitValue();
+                LOGGER.severe(stdErrString);
+                throw new RuntimeException(stdErrString);
             }
             result = readStdOut(p);
         } catch (IllegalThreadStateException  e) {
