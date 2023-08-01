@@ -94,7 +94,9 @@ public class DockerService {
         if (!xsdFile.exists()) {
             // $ java -jar {path to ws-schemagen.jar} {outputFile}
             String containerOutputFileString = "/tmp/" + xsdFileName;
-            String cmd = MessageFormat.format("java -jar {0} {1}", DEFAULT_CONTAINER_SCHEMAGEN_JAR_PATH.toString(), containerOutputFileString);
+            String schemaVersion = "--schemaVersion=1.1";
+            String outputVersion = "--outputVersion=2";
+            String cmd = MessageFormat.format("java -jar {0} {1} {2} {3}", DEFAULT_CONTAINER_SCHEMAGEN_JAR_PATH.toString(), schemaVersion, outputVersion, containerOutputFileString);
 
             // generate xsd file inside container
             dockerExec(libertyWorkspace.getContainerName(), cmd);
