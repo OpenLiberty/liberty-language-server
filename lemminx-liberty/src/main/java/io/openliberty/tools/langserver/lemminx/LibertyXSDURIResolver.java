@@ -147,7 +147,8 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
     
                 LOGGER.info("Generating schema file at: " + xsdDestPath);
     
-                ProcessBuilder pb = new ProcessBuilder("java", "-jar", schemaGenJarPath.toAbsolutePath().toString(), xsdDestPath); //Add locale param here
+                ProcessBuilder pb = new ProcessBuilder("java", "-jar", schemaGenJarPath.toAbsolutePath().toString(), "--schemaVersion=1.1",
+                        "--outputVersion=2", xsdDestPath); // Add locale param here
                 pb.directory(tempDir);
                 pb.redirectErrorStream(true);
                 pb.redirectOutput(new File(tempDir, "schemagen.log"));
