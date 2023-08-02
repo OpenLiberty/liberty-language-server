@@ -12,7 +12,6 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx.services;
 
-import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -37,8 +36,6 @@ import jakarta.xml.bind.Unmarshaller;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 
-import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
-import org.eclipse.lemminx.uriresolver.CacheResourcesManager.ResourceToDeploy;
 
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
 import io.openliberty.tools.langserver.lemminx.models.feature.FeatureInfo;
@@ -101,8 +98,9 @@ public class FeatureService {
   private List<Feature> getDefaultFeatureList() {
     try {
       if (defaultFeatureList == null) {
-        // Changing this to not contain the version in the file name (same as the server.xsd) 
-        InputStream is = getClass().getClassLoader().getResourceAsStream("features.json");
+        // Changing this to contain the version in the file name since the file is copied to the local .lemminx cache. 
+        // This is how we ensure the latest default features json gets used in each developer environment. 
+        InputStream is = getClass().getClassLoader().getResourceAsStream("features-cached-23006.json");
         InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
 
         // Only need the public features
@@ -139,7 +137,7 @@ public class FeatureService {
    * Returns the Liberty features corresponding to the Liberty version. First
    * attempts to fetch the feature list from Maven, otherwise falls back to the
    * list of installed features. If the installed features list cannot be
-   * gathered, falls back to the default features.json.
+   * gathered, falls back to the default cached features json file.
    * 
    * @param libertyVersion Liberty version (corresponds to XML document)
    * @param libertyRuntime Liberty runtime (corresponds to XML document)
@@ -230,7 +228,7 @@ public class FeatureService {
 
               // If tempDir is null, issue a warning for the current LibertyWorkspace URI and use the default features.json
               if (tempDir == null) {
-                  LOGGER.warning("Could not create a temporary directory for generating the " +  featureListFileName + " file. The cached features.json file will be used for the current workspace: " + libertyWorkspace.getWorkspaceString());
+                  LOGGER.warning("Could not create a temporary directory for generating the " +  featureListFileName + " file. The cached features json file will be used for the current workspace: " + libertyWorkspace.getWorkspaceString());
                   return installedFeatures;
               }
 
@@ -244,7 +242,7 @@ public class FeatureService {
               Process proc = pb.start();
               if (!proc.waitFor(30, TimeUnit.SECONDS)) {
                   proc.destroy();
-                  LOGGER.warning("Exceeded 30 second timeout during feature list generation. Using cached features.json file.");
+                  LOGGER.warning("Exceeded 30 second timeout during feature list generation. Using cached features json file.");
                   return installedFeatures;
               }
 

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2022 IBM Corporation and others.
+* Copyright (c) 2020, 2023 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -34,16 +34,18 @@ import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGrammarLocationProvider {
     private static final Logger LOGGER = Logger.getLogger(LibertyXSDURIResolver.class.getName());
 
-    private static final String XSD_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server.xsd";
-    private static final String XSD_CLASSPATH_LOCATION = "/schema/xsd/liberty/server.xsd";
+    // Changing this to contain the version in the file name since the file is copied to the local .lemminx cache. 
+    // This is how we ensure the latest default server schema gets used in each developer environment. 
+    private static final String XSD_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server-cached-23006.xsd";
+    private static final String XSD_CLASSPATH_LOCATION = "/schema/xsd/liberty/server-cached-23006.xsd";
 
     /**
-     * SERVER_XSD_RESOURCE is the server.xsd that is located at `/schema/server.xsd`
-     * that should be deployed (copied) to the .lemminx cache. The resourceURI is
-     * used by lemmix determine the path to store the file in the cache. So for
-     * server.xsd it takes the resource located at `/schema/server.xsd` and deploys
+     * SERVER_XSD_RESOURCE is the server schema that is located at XSD_CLASSPATH_LOCATION
+     * that gets deployed (copied) to the .lemminx cache. The XSD_RESOURCE_URL is
+     * used by lemmix to determine the path to store the file in the cache. So for the
+     * server schema it takes the resource located at XSD_CLASSPATH_LOCATION and deploys
      * it to:
-     * ~/.lemminx/cache/https/github.com/OpenLiberty/liberty-language-server/master/lemminx-liberty/src/main/resources/schema/server.xsd
+     * ~/.lemminx/cache/https/github.com/OpenLiberty/liberty-language-server/master/lemminx-liberty/src/main/resources/schema/xsd/server-cached-<version>.xsd
      * 
      * Declared public to be used by tests
      */
