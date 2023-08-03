@@ -42,7 +42,6 @@ import io.openliberty.tools.langserver.lemminx.services.DockerService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
-import io.openliberty.tools.langserver.lemminx.services.XmlReader;
 
 public class LibertyUtils {
 
@@ -72,11 +71,9 @@ public class LibertyUtils {
             filePath = filePath.replace("\\", "/");
         }
 
-        return isServerXMLFile(filePath) || isConfigDirFile(filePath) ||
+        return isServerXMLFile(filePath) || isConfigDirFile(filePath) || 
                 LibertyProjectsManager.getInstance().getWorkspaceFolder(filePath).hasConfigFile(filePath);
-
-        // TODO: implement server root heuristic
-        // return StaxReader.getInstance().hasServerRoot(new File(filePath));
+                // XmlReader.hasServerRoot(new File(filePath));
     }
 
     public static boolean isConfigXMLFile(DOMDocument file) {
