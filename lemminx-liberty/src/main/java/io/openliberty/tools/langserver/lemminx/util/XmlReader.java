@@ -26,44 +26,75 @@ import javax.xml.stream.events.XMLEvent;
 public class XmlReader {
     private static final Logger LOGGER = Logger.getLogger(XmlReader.class.getName());
 
-    public static boolean hasServerRoot(File file) throws XMLStreamException, IOException {
+    public static boolean hasServerRoot(File file) {
         if (!file.exists() || file.length() == 0) {
             return false;
         }
+
         XMLInputFactory factory = XMLInputFactory.newInstance();
-        XMLEventReader reader = factory.createXMLEventReader(new FileInputStream(file));
-        if (reader.hasNext()) {
-            XMLEvent firstTag = reader.nextTag(); // first start/end element
-            reader.close();
-            return isServerElement(firstTag);
+        XMLEventReader reader = null;
+        try {
+            reader = factory.createXMLEventReader(new FileInputStream(file));
+            if (reader.hasNext()) {
+                XMLEvent firstTag = reader.nextTag(); // first start/end element
+                reader.close();
+                return isServerElement(firstTag);
+            }
+        } catch (IOException e) {
+            LOGGER.severe("Unable to create an XMLEventReader for file: " + file);
+        } catch (XMLStreamException e) {
+            LOGGER.severe("XmlReader failed to grab the first starting element for file: " + file);
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception ignored) {   
+                }
+            }
         }
-        reader.close();
+
         return false;
     }
 
-    public static void readLibertPluginConfigXml(File file) throws XMLStreamException, IOException {
+    public static void readLibertPluginConfigXml(File file) {
         if (!file.exists() || file.length() == 0) {
             return;
         }
+
         XMLInputFactory factory = XMLInputFactory.newInstance();
-        XMLEventReader reader = factory.createXMLEventReader(new FileInputStream(file));
-        while (reader.hasNext()) {
-            XMLEvent event = reader.nextTag();
-            if (!event.isStartElement()) {
-                continue;
+        XMLEventReader reader = null;
+        try {
+            reader = factory.createXMLEventReader(new FileInputStream(file));
+            while (reader.hasNext()) {
+                XMLEvent event = reader.nextTag();
+                if (!event.isStartElement()) {
+                    continue;
+                }
+                switch (getElementName(event)) {
+                    case "serverEnvFile":
+                        // store
+                        break;
+                    case "bootstrapPropertiesFile":
+                        // store
+                        break;
+                    default:
+                        break;
+                }
+            } 
+        } catch (IOException e) {
+            LOGGER.severe("Unable to create an XMLEventReader for liberty-plugin-config file");
+        } catch (XMLStreamException e) {
+            LOGGER.severe("XmlReader encountered an error trying to read XML file: " + file);
+            e.printStackTrace();
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception ignored) {   
+                }
             }
-            switch (getElementName(event)) {
-                case "serverEnvFile":
-                    // store
-                    break;
-                case "bootstrapPropertiesFile":
-                    // store
-                    break;
-                default:
-                    break;
-            }
-        } 
-        reader.close();
+        }
     }
 
     protected static String getElementName(XMLEvent event) {
@@ -73,75 +104,4 @@ public class XmlReader {
     protected static boolean isServerElement(XMLEvent event) {
         return getElementName(event).equals("server");
     }
-
-    /* ===== Same methods written with try/catch blocks ===== */
-
-    // public static boolean hasServerRoot(File file) {
-    //     if (!file.exists() || file.length() == 0) {
-    //         return false;
-    //     }
-
-    //     XMLInputFactory factory = XMLInputFactory.newInstance();
-    //     try {
-    //         XMLEventReader reader = factory.createXMLEventReader(new FileInputStream(file));
-    //         try  {
-    //             if (reader.hasNext()) {
-    //                 XMLEvent firstTag = reader.nextTag(); // first start/end element
-    //                 reader.close();
-    //                 return isServerElement(firstTag);
-    //             }
-    //         } catch (XMLStreamException e) {
-    //             LOGGER.severe("XmlReader failed to grab the first starting element for file: " + file);
-    //             e.printStackTrace();
-    //         } finally {
-    //             try {
-    //                 reader.close();
-    //             } catch (Exception ignore) {
-    //             }
-    //         }
-    //     } catch (Exception e) {
-    //         LOGGER.severe("Unable to create an XMLEventReader for file: " + file);
-    //     }
-
-    //     return false;
-    // }
-
-    // public static void readLibertPluginConfigXml(File file) {
-    //     if (!file.exists() || file.length() == 0) {
-    //         return;
-    //     }
-
-    //     XMLInputFactory factory = XMLInputFactory.newInstance();
-    //     try {
-    //         XMLEventReader reader = factory.createXMLEventReader(new FileInputStream(file));
-    //         try {
-    //             while (reader.hasNext()) {
-    //                 XMLEvent event = reader.nextTag();
-    //                 if (!event.isStartElement()) {
-    //                     continue;
-    //                 }
-    //                 switch (getElementName(event)) {
-    //                     case "serverEnvFile":
-    //                         // store
-    //                         break;
-    //                     case "bootstrapPropertiesFile":
-    //                         // store
-    //                         break;
-    //                     default:
-    //                         break;
-    //                 }
-    //             } 
-    //         } catch (XMLStreamException e) {
-    //             LOGGER.severe("XmlReader encountered an error trying to read XML file: " + file);
-    //             e.printStackTrace();
-    //         } finally {
-    //             try {
-    //                 reader.close();
-    //             } catch (Exception ignore) {  
-    //             }
-    //         }
-    //     } catch (Exception e) {
-    //         LOGGER.severe("Unable to create an XMLEventReader for file: " + file);
-    //     } 
-    // }
 }
