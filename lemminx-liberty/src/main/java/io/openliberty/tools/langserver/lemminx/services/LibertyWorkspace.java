@@ -174,6 +174,7 @@ public class LibertyWorkspace {
         }
     }
 
+    // TODO: remove after isConfigXMLFile is reworked
     private void initConfigFileList() {
         try {
             List<Path> serverXmlList = Files
@@ -189,7 +190,7 @@ public class LibertyWorkspace {
         }
     }
 
-    // TODO: or use DOM
+    // TODO: remove after isConfigXMLFile is reworked
     private void scanForConfigLocations(Path filePath) {
         try {
             String workspacePath = this.getDir().getCanonicalPath();
