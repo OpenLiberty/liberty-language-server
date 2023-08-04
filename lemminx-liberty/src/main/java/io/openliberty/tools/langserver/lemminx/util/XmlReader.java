@@ -15,12 +15,16 @@ package io.openliberty.tools.langserver.lemminx.util;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
+import java.io.FileNotFoundException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 
 public class XmlReader {
@@ -40,10 +44,10 @@ public class XmlReader {
                 reader.close();
                 return isServerElement(firstTag);
             }
-        } catch (IOException e) {
-            LOGGER.severe("Unable to create an XMLEventReader for file: " + file);
+        } catch (FileNotFoundException e) {
+            LOGGER.severe("Unable to access file "+ file.getName());
         } catch (XMLStreamException e) {
-            LOGGER.severe("XmlReader failed to grab the first starting element for file: " + file);
+            LOGGER.severe("Error received trying to read XML file: " + file.getName());
             e.printStackTrace();
         } finally {
             if (reader != null) {
@@ -57,35 +61,34 @@ public class XmlReader {
         return false;
     }
 
-    public static void readLibertPluginConfigXml(File file) {
+    public static Map<String, String> getElementValues(File file, Set<String> elementNames) {
         if (!file.exists() || file.length() == 0) {
-            return;
+            return null;
         }
+        Map<String, String> returnValues = new HashMap<String, String> ();
 
         XMLInputFactory factory = XMLInputFactory.newInstance();
         XMLEventReader reader = null;
         try {
             reader = factory.createXMLEventReader(new FileInputStream(file));
             while (reader.hasNext()) {
-                XMLEvent event = reader.nextTag();
+                XMLEvent event = reader.nextEvent();
                 if (!event.isStartElement()) {
                     continue;
                 }
-                switch (getElementName(event)) {
-                    case "serverEnvFile":
-                        // store
-                        break;
-                    case "bootstrapPropertiesFile":
-                        // store
-                        break;
-                    default:
-                        break;
+                String elementName = getElementName(event);
+                if (elementNames.contains(elementName) && reader.hasNext()) {
+                    XMLEvent elementContent = reader.nextEvent();
+                    if (elementContent.isCharacters()) {
+                        Characters value = elementContent.asCharacters();
+                        returnValues.put(elementName, value.getData());
+                    }
                 }
             } 
-        } catch (IOException e) {
-            LOGGER.severe("Unable to create an XMLEventReader for liberty-plugin-config file");
+        } catch (FileNotFoundException e) {
+            LOGGER.severe("Unable to access file "+ file.getName());
         } catch (XMLStreamException e) {
-            LOGGER.severe("XmlReader encountered an error trying to read XML file: " + file);
+            LOGGER.severe("Error received trying to read XML file: " + file.getName());
             e.printStackTrace();
         } finally {
             if (reader != null) {
@@ -95,6 +98,8 @@ public class XmlReader {
                 }
             }
         }
+
+        return returnValues;
     }
 
     protected static String getElementName(XMLEvent event) {
