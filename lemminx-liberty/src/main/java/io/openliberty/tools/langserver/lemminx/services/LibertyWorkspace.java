@@ -45,6 +45,8 @@ public class LibertyWorkspace {
     private boolean isLibertyInstalled;
     private List<Feature> installedFeatureList;
     private Set<String> configFiles;
+    private String libertyInstallationDir;
+    private boolean isExternalLibertyInstallation;
 
     // devc vars
     private String containerName;
@@ -62,6 +64,8 @@ public class LibertyWorkspace {
         this.libertyVersion = null;
         this.libertyRuntime = null;
         this.isLibertyInstalled = false;
+        this.isExternalLibertyInstallation = false;
+        this.libertyInstallationDir = null;
         this.installedFeatureList = new ArrayList<Feature>();
         this.containerName = null;
         this.containerAlive = false;
@@ -100,10 +104,29 @@ public class LibertyWorkspace {
 
     public void setLibertyInstalled(boolean isLibertyInstalled) {
         this.isLibertyInstalled = isLibertyInstalled;
+        if (!isLibertyInstalled) {
+            setExternalLibertyInstallation(isLibertyInstalled);
+        }
     }
 
     public boolean isLibertyInstalled() {
         return this.isLibertyInstalled;
+    }
+
+    public void setExternalLibertyInstallation(boolean flag) {
+        this.isExternalLibertyInstallation = flag;
+    }
+
+    public boolean isExternalLibertyInstallation() {
+        return this.isExternalLibertyInstallation;
+    }
+
+    public void setLibertyInstallationDir(String dir) {
+        this.libertyInstallationDir = dir;
+    }
+
+    public String getLibertyInstallationDir() {
+        return this.libertyInstallationDir;
     }
 
     public List<Feature> getInstalledFeatureList() {

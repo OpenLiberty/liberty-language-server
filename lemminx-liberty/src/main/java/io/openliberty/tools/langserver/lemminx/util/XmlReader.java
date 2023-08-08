@@ -16,7 +16,9 @@ package io.openliberty.tools.langserver.lemminx.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -61,8 +63,18 @@ public class XmlReader {
         return false;
     }
 
-    public static Map<String, String> getElementValues(File file, Set<String> elementNames) {
-        if (!file.exists() || file.length() == 0) {
+    public static String getElementValue(Path file, String elementName) {
+        Set<String> names = new HashSet<String> ();
+        names.add(elementName);
+        Map<String, String> values = getElementValues(file, names);
+        if (values != null && values.containsKey(elementName)) {
+            return values.get(elementName);
+        }
+        return null;
+    }
+
+    public static Map<String, String> getElementValues(Path file, Set<String> elementNames) {
+        if (!file.toFile().exists()) {
             return null;
         }
         Map<String, String> returnValues = new HashMap<String, String> ();
@@ -70,7 +82,7 @@ public class XmlReader {
         XMLInputFactory factory = XMLInputFactory.newInstance();
         XMLEventReader reader = null;
         try {
-            reader = factory.createXMLEventReader(new FileInputStream(file));
+            reader = factory.createXMLEventReader(new FileInputStream(file.toFile()));
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
                 if (!event.isStartElement()) {
@@ -86,9 +98,9 @@ public class XmlReader {
                 }
             } 
         } catch (FileNotFoundException e) {
-            LOGGER.severe("Unable to access file "+ file.getName());
+            LOGGER.severe("Unable to access file "+ file.toFile().getName());
         } catch (XMLStreamException e) {
-            LOGGER.severe("Error received trying to read XML file: " + file.getName());
+            LOGGER.severe("Error received trying to read XML file: " + file.toFile().getName());
             e.printStackTrace();
         } finally {
             if (reader != null) {

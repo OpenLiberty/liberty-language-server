@@ -19,6 +19,8 @@ import org.eclipse.lemminx.services.extensions.hover.IHoverRequest;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
+
+import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
 import io.openliberty.tools.langserver.lemminx.models.feature.*;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
@@ -62,17 +64,16 @@ public class LibertyHoverParticipant implements IHoverParticipant {
 	}
 
 	private Hover getHoverFeatureDescription(String featureName, DOMDocument domDocument) {
-            String libertyRuntimeVersionInfo = LibertyUtils.getRuntimeAndVersionInfo(domDocument);
-            String libertyVersion =  LibertyUtils.getVersionFromInfo(libertyRuntimeVersionInfo);
-            String libertyRuntime =  LibertyUtils.getRuntimeFromInfo(libertyRuntimeVersionInfo);
+        LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
+        String libertyVersion =  runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
+        String libertyRuntime =  runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
 
+		final int requestDelay = SettingsService.getInstance().getRequestDelay();
+		Optional<Feature> feature = FeatureService.getInstance().getFeature(featureName, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
+		if (feature.isPresent()) {
+			return new Hover(new MarkupContent("plaintext", feature.get().getShortDescription()));
+		}
 
-            final int requestDelay = SettingsService.getInstance().getRequestDelay();
-            Optional<Feature> feature = FeatureService.getInstance().getFeature(featureName, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
-            if (feature.isPresent()) {
-                return new Hover(new MarkupContent("plaintext", feature.get().getShortDescription()));
-            }
-
-            return null;
+		return null;
 	}
 }

@@ -26,6 +26,7 @@ import org.eclipse.lemminx.uriresolver.IExternalGrammarLocationProvider;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager.ResourceToDeploy;
 import org.eclipse.lemminx.uriresolver.URIResolverExtension;
 
+import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
 import io.openliberty.tools.langserver.lemminx.services.DockerService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
@@ -72,8 +73,7 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
 
             if (libertyWorkspace != null) {
                 //Set workspace properties if not set 
-                LibertyUtils.getVersion(serverXMLUri);
-                LibertyUtils.getRuntimeInfo(serverXMLUri);
+                LibertyUtils.getLibertyRuntimeInfo(serverXMLUri);
 
                 //Check workspace for Liberty installation and generate schema.xsd file
                 //Return schema URI as String, otherwise use cached schema.xsd file
