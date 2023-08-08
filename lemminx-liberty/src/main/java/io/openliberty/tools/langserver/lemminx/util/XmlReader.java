@@ -35,41 +35,29 @@ public class XmlReader {
     private static final Logger LOGGER = Logger.getLogger(XmlReader.class.getName());
 
     public static boolean hasServerRoot(String filePath) {
+        XMLInputFactory factory = XMLInputFactory.newInstance();
+        XMLEventReader reader = null;
         File file = null;
         
         try {
             file = new File(new URI(filePath).getPath());
-            return hasServerRoot(file);
-        } catch (URISyntaxException e) {
-            LOGGER.severe("Error received converting file path to URI for path " + filePath);
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public static boolean hasServerRoot(Path filePath) {
-        return hasServerRoot(filePath.toFile());
-    }
-
-    public static boolean hasServerRoot(File xmlFile) {
-        XMLEventReader reader = null;
-        
-        try {
-            if (!xmlFile.exists() || xmlFile.length() == 0) {
+            if (!file.exists() || file.length() == 0) {
                 return false;
             }
 
-            XMLInputFactory factory = XMLInputFactory.newInstance();
-            reader = factory.createXMLEventReader(new FileInputStream(xmlFile));
+            reader = factory.createXMLEventReader(new FileInputStream(file));
             if (reader.hasNext()) {
                 XMLEvent firstTag = reader.nextTag(); // first start/end element
                 reader.close();
                 return isServerElement(firstTag);
             }
         } catch (FileNotFoundException e) {
-            LOGGER.severe("Unable to access file "+ xmlFile.getAbsolutePath());
+            LOGGER.severe("Unable to access file "+ filePath);
         } catch (XMLStreamException e) {
-            LOGGER.severe("Error received trying to read XML file: " + xmlFile.getAbsolutePath());
+            LOGGER.severe("Error received trying to read XML file: " + filePath);
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            LOGGER.severe("Error received converting file path to URI for path " + filePath);
             e.printStackTrace();
         } finally {
             if (reader != null) {
