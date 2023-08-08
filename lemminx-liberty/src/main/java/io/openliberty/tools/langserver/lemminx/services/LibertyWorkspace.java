@@ -65,9 +65,6 @@ public class LibertyWorkspace {
         this.installedFeatureList = new ArrayList<Feature>();
         this.containerName = null;
         this.containerAlive = false;
-
-        this.configFiles = new HashSet<String>();
-        initConfigFileList();
     }
 
     public String getWorkspaceString() {
@@ -171,63 +168,6 @@ public class LibertyWorkspace {
         } catch (JAXBException e) {
             // LOGGER.warning("Unable to unmarshal the devc metadata file: " + devcMetadataFile.toString());
             return null;
-        }
-    }
-
-    // TODO: remove after isConfigXMLFile is reworked
-    private void initConfigFileList() {
-        try {
-            List<Path> serverXmlList = Files
-                    .find(Paths.get(getWorkspaceURI()), Integer.MAX_VALUE,
-                            (filePath, fileAttributes) -> LibertyUtils.isServerXMLFile(filePath.toString()))
-                    .collect(Collectors.toList());
-            for (Path serverXml : serverXmlList) {
-                scanForConfigLocations(serverXml);
-            }
-        } catch (IOException e) {
-            // workspace URI does not exist
-            LOGGER.warning("Workspace URI does not exist: " + e.getMessage());
-        }
-    }
-
-    // TODO: remove after isConfigXMLFile is reworked
-    private void scanForConfigLocations(Path filePath) {
-        try {
-            String workspacePath = this.getDir().getCanonicalPath();
-            String content = new String(Files.readAllBytes(filePath));
-            // [^<] = All characters, including whitespaces/newlines, not equivalent to '<'
-            // [\"\'] = Accept either " or ' as string indicators
-            // [\\s\\S]+? = Anything up to first closing tag
-            String regex = "<include[^<]+location=[\"\'](.+)[\"\'][\\s\\S]+?/>";
-            Matcher m = Pattern.compile(regex).matcher(content);
-            while (m.find()) {
-                // m.group(0) contains whole include element, m.group(1) contains only location value
-                String locationFilePath = new File(filePath.getParent().toFile(), m.group(1)).getCanonicalPath();
-                if (locationFilePath.startsWith(workspacePath)) {
-                    // only recognize files that are in the same Liberty workspace 
-                    // this guards against path traversal vulnerabilities
-                    configFiles.add(locationFilePath);
-                }
-            }
-        } catch (IOException e) {
-            // specified config resources file does not exist
-        } catch (Exception e) {
-            LOGGER.warning("Exception received when scanning for config files: " + e.getMessage());
-        }
-    }
-
-    public void addConfigFile(String fileString) {
-        configFiles.add(fileString);
-    }
-
-    public boolean hasConfigFile(String fileString) {
-        try {
-            fileString = fileString.startsWith("file:") ? 
-                    new File(URI.create(fileString)).getCanonicalPath() :
-                    new File(fileString).getCanonicalPath();
-            return this.configFiles.contains(fileString);
-        } catch (IOException e) {
-            return false;
         }
     }
 

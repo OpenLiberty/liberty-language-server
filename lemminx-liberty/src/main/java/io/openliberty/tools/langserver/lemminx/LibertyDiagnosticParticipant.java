@@ -138,9 +138,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             configFile = new File(locAttribute);
         }
         try {
-            if (configFile.exists()) {
-                LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI()).addConfigFile(configFile.getCanonicalPath());
-            } else {
+            if (!configFile.exists()) {
                 DOMAttr optNode = node.getAttributeNode("optional");
                 if (optNode == null) {
                     list.add(new Diagnostic(range, IMPLICIT_NOT_OPTIONAL_MESSAGE, DiagnosticSeverity.Error, "liberty-lemminx", IMPLICIT_NOT_OPTIONAL_CODE));
@@ -150,7 +148,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 }
                 list.add(new Diagnostic(range, MISSING_FILE_MESSAGE, DiagnosticSeverity.Warning, "liberty-lemminx", MISSING_FILE_CODE));
             }
-        } catch (IllegalArgumentException | IOException e) {
+        } catch (IllegalArgumentException e) {
             list.add(new Diagnostic(range, MISSING_FILE_MESSAGE, DiagnosticSeverity.Warning, "liberty-lemminx-exception", MISSING_FILE_CODE));
         }
     }

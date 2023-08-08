@@ -16,6 +16,8 @@ package io.openliberty.tools.langserver.lemminx.util;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -30,14 +32,17 @@ import javax.xml.stream.events.XMLEvent;
 public class XmlReader {
     private static final Logger LOGGER = Logger.getLogger(XmlReader.class.getName());
 
-    public static boolean hasServerRoot(File file) {
-        if (!file.exists() || file.length() == 0) {
-            return false;
-        }
-
+    public static boolean hasServerRoot(String filePath) {
         XMLInputFactory factory = XMLInputFactory.newInstance();
         XMLEventReader reader = null;
+        File file = null;
+        
         try {
+            file = new File(new URI(filePath).getPath());
+            if (!file.exists() || file.length() == 0) {
+                return false;
+            }
+
             reader = factory.createXMLEventReader(new FileInputStream(file));
             if (reader.hasNext()) {
                 XMLEvent firstTag = reader.nextTag(); // first start/end element
@@ -45,9 +50,12 @@ public class XmlReader {
                 return isServerElement(firstTag);
             }
         } catch (FileNotFoundException e) {
-            LOGGER.severe("Unable to access file "+ file.getName());
+            LOGGER.severe("Unable to access file "+ filePath);
         } catch (XMLStreamException e) {
-            LOGGER.severe("Error received trying to read XML file: " + file.getName());
+            LOGGER.severe("Error received trying to read XML file: " + filePath);
+            e.printStackTrace();
+        } catch (URISyntaxException e) {
+            LOGGER.severe("Error received converting file path to URI for path " + filePath);
             e.printStackTrace();
         } finally {
             if (reader != null) {

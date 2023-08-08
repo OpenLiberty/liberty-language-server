@@ -141,15 +141,5 @@ public class LibertyDiagnosticTest {
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), 
                 not_xml, multi_liner, not_optional, missing_xml, optional_not_defined, missing_xml2);
-
-        Collection<LibertyWorkspace> workspaceFolders = LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders();
-        assertTrue(workspaceFolders.size() == 1);
-
-        LibertyWorkspace libWorkspace = workspaceFolders.iterator().next();
-
-        assertTrue(libWorkspace.hasConfigFile(new File("src/test/resources/empty_server.xml").getCanonicalPath()));
-        assertFalse(libWorkspace.hasConfigFile("MISSING FILE"));
-        assertFalse(libWorkspace.hasConfigFile("MULTI LINER"));
-        assertFalse(libWorkspace.hasConfigFile("MISSING FILE.xml"));
     }
 }
