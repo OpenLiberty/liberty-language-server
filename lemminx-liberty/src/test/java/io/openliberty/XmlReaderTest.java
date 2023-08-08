@@ -11,6 +11,7 @@ import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 import io.openliberty.tools.langserver.lemminx.util.XmlReader;
 
 public class XmlReaderTest {
@@ -20,18 +21,24 @@ public class XmlReaderTest {
     public void readEmptyXml() throws IOException {
         File emptyXml = new File(resourcesDir, "empty_server.xml");
         assertFalse(XmlReader.hasServerRoot(emptyXml.getCanonicalPath()));
+        assertFalse(LibertyUtils.isServerXMLFile(emptyXml.getCanonicalPath()));
+        assertFalse(LibertyUtils.isConfigXMLFile(emptyXml.getCanonicalPath()));
     }
 
     @Test
     public void readServerXml() throws IOException {
-        File sampleServerXml = new File(resourcesDir, "sample/server.xml");
+        File sampleServerXml = new File(resourcesDir, "sample/custom_server.xml");
         assertTrue(XmlReader.hasServerRoot(sampleServerXml.getCanonicalPath()));
+        assertFalse(LibertyUtils.isServerXMLFile(sampleServerXml.getCanonicalPath()));
+        assertFalse(LibertyUtils.isConfigDirFile(sampleServerXml.getCanonicalPath()));
+        assertTrue(LibertyUtils.isConfigXMLFile(sampleServerXml.getCanonicalPath()));
     }
 
     @Test
     public void readLibertyPluginConfigXml() throws IOException {
         File lpcXml = new File(resourcesDir, "sample/liberty-plugin-config.xml");
         assertFalse(XmlReader.hasServerRoot(lpcXml.getCanonicalPath()));
+        assertFalse(LibertyUtils.isConfigXMLFile(lpcXml.getCanonicalPath()));
 
         Set<String> elementNames = new HashSet<String> ();
         elementNames.add("configFile");
