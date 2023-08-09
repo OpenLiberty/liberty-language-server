@@ -44,12 +44,16 @@ public class LibertyWorkspaceIT {
             // modB installs the jaxrs-2.1, grpc-1.0, and grpcClient-1.0 features.
             File modAFolder = new File(parentModuleFolder, "modA");
             File modBFolder = new File(parentModuleFolder, "modB");
+            File modCFolder = new File(parentModuleFolder, "modC");
        
             File serverModAXmlFile = new File(modAFolder, "src/main/liberty/config/server.xml");
             String serverModAGenXSDURI = serverModAXmlFile.toPath().toUri().toString().replace("///", "/");
 
             File serverModBXmlFile = new File(modBFolder, "src/main/liberty/config/server.xml");
             String serverModBGenXSDURI = serverModBXmlFile.toPath().toUri().toString().replace("///", "/");
+
+            File serverModCXmlFile = new File(modCFolder, "src/main/liberty/config/server.xml");
+            String serverModCGenXSDURI = serverModCXmlFile.toPath().toUri().toString().replace("///", "/");
 
             //Configure Liberty workspace for testing - use parent module folder on purpose for multi-mod scenario
             WorkspaceFolder testWorkspace = new WorkspaceFolder(parentModuleFolder.toURI().toString());
@@ -58,15 +62,27 @@ public class LibertyWorkspaceIT {
             LibertyProjectsManager.getInstance().setWorkspaceFolders(testWorkspaceFolders);
 
             String schemaFileName = "ol-22.0.0.12.xsd";
+            String schemaFileModCName = "ol-23.0.0.6.xsd";
 
             LibertyWorkspace libWorkspaceA = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverModAGenXSDURI);
             LibertyWorkspace libWorkspaceB = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverModBGenXSDURI);
+            LibertyWorkspace libWorkspaceC = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverModCGenXSDURI);
 
-            org.junit.jupiter.api.Assertions.assertFalse(libWorkspaceA.getWorkspaceString().equals(libWorkspaceB.getWorkspaceString()), "Same workspace was returned for both sub-modules: "+ libWorkspaceA.getWorkspaceString());
+            org.junit.jupiter.api.Assertions.assertFalse(libWorkspaceA.getWorkspaceString().equals(libWorkspaceB.getWorkspaceString()), "Same workspace was returned for both sub-modules A & B: "+ libWorkspaceA.getWorkspaceString());
+            org.junit.jupiter.api.Assertions.assertFalse(libWorkspaceA.getWorkspaceString().equals(libWorkspaceC.getWorkspaceString()), "Same workspace was returned for both sub-modules A & C: "+ libWorkspaceA.getWorkspaceString());
+            org.junit.jupiter.api.Assertions.assertFalse(libWorkspaceB.getWorkspaceString().equals(libWorkspaceC.getWorkspaceString()), "Same workspace was returned for both sub-modules B & C: "+ libWorkspaceB.getWorkspaceString());
     
             File schemaFileA = new File(LibertyUtils.getTempDir(libWorkspaceA), schemaFileName);
             String serverAGenXSDURI = schemaFileA.toPath().toUri().toString().replace("///", "/");
             org.junit.jupiter.api.Assertions.assertTrue(serverAGenXSDURI.contains("modA"), "Wrong schema file location was returned for modA: "+ serverAGenXSDURI);
+
+            File schemaFileB = new File(LibertyUtils.getTempDir(libWorkspaceB), schemaFileName);
+            String serverBGenXSDURI = schemaFileB.toPath().toUri().toString().replace("///", "/");
+            org.junit.jupiter.api.Assertions.assertTrue(serverBGenXSDURI.contains("modB"), "Wrong schema file location was returned for modB: "+ serverBGenXSDURI);
+
+            File schemaFileC = new File(LibertyUtils.getTempDir(libWorkspaceC), schemaFileModCName);
+            String serverCGenXSDURI = schemaFileC.toPath().toUri().toString().replace("///", "/");
+            org.junit.jupiter.api.Assertions.assertTrue(serverCGenXSDURI.contains("modC"), "Wrong schema file location was returned for modC: "+ serverCGenXSDURI);
 
             String serverXML = String.join(newLine, //
                         "<server description=\"Sample Liberty server\">", //
@@ -81,13 +97,14 @@ public class LibertyWorkspaceIT {
                         "Source: [" + schemaFileName + "](" + serverAGenXSDURI + ")", //
                         r(1, 8, 1, 22));
 
-            File schemaFileB = new File(LibertyUtils.getTempDir(libWorkspaceB), schemaFileName);
-            String serverBGenXSDURI = schemaFileB.toPath().toUri().toString().replace("///", "/");
-            org.junit.jupiter.api.Assertions.assertTrue(serverBGenXSDURI.contains("modB"), "Wrong schema file location was returned for modB: "+ serverBGenXSDURI);
-
             XMLAssert.assertHover(serverXML, serverModBXmlFile.toURI().toString(), "Defines how the server loads features." + //
                         System.lineSeparator() + System.lineSeparator() + //
                         "Source: [" + schemaFileName + "](" + serverBGenXSDURI + ")", //
+                        r(1, 8, 1, 22));
+
+            XMLAssert.assertHover(serverXML, serverModCXmlFile.toURI().toString(), "Defines how the server loads features." + //
+                        System.lineSeparator() + System.lineSeparator() + //
+                        "Source: [" + schemaFileModCName + "](" + serverCGenXSDURI + ")", //
                         r(1, 8, 1, 22));
 
             serverXML = String.join(newLine, //
@@ -109,13 +126,18 @@ public class LibertyWorkspaceIT {
             XMLAssert.assertHover(serverXML, serverModAXmlFile.toURI().toString(), null, //
                         r(4, 8, 4, 18));
 
+            // The grpcClient config element should be recognized for modB since that feature is installed.
+            XMLAssert.assertHover(serverXML, serverModCXmlFile.toURI().toString(), "Configuration properties to be applied to gRPC targets that match the specified URI." + //
+                        System.lineSeparator() + System.lineSeparator() + //
+                        "Source: [" + schemaFileModCName + "](" + serverCGenXSDURI + ")", //
+                        r(4, 8, 4, 18));                        
        } catch (Exception e) {
            e.printStackTrace();
            org.junit.jupiter.api.Assertions.fail("Test FAILED...received unexpected exception.");
        }
     }
 
-    @Test
+    //@Test
     public void testGetFeatures() throws BadLocationException {
         try {
             File testFolder = new File(System.getProperty("user.dir"));

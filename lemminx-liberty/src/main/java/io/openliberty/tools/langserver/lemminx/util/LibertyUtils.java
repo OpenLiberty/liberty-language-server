@@ -229,18 +229,21 @@ public class LibertyUtils {
 
             LibertyRuntime libertyRuntimeInfo = new LibertyRuntime(propsPath);
 
-            libertyWorkspace.setLibertyRuntime(libertyRuntimeInfo.getRuntimeType());
-            libertyWorkspace.setLibertyVersion(libertyRuntimeInfo.getRuntimeVersion());
+            if (libertyRuntimeInfo != null) {
+                libertyWorkspace.setLibertyRuntime(libertyRuntimeInfo.getRuntimeType());
+                libertyWorkspace.setLibertyVersion(libertyRuntimeInfo.getRuntimeVersion());
 
-            // compare paths to see if it is an external installation
-            if (!devcOn && libertyRuntimeInfo.getRuntimeLocation() != null) {
-                if (!libertyRuntimeInfo.getRuntimeLocation().startsWith(libertyWorkspace.getWorkspaceString())) {
-                    libertyWorkspace.setExternalLibertyInstallation(true);
+                // compare paths to see if it is an external installation
+                if (!devcOn && (libertyRuntimeInfo.getRuntimeLocation() != null)) {
+                    // Need to add the trailing / to avoid matching a path with similar dir (e.g. /some/path/myliberty/wlp starts with /some/path/mylib)
+                    if (!libertyRuntimeInfo.getRuntimeLocation().startsWith(Paths.get(libertyWorkspace.getWorkspaceURI()).toString() + "/")) {
+                        libertyWorkspace.setExternalLibertyInstallation(true);
+                    }
+                    libertyWorkspace.setLibertyInstallationDir(libertyRuntimeInfo.getRuntimeLocation());
                 }
-                libertyWorkspace.setLibertyInstallationDir(libertyRuntimeInfo.getRuntimeLocation());
-            }
 
-            libertyWorkspace.setLibertyInstalled(!devcOn);
+                libertyWorkspace.setLibertyInstalled(!devcOn);
+            }
 
             return libertyRuntimeInfo;
         }
@@ -260,140 +263,39 @@ public class LibertyUtils {
             // check for Liberty installation outside of liberytWorkspace
             Path pluginConfigFilePath = findFileInWorkspace(libertyWorkspace,Paths.get("liberty-plugin-config.xml"));
             if (pluginConfigFilePath != null) { //If liberty-plugin-config.xml exists use its parent directory: buildDir/.libertyls
-                String installationDirectory  = XmlReader.getElementValue(pluginConfigFilePath, "installationDirectory");
+                LOGGER.info("Found liberty-plugin-config.xml at path: " + pluginConfigFilePath.toString());                            
+                String installationDirectory  = XmlReader.getElementValue(pluginConfigFilePath, "installDirectory");
                 if (installationDirectory != null) {
                     Path libertyInstallDir = Paths.get(installationDirectory);
                     if (libertyInstallDir.toFile().exists()) {
                         try {
-                            props = findLastModifiedMatchingFileInDirectory(Paths.get(installationDirectory), Paths.get("WebSphereApplicationServer.properties"));
+                            props = findLastModifiedMatchingFileInDirectory(libertyInstallDir, Paths.get("WebSphereApplicationServer.properties"));
                             if (props == null) {
-                                props = findLastModifiedMatchingFileInDirectory(Paths.get(installationDirectory), Paths.get("openliberty.properties"));
+                                props = findLastModifiedMatchingFileInDirectory(libertyInstallDir, Paths.get("openliberty.properties"));
                                 if (props == null) {
                                     LOGGER.warning("Could not find openliberty.properties file in Liberty installation: " + libertyInstallDir.toString());                            
+                                } else {
+                                    LOGGER.info("Found openliberty.properties at path: "+props.toString());                            
                                 }
+                            } else {
+                                LOGGER.info("Found WebSphereApplicationServer.properties at path: "+props.toString());                            
                             }
                         } catch (IOException e) {
                             LOGGER.warning("Error received loading properties file from Liberty installation: " + libertyInstallDir.toString() + ": " + e.getMessage());                            
                         }
+                    } else {
+                        LOGGER.info("The installDirectory path does not exist: "+installationDirectory);                            
                     }
+                } else {
+                    LOGGER.info("The installDirectory element does not exist.");                            
                 }
             }
+        } else {
+            LOGGER.info("Found properties at path: "+props.toString());                            
         }
 
         return props;
     }
-
-    /**
-     * Given a server.xml find the version associated with the corresponding Liberty
-     * workspace. If the version has not been set via the Settings Service, search for an
-     * openliberty.properties file in the workspace and return the version from that
-     * file. Otherwise, return null.
-     * 
-     * @param serverXML server xml associated
-     * @return version of Liberty or null
-     */
-    //public static String getVersion(DOMDocument serverXML) {
-    //    return getVersion(serverXML.getDocumentURI());
-    //}
-
-    public static String getVersion(String serverXMLUri) {
-        // return version set in settings if it exists
-        String libertyVersion = SettingsService.getInstance().getLibertyVersion();
-        if (libertyVersion != null) {
-            return libertyVersion;
-        }
-        // find workspace folder this serverXMLUri belongs to
-        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXMLUri);
-
-        if (libertyWorkspace == null || libertyWorkspace.getWorkspaceString() == null) {
-            return null;
-        }
-
-        String version = libertyWorkspace.getLibertyVersion();
-
-        // return version from cache if set and Liberty is installed
-        if (version != null && (libertyWorkspace.isLibertyInstalled() || libertyWorkspace.isContainerAlive())) {
-            return version;
-        }
-        
-        // workspace either has Liberty local or in running container
-        Path devcMetadataFile = libertyWorkspace.findDevcMetadata();
-        Path propertiesFile = findFileInWorkspace(libertyWorkspace, Paths.get("openliberty.properties"));
-        boolean devcOn = devcMetadataFile != null;
-
-        if (!devcOn && (propertiesFile == null)) {
-            // check for Liberty installation outside of liberytWorkspace
-            Path pluginConfigFilePath = findFileInWorkspace(libertyWorkspace,Paths.get("liberty-plugin-config.xml"));
-            if (pluginConfigFilePath != null) { //If liberty-plugin-config.xml exists use its parent directory: buildDir/.libertyls
-                String installationDirectory  = XmlReader.getElementValue(pluginConfigFilePath, "installationDirectory");
-                if (installationDirectory != null) {
-                    Path libertyInstallDir = Paths.get(installationDirectory);
-                    if (libertyInstallDir.toFile().exists()) {
-                        try {
-                            propertiesFile = findLastModifiedMatchingFileInDirectory(Paths.get(installationDirectory), Paths.get("openliberty.properties"));
-                        } catch (IOException e) {
-                            LOGGER.warning("Could not find openliberty.properties in Liberty installation: " + libertyInstallDir.toString() + ": " + e.getMessage());
-                        }
-                    }
-                }
-            }
-        }
-
-        if (devcOn || (propertiesFile != null && propertiesFile.toFile().exists())) {
-            // new properties file, reset the installed features stored in the feature cache
-            // so that the installed features list will be regenerated as it may have
-            // changed between Liberty installations
-            libertyWorkspace.setInstalledFeatureList(new ArrayList<Feature>());
-
-            Properties prop = new Properties();
-            FileInputStream fis;
-            try {
-                // add a file watcher on this file
-                if (!libertyWorkspace.isLibertyInstalled()) {
-                    watchFiles(devcOn ? devcMetadataFile : propertiesFile, libertyWorkspace);
-                }
-                
-                if (devcOn) {
-                    DockerService docker = DockerService.getInstance();
-                    File containerPropertiesFile = new File(getTempDir(libertyWorkspace), "container.properties");
-                    docker.dockerCp(libertyWorkspace.getContainerName(), DockerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH.toString(), containerPropertiesFile.toString());
-                    fis = new FileInputStream(containerPropertiesFile);
-                } else {
-                    fis = new FileInputStream(propertiesFile.toFile());
-                }
-
-                prop.load(fis);
-                version = prop.getProperty("com.ibm.websphere.productVersion");
-                libertyWorkspace.setLibertyVersion(version);
-                libertyWorkspace.setLibertyInstalled(!devcOn);
-
-                // compare paths to see if it is an external installation
-                if (!propertiesFile.toString().startsWith(libertyWorkspace.getWorkspaceString())) {
-                    libertyWorkspace.setExternalLibertyInstallation(true);
-                }
-
-                if (!devcOn) {
-                    // the properties file is located in wlp/lib/versions dir
-                    libertyWorkspace.setLibertyInstallationDir(propertiesFile.getParent().getParent().getParent().toString());
-                }
-
-                if (devcOn) {
-                    libertyWorkspace.setLibertyRuntime(prop.getProperty("com.ibm.websphere.productId").equals("io.openliberty") ? "ol" : "wlp");
-                }
-
-                return version;
-            } catch (IOException e) {
-                LOGGER.warning(devcOn ? 
-                        "Failed to get version from running container specified by devc metadata file: " + devcMetadataFile.toString() :
-                        "Unable to get version from properties file: " + propertiesFile.toString() + ": " + e.getMessage());
-                return null;
-            }
-        }
-        
-        // did not detect a new liberty properties file, return version from cache
-        return version;
-    }
-
 
     /**
      * Return temp directory to store generated feature lists and schema. Creates

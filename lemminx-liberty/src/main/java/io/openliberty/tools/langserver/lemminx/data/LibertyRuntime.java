@@ -73,10 +73,4 @@ public class LibertyRuntime {
         return this.runtimeLocation;
     }
 
-    public String getRuntimeInfo() {
-        String runtime = this.runtimeType == null ? "" : this.runtimeType;
-        String version = this.runtimeVersion == null ? "" : this.runtimeVersion;
-
-        return runtime + "-" + version;
-    }
 }
