@@ -39,6 +39,8 @@ public class LibertyWorkspace {
 
     private static final Logger LOGGER = Logger.getLogger(LibertyWorkspace.class.getName());
 
+    public static final String URI_SEPARATOR = "/";
+
     private String workspaceFolderURI;
     private String libertyVersion;
     private String libertyRuntime;
@@ -78,6 +80,13 @@ public class LibertyWorkspace {
         return this.workspaceFolderURI;
     }
 
+    public String getWorkspaceStringWithTrailingSlash() {
+        if (workspaceFolderURI != null && !workspaceFolderURI.endsWith(URI_SEPARATOR)) {
+            return workspaceFolderURI + URI_SEPARATOR;
+        }
+        return this.workspaceFolderURI;
+    }
+
     public URI getWorkspaceURI() {
         return URI.create(this.workspaceFolderURI);
     }
@@ -106,6 +115,8 @@ public class LibertyWorkspace {
         this.isLibertyInstalled = isLibertyInstalled;
         if (!isLibertyInstalled) {
             setExternalLibertyInstallation(isLibertyInstalled);
+            // clear the cached feature list when Liberty is no longer installed
+            this.installedFeatureList = new ArrayList<Feature>();
         }
     }
 

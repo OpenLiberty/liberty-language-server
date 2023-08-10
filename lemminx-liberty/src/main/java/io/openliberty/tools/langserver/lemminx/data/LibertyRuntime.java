@@ -23,6 +23,10 @@ public class LibertyRuntime {
     private String runtimeVersion = null;
     private String runtimeLocation = null;
 
+    /*
+     * The passed propertiesFilePath must be non-null and must exist. If an exception occurs while loading the file, the various fields will
+     * not be initialized.
+     */
     public LibertyRuntime(Path propertiesFilePath) {
 
         try {
@@ -35,6 +39,7 @@ public class LibertyRuntime {
 
             // only set the location if this is not a container
             if (!propertiesFilePath.getFileName().equals("container.properties")) {
+                // the properties file is always located in wlp/lib/versions/*.properties - set the runtimeLocation to the wlp dir
                 this.runtimeLocation = propertiesFilePath.getParent().getParent().getParent().toString();
             }
 

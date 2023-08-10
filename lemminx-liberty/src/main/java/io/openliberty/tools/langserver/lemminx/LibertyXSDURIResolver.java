@@ -26,7 +26,6 @@ import org.eclipse.lemminx.uriresolver.IExternalGrammarLocationProvider;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager.ResourceToDeploy;
 import org.eclipse.lemminx.uriresolver.URIResolverExtension;
 
-import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
 import io.openliberty.tools.langserver.lemminx.services.DockerService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
@@ -73,20 +72,13 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
 
             if (libertyWorkspace != null) {
                 //Set workspace properties if not set 
-                LibertyUtils.getLibertyRuntimeInfo(serverXMLUri);
+                LibertyUtils.getLibertyRuntimeInfo(libertyWorkspace);
 
                 //Check workspace for Liberty installation and generate schema.xsd file
                 //Return schema URI as String, otherwise use cached schema.xsd file
                 String serverSchemaUri = null;
                 if (libertyWorkspace.isLibertyInstalled()) {
-                    Path schemaGenJarPath = null;
-                    if (libertyWorkspace.isExternalLibertyInstallation()) {
-                        if (libertyWorkspace.getLibertyInstallationDir() != null) {
-                            schemaGenJarPath = LibertyUtils.findLastModifiedMatchingFileInDirectory(Paths.get(libertyWorkspace.getLibertyInstallationDir()), Paths.get("bin", "tools", "ws-schemagen.jar"));
-                        }
-                    } else {
-                        schemaGenJarPath = LibertyUtils.findFileInWorkspace(libertyWorkspace, Paths.get("bin", "tools", "ws-schemagen.jar"));
-                    }
+                    Path schemaGenJarPath = LibertyUtils.findLibertyFileForWorkspace(libertyWorkspace, Paths.get("bin", "tools", "ws-schemagen.jar"));
                     if (schemaGenJarPath != null) {
                         //Generate schema file
                         serverSchemaUri = generateServerSchemaXsd(libertyWorkspace, schemaGenJarPath);

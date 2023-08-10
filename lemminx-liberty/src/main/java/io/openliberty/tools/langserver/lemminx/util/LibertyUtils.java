@@ -136,18 +136,12 @@ public class LibertyUtils {
     }
 
     /**
-     * Given a server.xml URI find the associated workspace folder and search that
-     * folder for the most recently edited file that matches the given name.
+     * Given a Path and a LibertyWorkspace, find the most recently edited file that matches the given Path.
      * 
-     * @param serverXmlURI
-     * @param filename
+     * @param libertyWorkspace
+     * @param filePath
      * @return path to given file or null if could not be found
      */
-    public static Path findFileInWorkspace(String serverXmlURI, Path filePath) {
-        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlURI);
-        return findFileInWorkspace(libertyWorkspace, filePath);
-    }
-
     public static Path findFileInWorkspace(LibertyWorkspace libertyWorkspace, Path filePath) {
         if (libertyWorkspace.getWorkspaceURI() == null) {
             return null;
@@ -162,6 +156,33 @@ public class LibertyUtils {
     }
 
     /**
+     * Given a Path and a LibertyWorkspace, find the most recently edited file that matches the given Path in the Liberty installation for the workspace.
+     * 
+     * @param libertyWorkspace
+     * @param filePath
+     * @return path to given file or null if could not be found
+     */
+    public static Path findLibertyFileForWorkspace(LibertyWorkspace libertyWorkspace, Path filePath) {
+        if (libertyWorkspace.getWorkspaceURI() == null || !libertyWorkspace.isLibertyInstalled()) {
+            return null;
+        }
+
+        Path foundFilePath = null;
+
+        try {
+            if (libertyWorkspace.getLibertyInstallationDir() != null) {
+                foundFilePath = LibertyUtils.findLastModifiedMatchingFileInDirectory(Paths.get(libertyWorkspace.getLibertyInstallationDir()), filePath);
+            } else {
+                foundFilePath = LibertyUtils.findFileInWorkspace(libertyWorkspace, filePath);
+            }
+        } catch (IOException e) {
+            LOGGER.warning("Could not find: " + filePath.toString() + ": " + e.getMessage());
+        }
+
+        return foundFilePath;
+    }
+
+    /**
      * Given a server.xml find the version and runtime associated with the corresponding Liberty
      * workspace. If the version or runtime has not been set via the Settings Service, search for an
      * openliberty.properties file in the workspace and return the version from that
@@ -171,11 +192,19 @@ public class LibertyUtils {
      * 
      * @param serverXML server xml associated
      * @return version of Liberty or null
-     */    public static LibertyRuntime getLibertyRuntimeInfo(DOMDocument serverXML) {
+     */    
+    public static LibertyRuntime getLibertyRuntimeInfo(DOMDocument serverXML) {
         return getLibertyRuntimeInfo(serverXML.getDocumentURI());
     }
 
     public static LibertyRuntime getLibertyRuntimeInfo(String serverXMLUri) {
+        // find workspace folder this serverXML belongs to
+        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXMLUri);
+
+        return getLibertyRuntimeInfo(libertyWorkspace);
+    }
+
+    public static LibertyRuntime getLibertyRuntimeInfo(LibertyWorkspace libertyWorkspace) {
         // return runtime set in settings if it exists
         String libertyRuntime = SettingsService.getInstance().getLibertyRuntime();
         String libertyVersion = SettingsService.getInstance().getLibertyVersion();
@@ -183,9 +212,6 @@ public class LibertyUtils {
         if (libertyRuntime != null && libertyVersion != null) {
             return new LibertyRuntime(libertyRuntime, libertyVersion, null);
         }
-
-        // find workspace folder this serverXML belongs to
-        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXMLUri);
 
         if (libertyWorkspace == null || libertyWorkspace.getWorkspaceURI() == null) {
             return null;
@@ -204,7 +230,7 @@ public class LibertyUtils {
         Path devcMetadataFile = libertyWorkspace.findDevcMetadata();
         boolean devcOn = devcMetadataFile != null;
 
-        Path propsFile = getLibertyPropertiesFile(serverXMLUri, libertyWorkspace);
+        Path propsFile = getLibertyPropertiesFile(libertyWorkspace);
 
         if (devcOn || (propsFile != null && propsFile.toFile().exists())) {
             // new properties file, reset the installed features stored in the feature cache
@@ -216,13 +242,20 @@ public class LibertyUtils {
             if (!libertyWorkspace.isLibertyInstalled()) {
                 watchFiles(devcOn ? devcMetadataFile : propsFile, libertyWorkspace);
             }
+
             Path propsPath = null;
             
             if (devcOn) {
                 DockerService docker = DockerService.getInstance();
                 File containerPropertiesFile = new File(getTempDir(libertyWorkspace), "container.properties");
+                // TODO: Revisit to handle getting properties from container correctly. The install could be wlp instead of ol.
                 docker.dockerCp(libertyWorkspace.getContainerName(), DockerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH.toString(), containerPropertiesFile.toString());
                 propsPath = Paths.get(containerPropertiesFile.toString());
+
+                if (!propsPath.toFile().exists()) {
+                    LOGGER.warning("Could not find properties for container at location: "+propsPath.toString());
+                    return null;
+                }
             } else {
                 propsPath = propsFile;
             }
@@ -236,7 +269,7 @@ public class LibertyUtils {
                 // compare paths to see if it is an external installation
                 if (!devcOn && (libertyRuntimeInfo.getRuntimeLocation() != null)) {
                     // Need to add the trailing / to avoid matching a path with similar dir (e.g. /some/path/myliberty/wlp starts with /some/path/mylib)
-                    if (!libertyRuntimeInfo.getRuntimeLocation().startsWith(Paths.get(libertyWorkspace.getWorkspaceURI()).toString() + "/")) {
+                    if (!libertyRuntimeInfo.getRuntimeLocation().startsWith(libertyWorkspace.getWorkspaceStringWithTrailingSlash())) {
                         libertyWorkspace.setExternalLibertyInstallation(true);
                     }
                     libertyWorkspace.setLibertyInstallationDir(libertyRuntimeInfo.getRuntimeLocation());
@@ -252,46 +285,38 @@ public class LibertyUtils {
 
     }
 
-    public static Path getLibertyPropertiesFile(String serverXMLUri, LibertyWorkspace libertyWorkspace) {
-        Path props = findFileInWorkspace(serverXMLUri, Paths.get("WebSphereApplicationServer.properties"));
-
-        if (props == null) {
-            props = findFileInWorkspace(serverXMLUri, Paths.get("openliberty.properties"));
-        }
-
-        if (props == null) {
-            // check for Liberty installation outside of liberytWorkspace
-            Path pluginConfigFilePath = findFileInWorkspace(libertyWorkspace,Paths.get("liberty-plugin-config.xml"));
-            if (pluginConfigFilePath != null) { //If liberty-plugin-config.xml exists use its parent directory: buildDir/.libertyls
-                LOGGER.info("Found liberty-plugin-config.xml at path: " + pluginConfigFilePath.toString());                            
-                String installationDirectory  = XmlReader.getElementValue(pluginConfigFilePath, "installDirectory");
-                if (installationDirectory != null) {
-                    Path libertyInstallDir = Paths.get(installationDirectory);
-                    if (libertyInstallDir.toFile().exists()) {
-                        try {
-                            props = findLastModifiedMatchingFileInDirectory(libertyInstallDir, Paths.get("WebSphereApplicationServer.properties"));
+    public static Path getLibertyPropertiesFile(LibertyWorkspace libertyWorkspace) {
+        Path props = null;
+ 
+        // check for Liberty installation using liberty-plugin-config.xml which should ensure using the latest Liberty install for the workspace
+        Path pluginConfigFilePath = findFileInWorkspace(libertyWorkspace,Paths.get("liberty-plugin-config.xml"));
+        if (pluginConfigFilePath != null) { //If liberty-plugin-config.xml exists, get installation directory from it
+            String installationDirectory  = XmlReader.getElementValue(pluginConfigFilePath, "installDirectory");
+            if (installationDirectory != null) {
+                Path libertyInstallDir = Paths.get(installationDirectory);
+                if (libertyInstallDir.toFile().exists()) {
+                    try {
+                        props = findLastModifiedMatchingFileInDirectory(libertyInstallDir, Paths.get("WebSphereApplicationServer.properties"));
+                        if (props == null) {
+                            props = findLastModifiedMatchingFileInDirectory(libertyInstallDir, Paths.get("openliberty.properties"));
                             if (props == null) {
-                                props = findLastModifiedMatchingFileInDirectory(libertyInstallDir, Paths.get("openliberty.properties"));
-                                if (props == null) {
-                                    LOGGER.warning("Could not find openliberty.properties file in Liberty installation: " + libertyInstallDir.toString());                            
-                                } else {
-                                    LOGGER.info("Found openliberty.properties at path: "+props.toString());                            
-                                }
-                            } else {
-                                LOGGER.info("Found WebSphereApplicationServer.properties at path: "+props.toString());                            
+                                LOGGER.warning("Could not find openliberty.properties file in Liberty installation: " + libertyInstallDir.toString());                            
                             }
-                        } catch (IOException e) {
-                            LOGGER.warning("Error received loading properties file from Liberty installation: " + libertyInstallDir.toString() + ": " + e.getMessage());                            
                         }
-                    } else {
-                        LOGGER.info("The installDirectory path does not exist: "+installationDirectory);                            
+                    } catch (IOException e) {
+                        LOGGER.warning("Error received loading properties file from Liberty installation: " + libertyInstallDir.toString() + ": " + e.getMessage());                            
                     }
-                } else {
-                    LOGGER.info("The installDirectory element does not exist.");                            
                 }
             }
-        } else {
-            LOGGER.info("Found properties at path: "+props.toString());                            
+        }
+
+        // if props not found using liberty-plugin-config.xml, try checking for files in workspace
+        if (props == null) {
+            props = findFileInWorkspace(libertyWorkspace, Paths.get("WebSphereApplicationServer.properties"));
+
+            if (props == null) {
+                props = findFileInWorkspace(libertyWorkspace, Paths.get("openliberty.properties"));
+            }
         }
 
         return props;
