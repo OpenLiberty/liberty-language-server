@@ -41,7 +41,7 @@ public class SettingsService {
     public void updateLibertySettings(Object xmlSettings) {
         AllSettings rootSettings = JSONUtility.toModel(xmlSettings, AllSettings.class);
         if (rootSettings != null) {
-        settings = JSONUtility.toModel(rootSettings.getLiberty(), LibertySettings.class);
+            settings = JSONUtility.toModel(rootSettings.getLiberty(), LibertySettings.class);
         }
     }
 
@@ -55,10 +55,10 @@ public class SettingsService {
 
     public int getRequestDelay() {
         if (settings != null) {
-        int requestDelay = settings.getRequestDelay();
-        if (requestDelay > 0) {
-            return requestDelay;
-        }
+            int requestDelay = settings.getRequestDelay();
+            if (requestDelay > 0) {
+                return requestDelay;
+            }
         }
 
         return DEFAULT_REQUEST_DELAY;
