@@ -30,50 +30,50 @@ import java.util.Optional;
 
 public class LibertyHoverParticipant implements IHoverParticipant {
 
-	@Override
-	public Hover onAttributeName(IHoverRequest request, CancelChecker cancelChecker) {
-		return null;
-	}
+    @Override
+    public Hover onAttributeName(IHoverRequest request, CancelChecker cancelChecker) {
+        return null;
+    }
 
-	@Override
-	public Hover onAttributeValue(IHoverRequest request, CancelChecker cancelChecker) {
-		return null;
-	}
+    @Override
+    public Hover onAttributeValue(IHoverRequest request, CancelChecker cancelChecker) {
+        return null;
+    }
 
-	@Override
-	public Hover onTag(IHoverRequest request, CancelChecker cancelChecker) {
-		return null;
-	}
+    @Override
+    public Hover onTag(IHoverRequest request, CancelChecker cancelChecker) {
+        return null;
+    }
 
-	@Override
-	public Hover onText(IHoverRequest request, CancelChecker cancelChecker) {
-		if (!LibertyUtils.isConfigXMLFile(request.getXMLDocument()))
-			return null;
+    @Override
+    public Hover onText(IHoverRequest request, CancelChecker cancelChecker) {
+        if (!LibertyUtils.isConfigXMLFile(request.getXMLDocument()))
+            return null;
 
-		DOMElement parentElement = request.getParentElement();
-		if (parentElement == null || parentElement.getTagName() == null)
-			return null;
+        DOMElement parentElement = request.getParentElement();
+        if (parentElement == null || parentElement.getTagName() == null)
+            return null;
 
-		// if we are hovering over text inside a <feature> element
-		if (LibertyConstants.FEATURE_ELEMENT.equals(parentElement.getTagName())) {
-			String featureName = request.getNode().getTextContent().trim();
-			return getHoverFeatureDescription(featureName, request.getXMLDocument());
-		}
+        // if we are hovering over text inside a <feature> element
+        if (LibertyConstants.FEATURE_ELEMENT.equals(parentElement.getTagName())) {
+            String featureName = request.getNode().getTextContent().trim();
+            return getHoverFeatureDescription(featureName, request.getXMLDocument());
+        }
 
-		return null;
-	}
+        return null;
+    }
 
-	private Hover getHoverFeatureDescription(String featureName, DOMDocument domDocument) {
+    private Hover getHoverFeatureDescription(String featureName, DOMDocument domDocument) {
         LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
         String libertyVersion =  runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
         String libertyRuntime =  runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
 
-		final int requestDelay = SettingsService.getInstance().getRequestDelay();
-		Optional<Feature> feature = FeatureService.getInstance().getFeature(featureName, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
-		if (feature.isPresent()) {
-			return new Hover(new MarkupContent("plaintext", feature.get().getShortDescription()));
-		}
+        final int requestDelay = SettingsService.getInstance().getRequestDelay();
+        Optional<Feature> feature = FeatureService.getInstance().getFeature(featureName, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
+        if (feature.isPresent()) {
+            return new Hover(new MarkupContent("plaintext", feature.get().getShortDescription()));
+        }
 
-		return null;
-	}
+        return null;
+    }
 }

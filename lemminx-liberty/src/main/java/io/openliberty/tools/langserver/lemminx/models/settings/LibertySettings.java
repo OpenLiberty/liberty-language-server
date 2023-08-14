@@ -18,32 +18,32 @@ package io.openliberty.tools.langserver.lemminx.models.settings;
  */
 public class LibertySettings {
 
-  private String version;
-  private String runtime;
-  private int requestDelay; // in seconds
+    private String version;
+    private String runtime;
+    private int requestDelay; // in seconds
 
-  public String getVersion() {
-    return version;
-  }
+    public String getVersion() {
+        return version;
+    }
 
-  public void setVersion(String version) {
-    this.version = version;
-  }
+    public void setVersion(String version) {
+        this.version = version;
+    }
 
-  public String getRuntime() {
-    return runtime;
-  }
+    public String getRuntime() {
+        return runtime;
+    }
 
-  public void setRuntime(String runtime) {
-    this.runtime = runtime;
-  }
+    public void setRuntime(String runtime) {
+        this.runtime = runtime;
+    }
 
-  public int getRequestDelay() {
-    return requestDelay;
-  }
+    public int getRequestDelay() {
+        return requestDelay;
+    }
 
-  public void setRequestDelay(int requestDelay) {
-    this.requestDelay = requestDelay;
-  }
+    public void setRequestDelay(int requestDelay) {
+        this.requestDelay = requestDelay;
+    }
 
 }

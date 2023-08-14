@@ -17,51 +17,51 @@ import io.openliberty.tools.langserver.lemminx.models.settings.*;
 
 public class SettingsService {
 
-  // Singleton so that only 1 Settings Service can be initialized and is
-  // shared between all Lemminx Language Feature Participants
+    // Singleton so that only 1 Settings Service can be initialized and is
+    // shared between all Lemminx Language Feature Participants
 
-  private static SettingsService instance = new SettingsService();
+    private static SettingsService instance = new SettingsService();
 
-  public static SettingsService getInstance() {
-    return instance;
-  }
-
-  // default request delay is 120 seconds
-  private static int DEFAULT_REQUEST_DELAY = 120;
-
-  private SettingsService() {
-  }
-
-  private LibertySettings settings;
-
-  /**
-   * Takes the xml settings object and parses out the Liberty Settings
-   * @param xmlSettings - All xml settings provided by the client
-   */
-  public void updateLibertySettings(Object xmlSettings) {
-    AllSettings rootSettings = JSONUtility.toModel(xmlSettings, AllSettings.class);
-    if (rootSettings != null) {
-      settings = JSONUtility.toModel(rootSettings.getLiberty(), LibertySettings.class);
-    }
-  }
-
-  public String getLibertyVersion() {
-    return settings != null ? settings.getVersion() : null;
-  }
-
-  public String getLibertyRuntime() {
-    return settings != null ? settings.getRuntime() : null;
-  }
-
-  public int getRequestDelay() {
-    if (settings != null) {
-      int requestDelay = settings.getRequestDelay();
-      if (requestDelay > 0) {
-        return requestDelay;
-      }
+    public static SettingsService getInstance() {
+        return instance;
     }
 
-    return DEFAULT_REQUEST_DELAY;
-  }
+    // default request delay is 120 seconds
+    private static int DEFAULT_REQUEST_DELAY = 120;
+
+    private SettingsService() {
+    }
+
+    private LibertySettings settings;
+
+    /**
+     * Takes the xml settings object and parses out the Liberty Settings
+     * @param xmlSettings - All xml settings provided by the client
+     */
+    public void updateLibertySettings(Object xmlSettings) {
+        AllSettings rootSettings = JSONUtility.toModel(xmlSettings, AllSettings.class);
+        if (rootSettings != null) {
+            settings = JSONUtility.toModel(rootSettings.getLiberty(), LibertySettings.class);
+        }
+    }
+
+    public String getLibertyVersion() {
+        return settings != null ? settings.getVersion() : null;
+    }
+
+    public String getLibertyRuntime() {
+        return settings != null ? settings.getRuntime() : null;
+    }
+
+    public int getRequestDelay() {
+        if (settings != null) {
+            int requestDelay = settings.getRequestDelay();
+            if (requestDelay > 0) {
+                return requestDelay;
+            }
+        }
+
+        return DEFAULT_REQUEST_DELAY;
+    }
 
 }

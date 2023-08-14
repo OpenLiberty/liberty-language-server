@@ -56,7 +56,7 @@ public class FeatureService {
 
     public static FeatureService getInstance() {
         if (instance == null) {
-          instance = new FeatureService();
+            instance = new FeatureService();
         }
         return instance;
     }
