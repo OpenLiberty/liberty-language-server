@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2022 IBM Corporation and others.
+* Copyright (c) 2020, 2023 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -12,13 +12,11 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx.services;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Collection;
 import java.util.Map;
@@ -35,8 +33,6 @@ public class LibertyProjectsManager {
     private static final Logger LOGGER = Logger.getLogger(LibertyProjectsManager.class.getName());
 
     private static final LibertyProjectsManager INSTANCE = new LibertyProjectsManager();
-
-    private static final String URI_SEPARATOR = "/";
 
     private Map<String, LibertyWorkspace> libertyWorkspaceFolders;
 
@@ -135,13 +131,8 @@ public class LibertyProjectsManager {
     public LibertyWorkspace getWorkspaceFolder(String serverXMLUri) {
         String normalizeUri = serverXMLUri.replace("///", "/");
         for (LibertyWorkspace folder : getInstance().getLibertyWorkspaceFolders()) {
-            //Append workspaceDirUri with file separator to avoid bad matches
-            String workspaceDirUri = folder.getWorkspaceString();
-            if (workspaceDirUri != null && !workspaceDirUri.endsWith(URI_SEPARATOR)) {
-                workspaceDirUri = workspaceDirUri + URI_SEPARATOR;
-            }
-
-            if (normalizeUri.contains(workspaceDirUri)) {
+            //Append workspaceString with file separator to avoid bad matches
+            if (normalizeUri.contains(folder.getWorkspaceStringWithTrailingSlash())) {
                 return folder;
             }
         }

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2022 IBM Corporation and others.
+* Copyright (c) 2020, 2023 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -32,6 +32,7 @@ import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
+import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
@@ -46,7 +47,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
         if (!LibertyUtils.isConfigXMLFile(request.getXMLDocument()))
             return;    
 
-        LibertyUtils.getVersion(request.getXMLDocument());
+        LibertyUtils.getLibertyRuntimeInfo(request.getXMLDocument());
 
         DOMElement parentElement = request.getParentElement();
         if (parentElement == null || parentElement.getTagName() == null)
@@ -88,9 +89,9 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
     private List<CompletionItem> buildCompletionItems(DOMElement featureElement, DOMDocument domDocument,
             List<String> existingFeatures) {
 
-        String libertyRuntimeVersionInfo = LibertyUtils.getRuntimeAndVersionInfo(domDocument);
-        String libertyVersion =  LibertyUtils.getVersionFromInfo(libertyRuntimeVersionInfo);
-        String libertyRuntime =  LibertyUtils.getRuntimeFromInfo(libertyRuntimeVersionInfo);
+        LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
+        String libertyVersion =  runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
+        String libertyRuntime =  runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
 
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
         List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());

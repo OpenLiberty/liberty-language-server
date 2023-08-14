@@ -20,6 +20,7 @@
     <modules>
         <module>modA</module>
         <module>modB</module>
+        <module>modC</module>
         <module>modIt</module>
     </modules>
 

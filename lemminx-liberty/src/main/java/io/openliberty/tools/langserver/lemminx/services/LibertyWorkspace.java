@@ -39,12 +39,16 @@ public class LibertyWorkspace {
 
     private static final Logger LOGGER = Logger.getLogger(LibertyWorkspace.class.getName());
 
+    public static final String URI_SEPARATOR = "/";
+
     private String workspaceFolderURI;
     private String libertyVersion;
     private String libertyRuntime;
     private boolean isLibertyInstalled;
     private List<Feature> installedFeatureList;
     private Set<String> configFiles;
+    private String libertyInstallationDir;
+    private boolean isExternalLibertyInstallation;
 
     // devc vars
     private String containerName;
@@ -62,6 +66,8 @@ public class LibertyWorkspace {
         this.libertyVersion = null;
         this.libertyRuntime = null;
         this.isLibertyInstalled = false;
+        this.isExternalLibertyInstallation = false;
+        this.libertyInstallationDir = null;
         this.installedFeatureList = new ArrayList<Feature>();
         this.containerName = null;
         this.containerAlive = false;
@@ -71,6 +77,13 @@ public class LibertyWorkspace {
     }
 
     public String getWorkspaceString() {
+        return this.workspaceFolderURI;
+    }
+
+    public String getWorkspaceStringWithTrailingSlash() {
+        if (workspaceFolderURI != null && !workspaceFolderURI.endsWith(URI_SEPARATOR)) {
+            return workspaceFolderURI + URI_SEPARATOR;
+        }
         return this.workspaceFolderURI;
     }
 
@@ -100,10 +113,31 @@ public class LibertyWorkspace {
 
     public void setLibertyInstalled(boolean isLibertyInstalled) {
         this.isLibertyInstalled = isLibertyInstalled;
+        if (!isLibertyInstalled) {
+            setExternalLibertyInstallation(isLibertyInstalled);
+            // clear the cached feature list when Liberty is no longer installed
+            this.installedFeatureList = new ArrayList<Feature>();
+        }
     }
 
     public boolean isLibertyInstalled() {
         return this.isLibertyInstalled;
+    }
+
+    public void setExternalLibertyInstallation(boolean flag) {
+        this.isExternalLibertyInstallation = flag;
+    }
+
+    public boolean isExternalLibertyInstallation() {
+        return this.isExternalLibertyInstallation;
+    }
+
+    public void setLibertyInstallationDir(String dir) {
+        this.libertyInstallationDir = dir;
+    }
+
+    public String getLibertyInstallationDir() {
+        return this.libertyInstallationDir;
     }
 
     public List<Feature> getInstalledFeatureList() {
