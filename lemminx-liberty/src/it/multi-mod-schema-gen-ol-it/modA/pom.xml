@@ -63,6 +63,7 @@
                         <artifactId>openliberty-kernel</artifactId>
                         <version>22.0.0.12</version>
                     </runtimeArtifact>
+                    <configDirectory>src/test/resources</configDirectory>
                 </configuration>
                 <executions>
                     <execution>
