@@ -183,12 +183,12 @@ public class LibertyUtils {
     }
 
     /**
-     * Given a server.xml find the version and runtime associated with the corresponding Liberty
-     * workspace. If the version or runtime has not been set via the Settings Service, search for an
-     * openliberty.properties file in the workspace and return the version from that
-     * file. If no properties file is found, check for liberty-plugin-config.xml and determine if 
-     * Liberty is installed outside of the workspace. If so, load runtime info from that installation.
-     * Otherwise, return null.
+     * Given a server xml file, find the Liberty version and runtime associated with the corresponding Liberty
+     * workspace. If the version or runtime has not been set via the Settings Service, check if they have been set
+     * in the Liberty workspace. If not set, search for the liberty-plugin-config.xml file in the Liberty workspace 
+     * and use the installDir location from that file to load the runtime info from the properties file
+     * (WebSphereApplicationServer.properties or openliberty.properties). Otherwise, look for the properties file in the workspace. 
+     * If found, load the runtime info from the properties. Otherwise, return null.
      * 
      * @param serverXML server xml associated
      * @return version of Liberty or null
@@ -230,9 +230,9 @@ public class LibertyUtils {
         Path devcMetadataFile = libertyWorkspace.findDevcMetadata();
         boolean devcOn = devcMetadataFile != null;
 
-        Path propsFile = getLibertyPropertiesFile(libertyWorkspace);
+        Path propsFile = devcOn ? getLibertyPropertiesFileForDevc(libertyWorkspace) : getLibertyPropertiesFile(libertyWorkspace);
 
-        if (devcOn || (propsFile != null && propsFile.toFile().exists())) {
+        if (propsFile != null && propsFile.toFile().exists()) {
             // new properties file, reset the installed features stored in the feature cache
             // so that the installed features list will be regenerated as it may have
             // changed between Liberty installations
@@ -243,24 +243,7 @@ public class LibertyUtils {
                 watchFiles(devcOn ? devcMetadataFile : propsFile, libertyWorkspace);
             }
 
-            Path propsPath = null;
-            
-            if (devcOn) {
-                DockerService docker = DockerService.getInstance();
-                File containerPropertiesFile = new File(getTempDir(libertyWorkspace), "container.properties");
-                // TODO: Revisit to handle getting properties from container correctly. The install could be wlp instead of ol.
-                docker.dockerCp(libertyWorkspace.getContainerName(), DockerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH.toString(), containerPropertiesFile.toString());
-                propsPath = Paths.get(containerPropertiesFile.toString());
-
-                if (!propsPath.toFile().exists()) {
-                    LOGGER.warning("Could not find properties for container at location: "+propsPath.toString());
-                    return null;
-                }
-            } else {
-                propsPath = propsFile;
-            }
-
-            LibertyRuntime libertyRuntimeInfo = new LibertyRuntime(propsPath);
+            LibertyRuntime libertyRuntimeInfo = new LibertyRuntime(propsFile);
 
             if (libertyRuntimeInfo != null) {
                 libertyWorkspace.setLibertyRuntime(libertyRuntimeInfo.getRuntimeType());
@@ -285,6 +268,15 @@ public class LibertyUtils {
 
     }
 
+    /*
+     * First search for liberty-plugin-config.xml to determine the installation location for Liberty in which to find the properties files. 
+     * If not found, simply look for the properties files in the local libertyWorkspace. In either case, first look for WebSphereApplicatonServer.properties 
+     * which is only present for WebSphere Liberty. If not found, then look for openliberty.properties which is present in both WebSphere Liberty and Open Liberty, 
+     * but whose productId is only correct for Open Liberty.
+     * 
+     * @param libertyWorkspace
+     * @return Path to the properties file to use, or null if not found
+     */
     public static Path getLibertyPropertiesFile(LibertyWorkspace libertyWorkspace) {
         Path props = null;
  
@@ -316,6 +308,27 @@ public class LibertyUtils {
 
             if (props == null) {
                 props = findFileInWorkspace(libertyWorkspace, Paths.get("openliberty.properties"));
+            }
+        }
+
+        return props;
+    }
+
+    public static Path getLibertyPropertiesFileForDevc(LibertyWorkspace libertyWorkspace) {
+        Path props = null;
+
+        DockerService docker = DockerService.getInstance();
+        File containerPropertiesFile = new File(getTempDir(libertyWorkspace), "container.properties");
+        docker.dockerCp(libertyWorkspace.getContainerName(), DockerService.DEFAULT_CONTAINER_WLP_PROPERTIES_PATH.toString(), containerPropertiesFile.toString());
+        props = Paths.get(containerPropertiesFile.toString());
+
+        if (!props.toFile().exists()) {
+            docker.dockerCp(libertyWorkspace.getContainerName(), DockerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH.toString(), containerPropertiesFile.toString());
+            props = Paths.get(containerPropertiesFile.toString());
+
+            if (!props.toFile().exists()) {
+                LOGGER.warning("Could not find properties for container at location: "+props.toString());
+                props = null;
             }
         }
 

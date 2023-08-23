@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2023 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -17,8 +17,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -42,9 +40,18 @@ public class DockerService {
     }
 
     // Liberty images use Unix path
-    public static final String DEFAULT_CONTAINER_WLP_DIR = "opt/ol/wlp/";
-    public static final String DEFAULT_CONTAINER_OL_PROPERTIES_PATH = DEFAULT_CONTAINER_WLP_DIR + "lib/versions/openliberty.properties";
-    public static final String DEFAULT_CONTAINER_SCHEMAGEN_JAR_PATH = DEFAULT_CONTAINER_WLP_DIR + "bin/tools/ws-schemagen.jar";
+    public static final String SCHEMA_GEN_JAR_PATH = "bin/tools/ws-schemagen.jar";
+    public static final String FEATURE_LIST_JAR_PATH = "bin/tools/ws-featurelist.jar";
+
+    public static final String DEFAULT_CONTAINER_OL_DIR = "opt/ol/wlp/";
+    public static final String DEFAULT_CONTAINER_OL_PROPERTIES_PATH = DEFAULT_CONTAINER_OL_DIR + "lib/versions/openliberty.properties";
+    public static final String DEFAULT_CONTAINER_OL_SCHEMAGEN_JAR_PATH = DEFAULT_CONTAINER_OL_DIR + SCHEMA_GEN_JAR_PATH;
+    public static final String DEFAULT_CONTAINER_OL_FEATURELIST_JAR_PATH = DEFAULT_CONTAINER_OL_DIR + FEATURE_LIST_JAR_PATH;
+
+    public static final String DEFAULT_CONTAINER_WLP_DIR = "opt/ibm/wlp/";
+    public static final String DEFAULT_CONTAINER_WLP_PROPERTIES_PATH = DEFAULT_CONTAINER_WLP_DIR + "lib/versions/WebSphereApplicationServer.properties";
+    public static final String DEFAULT_CONTAINER_WLP_SCHEMAGEN_JAR_PATH = DEFAULT_CONTAINER_WLP_DIR + SCHEMA_GEN_JAR_PATH;
+    public static final String DEFAULT_CONTAINER_WLP_FEATURELIST_JAR_PATH = DEFAULT_CONTAINER_WLP_DIR + FEATURE_LIST_JAR_PATH;
 
     /** ===== Public Methods ===== **/
 
@@ -73,7 +80,7 @@ public class DockerService {
 
     /**
      * Generate the schema file for a LibertyWorkspace using the ws-schemagen.jar from the corresponding container
-     * @param containerName
+     * @param libertyWorkspace
      * @return Path to generated schema file or null if failed.
      * @throws IOException
      */
@@ -88,11 +95,12 @@ public class DockerService {
         File xsdFile = new File(tempDir, xsdFileName);
 
         if (!xsdFile.exists()) {
-            // $ java -jar {path to ws-schemagen.jar} {outputFile}
+            // java -jar {path to ws-schemagen.jar} {schemaVersion} {outputVersion} {outputFile}
             String containerOutputFileString = "/tmp/" + xsdFileName;
+            String jarPath = (libertyRuntime != null && !libertyRuntime.isEmpty() && libertyRuntime.equals("wlp")) ? DEFAULT_CONTAINER_WLP_SCHEMAGEN_JAR_PATH.toString() : DEFAULT_CONTAINER_OL_SCHEMAGEN_JAR_PATH.toString();
             String schemaVersion = "--schemaVersion=1.1";
             String outputVersion = "--outputVersion=2";
-            String cmd = MessageFormat.format("java -jar {0} {1} {2} {3}", DEFAULT_CONTAINER_SCHEMAGEN_JAR_PATH.toString(), schemaVersion, outputVersion, containerOutputFileString);
+            String cmd = MessageFormat.format("java -jar {0} {1} {2} {3}", jarPath, schemaVersion, outputVersion, containerOutputFileString);
 
             // generate xsd file inside container
             dockerExec(libertyWorkspace.getContainerName(), cmd);
@@ -107,7 +115,40 @@ public class DockerService {
         return xsdFile.toURI().toString();
     }
 
+    /**
+     * Generate the feature list for a LibertyWorkspace using the ws-featurelist.jar from the corresponding container
+     * @param libertyWorkspace
+     * @return File the generated feature list file or null if failed.
+     * @throws IOException
+     */
+    public File generateFeatureListFromContainer(LibertyWorkspace libertyWorkspace) throws IOException {
+        File tempDir = LibertyUtils.getTempDir(libertyWorkspace);
+        String libertyRuntime = libertyWorkspace.getLibertyRuntime();
+        String libertyVersion = libertyWorkspace.getLibertyVersion();
+        String featureListFileName = (libertyVersion != null && libertyRuntime != null &&
+                            !libertyVersion.isEmpty() && !libertyRuntime.isEmpty()) ?
+                            "featurelist-" + libertyRuntime + "-" + libertyVersion + ".xml" :
+                            "featurelist.xml";
+        File featureListFile = new File(tempDir, featureListFileName);
 
+        if (!featureListFile.exists()) {
+            // java -jar {path to ws-featurelist.jar} {outputFile}
+            String containerOutputFileString = "/tmp/" + featureListFileName;
+            String jarPath = (libertyRuntime != null && !libertyRuntime.isEmpty() && libertyRuntime.equals("wlp")) ? DEFAULT_CONTAINER_WLP_FEATURELIST_JAR_PATH.toString() : DEFAULT_CONTAINER_OL_FEATURELIST_JAR_PATH.toString();
+            String cmd = MessageFormat.format("java -jar {0} {1}", jarPath, containerOutputFileString);
+
+            // generate feature list file inside container
+            dockerExec(libertyWorkspace.getContainerName(), cmd);
+            // extract feature list file to local/temp dir
+            dockerCp(libertyWorkspace.getContainerName(), containerOutputFileString, tempDir.getCanonicalPath());
+        }
+        // (re)confirm feature list generation
+        if (!featureListFile.exists()) {
+            return null;
+        }
+        LOGGER.info("Using feature list file at: " + featureListFile.toURI().toString());
+        return featureListFile;
+    }
     /** ===== Protected/Helper Methods ===== **/
 
     /**
