@@ -38,18 +38,16 @@ public class XmlReader {
      * @param file
      * @return
      */
-    public static Map<String, String> readLibertyPluginCfgXml(String fileUri) {
+    public static Map<String, String> readLibertyPluginCfgXml(String fileUri, String... elementNames) {
         File xmlFile = new File(fileUri);
 
         if (!xmlFile.toPath().endsWith("liberty-plugin-config.xml")) {
             return null;
         }
 
-        Set<String> elementNames = new HashSet<String>();
-        elementNames.add("serverEnvFile");
-        elementNames.add("bootstrapPropertiesFile");
-        // elementNames.add("serverXmlFile"); // not needed
-        return getElementValues(xmlFile, elementNames);
+        Set<String> elementNamesSet = Set.of(elementNames);
+
+        return getElementValues(xmlFile, elementNamesSet);
     }
 
     public static Map<String, String> getElementValues(File file, Set<String> elementNames) {
