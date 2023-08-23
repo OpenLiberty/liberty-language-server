@@ -13,7 +13,6 @@
 package io.openliberty.tools.langserver.lemminx.util;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.FileSystems;
@@ -25,14 +24,9 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
-
-import jakarta.xml.bind.JAXBContext;
-import jakarta.xml.bind.JAXBException;
-import jakarta.xml.bind.Unmarshaller;
 
 import org.eclipse.lemminx.dom.DOMDocument;
 
@@ -315,24 +309,22 @@ public class LibertyUtils {
     }
 
     public static Path getLibertyPropertiesFileForDevc(LibertyWorkspace libertyWorkspace) {
-        Path props = null;
+        Path props = getFileFromContainer(libertyWorkspace, DockerService.DEFAULT_CONTAINER_WLP_PROPERTIES_PATH);
+        props = props.toFile().exists() ? props : getFileFromContainer(libertyWorkspace, DockerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH);
 
-        DockerService docker = DockerService.getInstance();
-        File containerPropertiesFile = new File(getTempDir(libertyWorkspace), "container.properties");
-        docker.dockerCp(libertyWorkspace.getContainerName(), DockerService.DEFAULT_CONTAINER_WLP_PROPERTIES_PATH.toString(), containerPropertiesFile.toString());
-        props = Paths.get(containerPropertiesFile.toString());
-
-        if (!props.toFile().exists()) {
-            docker.dockerCp(libertyWorkspace.getContainerName(), DockerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH.toString(), containerPropertiesFile.toString());
-            props = Paths.get(containerPropertiesFile.toString());
-
-            if (!props.toFile().exists()) {
-                LOGGER.warning("Could not find properties for container at location: "+props.toString());
-                props = null;
-            }
+        if (props.toFile().exists()) {
+            return props;
         }
 
-        return props;
+        LOGGER.warning("Could not find properties for container at location: "+DockerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH);
+        return null;
+    }
+
+    public static Path getFileFromContainer(LibertyWorkspace libertyWorkspace, String fileLocation) {
+        DockerService docker = DockerService.getInstance();
+        File containerPropertiesFile = new File(getTempDir(libertyWorkspace), "container.properties");
+        docker.dockerCp(libertyWorkspace.getContainerName(), fileLocation, containerPropertiesFile.toString());
+        return Paths.get(containerPropertiesFile.toString());
     }
 
     /**
