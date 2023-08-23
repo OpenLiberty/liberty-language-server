@@ -52,7 +52,7 @@ public class LibertyProjectsManager {
     public void setWorkspaceFolders(List<WorkspaceFolder> workspaceFolders) {
         for (WorkspaceFolder folder : workspaceFolders) {
             // Add logic here to see if child folders are sub-modules in a multi-module project.
-            // If child folder is a Liberty project (has src/main/liberty/config/server.xml),
+            // If child folder is a Liberty project (has any xml files with a <server> root element),
             // then create a LibertyWorkspace for it and do not create one for the parent folder.
 
             String workspaceUriString = folder.getUri();

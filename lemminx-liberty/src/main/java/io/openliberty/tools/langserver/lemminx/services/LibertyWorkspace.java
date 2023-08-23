@@ -19,12 +19,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import jakarta.xml.bind.JAXBContext;
@@ -33,7 +29,6 @@ import jakarta.xml.bind.Unmarshaller;
 
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
 import io.openliberty.tools.langserver.lemminx.models.settings.DevcMetadata;
-import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 public class LibertyWorkspace {
 
@@ -46,7 +41,6 @@ public class LibertyWorkspace {
     private String libertyRuntime;
     private boolean isLibertyInstalled;
     private List<Feature> installedFeatureList;
-    private Set<String> configFiles;
     private String libertyInstallationDir;
     private boolean isExternalLibertyInstallation;
 
