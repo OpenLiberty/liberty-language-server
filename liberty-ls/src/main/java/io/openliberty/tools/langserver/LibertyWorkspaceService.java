@@ -14,11 +14,13 @@ package io.openliberty.tools.langserver;
 
 import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
+import org.eclipse.lsp4j.FileEvent;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
 public class LibertyWorkspaceService implements WorkspaceService {
 
     private final LibertyLanguageServer libertyLanguageServer;
+    private static final LibertyConfigFileManager ccm = new LibertyConfigFileManager();
 
     public LibertyWorkspaceService(LibertyLanguageServer libertyls) {
         this.libertyLanguageServer = libertyls;
@@ -32,5 +34,12 @@ public class LibertyWorkspaceService implements WorkspaceService {
     @Override
     public void didChangeWatchedFiles(DidChangeWatchedFilesParams params) {
         // Do nothing
+        for (FileEvent change : params.getChanges()) {
+            String uri = change.getUri();
+            if (uri.endsWith("liberty-plugin-config.xml")) {
+                // TODO: process changes for liberty-plugin-config.xml
+                ccm.processLibertyPluginConfigXml(change);
+            }
+        }
     }
 }

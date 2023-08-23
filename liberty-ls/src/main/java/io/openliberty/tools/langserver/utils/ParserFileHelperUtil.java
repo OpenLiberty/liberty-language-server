@@ -11,9 +11,12 @@ package io.openliberty.tools.langserver.utils;
 
 import org.eclipse.lsp4j.Position;
 
+import io.openliberty.tools.langserver.LibertyConfigFileManager;
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 
 public class ParserFileHelperUtil {
+
+    LibertyConfigFileManager ccm;
 
     public String getLine(LibertyTextDocument textDocumentItem, Position position) {
         return getLine(textDocumentItem, position.getLine());
@@ -31,6 +34,7 @@ public class ParserFileHelperUtil {
         return null;
     }
 
+    // TODO: change filters to include custom files
     public static boolean isServerEnvFile(LibertyTextDocument tdi) {
         return tdi.getUri().endsWith("server.env");
     }
