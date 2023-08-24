@@ -38,7 +38,7 @@ public class LibertyWorkspaceService implements WorkspaceService {
             String uri = change.getUri();
             if (uri.endsWith("liberty-plugin-config.xml")) {
                 // TODO: process changes for liberty-plugin-config.xml
-                ccm.processLibertyPluginConfigXml(change);
+                LibertyConfigFileManager.processLibertyPluginConfigXml(uri);
             }
         }
     }

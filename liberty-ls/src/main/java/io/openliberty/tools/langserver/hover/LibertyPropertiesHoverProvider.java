@@ -26,6 +26,9 @@ public class LibertyPropertiesHoverProvider {
     }
 
     public CompletableFuture<Hover> getHover(Position position) {
+        // textDocumentItem.getUri();
+        // if this is custom file, process
+
         String entryLine = new ParserFileHelperUtil().getLine(textDocumentItem, position);
         return new PropertiesEntryInstance(entryLine, textDocumentItem).getHover(position);
     }

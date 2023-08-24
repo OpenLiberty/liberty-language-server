@@ -29,6 +29,7 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
+import io.openliberty.tools.langserver.LibertyConfigFileManager;
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 import io.openliberty.tools.langserver.utils.ParserFileHelperUtil;
 import io.openliberty.tools.langserver.utils.PropertiesValidationResult;
@@ -42,7 +43,7 @@ public class LibertyPropertiesDiagnosticService  {
 
     public Map<String, PropertiesValidationResult> compute(String text, LibertyTextDocument openedDocument) {
         Map<String, PropertiesValidationResult> errors = new HashMap<>();
-        if (ParserFileHelperUtil.isBootstrapPropertiesFile(openedDocument) || ParserFileHelperUtil.isServerEnvFile(openedDocument)) {
+        if (LibertyConfigFileManager.isBootstrapPropertiesFile(openedDocument) || LibertyConfigFileManager.isServerEnvFile(openedDocument)) {
             BufferedReader br = new BufferedReader(new StringReader(text));
             String line = null;
             int lineNumber = 0;

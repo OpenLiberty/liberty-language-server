@@ -16,6 +16,8 @@ package io.openliberty.tools.langserver.utils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -33,21 +35,22 @@ public class XmlReader {
     private static final Logger LOGGER = Logger.getLogger(XmlReader.class.getName());
 
     /**
-     * Reads a liberty-plugin-cfg.xml, and returns found values for:
-     * serverEnvFile, bootstrapPropertiesFile
-     * @param file
-     * @return
+     * Returns the element values from the provided tag names with a given xml URI
+     * @param fileUri
+     * @param tagNames 
+     * @return A map of found values to tag names
      */
-    public static Map<String, String> readLibertyPluginCfgXml(String fileUri, String... elementNames) {
-        File xmlFile = new File(fileUri);
-
-        if (!xmlFile.toPath().endsWith("liberty-plugin-config.xml")) {
-            return null;
+    public static Map<String, String> readTagsFromXml(String fileUri, String... tagNames) {
+        File xmlFile = null;
+        try {
+            xmlFile = new File(new URI(fileUri).getPath());
+        } catch (URISyntaxException e) {
+            LOGGER.warning("not now");
+            e.printStackTrace();
+            return new HashMap<String, String>();
         }
-
-        Set<String> elementNamesSet = Set.of(elementNames);
-
-        return getElementValues(xmlFile, elementNamesSet);
+        Set<String> tagSet = Set.of(tagNames);
+        return getElementValues(xmlFile, tagSet);
     }
 
     public static Map<String, String> getElementValues(File file, Set<String> elementNames) {
