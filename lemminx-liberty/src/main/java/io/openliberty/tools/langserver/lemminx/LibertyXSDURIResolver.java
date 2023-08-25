@@ -29,6 +29,7 @@ import org.eclipse.lemminx.uriresolver.URIResolverExtension;
 import io.openliberty.tools.langserver.lemminx.services.DockerService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
+import io.openliberty.tools.langserver.lemminx.util.DocumentUtil;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGrammarLocationProvider {
@@ -157,6 +158,11 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
                     proc.destroy();
                     LOGGER.warning("Exceeded 30 second timeout during schema file generation. Using cached schema.xsd file.");
                     return null;
+                }
+
+                if (xsdDestFile.exists()) {
+                    // do some post processing to remove the anyAttribute element from parent element if there is no extraProperties sibling
+                    DocumentUtil.removeExtraneousAnyAttributeElements(xsdDestFile);
                 }
 
                 LOGGER.info("Caching schema file with URI: " + xsdDestFile.toURI().toString());
