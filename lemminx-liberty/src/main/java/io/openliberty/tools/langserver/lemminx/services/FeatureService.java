@@ -126,8 +126,9 @@ public class FeatureService {
         Feature[] featureList = new Gson().fromJson(reader, Feature[].class);
 
         ArrayList<Feature> publicFeatures = new ArrayList<>();
+        // Guard against null visibility field. Ran into this during manual testing of a wlp installation.
         Arrays.asList(featureList).stream()
-            .filter(f -> f.getWlpInformation().getVisibility().equals(LibertyConstants.PUBLIC_VISIBILITY))
+            .filter(f -> f.getWlpInformation().getVisibility() != null && f.getWlpInformation().getVisibility().equals(LibertyConstants.PUBLIC_VISIBILITY))
             .forEach(publicFeatures::add);
         defaultFeatureList = publicFeatures;
         return publicFeatures;
@@ -162,22 +163,26 @@ public class FeatureService {
 
         LOGGER.info("Getting features for: " + featureCacheKey);
 
-        // else need to fetch the features from maven central
-        try {
-            // verify that request delay (seconds) has gone by since last fetch request
-            long currentTime = System.currentTimeMillis();
-            if (this.featureUpdateTime == -1 || currentTime >= (this.featureUpdateTime + (requestDelay * 1000))) {
-                List<Feature> features = fetchFeaturesForVersion(libertyVersion, libertyRuntime);
-                featureCache.put(featureCacheKey, features);
-                this.featureUpdateTime = System.currentTimeMillis();
-                return features;
+        // else if not a beta runtime, fetch the features from maven central
+        // beta runtimes do not have a published features.json in mc
+        if (!libertyVersion.endsWith("-beta")) {
+            try {
+                // verify that request delay (seconds) has gone by since last fetch request
+                long currentTime = System.currentTimeMillis();
+                if (this.featureUpdateTime == -1 || currentTime >= (this.featureUpdateTime + (requestDelay * 1000))) {
+                    List<Feature> features = fetchFeaturesForVersion(libertyVersion, libertyRuntime);
+                    featureCache.put(featureCacheKey, features);
+                    this.featureUpdateTime = System.currentTimeMillis();
+                    return features;
+                }
+            } catch (Exception e) {
+                // do nothing, continue on to returning default feature list
+                LOGGER.warning("Received exception when trying to download features from Maven Central: "+e.getMessage());
             }
-        } catch (Exception e) {
-            // do nothing, continue on to returning default feature list
         }
 
         // fetch installed features list - this would only happen if a features.json was not able to be downloaded from Maven Central
-        // which would not be the normal case
+        // This is the case for beta runtimes and for very old runtimes pre 18.0.0.2.
         List<Feature> installedFeatures = getInstalledFeaturesList(documentURI, libertyRuntime, libertyVersion);
         if (installedFeatures.size() != 0) {
             return installedFeatures;
@@ -210,55 +215,97 @@ public class FeatureService {
      */
     private List<Feature> getInstalledFeaturesList(String documentURI, String libertyRuntime, String libertyVersion) {
         List<Feature> installedFeatures = new ArrayList<Feature>();
+
+        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(documentURI);
+        if (libertyWorkspace == null || libertyWorkspace.getWorkspaceString() == null) {
+            return installedFeatures;
+        }
+
+        // return installed features from cache
+        if (libertyWorkspace.getInstalledFeatureList().size() != 0) {
+            return libertyWorkspace.getInstalledFeatureList();
+        }
+
         try {
-            LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(documentURI);
-            if (libertyWorkspace == null || libertyWorkspace.getWorkspaceString() == null) {
-                return installedFeatures;
+            // Need to handle both local installation and container
+            File featureListFile = null;
+
+            if (libertyWorkspace.isLibertyInstalled()) {
+                Path featureListJAR = LibertyUtils.findLibertyFileForWorkspace(libertyWorkspace, Paths.get("bin", "tools", "ws-featurelist.jar"));
+                if (featureListJAR != null && featureListJAR.toFile().exists()) {
+                    //Generate featurelist file
+                    featureListFile = generateFeatureListXml(libertyWorkspace, featureListJAR);
+                }
+            } else if (libertyWorkspace.isContainerAlive()) {
+                DockerService docker = DockerService.getInstance();
+                featureListFile = docker.generateFeatureListFromContainer(libertyWorkspace);
             }
 
-            // return installed features from cache
-            if (libertyWorkspace.getInstalledFeatureList().size() != 0) {
-                return libertyWorkspace.getInstalledFeatureList();
-            }
-
-            // TODO: Revisit for devc
-            Path featureListJAR = LibertyUtils.findLibertyFileForWorkspace(libertyWorkspace, Paths.get("bin", "tools", "ws-featurelist.jar"));
-
-            if (featureListJAR != null && featureListJAR.toFile().exists()) {
-
-                File tempDir = LibertyUtils.getTempDir(libertyWorkspace);
-                String featureListFileName = "featurelist-"+libertyRuntime+"-"+libertyVersion+".xml";
-
-                // If tempDir is null, issue a warning for the current LibertyWorkspace URI and use the default features.json
-                if (tempDir == null) {
-                    LOGGER.warning("Could not create a temporary directory for generating the " +  featureListFileName + " file. The cached features json file will be used for the current workspace: " + libertyWorkspace.getWorkspaceString());
-                    return installedFeatures;
+            if (featureListFile != null && featureListFile.exists()) {
+                try {
+                    installedFeatures = readFeaturesFromFeatureListFile(installedFeatures, libertyWorkspace, featureListFile);
+                } catch (JAXBException e) {
+                    LOGGER.severe("Error: Unable to load the generated feature list file for the target Liberty runtime due to exception: "+e.getMessage());
                 }
-
-                File featureListFile = new File(tempDir, featureListFileName);
-
-                ProcessBuilder pb = new ProcessBuilder("java", "-jar", featureListJAR.toAbsolutePath().toString(), featureListFile.getCanonicalPath());
-                pb.directory(tempDir);
-                pb.redirectErrorStream(true);
-                pb.redirectOutput(new File(tempDir, "ws-featurelist.log"));
-      
-                Process proc = pb.start();
-                if (!proc.waitFor(30, TimeUnit.SECONDS)) {
-                    proc.destroy();
-                    LOGGER.warning("Exceeded 30 second timeout during feature list generation. Using cached features json file.");
-                    return installedFeatures;
-                }
-
-                installedFeatures = readFeaturesFromFeatureListFile(installedFeatures, libertyWorkspace, featureListFile);
             } else {
                 LOGGER.warning("Unable to generate the feature list for the current Liberty workspace:" + libertyWorkspace.getWorkspaceString());
             }
-        } catch (IOException | JAXBException | InterruptedException e) {
-            LOGGER.warning("Unable to get installed features: " + e);
+        } catch (IOException e) {
+            LOGGER.severe("Error: Unable to generate the feature list file from the target Liberty runtime due to exception: "+e.getMessage());
         }
 
         LOGGER.info("Returning installed features: " + installedFeatures.size());
         return installedFeatures;
+    }
+
+    /**
+     * Generate the featurelist file for a LibertyWorkspace using the ws-featurelist.jar in the corresponding Liberty installation
+     * @param libertyWorkspace
+     * @param featurelistJarPath
+     * @return File the generated featurelist file.
+     */
+    private File generateFeatureListXml(LibertyWorkspace libertyWorkspace, Path featurelistJarPath) {
+        // java -jar {path to ws-featurelist.jar} {outputFile}
+        File tempDir = LibertyUtils.getTempDir(libertyWorkspace);
+
+        //If tempDir is null, issue a warning for the current LibertyWorkspace URI
+        if (tempDir == null) {
+            LOGGER.warning("Unable to generate the feature list for the current Liberty workspace:" + libertyWorkspace.getWorkspaceString());
+            return null;
+        }
+
+        File featureListFile = new File(tempDir, "featurelist.xml");
+        if (libertyWorkspace.getLibertyVersion()!= null && !libertyWorkspace.getLibertyVersion().isEmpty() &&
+                libertyWorkspace.getLibertyRuntime()!= null && !libertyWorkspace.getLibertyRuntime().isEmpty()) {
+            featureListFile = new File(tempDir, "featurelist-" + libertyWorkspace.getLibertyRuntime() + "-" + libertyWorkspace.getLibertyVersion() + ".xml");
+        }
+
+        try {
+            LOGGER.info("Generating feature list file from: " + featurelistJarPath.toString());
+            String xmlDestPath = featureListFile.getCanonicalPath();
+
+            LOGGER.info("Generating feature list file at: " + xmlDestPath);
+
+            ProcessBuilder pb = new ProcessBuilder("java", "-jar", featurelistJarPath.toAbsolutePath().toString(), xmlDestPath);
+            pb.directory(tempDir);
+            pb.redirectErrorStream(true);
+            pb.redirectOutput(new File(tempDir, "ws-featurelist.log"));
+
+            Process proc = pb.start();
+            if (!proc.waitFor(30, TimeUnit.SECONDS)) {
+                proc.destroy();
+                LOGGER.warning("Exceeded 30 second timeout during feature list generation. Using cached features json file.");
+                return null;
+            }
+
+        } catch (Exception e) {
+            LOGGER.warning(e.getMessage());
+            LOGGER.warning("Due to an exception during feature list file generation, a cached features json file will be used.");
+            return null;
+        }
+
+        LOGGER.info("Using feature list file at: " + featureListFile.toURI().toString());
+        return featureListFile;
     }
 
     public List<Feature> readFeaturesFromFeatureListFile(List<Feature> installedFeatures, LibertyWorkspace libertyWorkspace,
@@ -267,10 +314,14 @@ public class FeatureService {
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         FeatureInfo featureInfo = (FeatureInfo) jaxbUnmarshaller.unmarshal(featureListFile);
         
+        // Note: Only the public features are loaded when unmarshalling the passed featureListFile.
         if ((featureInfo.getFeatures() != null) && (featureInfo.getFeatures().size() > 0)) {
             for (int i = 0; i < featureInfo.getFeatures().size(); i++) {
                 Feature f = featureInfo.getFeatures().get(i);
                 f.setShortDescription(f.getDescription());
+                // The xml featureListFile does not have a wlpInformation element like the json does, but our code depends on looking up 
+                // features by the shortName found in wlpInformation. So create a WlpInformation object and initialize the shortName to 
+                // the feature name.
                 WlpInformation wlpInfo = new WlpInformation(f.getName());
                 f.setWlpInformation(wlpInfo);
             }

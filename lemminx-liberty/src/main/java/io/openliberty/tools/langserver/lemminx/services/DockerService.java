@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2023 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -17,8 +17,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -42,9 +40,18 @@ public class DockerService {
     }
 
     // Liberty images use Unix path
-    public static final String DEFAULT_CONTAINER_WLP_DIR = "opt/ol/wlp/";
-    public static final String DEFAULT_CONTAINER_OL_PROPERTIES_PATH = DEFAULT_CONTAINER_WLP_DIR + "lib/versions/openliberty.properties";
-    public static final String DEFAULT_CONTAINER_SCHEMAGEN_JAR_PATH = DEFAULT_CONTAINER_WLP_DIR + "bin/tools/ws-schemagen.jar";
+    public static final String SCHEMA_GEN_JAR_PATH = "bin/tools/ws-schemagen.jar";
+    public static final String FEATURE_LIST_JAR_PATH = "bin/tools/ws-featurelist.jar";
+
+    public static final String DEFAULT_CONTAINER_OL_DIR = "opt/ol/wlp/";
+    public static final String DEFAULT_CONTAINER_OL_PROPERTIES_PATH = DEFAULT_CONTAINER_OL_DIR + "lib/versions/openliberty.properties";
+    public static final String DEFAULT_CONTAINER_OL_SCHEMAGEN_JAR_PATH = DEFAULT_CONTAINER_OL_DIR + SCHEMA_GEN_JAR_PATH;
+    public static final String DEFAULT_CONTAINER_OL_FEATURELIST_JAR_PATH = DEFAULT_CONTAINER_OL_DIR + FEATURE_LIST_JAR_PATH;
+
+    public static final String DEFAULT_CONTAINER_WLP_DIR = "opt/ibm/wlp/";
+    public static final String DEFAULT_CONTAINER_WLP_PROPERTIES_PATH = DEFAULT_CONTAINER_WLP_DIR + "lib/versions/WebSphereApplicationServer.properties";
+    public static final String DEFAULT_CONTAINER_WLP_SCHEMAGEN_JAR_PATH = DEFAULT_CONTAINER_WLP_DIR + SCHEMA_GEN_JAR_PATH;
+    public static final String DEFAULT_CONTAINER_WLP_FEATURELIST_JAR_PATH = DEFAULT_CONTAINER_WLP_DIR + FEATURE_LIST_JAR_PATH;
 
     /** ===== Public Methods ===== **/
 
@@ -66,14 +73,25 @@ public class DockerService {
      * @param localDest
      */
     public void dockerCp(String containerName, String containerSrc, String localDest) {
+        dockerCp(containerName, containerSrc, localDest, false);
+    }
+
+    /**
+     * Method to copy a file out from the specified container
+     * @param containerName
+     * @param containerSrc
+     * @param localDest
+     * @param suppressError - if the file may not be present, pass true for this boolean parameter to suppress the error/exception
+     */
+    public void dockerCp(String containerName, String containerSrc, String localDest, boolean suppressError) {
         // $ docker cp [OPTIONS] CONTAINER:SRC_PATH DEST_PATH|-
         String dockerCp = MessageFormat.format("docker cp {0}:{1} {2}", containerName, containerSrc, localDest);
-        execDockerCmd(dockerCp);
+        execDockerCmd(dockerCp, suppressError);
     }
 
     /**
      * Generate the schema file for a LibertyWorkspace using the ws-schemagen.jar from the corresponding container
-     * @param containerName
+     * @param libertyWorkspace
      * @return Path to generated schema file or null if failed.
      * @throws IOException
      */
@@ -88,11 +106,14 @@ public class DockerService {
         File xsdFile = new File(tempDir, xsdFileName);
 
         if (!xsdFile.exists()) {
-            // $ java -jar {path to ws-schemagen.jar} {outputFile}
+            // java -jar {path to ws-schemagen.jar} {schemaVersion} {outputVersion} {outputFile}
             String containerOutputFileString = "/tmp/" + xsdFileName;
+            String jarPath = (libertyRuntime != null && !libertyRuntime.isEmpty() && libertyRuntime.equals("wlp")) ? DEFAULT_CONTAINER_WLP_SCHEMAGEN_JAR_PATH.toString() : DEFAULT_CONTAINER_OL_SCHEMAGEN_JAR_PATH.toString();
             String schemaVersion = "--schemaVersion=1.1";
             String outputVersion = "--outputVersion=2";
-            String cmd = MessageFormat.format("java -jar {0} {1} {2} {3}", DEFAULT_CONTAINER_SCHEMAGEN_JAR_PATH.toString(), schemaVersion, outputVersion, containerOutputFileString);
+            String cmd = MessageFormat.format("java -jar {0} {1} {2} {3}", jarPath, schemaVersion, outputVersion, containerOutputFileString);
+
+            LOGGER.info("Generating schema file for container at: " + xsdFile.getCanonicalPath());
 
             // generate xsd file inside container
             dockerExec(libertyWorkspace.getContainerName(), cmd);
@@ -107,21 +128,65 @@ public class DockerService {
         return xsdFile.toURI().toString();
     }
 
+    /**
+     * Generate the feature list for a LibertyWorkspace using the ws-featurelist.jar from the corresponding container
+     * @param libertyWorkspace
+     * @return File the generated feature list file or null if failed.
+     * @throws IOException
+     */
+    public File generateFeatureListFromContainer(LibertyWorkspace libertyWorkspace) throws IOException {
+        File tempDir = LibertyUtils.getTempDir(libertyWorkspace);
+        String libertyRuntime = libertyWorkspace.getLibertyRuntime();
+        String libertyVersion = libertyWorkspace.getLibertyVersion();
+        String featureListFileName = (libertyVersion != null && libertyRuntime != null &&
+                            !libertyVersion.isEmpty() && !libertyRuntime.isEmpty()) ?
+                            "featurelist-" + libertyRuntime + "-" + libertyVersion + ".xml" :
+                            "featurelist.xml";
+        File featureListFile = new File(tempDir, featureListFileName);
 
+        if (!featureListFile.exists()) {
+            // java -jar {path to ws-featurelist.jar} {outputFile}
+            String containerOutputFileString = "/tmp/" + featureListFileName;
+            String jarPath = (libertyRuntime != null && !libertyRuntime.isEmpty() && libertyRuntime.equals("wlp")) ? DEFAULT_CONTAINER_WLP_FEATURELIST_JAR_PATH.toString() : DEFAULT_CONTAINER_OL_FEATURELIST_JAR_PATH.toString();
+            String cmd = MessageFormat.format("java -jar {0} {1}", jarPath, containerOutputFileString);
+
+            LOGGER.info("Generating feature list file for container at: " + featureListFile.getCanonicalPath());
+
+            // generate feature list file inside container
+            dockerExec(libertyWorkspace.getContainerName(), cmd);
+            // extract feature list file to local/temp dir
+            dockerCp(libertyWorkspace.getContainerName(), containerOutputFileString, tempDir.getCanonicalPath());
+        }
+        // (re)confirm feature list generation
+        if (!featureListFile.exists()) {
+            return null;
+        }
+        LOGGER.info("Using feature list file at: " + featureListFile.toURI().toString());
+        return featureListFile;
+    }
     /** ===== Protected/Helper Methods ===== **/
 
     /**
-     * @param timeout unit is seconds
+     * @param command String containing the command to run
      * @return the stdout of the command or null for no output on stdout
      */
     protected String execDockerCmd(String command) {
+        return execDockerCmd(command, false);
+    }
+
+    /**
+     * @param command String containing the command to run
+     * @param suppressError If it is expected that the command may fail, pass true for this boolean parameter to suppress the error/exception.
+     * @return the stdout of the command or null for no output on stdout
+     */
+    protected String execDockerCmd(String command, boolean suppressError) {
         String result = null;
         try {
             // debug("execDocker, timeout=" + timeout + ", cmd=" + command);
             Process p = Runtime.getRuntime().exec(command);
             p.waitFor(DOCKER_TIMEOUT, TimeUnit.SECONDS);
             // After waiting for the process, handle the error case and normal termination.
-            if (p.exitValue() != 0) {
+            if (p.exitValue() != 0 && !suppressError) {
                 LOGGER.severe("Received exit value=" + p.exitValue() + " when running Docker command: " + command);
                 // read messages from standard err
                 char[] d = new char[1023];

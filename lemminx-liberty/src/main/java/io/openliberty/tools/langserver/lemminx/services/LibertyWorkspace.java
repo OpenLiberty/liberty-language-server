@@ -114,7 +114,9 @@ public class LibertyWorkspace {
     public void setLibertyInstalled(boolean isLibertyInstalled) {
         this.isLibertyInstalled = isLibertyInstalled;
         if (!isLibertyInstalled) {
+            // do not clear out the libertyRuntime or libertyVersion since those could be set for a live container
             setExternalLibertyInstallation(isLibertyInstalled);
+            setLibertyInstallationDir(null);
             // clear the cached feature list when Liberty is no longer installed
             this.installedFeatureList = new ArrayList<Feature>();
         }
