@@ -43,4 +43,13 @@ public class DocumentUtilTest {
 
     }
 
+    //@Test
+    public void updateCachedSchema() throws Exception {
+        // When uploading a new server schema, put a copy of the schema file in src/test/resources and uncomment this
+        // test to get the updated schema without the extaneous anyAttribute elements. Then copy the updated schema 
+        // from target/test-classes to src/main/resources/schema/xsd/liberty and remove it from src/test/resources.
+        File sampleXsd = new File(resourcesDir, "server-cached-23006.xsd");
+        DocumentUtil.removeExtraneousAnyAttributeElements(sampleXsd);
+    }
+
 }
