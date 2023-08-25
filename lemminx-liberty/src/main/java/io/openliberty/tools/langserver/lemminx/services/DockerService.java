@@ -150,6 +150,8 @@ public class DockerService {
             String jarPath = (libertyRuntime != null && !libertyRuntime.isEmpty() && libertyRuntime.equals("wlp")) ? DEFAULT_CONTAINER_WLP_FEATURELIST_JAR_PATH.toString() : DEFAULT_CONTAINER_OL_FEATURELIST_JAR_PATH.toString();
             String cmd = MessageFormat.format("java -jar {0} {1}", jarPath, containerOutputFileString);
 
+            LOGGER.info("Generating feature list file for container at: " + featureListFile.getCanonicalPath());
+
             // generate feature list file inside container
             dockerExec(libertyWorkspace.getContainerName(), cmd);
             // extract feature list file to local/temp dir

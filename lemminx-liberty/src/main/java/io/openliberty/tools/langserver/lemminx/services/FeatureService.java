@@ -163,23 +163,26 @@ public class FeatureService {
 
         LOGGER.info("Getting features for: " + featureCacheKey);
 
-        // else need to fetch the features from maven central
-        try {
-            // verify that request delay (seconds) has gone by since last fetch request
-            long currentTime = System.currentTimeMillis();
-            if (this.featureUpdateTime == -1 || currentTime >= (this.featureUpdateTime + (requestDelay * 1000))) {
-                List<Feature> features = fetchFeaturesForVersion(libertyVersion, libertyRuntime);
-                featureCache.put(featureCacheKey, features);
-                this.featureUpdateTime = System.currentTimeMillis();
-                return features;
+        // else if not a beta runtime, fetch the features from maven central
+        // beta runtimes do not have a published features.json in mc
+        if (!libertyVersion.endsWith("-beta")) {
+            try {
+                // verify that request delay (seconds) has gone by since last fetch request
+                long currentTime = System.currentTimeMillis();
+                if (this.featureUpdateTime == -1 || currentTime >= (this.featureUpdateTime + (requestDelay * 1000))) {
+                    List<Feature> features = fetchFeaturesForVersion(libertyVersion, libertyRuntime);
+                    featureCache.put(featureCacheKey, features);
+                    this.featureUpdateTime = System.currentTimeMillis();
+                    return features;
+                }
+            } catch (Exception e) {
+                // do nothing, continue on to returning default feature list
+                LOGGER.warning("Received exception when trying to download features from Maven Central: "+e.getMessage());
             }
-        } catch (Exception e) {
-            // do nothing, continue on to returning default feature list
-            LOGGER.warning("Received exception when trying to download features from Maven Central: "+e.getMessage());
         }
 
         // fetch installed features list - this would only happen if a features.json was not able to be downloaded from Maven Central
-        // which would not be the normal case
+        // This is the case for beta runtimes and for very old runtimes pre 18.0.0.2.
         List<Feature> installedFeatures = getInstalledFeaturesList(documentURI, libertyRuntime, libertyVersion);
         if (installedFeatures.size() != 0) {
             return installedFeatures;

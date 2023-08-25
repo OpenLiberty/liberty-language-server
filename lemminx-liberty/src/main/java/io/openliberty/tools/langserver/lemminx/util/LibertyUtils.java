@@ -286,7 +286,7 @@ public class LibertyUtils {
                         if (props == null) {
                             props = findLastModifiedMatchingFileInDirectory(libertyInstallDir, Paths.get("openliberty.properties"));
                             if (props == null) {
-                                LOGGER.warning("Could not find openliberty.properties file in Liberty installation: " + libertyInstallDir.toString());                            
+                                LOGGER.info("Could not find openliberty.properties file in Liberty installation: " + libertyInstallDir.toString());                            
                             }
                         }
                     } catch (IOException e) {
