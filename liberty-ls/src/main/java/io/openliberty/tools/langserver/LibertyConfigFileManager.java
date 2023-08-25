@@ -40,12 +40,18 @@ public class LibertyConfigFileManager {
     }
 
     public static boolean isServerEnvFile(LibertyTextDocument tdi) {
-        String docUri = tdi.getUri();
-        return docUri.endsWith("server.env") || customServerEnvFiles.contains(docUri);
+        return isServerEnvFile(tdi.getUri());
+    }
+
+    public static boolean isServerEnvFile(String uri) {
+        return uri.endsWith("server.env") || customServerEnvFiles.contains(uri);
     }
 
     public static boolean isBootstrapPropertiesFile(LibertyTextDocument tdi) {
-        String docUri = tdi.getUri();
-        return docUri.endsWith("bootstrap.properties") || customBootstrapFiles.contains(docUri);
+        return isBootstrapPropertiesFile(tdi.getUri());
+    }
+
+    public static boolean isBootstrapPropertiesFile(String uri) {
+        return uri.endsWith("bootstrap.properties") || customBootstrapFiles.contains(uri);
     }
 }

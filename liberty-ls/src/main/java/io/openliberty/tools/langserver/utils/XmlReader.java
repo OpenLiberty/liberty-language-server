@@ -45,7 +45,7 @@ public class XmlReader {
         try {
             xmlFile = new File(new URI(fileUri).getPath());
         } catch (URISyntaxException e) {
-            LOGGER.warning("not now");
+            LOGGER.warning("Failed to read file: " + fileUri);
             e.printStackTrace();
             return new HashMap<String, String>();
         }
@@ -64,7 +64,7 @@ public class XmlReader {
         try {
             reader = factory.createXMLEventReader(new FileInputStream(file));
             while (reader.hasNext()) {
-                XMLEvent event = reader.nextTag();
+                XMLEvent event = reader.nextEvent();
                 if (!event.isStartElement()) {
                     continue;
                 }
