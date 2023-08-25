@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:ext="http://www.ibm.com/xmlns/dde/schema/annotation/ext"> 
+    <xsd:complexType name="com.ibm.ws.security.authentication.tai.interceptor.properties"> 
+        <xsd:annotation> 
+            <xsd:documentation>Collection of properties for the interceptor.</xsd:documentation> 
+            <xsd:appinfo> 
+                <ext:label>Interceptor Properties</ext:label> 
+                <ext:extraProperties/> 
+            </xsd:appinfo> 
+        </xsd:annotation><!--Idiom for "empty element context" (whitespace accepted and ignored)--> 
+        <xsd:sequence> 
+            <xsd:sequence/> 
+        </xsd:sequence> 
+        <xsd:attribute name="internal.properties" type="internalPropertiesType" use="optional"> 
+            <xsd:annotation> 
+                <xsd:documentation>Collection of properties for the interceptor.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Interceptor properties</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:anyAttribute processContents="skip"> 
+        </xsd:anyAttribute> 
+    </xsd:complexType> 
+    <xsd:complexType name="com.ibm.ws.security.authentication.tai.interceptor.properties-factory"> 
+        <xsd:complexContent> 
+            <xsd:extension base="com.ibm.ws.security.authentication.tai.interceptor.properties"> 
+                <xsd:attribute name="id" type="factoryIdType" use="optional"> 
+                    <xsd:annotation> 
+                        <xsd:documentation>A unique configuration ID.</xsd:documentation> 
+                        <xsd:appinfo> 
+                            <ext:label>ID</ext:label> 
+                        </xsd:appinfo> 
+                    </xsd:annotation> 
+                </xsd:attribute> 
+            </xsd:extension> 
+        </xsd:complexContent> 
+    </xsd:complexType> 
+    <xsd:complexType name="com.ibm.ws.security.authentication.filter.remoteAddress"> 
+        <xsd:annotation> 
+            <xsd:documentation>Specifies the remote host TCP/IP address of the client application that sent the HTTP request, for example, remoteAddress id="sample" ip="100.100.100.99" matchType="greaterThan".</xsd:documentation> 
+            <xsd:appinfo> 
+                <ext:label>Remote Address</ext:label> 
+            </xsd:appinfo> 
+        </xsd:annotation><!--Idiom for "empty element context" (whitespace accepted and ignored)--> 
+        <xsd:sequence> 
+            <xsd:sequence/> 
+        </xsd:sequence> 
+        <xsd:attribute name="matchType" use="optional" default="contains"> 
+            <xsd:annotation> 
+                <xsd:documentation>Specifies the match type.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Match type</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+            <xsd:simpleType> 
+                <xsd:union memberTypes="variableType"> 
+                    <xsd:simpleType> 
+                        <xsd:restriction base="xsd:string"> 
+                            <xsd:enumeration value="equals"> 
+                                <xsd:annotation> 
+                                    <xsd:documentation>Equals</xsd:documentation> 
+                                </xsd:annotation> 
+                            </xsd:enumeration> 
+                            <xsd:enumeration value="contains"> 
+                                <xsd:annotation> 
+                                    <xsd:documentation>Contains</xsd:documentation> 
+                                </xsd:annotation> 
+                            </xsd:enumeration> 
+                            <xsd:enumeration value="notContain"> 
+                                <xsd:annotation> 
+                                    <xsd:documentation>Not contain</xsd:documentation> 
+                                </xsd:annotation> 
+                            </xsd:enumeration> 
+                            <xsd:enumeration value="greaterThan"> 
+                                <xsd:annotation> 
+                                    <xsd:documentation>Greater than</xsd:documentation> 
+                                </xsd:annotation> 
+                            </xsd:enumeration> 
+                            <xsd:enumeration value="lessThan"> 
+                                <xsd:annotation> 
+                                    <xsd:documentation>Less than</xsd:documentation> 
+                                </xsd:annotation> 
+                            </xsd:enumeration> 
+                        </xsd:restriction> 
+                    </xsd:simpleType> 
+                </xsd:union> 
+            </xsd:simpleType> 
+        </xsd:attribute> 
+        <xsd:attribute name="ip" use="optional" type="xsd:string"> 
+            <xsd:annotation> 
+                <xsd:documentation>Specifies the remote host TCP/IP address. </xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>IP address</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:anyAttribute processContents="skip"> 
+        </xsd:anyAttribute> 
+    </xsd:complexType> 
+    <xsd:simpleType name="variableType"> 
+        <xsd:restriction base="xsd:string"> 
+            <xsd:pattern value=".*$\{[^\s\}]*\}.*"/> 
+        </xsd:restriction> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="location"> 
+        <xsd:union memberTypes="xsd:string variableType"/> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="multiplePidType"> 
+        <xsd:restriction base="xsd:string"> 
+            <xsd:pattern value="[^, ]+(\s*,\s*[^, ]+)*"/> 
+        </xsd:restriction> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="pidListType"> 
+        <xsd:union memberTypes="multiplePidType variableType"/> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="singlePidType"> 
+        <xsd:restriction base="xsd:string"> 
+            <xsd:pattern value="[^, ]+"/> 
+        </xsd:restriction> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="pidType"> 
+        <xsd:union memberTypes="singlePidType variableType"/> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="booleanType"> 
+        <xsd:union memberTypes="xsd:boolean variableType"/> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="secondDuration"> 
+        <xsd:union memberTypes="xsd:string variableType"/> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="dirLocation"> 
+        <xsd:union memberTypes="xsd:string variableType"/> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="duration"> 
+        <xsd:union memberTypes="xsd:string variableType"/> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="passwordHash"> 
+        <xsd:union memberTypes="xsd:string variableType"/> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="hourDuration"> 
+        <xsd:union memberTypes="xsd:string variableType"/> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="fileLocation"> 
+        <xsd:union memberTypes="xsd:string variableType"/> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="intType"> 
+        <xsd:union memberTypes="xsd:int variableType"/> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="password"> 
+        <xsd:union memberTypes="xsd:string variableType"/> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="minuteDuration"> 
+        <xsd:union memberTypes="xsd:string variableType"/> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="longType"> 
+        <xsd:union memberTypes="xsd:long variableType"/> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="shortType"> 
+        <xsd:union memberTypes="xsd:short variableType"/> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="tokenType"> 
+        <xsd:union memberTypes="xsd:token variableType"/> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="factoryIdType"> 
+        <xsd:restriction base="xsd:string"/> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="internalPropertiesType"> 
+        <xsd:restriction base="xsd:string"/> 
+    </xsd:simpleType> 
+    <xsd:simpleType name="schemaPropertiesType"> 
+        <xsd:restriction base="xsd:string"/> 
+    </xsd:simpleType> 
+    <xsd:complexType name="includeType"> 
+        <xsd:annotation> 
+            <xsd:documentation>Specify a configuration resource to include in the server's configuration.</xsd:documentation> 
+            <xsd:appinfo> 
+                <ext:label>Include</ext:label> 
+            </xsd:appinfo> 
+        </xsd:annotation> 
+        <xsd:attribute name="optional" type="xsd:boolean" use="optional" default="false"> 
+            <xsd:annotation> 
+                <xsd:documentation>Allow the included resource to be skipped if it cannot be found.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Resource is optional</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="location" type="location" use="required"> 
+            <xsd:annotation> 
+                <xsd:documentation>Specifies the resource location. This can be a file path or a URI for a remote resource.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Location</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="onConflict" use="optional" default="MERGE"> 
+            <xsd:annotation> 
+                <xsd:documentation>Specifies the behavior that is used to merge elements when conflicts are found.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>On conflict</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+            <xsd:simpleType> 
+                <xsd:union memberTypes="variableType"> 
+                    <xsd:simpleType> 
+                        <xsd:restriction base="xsd:string"> 
+                            <xsd:enumeration value="MERGE"> 
+                                <xsd:annotation> 
+                                    <xsd:documentation>Conflicting elements will be merged together.</xsd:documentation> 
+                                </xsd:annotation> 
+                            </xsd:enumeration> 
+                            <xsd:enumeration value="REPLACE"> 
+                                <xsd:annotation> 
+                                    <xsd:documentation>When elements conflict, the element from the included file will replace the conflicting element.</xsd:documentation> 
+                                </xsd:annotation> 
+                            </xsd:enumeration> 
+                            <xsd:enumeration value="IGNORE"> 
+                                <xsd:annotation> 
+                                    <xsd:documentation>Conflicting elements in the included file will be ignored.</xsd:documentation> 
+                                </xsd:annotation> 
+                            </xsd:enumeration> 
+                        </xsd:restriction> 
+                    </xsd:simpleType> 
+                </xsd:union> 
+            </xsd:simpleType> 
+        </xsd:attribute> 
+    </xsd:complexType> 
+    <xsd:complexType name="variableDefinitionType"> 
+        <xsd:annotation> 
+            <xsd:documentation>Declare a new variable by specifying the name and value for the variable.</xsd:documentation> 
+            <xsd:appinfo> 
+                <ext:label>Variable Declaration</ext:label> 
+            </xsd:appinfo> 
+        </xsd:annotation> 
+        <xsd:attribute name="name" type="xsd:string" use="required"> 
+            <xsd:annotation> 
+                <xsd:documentation>The name of the variable.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Name</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="value" type="xsd:string"> 
+            <xsd:annotation> 
+                <xsd:documentation>The value to be assigned to the variable.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Value</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+        <xsd:attribute name="defaultValue" type="xsd:string"> 
+            <xsd:annotation> 
+                <xsd:documentation>The defaultValue to be assigned to the variable if no value is available.</xsd:documentation> 
+                <xsd:appinfo> 
+                    <ext:label>Default value</ext:label> 
+                </xsd:appinfo> 
+            </xsd:annotation> 
+        </xsd:attribute> 
+    </xsd:complexType> 
+    <xsd:complexType name="serverType"> 
+        <xsd:choice minOccurs="0" maxOccurs="unbounded"> 
+            <xsd:element name="include" type="includeType"/> 
+            <xsd:element name="variable" type="variableDefinitionType"/> 
+        </xsd:choice> 
+        <xsd:attribute name="description" type="xsd:string" use="optional"/> 
+        <xsd:anyAttribute processContents="skip"> 
+        </xsd:anyAttribute> 
+    </xsd:complexType> 
+    <xsd:element name="client" type="serverType"/> 
+    <xsd:element name="server" type="serverType"/> 
+</xsd:schema> 
