@@ -22,6 +22,7 @@ import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import io.openliberty.tools.langserver.lemminx.util.DocumentUtil;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 public class ContainerService {
@@ -128,6 +129,10 @@ public class ContainerService {
         if (!xsdFile.exists()) {
             return null;
         }
+
+        // do some post processing to remove the anyAttribute element from parent element if there is no extraProperties sibling
+        DocumentUtil.removeExtraneousAnyAttributeElements(xsdFile);
+
         LOGGER.info("Using schema file at: " + xsdFile.toURI().toString());
         return xsdFile.toURI().toString();
     }
