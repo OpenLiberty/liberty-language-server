@@ -73,9 +73,20 @@ public class DockerService {
      * @param localDest
      */
     public void dockerCp(String containerName, String containerSrc, String localDest) {
+        dockerCp(containerName, containerSrc, localDest, false);
+    }
+
+    /**
+     * Method to copy a file out from the specified container
+     * @param containerName
+     * @param containerSrc
+     * @param localDest
+     * @param suppressError - if the file may not be present, pass true for this boolean parameter to suppress the error/exception
+     */
+    public void dockerCp(String containerName, String containerSrc, String localDest, boolean suppressError) {
         // $ docker cp [OPTIONS] CONTAINER:SRC_PATH DEST_PATH|-
         String dockerCp = MessageFormat.format("docker cp {0}:{1} {2}", containerName, containerSrc, localDest);
-        execDockerCmd(dockerCp);
+        execDockerCmd(dockerCp, suppressError);
     }
 
     /**
@@ -101,6 +112,8 @@ public class DockerService {
             String schemaVersion = "--schemaVersion=1.1";
             String outputVersion = "--outputVersion=2";
             String cmd = MessageFormat.format("java -jar {0} {1} {2} {3}", jarPath, schemaVersion, outputVersion, containerOutputFileString);
+
+            LOGGER.info("Generating schema file for container at: " + xsdFile.getCanonicalPath());
 
             // generate xsd file inside container
             dockerExec(libertyWorkspace.getContainerName(), cmd);
@@ -152,17 +165,26 @@ public class DockerService {
     /** ===== Protected/Helper Methods ===== **/
 
     /**
-     * @param timeout unit is seconds
+     * @param command String containing the command to run
      * @return the stdout of the command or null for no output on stdout
      */
     protected String execDockerCmd(String command) {
+        return execDockerCmd(command, false);
+    }
+
+    /**
+     * @param command String containing the command to run
+     * @param suppressError If it is expected that the command may fail, pass true for this boolean parameter to suppress the error/exception.
+     * @return the stdout of the command or null for no output on stdout
+     */
+    protected String execDockerCmd(String command, boolean suppressError) {
         String result = null;
         try {
             // debug("execDocker, timeout=" + timeout + ", cmd=" + command);
             Process p = Runtime.getRuntime().exec(command);
             p.waitFor(DOCKER_TIMEOUT, TimeUnit.SECONDS);
             // After waiting for the process, handle the error case and normal termination.
-            if (p.exitValue() != 0) {
+            if (p.exitValue() != 0 && !suppressError) {
                 LOGGER.severe("Received exit value=" + p.exitValue() + " when running Docker command: " + command);
                 // read messages from standard err
                 char[] d = new char[1023];

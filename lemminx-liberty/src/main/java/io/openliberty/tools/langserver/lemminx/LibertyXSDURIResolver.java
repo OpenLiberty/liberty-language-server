@@ -92,8 +92,7 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
                 }
             }
         } catch (Exception e) {
-            LOGGER.severe("Error: Unable to generate the Liberty schema from the target Liberty runtime.");
-            e.printStackTrace();
+            LOGGER.severe("Error: Unable to generate the Liberty schema from the target Liberty runtime: "+e.getMessage());
         }
 
         try {

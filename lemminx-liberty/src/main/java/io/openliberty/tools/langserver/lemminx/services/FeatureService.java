@@ -126,8 +126,9 @@ public class FeatureService {
         Feature[] featureList = new Gson().fromJson(reader, Feature[].class);
 
         ArrayList<Feature> publicFeatures = new ArrayList<>();
+        // Guard against null visibility field. Ran into this during manual testing of a wlp installation.
         Arrays.asList(featureList).stream()
-            .filter(f -> f.getWlpInformation().getVisibility().equals(LibertyConstants.PUBLIC_VISIBILITY))
+            .filter(f -> f.getWlpInformation().getVisibility() != null && f.getWlpInformation().getVisibility().equals(LibertyConstants.PUBLIC_VISIBILITY))
             .forEach(publicFeatures::add);
         defaultFeatureList = publicFeatures;
         return publicFeatures;
@@ -174,6 +175,7 @@ public class FeatureService {
             }
         } catch (Exception e) {
             // do nothing, continue on to returning default feature list
+            LOGGER.warning("Received exception when trying to download features from Maven Central: "+e.getMessage());
         }
 
         // fetch installed features list - this would only happen if a features.json was not able to be downloaded from Maven Central
@@ -309,10 +311,14 @@ public class FeatureService {
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         FeatureInfo featureInfo = (FeatureInfo) jaxbUnmarshaller.unmarshal(featureListFile);
         
+        // Note: Only the public features are loaded when unmarshalling the passed featureListFile.
         if ((featureInfo.getFeatures() != null) && (featureInfo.getFeatures().size() > 0)) {
             for (int i = 0; i < featureInfo.getFeatures().size(); i++) {
                 Feature f = featureInfo.getFeatures().get(i);
                 f.setShortDescription(f.getDescription());
+                // The xml featureListFile does not have a wlpInformation element like the json does, but our code depends on looking up 
+                // features by the shortName found in wlpInformation. So create a WlpInformation object and initialize the shortName to 
+                // the feature name.
                 WlpInformation wlpInfo = new WlpInformation(f.getName());
                 f.setWlpInformation(wlpInfo);
             }

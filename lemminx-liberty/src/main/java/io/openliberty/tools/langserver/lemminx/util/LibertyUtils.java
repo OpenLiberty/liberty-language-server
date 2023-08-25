@@ -309,21 +309,26 @@ public class LibertyUtils {
     }
 
     public static Path getLibertyPropertiesFileForDevc(LibertyWorkspace libertyWorkspace) {
-        Path props = getFileFromContainer(libertyWorkspace, DockerService.DEFAULT_CONTAINER_WLP_PROPERTIES_PATH);
-        props = props.toFile().exists() ? props : getFileFromContainer(libertyWorkspace, DockerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH);
+        try {
+            Path props = getFileFromContainer(libertyWorkspace, DockerService.DEFAULT_CONTAINER_WLP_PROPERTIES_PATH, true);
+            props = props.toFile().exists() ? props : getFileFromContainer(libertyWorkspace, DockerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH, true);
 
-        if (props.toFile().exists()) {
-            return props;
+            if (props.toFile().exists()) {
+                return props;
+            }
+            LOGGER.warning("Could not find properties for container at location: "+DockerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH);
+        } catch (IOException e) {
+            LOGGER.warning("Could not find properties for container at location: "+DockerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH+" due to exception: "+e.getMessage());
         }
 
-        LOGGER.warning("Could not find properties for container at location: "+DockerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH);
         return null;
     }
 
-    public static Path getFileFromContainer(LibertyWorkspace libertyWorkspace, String fileLocation) {
+    public static Path getFileFromContainer(LibertyWorkspace libertyWorkspace, String fileLocation, boolean suppressError) throws IOException {
         DockerService docker = DockerService.getInstance();
-        File containerPropertiesFile = new File(getTempDir(libertyWorkspace), "container.properties");
-        docker.dockerCp(libertyWorkspace.getContainerName(), fileLocation, containerPropertiesFile.toString());
+        Path tempDir = Files.createTempDirectory(null);
+        File containerPropertiesFile = new File(tempDir.toFile(), "container.properties");
+        docker.dockerCp(libertyWorkspace.getContainerName(), fileLocation, containerPropertiesFile.toString(), suppressError);
         return Paths.get(containerPropertiesFile.toString());
     }
 
