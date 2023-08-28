@@ -19,6 +19,7 @@ import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
 
+import io.openliberty.tools.langserver.LibertyConfigFileManager;
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 
 public class Messages {
@@ -90,11 +91,11 @@ public class Messages {
             }
             return true;
         };
-        if (filename.contains("server.env")) { // server.env file
+        if (LibertyConfigFileManager.isServerEnvFile(filename)) { // server.env file
             List<String> keys = new ArrayList<String>(serverPropertyKeys);
             keys.removeIf(filter);
             return keys;
-        } else if (filename.contains("bootstrap.properties")) { // bootstrap.properties file
+        } else if (LibertyConfigFileManager.isBootstrapPropertiesFile(filename)) { // bootstrap.properties file
             List<String> keys = new ArrayList<String>(bootstrapPropertyKeys);
             keys.removeIf(filter);
             return keys;

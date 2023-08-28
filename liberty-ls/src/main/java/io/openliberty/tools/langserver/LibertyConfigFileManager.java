@@ -1,8 +1,11 @@
 package io.openliberty.tools.langserver;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 import io.openliberty.tools.langserver.utils.XmlReader;
@@ -13,6 +16,8 @@ public class LibertyConfigFileManager {
 
     private static Set<String> customServerEnvFiles = new HashSet<String>();
     private static Set<String> customBootstrapFiles = new HashSet<String>();
+
+    private static final Logger LOGGER = Logger.getLogger(LibertyConfigFileManager.class.getName());
 
     public static void processLibertyPluginConfigXml(String uri) {
         if (!uri.endsWith("liberty-plugin-config.xml")) {
@@ -44,7 +49,14 @@ public class LibertyConfigFileManager {
     }
 
     public static boolean isServerEnvFile(String uri) {
-        return uri.endsWith("server.env") || customServerEnvFiles.contains(uri);
+        String path = null;
+        try {
+            path = new URI(uri).getPath();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+
+        return uri.endsWith("server.env") || customServerEnvFiles.contains(path);
     }
 
     public static boolean isBootstrapPropertiesFile(LibertyTextDocument tdi) {
@@ -52,6 +64,12 @@ public class LibertyConfigFileManager {
     }
 
     public static boolean isBootstrapPropertiesFile(String uri) {
-        return uri.endsWith("bootstrap.properties") || customBootstrapFiles.contains(uri);
+        String path = null;
+        try {
+            path = new URI(uri).getPath();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+        }
+        return uri.endsWith("bootstrap.properties") || customBootstrapFiles.contains(path);
     }
 }
