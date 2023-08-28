@@ -117,7 +117,7 @@ public class FeatureService {
     }
 
     /**
-     * Returns a list of public features
+     * Returns a list of public features found in the passed input stream. Does not affect the default feature list.
      *
      * @param reader - InputStreamReader for json feature list
      * @return list of public features
@@ -130,7 +130,6 @@ public class FeatureService {
         Arrays.asList(featureList).stream()
             .filter(f -> f.getWlpInformation().getVisibility() != null && f.getWlpInformation().getVisibility().equals(LibertyConstants.PUBLIC_VISIBILITY))
             .forEach(publicFeatures::add);
-        defaultFeatureList = publicFeatures;
         return publicFeatures;
     }
 
@@ -168,6 +167,8 @@ public class FeatureService {
         if (!libertyVersion.endsWith("-beta")) {
             try {
                 // verify that request delay (seconds) has gone by since last fetch request
+                // Note that the default delay is 120 seconds and can cause us to generate a feature list instead of download from MC when
+                // switching back and forth between projects.
                 long currentTime = System.currentTimeMillis();
                 if (this.featureUpdateTime == -1 || currentTime >= (this.featureUpdateTime + (requestDelay * 1000))) {
                     List<Feature> features = fetchFeaturesForVersion(libertyVersion, libertyRuntime);
@@ -182,7 +183,7 @@ public class FeatureService {
         }
 
         // fetch installed features list - this would only happen if a features.json was not able to be downloaded from Maven Central
-        // This is the case for beta runtimes and for very old runtimes pre 18.0.0.2.
+        // This is the case for beta runtimes and for very old runtimes pre 18.0.0.2 (or if within the requestDelay window of 120 seconds).
         List<Feature> installedFeatures = getInstalledFeaturesList(documentURI, libertyRuntime, libertyVersion);
         if (installedFeatures.size() != 0) {
             return installedFeatures;
