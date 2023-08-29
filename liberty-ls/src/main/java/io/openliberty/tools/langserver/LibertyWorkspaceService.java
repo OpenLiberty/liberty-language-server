@@ -26,6 +26,7 @@ public class LibertyWorkspaceService implements WorkspaceService {
 
     public LibertyWorkspaceService(LibertyLanguageServer libertyls) {
         this.libertyLanguageServer = libertyls;
+        // TODO: init scanning liberty-plugin-config.xml files
     }
 
     @Override

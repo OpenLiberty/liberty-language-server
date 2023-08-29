@@ -26,6 +26,7 @@ public class LibertyConfigFileManager {
         Map<String, String> customConfigFiles = XmlReader.readTagsFromXml(uri, 
                 CUSTOM_SERVER_ENV_XML_TAG, 
                 CUSTOM_BOOTSTRAP_PREOPERTIES_XML_TAG);
+        // TODO: handle deletions
         if (customConfigFiles.containsKey(CUSTOM_SERVER_ENV_XML_TAG)) {
             customServerEnvFiles.add(customConfigFiles.get(CUSTOM_SERVER_ENV_XML_TAG));
         }
@@ -39,7 +40,6 @@ public class LibertyConfigFileManager {
      * @param fileUri
      * @return
      */
-    // TODO: separate into two methods for server/bootstrap files
     public static boolean isCustomConfigFile(String fileUri) {
         return customBootstrapFiles.contains(fileUri) || customServerEnvFiles.contains(fileUri);
     }
