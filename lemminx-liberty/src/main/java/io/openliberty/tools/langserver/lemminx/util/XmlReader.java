@@ -49,8 +49,7 @@ public class XmlReader {
         } catch (FileNotFoundException e) {
             LOGGER.severe("Unable to access file "+ file.getName());
         } catch (XMLStreamException e) {
-            LOGGER.severe("Error received trying to read XML file: " + file.getName());
-            e.printStackTrace();
+            LOGGER.severe("Error received trying to read XML file " + file.getName() + " : "+e.getMessage());
         } finally {
             if (reader != null) {
                 try {
@@ -100,8 +99,7 @@ public class XmlReader {
         } catch (FileNotFoundException e) {
             LOGGER.severe("Unable to access file "+ file.toFile().getName());
         } catch (XMLStreamException e) {
-            LOGGER.severe("Error received trying to read XML file: " + file.toFile().getName());
-            e.printStackTrace();
+            LOGGER.severe("Error received trying to read XML file " + file.toFile().getName() + " : "+e.getMessage());
         } finally {
             if (reader != null) {
                 try {
