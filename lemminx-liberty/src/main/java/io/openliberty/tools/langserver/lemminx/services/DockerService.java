@@ -193,7 +193,7 @@ public class DockerService {
                 char[] d = new char[1023];
                 new InputStreamReader(p.getErrorStream(), StandardCharsets.UTF_8).read(d);
                 String stdErrString = new String(d).trim()+" RC="+p.exitValue();
-                LOGGER.severe(stdErrString);
+                //LOGGER.severe(stdErrString);
                 throw new RuntimeException(stdErrString);
             }
             result = readStdOut(p);
