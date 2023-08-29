@@ -17,6 +17,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.text.MessageFormat;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -190,7 +191,7 @@ public class DockerService {
                 LOGGER.severe("Received exit value=" + p.exitValue() + " when running Docker command: " + command);
                 // read messages from standard err
                 char[] d = new char[1023];
-                new InputStreamReader(p.getErrorStream()).read(d);
+                new InputStreamReader(p.getErrorStream(), StandardCharsets.UTF_8).read(d);
                 String stdErrString = new String(d).trim()+" RC="+p.exitValue();
                 LOGGER.severe(stdErrString);
                 throw new RuntimeException(stdErrString);
