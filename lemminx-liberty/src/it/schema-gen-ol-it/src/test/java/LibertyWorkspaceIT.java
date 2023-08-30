@@ -1,7 +1,5 @@
 package io.openliberty.tools.test;
 
-import static org.eclipse.lemminx.XMLAssert.r;
-
 import java.util.List;
 import java.io.File;
 import java.io.IOException;
