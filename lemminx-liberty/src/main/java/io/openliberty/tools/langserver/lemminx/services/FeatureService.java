@@ -84,7 +84,13 @@ public class FeatureService {
         InputStreamReader reader = new InputStreamReader(new URL(featureEndpoint).openStream());
 
         // Only need the public features
-        ArrayList<Feature> publicFeatures = readPublicFeatures(reader);
+        List<Feature> publicFeatures = readPublicFeatures(reader);
+
+        if (libertyRuntime.equals("wlp")) {
+            // need to also get the OpenLiberty features and add them to the list to return
+            List<Feature> olFeatures = fetchFeaturesForVersion(libertyVersion, "ol");
+            publicFeatures.addAll(olFeatures);
+        }
 
         LOGGER.info("Returning public features from Maven: " + publicFeatures.size());
         return publicFeatures;
@@ -162,8 +168,8 @@ public class FeatureService {
 
         LOGGER.info("Getting features for: " + featureCacheKey);
 
-        // else if not a beta runtime, fetch the features from maven central
-        // beta runtimes do not have a published features.json in mc
+        // if not a beta runtime, fetch features from maven central
+        // - beta runtimes do not have a published features.json in mc
         if (!libertyVersion.endsWith("-beta")) {
             try {
                 // verify that request delay (seconds) has gone by since last fetch request
@@ -223,8 +229,10 @@ public class FeatureService {
         }
 
         // return installed features from cache
-        if (libertyWorkspace.getInstalledFeatureList().size() != 0) {
-            return libertyWorkspace.getInstalledFeatureList();
+        List<Feature> cachedFeatures = libertyWorkspace.getInstalledFeatureList();
+        if (cachedFeatures.size() != 0) {
+            LOGGER.info("Getting cached features from previously generated feature list: " + cachedFeatures.size());
+            return cachedFeatures;
         }
 
         try {
