@@ -6,7 +6,6 @@ import org.eclipse.lsp4j.WorkspaceFolder;
 import org.junit.jupiter.api.Test;
 
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
-import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 
 import static org.eclipse.lemminx.XMLAssert.r;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -16,7 +15,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Collection;
 
 public class LibertyDiagnosticTest {
 
@@ -82,7 +80,7 @@ public class LibertyDiagnosticTest {
                 "</server>" //
         );
 
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, null);
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, (Diagnostic[]) null);
     }
 
     @Test
