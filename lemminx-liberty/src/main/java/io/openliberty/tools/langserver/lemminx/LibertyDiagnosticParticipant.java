@@ -25,7 +25,6 @@ import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
-import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import io.openliberty.tools.langserver.lemminx.util.*;
 

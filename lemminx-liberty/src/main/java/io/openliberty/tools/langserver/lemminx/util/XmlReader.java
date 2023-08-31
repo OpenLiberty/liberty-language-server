@@ -35,28 +35,41 @@ public class XmlReader {
     private static final Logger LOGGER = Logger.getLogger(XmlReader.class.getName());
 
     public static boolean hasServerRoot(String filePath) {
-        XMLInputFactory factory = XMLInputFactory.newInstance();
-        XMLEventReader reader = null;
         File file = null;
         
         try {
             file = new File(new URI(filePath).getPath());
-            if (!file.exists() || file.length() == 0) {
+            return hasServerRoot(file);
+        } catch (URISyntaxException e) {
+            LOGGER.severe("Error received converting file path to URI for path " + filePath);
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean hasServerRoot(Path filePath) {
+        return hasServerRoot(filePath.toFile());
+    }
+
+    public static boolean hasServerRoot(File xmlFile) {
+        XMLEventReader reader = null;
+        
+        try {
+            if (!xmlFile.exists() || xmlFile.length() == 0) {
                 return false;
             }
 
-            reader = factory.createXMLEventReader(new FileInputStream(file));
+            XMLInputFactory factory = XMLInputFactory.newInstance();
+            reader = factory.createXMLEventReader(new FileInputStream(xmlFile));
             if (reader.hasNext()) {
                 XMLEvent firstTag = reader.nextTag(); // first start/end element
                 reader.close();
                 return isServerElement(firstTag);
             }
         } catch (FileNotFoundException e) {
-            LOGGER.severe("Unable to access file "+ filePath);
+            LOGGER.severe("Unable to access file "+ xmlFile.getAbsolutePath());
         } catch (XMLStreamException e) {
-            LOGGER.severe("Error received trying to read XML file " + file.getName() + " : "+e.getMessage());
-        } catch (URISyntaxException e) {
-            LOGGER.severe("Error received converting file path to URI for path " + filePath);
+            LOGGER.severe("Error received trying to read XML file: " + xmlFile.getAbsolutePath());
             e.printStackTrace();
         } finally {
             if (reader != null) {

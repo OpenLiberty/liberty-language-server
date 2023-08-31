@@ -24,6 +24,7 @@ import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -81,6 +82,73 @@ public class LibertyUtils {
 
     public static URI getDocumentAsUri(DOMDocument document) {
         return URI.create(document.getDocumentURI());
+    }
+
+    /*
+     * Check the dirs collection of Path objects to see if any of them have a name that matches the passed collection of names.
+     * 
+     * @param dirs collection of Path objects that are directories
+     * @param names collection of Strings that are names to match on
+     * @return boolean true if any of the passed Path objects have a name that matches one in the collection of names
+     */
+    public static boolean containsDirectoryWithName(List<Path> dirs, Set<String> names) {
+        for (Path nextDir : dirs) {
+            if (names.contains(nextDir.toFile().getName())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /*
+     * Check the files to see if any start with the Path for rootDir.
+     * 
+     * @param rootDir Path to compare using startsWith method
+     * @param files collection of Path objects that are files to check
+     * @return boolean true if any of the passed Path objects for files start with the rootDir Path
+     */
+    public static boolean containsFileStartingWithRootPath(Path rootDir, List<Path> files) {
+        for (Path nextFile : files) {
+            if (nextFile.startsWith(rootDir)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /*
+     * Retrieve a collection of Path objects for xml files located in the passed Path dir that have a <server> root element.
+     * 
+     * @param dir Path of directory to check for xml files 
+     * @return List<Path> collection of xml files with server root elements
+     */
+    public static List<Path> getXmlFilesWithServerRootInDirectory(Path dir) throws IOException {
+        List<Path> serverRootXmlFiles = new ArrayList<Path>();
+
+        List<Path> xmlFiles = findFilesEndsWithInDirectory(dir, ".xml");
+        for (Path nextXmlFile : xmlFiles) {
+            if (XmlReader.hasServerRoot(nextXmlFile)) {
+                serverRootXmlFiles.add(nextXmlFile);
+            }
+        }       
+
+        return serverRootXmlFiles;
+    }
+
+    /**
+     * Search the dir path for all files that end with a name or extension. If none are found,
+     * an empty List is returned.
+     * 
+     * @param dir Path to search under
+     * @param nameOrExtension String to match
+     * @return List<Path> collection of Path that match the given nameOrExtension in the specified dir Path.
+     */
+    public static List<Path> findFilesEndsWithInDirectory(Path dir, String nameOrExtension) throws IOException {
+        List<Path> matchingFiles = Files.walk(dir)
+                .filter(p -> (Files.isRegularFile(p) && p.toFile().getName().endsWith(nameOrExtension)))
+                .collect(Collectors.toList());
+
+        return matchingFiles;
     }
 
     /**
