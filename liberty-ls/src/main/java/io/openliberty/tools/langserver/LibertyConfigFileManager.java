@@ -1,5 +1,6 @@
 package io.openliberty.tools.langserver;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -95,13 +96,8 @@ public class LibertyConfigFileManager {
      * @return
      */
     public static boolean isServerEnvFile(String uri) {
-        String path = null;
-        try {
-            path = new URI(uri).getPath();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        return uri.endsWith("src/main/liberty/config/server.env") || customServerEnvFiles.contains(path);
+        Path finalPath = Paths.get(new File(uri).toURI());
+        return finalPath.endsWith("src/main/liberty/config/server.env") || customServerEnvFiles.contains(finalPath.toString());
     }
 
     public static boolean isBootstrapPropertiesFile(LibertyTextDocument tdi) {
@@ -118,13 +114,8 @@ public class LibertyConfigFileManager {
      * @return
      */
     public static boolean isBootstrapPropertiesFile(String uri) {
-        String path = null;
-        try {
-            path = new URI(uri).getPath();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-        }
-        return uri.endsWith("src/main/liberty/config/bootstrap.properties") || customBootstrapFiles.contains(path);
+        Path finalPath = Paths.get(new File(uri).toURI());
+        return finalPath.endsWith("src/main/liberty/config/bootstrap.properties") || customBootstrapFiles.contains(finalPath.toString());
     }
 
     /**
