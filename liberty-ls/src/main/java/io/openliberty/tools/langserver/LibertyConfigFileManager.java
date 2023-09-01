@@ -2,10 +2,13 @@ package io.openliberty.tools.langserver;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.file.FileSystem;
+import java.nio.file.PathMatcher;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 import io.openliberty.tools.langserver.utils.XmlReader;
@@ -26,7 +29,7 @@ public class LibertyConfigFileManager {
         Map<String, String> customConfigFiles = XmlReader.readTagsFromXml(uri, 
                 CUSTOM_SERVER_ENV_XML_TAG, 
                 CUSTOM_BOOTSTRAP_PREOPERTIES_XML_TAG);
-        // TODO: handle deletions
+        // TODO: handle deletions. maybe use map with <uri, path> ? and clear all that match uri
         if (customConfigFiles.containsKey(CUSTOM_SERVER_ENV_XML_TAG)) {
             customServerEnvFiles.add(customConfigFiles.get(CUSTOM_SERVER_ENV_XML_TAG));
         }
@@ -48,6 +51,13 @@ public class LibertyConfigFileManager {
         return isServerEnvFile(tdi.getUri());
     }
 
+    /**
+     * Checks if file matches one of these conditions:
+     * - is default server.env file in `src/main/liberty/config`
+     * - is custom env file specified in liberty-plugin-config.xml (generated from build file)
+     * @param uri
+     * @return
+     */
     public static boolean isServerEnvFile(String uri) {
         String path = null;
         try {
@@ -55,14 +65,20 @@ public class LibertyConfigFileManager {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-
-        return uri.endsWith("server.env") || customServerEnvFiles.contains(path);
+        return uri.endsWith("src/main/liberty/config/server.env") || customServerEnvFiles.contains(path);
     }
 
     public static boolean isBootstrapPropertiesFile(LibertyTextDocument tdi) {
         return isBootstrapPropertiesFile(tdi.getUri());
     }
 
+    /**
+     * Checks if file matches one of these conditions:
+     * - is default bootstrap.properties file in `src/main/liberty/config`
+     * - is custom properties file specified in liberty-plugin-config.xml (generated from build file)
+     * @param uri
+     * @return
+     */
     public static boolean isBootstrapPropertiesFile(String uri) {
         String path = null;
         try {
@@ -70,6 +86,6 @@ public class LibertyConfigFileManager {
         } catch (URISyntaxException e) {
             e.printStackTrace();
         }
-        return uri.endsWith("bootstrap.properties") || customBootstrapFiles.contains(path);
+        return uri.endsWith("src/main/liberty/config/bootstrap.properties") || customBootstrapFiles.contains(path);
     }
 }

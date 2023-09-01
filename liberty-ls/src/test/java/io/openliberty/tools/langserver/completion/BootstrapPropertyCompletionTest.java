@@ -101,7 +101,7 @@ public class BootstrapPropertyCompletionTest extends AbstractCompletionTest {
     }
 
     protected CompletableFuture<Either<List<CompletionItem>, CompletionList>> getCompletion(String enteredText, Position position) throws URISyntaxException, InterruptedException, ExecutionException {
-        String filename = "bootstrap.properties";
+        String filename = "src/main/liberty/config/bootstrap.properties";
         LibertyLanguageServer lls = initializeLanguageServer(filename, new TextDocumentItem(filename, LibertyLanguageServer.LANGUAGE_ID, 0, enteredText));
         return getCompletionFor(lls, position, filename);
     }

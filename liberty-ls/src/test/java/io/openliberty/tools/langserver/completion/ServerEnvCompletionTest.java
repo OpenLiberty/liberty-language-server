@@ -117,7 +117,7 @@ public class ServerEnvCompletionTest extends AbstractCompletionTest {
     }
 
     protected CompletableFuture<Either<List<CompletionItem>, CompletionList>> getCompletion(String enteredText, Position position) throws URISyntaxException, InterruptedException, ExecutionException {
-        String filename = "server.env";
+        String filename = "src/main/liberty/config/server.env";
         LibertyLanguageServer lls = initializeLanguageServer(filename, new TextDocumentItem(filename, LibertyLanguageServer.LANGUAGE_ID, 0, enteredText));
         return getCompletionFor(lls, position, filename);
     }

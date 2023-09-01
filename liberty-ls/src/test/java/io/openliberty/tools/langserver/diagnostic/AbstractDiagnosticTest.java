@@ -44,7 +44,7 @@ public class AbstractDiagnosticTest extends AbstractLibertyLanguageServerTest {
     }
 
     protected void testDiagnostic(String fileToTest, int expectedNumberOfErrors) throws FileNotFoundException {
-        File f = new File("src/test/resources/workspace/diagnostic/" + fileToTest);
+        File f = new File("src/test/resources/workspace/diagnostic/src/main/liberty/config/" + fileToTest);
         testDiagnostic(f, expectedNumberOfErrors);
     }
 
