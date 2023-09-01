@@ -42,13 +42,7 @@ public class XmlReader {
      */
     public static Map<String, String> readTagsFromXml(String fileUri, String... tagNames) {
         File xmlFile = null;
-        try {
-            xmlFile = new File(new URI(fileUri).getPath());
-        } catch (URISyntaxException e) {
-            LOGGER.warning("Failed to read file: " + fileUri);
-            e.printStackTrace();
-            return new HashMap<String, String>();
-        }
+        xmlFile = new File(fileUri);
         Set<String> tagSet = Set.of(tagNames);
         return getElementValues(xmlFile, tagSet);
     }

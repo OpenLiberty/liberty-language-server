@@ -22,7 +22,7 @@ public class XmlReaderTest {
     @Test
     public void readLibertyPluginConfigXml() throws IOException {
         File lpcXml = new File(resourcesDir, "xml/liberty-plugin-config.xml");
-        Map<String, String> tagValues = XmlReader.readTagsFromXml(lpcXml.toURI().toString(), 
+        Map<String, String> tagValues = XmlReader.readTagsFromXml(lpcXml.toURI().getPath(), 
                 LibertyConfigFileManager.CUSTOM_BOOTSTRAP_PREOPERTIES_XML_TAG, 
                 LibertyConfigFileManager.CUSTOM_SERVER_ENV_XML_TAG);
 
