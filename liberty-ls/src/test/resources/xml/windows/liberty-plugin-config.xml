@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<liberty-plugin-config version="2.0">
+  <installDirectory>C:\Users\user\sample-project\build\wlp</installDirectory>
+  <bootstrapPropertiesFile>C:\user\sample-project\src\main\liberty\config\custombootstrapprops.properties</bootstrapPropertiesFile>
+  <serverEnvFile>C:\user\sample-project\src\main\liberty\config\customserverenv.env</serverEnvFile>
+  <servers>
+    <server>
+      <userDirectory>C:\Users\user\sample-project\build\wlp\usr</userDirectory>
+      <serverDirectory>C:\Users\user\sample-project\build\wlp\usr\servers\testServer</serverDirectory>
+      <serverOutputDirectory>C:\Users\user\sample-project\build\wlp\usr\servers\testServer</serverOutputDirectory>
+      <serverName>testServer</serverName>
+      <looseApplication>true</looseApplication>
+      <stripVersion>false</stripVersion>
+      <applications>
+        <application>
+          <appsDirectory>apps</appsDirectory>
+          <applicationFilename>ejb-war.war.xml</applicationFilename>
+          <warSourceDirectory>src/main/webapp</warSourceDirectory>
+          <projectType>war</projectType>
+        </application>
+      </applications>
+    </server>
+  </servers>
+</liberty-plugin-config>
