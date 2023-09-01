@@ -24,8 +24,6 @@ import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
-import org.eclipse.lsp4j.services.LanguageServer;
-import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
 import io.openliberty.tools.langserver.common.ParentProcessWatcher.ProcessLanguageServer;
@@ -57,6 +55,7 @@ public class LibertyLanguageServer extends AbstractLanguageServer implements Pro
 
         ServerCapabilities serverCapabilities = createServerCapabilities();
         InitializeResult initializeResult = new InitializeResult(serverCapabilities);
+        LibertyConfigFileManager.initLibertyConfigFileManager(params.getWorkspaceFolders());
         return CompletableFuture.completedFuture(initializeResult);
     }
 
@@ -124,5 +123,9 @@ public class LibertyLanguageServer extends AbstractLanguageServer implements Pro
 
     public void setLanguageClient(LanguageClient languageClient) {
         this.languageClient = languageClient;
+    }
+
+    private void initLibertyConfigFileManager() {
+        
     }
 }
