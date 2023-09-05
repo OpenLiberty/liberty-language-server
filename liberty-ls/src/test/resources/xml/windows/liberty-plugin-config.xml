@@ -2,7 +2,7 @@
 <liberty-plugin-config version="2.0">
   <installDirectory>C:\Users\user\sample-project\build\wlp</installDirectory>
   <bootstrapPropertiesFile>C:\user\sample-project\src\main\liberty\config\custombootstrapprops.properties</bootstrapPropertiesFile>
-  <serverEnvFile>C:\user\sample-project\src\main\liberty\config\customserverenv.env</serverEnvFile>
+  <serverEnv>C:\user\sample-project\src\main\liberty\config\customserverenv.env</serverEnv>
   <servers>
     <server>
       <userDirectory>C:\Users\user\sample-project\build\wlp\usr</userDirectory>

@@ -8,7 +8,7 @@
     <configDirectory>/user/sample-project/src/main/liberty/config</configDirectory>
     <configFile>/user/sample-project/src/main/liberty/config/server.xml</configFile>
     <bootstrapPropertiesFile>/user/sample-project/src/main/liberty/config/custombootstrapprops.properties</bootstrapPropertiesFile>
-    <serverEnv>/user/sample-project/src/main/liberty/config/customserverenv.env</serverEnvFile>
+    <serverEnv>/user/sample-project/src/main/liberty/config/customserverenv.env</serverEnv>
     <appsDirectory>apps</appsDirectory>
     <looseApplication>true</looseApplication>
     <stripVersion>false</stripVersion>

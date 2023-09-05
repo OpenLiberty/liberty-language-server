@@ -82,7 +82,6 @@ public class Messages {
             initializeBundles();
         }
         
-        String filename = textDocument.getUri();
         // remove completion results that don't contain the query string (case-insensitive search)
         Predicate<String> filter = s -> {
             for (int i = s.length() - query.length(); i >= 0; --i) {
@@ -91,11 +90,11 @@ public class Messages {
             }
             return true;
         };
-        if (LibertyConfigFileManager.isServerEnvFile(filename)) { // server.env file
+        if (LibertyConfigFileManager.isServerEnvFile(textDocument)) { // server.env file
             List<String> keys = new ArrayList<String>(serverPropertyKeys);
             keys.removeIf(filter);
             return keys;
-        } else if (LibertyConfigFileManager.isBootstrapPropertiesFile(filename)) { // bootstrap.properties file
+        } else if (LibertyConfigFileManager.isBootstrapPropertiesFile(textDocument)) { // bootstrap.properties file
             List<String> keys = new ArrayList<String>(bootstrapPropertyKeys);
             keys.removeIf(filter);
             return keys;
