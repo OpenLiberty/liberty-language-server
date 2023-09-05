@@ -12,8 +12,8 @@ import io.openliberty.tools.langserver.LibertyConfigFileManager;
 
 public class LibertyConfigFileManagerTest {
     File resourcesDir = new File("src/test/resources");
-    public final String CUSTOM_SERVER_ENV_VALUE = "/user/sample-project/src/main/liberty/config/customserverenv.env";
-    public final String CUSTOM_BOOTSTRAP_PROPERTIES_VALUE = "/user/sample-project/src/main/liberty/config/custombootstrapprops.properties";
+    public final String CUSTOM_SERVER_ENV_VALUE = "file:/user/sample-project/src/main/liberty/config/customserverenv.env";
+    public final String CUSTOM_BOOTSTRAP_PROPERTIES_VALUE = "file:/user/sample-project/src/main/liberty/config/custombootstrapprops.properties";
     public final String WINDOWS_CUSTOM_SERVER_ENV_VALUE = "C:\\user\\sample-project\\src\\main\\liberty\\config\\customserverenv.env";
     public final String WINDOWS_CUSTOM_BOOTSTRAP_PROPERTIES_VALUE = "C:\\user\\sample-project\\src\\main\\liberty\\config\\custombootstrapprops.properties";
 
@@ -22,7 +22,7 @@ public class LibertyConfigFileManagerTest {
         if (File.separator.equals("/")) {
             File lpcXml = new File(resourcesDir, "xml/unix/liberty-plugin-config.xml");
 
-            LibertyConfigFileManager.processLibertyPluginConfigXml(lpcXml.getCanonicalPath());
+            LibertyConfigFileManager.processLibertyPluginConfigXml(lpcXml.toURI().getPath());
             assertTrue(LibertyConfigFileManager.isServerEnvFile(CUSTOM_SERVER_ENV_VALUE));
             assertTrue(LibertyConfigFileManager.isBootstrapPropertiesFile(CUSTOM_BOOTSTRAP_PROPERTIES_VALUE));
         }

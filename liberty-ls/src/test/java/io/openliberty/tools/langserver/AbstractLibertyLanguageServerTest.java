@@ -68,9 +68,9 @@ public class AbstractLibertyLanguageServerTest {
         }
     }
 
-    protected LibertyLanguageServer initializeLanguageServerWithFilename(InputStream stream, String fileName) {
+    protected LibertyLanguageServer initializeLanguageServerWithFileUriString(InputStream stream, String fileURI) {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(stream))) {
-            return initializeLanguageServerWithFilename(br.lines().collect(Collectors.joining("\n")), fileName);
+            return initializeLanguageServerWithFileUriString(br.lines().collect(Collectors.joining("\n")), fileURI);
         } catch (ExecutionException | InterruptedException | URISyntaxException | IOException e) {
             return null;
         }
@@ -80,10 +80,19 @@ public class AbstractLibertyLanguageServerTest {
         return initializeLanguageServer(fileSuffix, createTestTextDocument(text, fileSuffix));
     }
 
-    private LibertyLanguageServer initializeLanguageServerWithFilename(String text, String filename) throws URISyntaxException, InterruptedException, ExecutionException {
-        return initializeLanguageServer(filename.substring(filename.lastIndexOf(".")), createTestTextDocumentWithFilename(text, filename));
+    private LibertyLanguageServer initializeLanguageServerWithFileUriString(String text, String fileURI) throws URISyntaxException, InterruptedException, ExecutionException {
+        return initializeLanguageServer(fileURI.substring(fileURI.lastIndexOf(".")), createTestTextDocumentWithFilename(text, fileURI));
     }
 
+    /**
+     * May deprecated String fileSuffix
+     * @param fileSuffix
+     * @param items
+     * @return
+     * @throws URISyntaxException
+     * @throws InterruptedException
+     * @throws ExecutionException
+     */
     protected LibertyLanguageServer initializeLanguageServer(String fileSuffix, TextDocumentItem... items) throws URISyntaxException, InterruptedException, ExecutionException {
         this.extensionUsed = fileSuffix;
         initializeLanguageServer(getInitParams());
@@ -118,8 +127,8 @@ public class AbstractLibertyLanguageServerTest {
         return createTestTextDocumentWithFilename(text, DUMMY_URI + fileSuffix);
     }
 
-    private TextDocumentItem createTestTextDocumentWithFilename(String text, String fileName) {
-        return new TextDocumentItem(fileName, LibertyLanguageServer.LANGUAGE_ID, 0, text);
+    private TextDocumentItem createTestTextDocumentWithFilename(String text, String fileURI) {
+        return new TextDocumentItem(fileURI, LibertyLanguageServer.LANGUAGE_ID, 0, text);
     }
 
     final class DummyLanguageClient implements LanguageClient {
@@ -147,14 +156,20 @@ public class AbstractLibertyLanguageServerTest {
         }
     }
 
+    /**
+     * May be deprecated if DUMMY_URI and extensionUsed aren't relevant anymore
+     * @param libertyLanguageServer
+     * @param position
+     * @return
+     */
     protected CompletableFuture<Either<List<CompletionItem>, CompletionList>> getCompletionFor(LibertyLanguageServer libertyLanguageServer, Position position) {
         return getCompletionFor(libertyLanguageServer, position, DUMMY_URI + extensionUsed);
     }
 
     protected CompletableFuture<Either<List<CompletionItem>, CompletionList>> getCompletionFor(LibertyLanguageServer libertyLanguageServer, Position position,
-            String filename) {
+            String fileURI) {
         TextDocumentService tds = libertyLanguageServer.getTextDocumentService();
-        CompletionParams completionParams = new CompletionParams(new TextDocumentIdentifier(filename), position);
+        CompletionParams completionParams = new CompletionParams(new TextDocumentIdentifier(fileURI), position);
         return tds.completion(completionParams);
     }
 

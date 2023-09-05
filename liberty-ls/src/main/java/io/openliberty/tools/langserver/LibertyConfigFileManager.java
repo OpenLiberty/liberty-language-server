@@ -12,7 +12,6 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -107,7 +106,7 @@ public class LibertyConfigFileManager {
      * @return
      */
     public static boolean isServerEnvFile(String uri) {
-        Path finalPath = Paths.get(new File(uri).toURI());
+        Path finalPath = Paths.get(URI.create(uri));
         return finalPath.endsWith("src/main/liberty/config/server.env") || customServerEnvFiles.contains(finalPath.toString());
     }
 
@@ -125,7 +124,7 @@ public class LibertyConfigFileManager {
      * @return
      */
     public static boolean isBootstrapPropertiesFile(String uri) {
-        Path finalPath = Paths.get(new File(uri).toURI());
+        Path finalPath = Paths.get(URI.create(uri));
         return finalPath.endsWith("src/main/liberty/config/bootstrap.properties") || customBootstrapFiles.contains(finalPath.toString());
     }
 

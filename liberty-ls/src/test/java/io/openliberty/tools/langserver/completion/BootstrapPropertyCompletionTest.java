@@ -11,6 +11,7 @@ package io.openliberty.tools.langserver.completion;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -101,8 +102,11 @@ public class BootstrapPropertyCompletionTest extends AbstractCompletionTest {
     }
 
     protected CompletableFuture<Either<List<CompletionItem>, CompletionList>> getCompletion(String enteredText, Position position) throws URISyntaxException, InterruptedException, ExecutionException {
-        String filename = "src/main/liberty/config/bootstrap.properties";
-        LibertyLanguageServer lls = initializeLanguageServer(filename, new TextDocumentItem(filename, LibertyLanguageServer.LANGUAGE_ID, 0, enteredText));
-        return getCompletionFor(lls, position, filename);
+        String filename = "bootstrap.properties";
+        File file = new File(resourcesDir, filename);
+        String fileURI = file.toURI().toString();
+        
+        LibertyLanguageServer lls = initializeLanguageServer(filename, new TextDocumentItem(fileURI, LibertyLanguageServer.LANGUAGE_ID, 0, enteredText));
+        return getCompletionFor(lls, position, fileURI);
     }
 }

@@ -12,6 +12,7 @@ package io.openliberty.tools.langserver.completion;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertNotNull;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -23,6 +24,8 @@ import org.eclipse.lsp4j.CompletionItemKind;
 import io.openliberty.tools.langserver.AbstractLibertyLanguageServerTest;
 
 public class AbstractCompletionTest extends AbstractLibertyLanguageServerTest {
+
+    File resourcesDir = new File("src/test/resources/workspace/diagnostic/src/main/liberty/config");
 
     /**
      * 
