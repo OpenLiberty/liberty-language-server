@@ -29,7 +29,6 @@ import org.eclipse.lsp4j.services.WorkspaceService;
 import io.openliberty.tools.langserver.common.ParentProcessWatcher.ProcessLanguageServer;
 
 public class LibertyLanguageServer extends AbstractLanguageServer implements ProcessLanguageServer, LanguageClientAware {
-    protected String test;
     public static final String LANGUAGE_ID = "LANGUAGE_ID_LIBERTY";
     private static final Logger LOGGER = Logger.getLogger(LibertyLanguageServer.class.getName());
 
