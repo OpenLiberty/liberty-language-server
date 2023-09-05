@@ -74,8 +74,8 @@ public class XmlReader {
         } catch (FileNotFoundException e) {
             LOGGER.severe("Unable to access file "+ file.getName());
         } catch (XMLStreamException e) {
-            LOGGER.severe("Error received trying to read XML file: " + file.getName());
-            e.printStackTrace();
+            LOGGER.severe("Error received trying to read XML file: " + file.getName() + 
+                          "\n\tError" + e.getMessage());
         } finally {
             if (reader != null) {
                 try {

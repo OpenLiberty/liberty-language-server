@@ -31,8 +31,8 @@ import io.openliberty.tools.langserver.utils.XmlReader;
 
 public class LibertyConfigFileManager {
     public static final String LIBERTY_PLUGIN_CONFIG_XML = "liberty-plugin-config.xml";
-    public static final String CUSTOM_SERVER_ENV_XML_TAG = "serverEnvFile";
-    public static final String CUSTOM_BOOTSTRAP_PREOPERTIES_XML_TAG = "bootstrapPropertiesFile";
+    public static final String CUSTOM_SERVER_ENV_XML_TAG = "serverEnv";
+    public static final String CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG = "bootstrapPropertiesFile";
 
     private static Set<String> customServerEnvFiles = new HashSet<String>();
     private static Set<String> customBootstrapFiles = new HashSet<String>();
@@ -70,14 +70,14 @@ public class LibertyConfigFileManager {
         }
         Map<String, String> customConfigFiles = XmlReader.readTagsFromXml(uri,
                 CUSTOM_SERVER_ENV_XML_TAG,
-                CUSTOM_BOOTSTRAP_PREOPERTIES_XML_TAG);
+                CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG);
         // TODO: handle deletions. maybe use map with <uri, path> ? and clear all that
         // match uri
         if (customConfigFiles.containsKey(CUSTOM_SERVER_ENV_XML_TAG)) {
             customServerEnvFiles.add(customConfigFiles.get(CUSTOM_SERVER_ENV_XML_TAG));
         }
-        if (customConfigFiles.containsKey(CUSTOM_BOOTSTRAP_PREOPERTIES_XML_TAG)) {
-            customBootstrapFiles.add(customConfigFiles.get(CUSTOM_BOOTSTRAP_PREOPERTIES_XML_TAG));
+        if (customConfigFiles.containsKey(CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG)) {
+            customBootstrapFiles.add(customConfigFiles.get(CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG));
         }
     }
 

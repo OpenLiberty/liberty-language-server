@@ -23,7 +23,7 @@ public class XmlReaderTest {
     public void readLibertyPluginConfigXml() throws IOException {
         File lpcXml = new File(resourcesDir, "xml/unix/liberty-plugin-config.xml");
         Map<String, String> tagValues = XmlReader.readTagsFromXml(lpcXml.toURI().getPath(), 
-                LibertyConfigFileManager.CUSTOM_BOOTSTRAP_PREOPERTIES_XML_TAG, 
+                LibertyConfigFileManager.CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG, 
                 LibertyConfigFileManager.CUSTOM_SERVER_ENV_XML_TAG);
 
         assertNotNull(tagValues);
@@ -31,8 +31,8 @@ public class XmlReaderTest {
         
         Set<String> elementNames = new HashSet<String> ();
         elementNames.add("configFile");
-        elementNames.add("bootstrapPropertiesFile");
-        elementNames.add("serverEnvFile");
+        elementNames.add(LibertyConfigFileManager.CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG);
+        elementNames.add(LibertyConfigFileManager.CUSTOM_SERVER_ENV_XML_TAG);
 
         Map<String, String> values = XmlReader.getElementValues(lpcXml, elementNames);
         assertTrue("Did not find expected number of elements in liberty-plugin-config.xml file. Expected 3, found "+values.size(), values.size() == 3);
@@ -40,10 +40,10 @@ public class XmlReaderTest {
         assertTrue("Expected configFile element not found", values.containsKey("configFile"));
         assertTrue("Expected configFile value not found. Value found: "+values.get("configFile"), values.get("configFile").equals("/user/sample-project/src/main/liberty/config/server.xml"));
 
-        assertTrue("Expected bootstrapPropertiesFile element not found", values.containsKey("bootstrapPropertiesFile"));
-        assertTrue("Expected bootstrapPropertiesFile value not found. Value found: "+values.get("bootstrapPropertiesFile"), values.get("bootstrapPropertiesFile").equals("/user/sample-project/src/main/liberty/config/custombootstrapprops.properties"));
+        assertTrue("Expected bootstrapPropertiesFile element not found", values.containsKey(LibertyConfigFileManager.CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG));
+        assertTrue("Expected bootstrapPropertiesFile value not found. Value found: "+values.get(LibertyConfigFileManager.CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG), values.get("bootstrapPropertiesFile").equals("/user/sample-project/src/main/liberty/config/custombootstrapprops.properties"));
 
-        assertTrue("Expected serverEnvFile element not found", values.containsKey("serverEnvFile"));
-        assertTrue("Expected serverEnvFile value not found. Value found: "+values.get("serverEnvFile"), values.get("serverEnvFile").equals("/user/sample-project/src/main/liberty/config/customserverenv.env"));
+        assertTrue("Expected serverEnvFile element not found", values.containsKey(LibertyConfigFileManager.CUSTOM_SERVER_ENV_XML_TAG));
+        assertTrue("Expected serverEnvFile value not found. Value found: "+values.get(LibertyConfigFileManager.CUSTOM_SERVER_ENV_XML_TAG), values.get(LibertyConfigFileManager.CUSTOM_SERVER_ENV_XML_TAG).equals("/user/sample-project/src/main/liberty/config/customserverenv.env"));
     }
 }
