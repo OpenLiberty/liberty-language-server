@@ -61,7 +61,7 @@ public class LibertyConfigFileManager {
         try {
             List<Path> lpcXmlList = findFilesEndsWithInDirectory(workspacePath, LIBERTY_PLUGIN_CONFIG_XML);
             for (Path lpcXml : lpcXmlList) {
-                processLibertyPluginConfigXml(lpcXml.toString());
+                processLibertyPluginConfigXml(lpcXml.toUri().toString());
             }
         } catch (IOException e) {
             LOGGER.warning("Encountered an IOException on initial custom config processing: " + e.getMessage());
@@ -71,6 +71,7 @@ public class LibertyConfigFileManager {
 
     /**
      * Given a Liberty plugin config xml, store custom config file paths to memory.
+     * @param uri - URI-formatted string
      */
     public static void processLibertyPluginConfigXml(String uri) {
         if (!uri.endsWith("liberty-plugin-config.xml")) {

@@ -16,11 +16,7 @@ package io.openliberty.tools.langserver.utils;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -31,28 +27,32 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
 
+import io.openliberty.tools.langserver.LibertyConfigFileManager;
+
 public class XmlReader {
     private static final Logger LOGGER = Logger.getLogger(XmlReader.class.getName());
 
     /**
      * Returns the element values from the provided tag names with a given xml URI
-     * @param fileUri
+     * @param fileUri - URI-formatted String
      * @param tagNames 
      * @return A map of found values to tag names
      */
     public static Map<String, String> readTagsFromXml(String fileUri, String... tagNames) {
         File xmlFile = null;
+        fileUri = LibertyConfigFileManager.normalizeFilePath(fileUri);
         xmlFile = new File(fileUri);
         Set<String> tagSet = Set.of(tagNames);
         return getElementValues(xmlFile, tagSet);
     }
 
     public static Map<String, String> getElementValues(File file, Set<String> elementNames) {
+        Map<String, String> returnValues = new HashMap<String, String> ();
         if (!file.exists() || file.length() == 0) {
-            return null;
+            LOGGER.info("File could not be found or is empty: " + file.toString());
+            return returnValues;
         }
 
-        Map<String, String> returnValues = new HashMap<String, String> ();
         XMLInputFactory factory = XMLInputFactory.newInstance();
         XMLEventReader reader = null;
         try {

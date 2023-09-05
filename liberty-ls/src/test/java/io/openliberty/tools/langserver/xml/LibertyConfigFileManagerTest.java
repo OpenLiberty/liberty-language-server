@@ -22,7 +22,7 @@ public class LibertyConfigFileManagerTest {
         if (File.separator.equals("/")) {
             File lpcXml = new File(resourcesDir, "xml/unix/liberty-plugin-config.xml");
 
-            LibertyConfigFileManager.processLibertyPluginConfigXml(lpcXml.toURI().getPath());
+            LibertyConfigFileManager.processLibertyPluginConfigXml(lpcXml.toURI().toString());
             assertTrue(LibertyConfigFileManager.isServerEnvFile(CUSTOM_SERVER_ENV_VALUE));
             assertTrue(LibertyConfigFileManager.isBootstrapPropertiesFile(CUSTOM_BOOTSTRAP_PROPERTIES_VALUE));
         }
