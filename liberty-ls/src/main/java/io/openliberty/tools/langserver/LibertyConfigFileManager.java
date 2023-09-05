@@ -12,6 +12,7 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Files;
@@ -48,6 +49,9 @@ public class LibertyConfigFileManager {
         }
     }
 
+    /**
+     * Given a workspace folder, find and process all Liberty plugin config xmls
+     */
     public static void processWorkspaceDir(WorkspaceFolder workspaceFolder) {
         String workspaceUriString = workspaceFolder.getUri();
         String normalizedUriString = workspaceUriString.replace("///", "/");
@@ -62,8 +66,12 @@ public class LibertyConfigFileManager {
         } catch (IOException e) {
             LOGGER.warning("Encountered an IOException on initial custom config processing: " + e.getMessage());
         }
+        // LOGGER.info("Found custom files: server-" + customServerEnvFiles + "; bootstrap-"+customBootstrapFiles);
     }
 
+    /**
+     * Given a Liberty plugin config xml, store custom config file paths to memory.
+     */
     public static void processLibertyPluginConfigXml(String uri) {
         if (!uri.endsWith("liberty-plugin-config.xml")) {
             return;
@@ -71,7 +79,7 @@ public class LibertyConfigFileManager {
         Map<String, String> customConfigFiles = XmlReader.readTagsFromXml(uri,
                 CUSTOM_SERVER_ENV_XML_TAG,
                 CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG);
-        // TODO: handle deletions. maybe use map with <uri, path> ? and clear all that
+        // TODO: handle deletions
         // match uri
         if (customConfigFiles.containsKey(CUSTOM_SERVER_ENV_XML_TAG)) {
             customServerEnvFiles.add(customConfigFiles.get(CUSTOM_SERVER_ENV_XML_TAG));
@@ -79,17 +87,6 @@ public class LibertyConfigFileManager {
         if (customConfigFiles.containsKey(CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG)) {
             customBootstrapFiles.add(customConfigFiles.get(CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG));
         }
-    }
-
-    /**
-     * Returns true if fileUri is a custom bootstrap.properties or server.env
-     * defined in the build file (after processed into liberty-plugin-config.xml)
-     * 
-     * @param fileUri
-     * @return
-     */
-    public static boolean isCustomConfigFile(String fileUri) {
-        return customBootstrapFiles.contains(fileUri) || customServerEnvFiles.contains(fileUri);
     }
 
     public static boolean isServerEnvFile(LibertyTextDocument tdi) {
@@ -102,12 +99,12 @@ public class LibertyConfigFileManager {
      * - is custom env file specified in liberty-plugin-config.xml (generated from
      * build file)
      * 
-     * @param uri
+     * @param uri - normally comes from LibertyTextDocument.getUri() which is a URI formatted string (file:///path/to/file)
      * @return
      */
     public static boolean isServerEnvFile(String uri) {
-        Path finalPath = Paths.get(URI.create(uri));
-        return finalPath.endsWith("src/main/liberty/config/server.env") || customServerEnvFiles.contains(finalPath.toString());
+        String filePath = normalizeFilePath(uri);
+        return filePath.endsWith("src/main/liberty/config/server.env") || customServerEnvFiles.contains(filePath);
     }
 
     public static boolean isBootstrapPropertiesFile(LibertyTextDocument tdi) {
@@ -120,12 +117,37 @@ public class LibertyConfigFileManager {
      * - is custom properties file specified in liberty-plugin-config.xml (generated
      * from build file)
      * 
-     * @param uri
+     * @param uri - normally comes from LibertyTextDocument.getUri() which is a URI formatted string (file:///path/to/file)
      * @return
      */
     public static boolean isBootstrapPropertiesFile(String uri) {
-        Path finalPath = Paths.get(URI.create(uri));
-        return finalPath.endsWith("src/main/liberty/config/bootstrap.properties") || customBootstrapFiles.contains(finalPath.toString());
+        String filePath = normalizeFilePath(uri);
+        return filePath.endsWith("src/main/liberty/config/bootstrap.properties") || customBootstrapFiles.contains(filePath);
+    }
+
+    /**
+     * Normalize and fix file path, starting from uri-formatted string.
+     * - Handles URL encoding, Windows drive letter discrepancies
+     * @param uri - URI-formatted string
+     * @return
+     */
+    public static String normalizeFilePath(String uri) {
+        String normalizedUriString = uri.replace("///", "/");
+        Path path = Paths.get(URI.create(normalizedUriString));
+        String finalPath = path.toString();
+        if (!File.separator.equals("/")) {
+            finalPath = normalizeDriveLetter(finalPath);
+        }
+        return finalPath;
+    }
+    
+    /**
+     * Necessary adjustment for Windows URI: 
+     * https://github.com/Microsoft/vscode/issues/42159#issuecomment-360533151
+     * Notes: LSP uses lowercase drive letters, but Windows file system uses uppercase drive letters
+     */
+    public static String normalizeDriveLetter(String path) {
+        return path.substring(0, 1).toUpperCase() + path.substring(1);
     }
 
     /**
