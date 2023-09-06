@@ -78,7 +78,7 @@ public class LibertyConfigFileManager {
      * @param uri - URI-formatted string
      */
     public static void processLibertyPluginConfigXml(String uri) {
-        if (!uri.endsWith("liberty-plugin-config.xml")) {
+        if (!uri.endsWith(LIBERTY_PLUGIN_CONFIG_XML)) {
             return;
         }
         Map<String, String> customConfigFiles = XmlReader.readTagsFromXml(uri,
@@ -131,29 +131,26 @@ public class LibertyConfigFileManager {
     }
 
     /**
-     * Normalize and fix file path, starting from uri-formatted string, converting to OS-specific filepaths.
+     * Normalize and fix file path, starting from uri-formatted string.
+     * - Converts to OS-specific filepaths (/ for unix, \ for windows)
      * - Handles URL encoding, Windows drive letter discrepancies
      * @param uri - URI-formatted string
-     * @return
+     * @return - OS-specific filepath
      */
     public static String normalizeFilePath(String uri) {
-        LOGGER.info("Normalize received uri string: " + uri);
         // make sure Windows backslashes are replaced with forwardslash for URI.create
         String normalizedUriString = uri.replace("\\","/");
-        LOGGER.info("Normalized uri string: " + normalizedUriString);
         String finalPath = null;
-        if (File.separator.equals("/")) {
+        if (File.separator.equals("/")) { //unix
             Path path = Paths.get(URI.create(normalizedUriString));
             finalPath = path.toString();
-            LOGGER.info("Final path: " + finalPath);
-        } else {
+        } else { // windows - URI.create with string instead of URI to handle drive letters. normalize drive letter
             String filepath = URI.create(normalizedUriString).getPath();
             if (filepath.charAt(0) == '/') {
                 filepath = filepath.substring(1);
             }
             Path path = Paths.get(filepath);
             finalPath = path.toString();
-            LOGGER.info("Final path: " + finalPath);
             finalPath = normalizeDriveLetter(finalPath);
         }
         return finalPath;

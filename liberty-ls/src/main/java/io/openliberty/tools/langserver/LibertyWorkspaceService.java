@@ -37,7 +37,7 @@ public class LibertyWorkspaceService implements WorkspaceService {
     public void didChangeWatchedFiles(DidChangeWatchedFilesParams params) {
         for (FileEvent change : params.getChanges()) {
             String uri = change.getUri();
-            if (uri.endsWith("liberty-plugin-config.xml")) {
+            if (uri.endsWith(LibertyConfigFileManager.LIBERTY_PLUGIN_CONFIG_XML)) {
                 LibertyConfigFileManager.processLibertyPluginConfigXml(uri);
             }
         }
