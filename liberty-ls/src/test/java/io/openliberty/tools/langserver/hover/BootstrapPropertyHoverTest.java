@@ -11,21 +11,18 @@ package io.openliberty.tools.langserver.hover;
 
 import static org.junit.Assert.assertEquals;
 
+import java.io.File;
 import java.net.URISyntaxException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import org.eclipse.lsp4j.Hover;
-import org.eclipse.lsp4j.HoverParams;
-import org.eclipse.lsp4j.Position;
-import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextDocumentItem;
 import org.junit.Test;
 
-import io.openliberty.tools.langserver.AbstractLibertyLanguageServerTest;
 import io.openliberty.tools.langserver.LibertyLanguageServer;
 
-public class BootstrapPropertyHoverTest extends AbstractLibertyLanguageServerTest {
+public class BootstrapPropertyHoverTest extends AbstractHoverTest {
     
     @Test
     public void testHoverOnPropertyName() throws Exception {
@@ -45,8 +42,10 @@ public class BootstrapPropertyHoverTest extends AbstractLibertyLanguageServerTes
 
     private CompletableFuture<Hover> getHover(String propertyEntry, int position) throws URISyntaxException, InterruptedException, ExecutionException {
         String filename = "bootstrap.properties";
-        LibertyLanguageServer lls = initializeLanguageServer(filename, new TextDocumentItem(filename, LibertyLanguageServer.LANGUAGE_ID, 0, propertyEntry));
-        HoverParams hoverParams = new HoverParams(new TextDocumentIdentifier(filename), new Position(0, position));
-        return lls.getTextDocumentService().hover(hoverParams);
+        File file = new File(resourcesDir, filename);
+        String fileURI = file.toURI().toString();
+
+        LibertyLanguageServer lls = initializeLanguageServer(filename, new TextDocumentItem(fileURI, LibertyLanguageServer.LANGUAGE_ID, 0, propertyEntry));
+        return getHover(lls, position, fileURI);
     }
 }

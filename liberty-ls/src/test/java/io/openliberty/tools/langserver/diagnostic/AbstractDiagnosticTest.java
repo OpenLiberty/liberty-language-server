@@ -33,6 +33,7 @@ import io.openliberty.tools.langserver.AbstractLibertyLanguageServerTest;
 import io.openliberty.tools.langserver.LibertyLanguageServer;
 
 public class AbstractDiagnosticTest extends AbstractLibertyLanguageServerTest {
+    File resourcesDir = new File("src/test/resources/workspace/diagnostic/src/main/liberty/config");
 
     protected static final Duration AWAIT_TIMEOUT = Duration.ofMillis(10000);
     private static final Duration AWAIT_POLL_INTERVAL = Duration.ofMillis(5);
@@ -44,14 +45,15 @@ public class AbstractDiagnosticTest extends AbstractLibertyLanguageServerTest {
     }
 
     protected void testDiagnostic(String fileToTest, int expectedNumberOfErrors) throws FileNotFoundException {
-        File f = new File("src/test/resources/workspace/diagnostic/" + fileToTest);
+        File f = new File(resourcesDir, fileToTest);
         testDiagnostic(f, expectedNumberOfErrors);
     }
 
     protected void testDiagnostic(File file, int expectedNumberOfErrors) throws FileNotFoundException {
-        libertyLanguageServer = initializeLanguageServerWithFilename(new FileInputStream(file), file.toString());
+        String fileURI = file.toURI().toString();
+        libertyLanguageServer = initializeLanguageServerWithFileUriString(new FileInputStream(file), fileURI);
 
-        DidOpenTextDocumentParams params = new DidOpenTextDocumentParams(libertyLanguageServer.getTextDocumentService().getOpenedDocument(file.toString()));
+        DidOpenTextDocumentParams params = new DidOpenTextDocumentParams(libertyLanguageServer.getTextDocumentService().getOpenedDocument(fileURI));
         libertyLanguageServer.getTextDocumentService().didOpen(params);
 
         createAwait().untilAsserted(() -> assertNotNull(lastPublishedDiagnostics));

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<liberty-plugin-config>
+    <installDirectory>/user/sample-project/target/liberty/wlp</installDirectory>
+    <serverDirectory>/user/sample-project/target/liberty/wlp/usr/servers/defaultServer</serverDirectory>
+    <userDirectory>/user/sample-project/target/liberty/wlp/usr</userDirectory>
+    <serverOutputDirectory>/user/sample-project/target/liberty/wlp/usr/servers/defaultServer</serverOutputDirectory>
+    <serverName>defaultServer</serverName>
+    <configDirectory>/user/sample-project/src/main/liberty/config</configDirectory>
+    <configFile>/user/sample-project/src/main/liberty/config/server.xml</configFile>
+    <bootstrapPropertiesFile>/user/sample-project/src/main/liberty/config/custombootstrapprops.properties</bootstrapPropertiesFile>
+    <serverEnv>/user/sample-project/src/main/liberty/config/customserverenv.env</serverEnv>
+    <appsDirectory>apps</appsDirectory>
+    <looseApplication>true</looseApplication>
+    <stripVersion>false</stripVersion>
+    <installAppPackages>project</installAppPackages>
+    <applicationFilename>app-name.war.xml</applicationFilename>
+    <assemblyArtifact>
+        <groupId>io.openliberty</groupId>
+        <artifactId>openliberty-kernel</artifactId>
+        <version>23.0.0.5</version>
+        <type>zip</type>
+    </assemblyArtifact>
+    <assemblyArchive>/user/.m2/repository/io/openliberty/openliberty-kernel/23.0.0.5/openliberty-kernel-23.0.0.5.zip</assemblyArchive>
+    <assemblyInstallDirectory>/user/sample-project/target/liberty</assemblyInstallDirectory>
+    <refresh>false</refresh>
+    <installAppsConfigDropins>/user/sample-project/target/liberty/wlp/usr/servers/defaultServer/configDropins/defaults/install_apps_configuration_1491924271.xml</installAppsConfigDropins>
+    <projectType>war</projectType>
+    <projectCompileDependency>junit:junit:4.13.1</projectCompileDependency>
+    <projectCompileDependency>org.hamcrest:hamcrest-core:1.3</projectCompileDependency>
+    <projectCompileDependency>org.junit.jupiter:junit-jupiter-api:5.8.2</projectCompileDependency>
+    <projectCompileDependency>org.opentest4j:opentest4j:1.2.0</projectCompileDependency>
+    <projectCompileDependency>org.junit.platform:junit-platform-commons:1.8.2</projectCompileDependency>
+    <projectCompileDependency>org.apiguardian:apiguardian-api:1.1.2</projectCompileDependency>
+</liberty-plugin-config>
