@@ -35,6 +35,10 @@ public class LibertyConfigFileManager {
     public static final String CUSTOM_SERVER_ENV_XML_TAG = "serverEnv";
     public static final String CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG = "bootstrapPropertiesFile";
 
+    private static final String DEFAULT_SERVER_ENV = "src/main/liberty/config/server.env".replace("/", File.separator);
+    private static final String DEFAULT_BOOTSTRAP_PROPERTIES = "src/main/liberty/config/bootstrap.properties".replace("/", File.separator);
+
+
     private static Set<String> customServerEnvFiles = new HashSet<String>();
     private static Set<String> customBootstrapFiles = new HashSet<String>();
 
@@ -105,7 +109,7 @@ public class LibertyConfigFileManager {
      */
     public static boolean isServerEnvFile(String uri) {
         String filePath = normalizeFilePath(uri);
-        return filePath.endsWith("src/main/liberty/config/server.env") || customServerEnvFiles.contains(filePath);
+        return filePath.endsWith(DEFAULT_SERVER_ENV) || customServerEnvFiles.contains(filePath);
     }
 
     public static boolean isBootstrapPropertiesFile(LibertyTextDocument tdi) {
@@ -123,20 +127,33 @@ public class LibertyConfigFileManager {
      */
     public static boolean isBootstrapPropertiesFile(String uri) {
         String filePath = normalizeFilePath(uri);
-        return filePath.endsWith("src/main/liberty/config/bootstrap.properties") || customBootstrapFiles.contains(filePath);
+        return filePath.endsWith(DEFAULT_BOOTSTRAP_PROPERTIES) || customBootstrapFiles.contains(filePath);
     }
 
     /**
-     * Normalize and fix file path, starting from uri-formatted string.
+     * Normalize and fix file path, starting from uri-formatted string, converting to OS-specific filepaths.
      * - Handles URL encoding, Windows drive letter discrepancies
      * @param uri - URI-formatted string
      * @return
      */
     public static String normalizeFilePath(String uri) {
-        String normalizedUriString = uri.replace("///", "/");
-        Path path = Paths.get(URI.create(normalizedUriString));
-        String finalPath = path.toString();
-        if (!File.separator.equals("/")) {
+        LOGGER.info("Normalize received uri string: " + uri);
+        // make sure Windows backslashes are replaced with forwardslash for URI.create
+        String normalizedUriString = uri.replace("\\","/");
+        LOGGER.info("Normalized uri string: " + normalizedUriString);
+        String finalPath = null;
+        if (File.separator.equals("/")) {
+            Path path = Paths.get(URI.create(normalizedUriString));
+            finalPath = path.toString();
+            LOGGER.info("Final path: " + finalPath);
+        } else {
+            String filepath = URI.create(normalizedUriString).getPath();
+            if (filepath.charAt(0) == '/') {
+                filepath = filepath.substring(1);
+            }
+            Path path = Paths.get(filepath);
+            finalPath = path.toString();
+            LOGGER.info("Final path: " + finalPath);
             finalPath = normalizeDriveLetter(finalPath);
         }
         return finalPath;
