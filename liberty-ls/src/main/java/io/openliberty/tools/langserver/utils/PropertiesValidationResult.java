@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 
 import org.apache.commons.lang3.Range;
 
+import io.openliberty.tools.langserver.LibertyConfigFileManager;
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 import io.openliberty.tools.langserver.model.propertiesfile.PropertiesEntryInstance;
 
@@ -66,7 +67,7 @@ public class PropertiesValidationResult {
         
         // check whitespace around equal sign (=)
         LOGGER.info("Validating property line: " + entry.getLineContent());
-        if (ParserFileHelperUtil.isServerEnvFile(textDocumentItem)) {
+        if (LibertyConfigFileManager.isServerEnvFile(textDocumentItem)) {
             if (property.endsWith(" ") || value.startsWith(" ")) {
                 startChar = property.trim().length();
                 endChar = entry.getLineContent().length() - value.trim().length();
@@ -85,7 +86,7 @@ public class PropertiesValidationResult {
                 // ignoring case, check if value is valid
                 hasErrors = !validValues.stream().anyMatch(value::equalsIgnoreCase);
             }
-            diagnosticType = ParserFileHelperUtil.isBootstrapPropertiesFile(textDocumentItem) ? 
+            diagnosticType = LibertyConfigFileManager.isBootstrapPropertiesFile(textDocumentItem) ? 
                                             "INVALID_PROPERTY_VALUE" : "INVALID_VARIABLE_VALUE";
         } else if (ServerPropertyValues.usesIntegerRangeValue(property)) {
             Range<Integer> range = ServerPropertyValues.getIntegerRange(property);
@@ -115,7 +116,7 @@ public class PropertiesValidationResult {
                     hasErrors = true;
                 }
             }
-            diagnosticType = ParserFileHelperUtil.isBootstrapPropertiesFile(textDocumentItem) ? 
+            diagnosticType = LibertyConfigFileManager.isBootstrapPropertiesFile(textDocumentItem) ? 
                                             "INVALID_PROPERTY_INTEGER_RANGE" : "INVALID_VARIABLE_INTEGER_RANGE";
         } else if (ServerPropertyValues.usesPackageNames(property)) { // defines packages
             // simple check for comma-delimited list of Java packages

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2022 IBM Corporation and others.
+* Copyright (c) 2020, 2023 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -24,14 +24,11 @@ import org.eclipse.lsp4j.ServerCapabilities;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
-import org.eclipse.lsp4j.services.LanguageServer;
-import org.eclipse.lsp4j.services.TextDocumentService;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
 import io.openliberty.tools.langserver.common.ParentProcessWatcher.ProcessLanguageServer;
 
 public class LibertyLanguageServer extends AbstractLanguageServer implements ProcessLanguageServer, LanguageClientAware {
-
     public static final String LANGUAGE_ID = "LANGUAGE_ID_LIBERTY";
     private static final Logger LOGGER = Logger.getLogger(LibertyLanguageServer.class.getName());
 
@@ -57,6 +54,7 @@ public class LibertyLanguageServer extends AbstractLanguageServer implements Pro
 
         ServerCapabilities serverCapabilities = createServerCapabilities();
         InitializeResult initializeResult = new InitializeResult(serverCapabilities);
+        LibertyConfigFileManager.initLibertyConfigFileManager(params.getWorkspaceFolders());
         return CompletableFuture.completedFuture(initializeResult);
     }
 
