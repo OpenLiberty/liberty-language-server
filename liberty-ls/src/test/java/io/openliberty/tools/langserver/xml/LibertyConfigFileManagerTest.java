@@ -1,5 +1,6 @@
 package io.openliberty.tools.langserver.xml;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -12,10 +13,13 @@ import io.openliberty.tools.langserver.LibertyConfigFileManager;
 
 public class LibertyConfigFileManagerTest {
     File resourcesDir = new File("src/test/resources");
+    File resourcesDir2 = new File("src/test/resources2");
+
     public final String CUSTOM_SERVER_ENV = "file:/user/sample-project/src/main/liberty/config/customserverenv.env";
     public final String CUSTOM_BOOTSTRAP_PROPERTIES = "file:/user/sample-project/src/main/liberty/config/custombootstrapprops.properties";
     public final String WINDOWS_CUSTOM_SERVER_ENV = "file:/C:/user/sample-project/src/main/liberty/config/customserverenv.env";
     public final String WINDOWS_CUSTOM_BOOTSTRAP_PROPERTIES = "file:/C:/user/sample-project/src/main/liberty/config/custombootstrapprops.properties";
+    public final String ANOTHER_BOOTSTRAP = "file:/user/sample-project/src/main/another.properties";
 
     @Test
     public void processConfigXml() throws IOException {
@@ -41,16 +45,17 @@ public class LibertyConfigFileManagerTest {
 
     @Test
     public void initCustomConfigTest() {
-        WorkspaceFolder folder = new WorkspaceFolder(resourcesDir.toURI().toString());
-        LibertyConfigFileManager.processWorkspaceDir(folder);
-
+        assertFalse(LibertyConfigFileManager.isBootstrapPropertiesFile(ANOTHER_BOOTSTRAP));
         if (File.separator.equals("/")) {
+            WorkspaceFolder folder = new WorkspaceFolder(resourcesDir2.toURI().toString());
+            LibertyConfigFileManager.processWorkspaceDir(folder);
             assertTrue(LibertyConfigFileManager.isServerEnvFile(CUSTOM_SERVER_ENV));
-            assertTrue(LibertyConfigFileManager.isBootstrapPropertiesFile(CUSTOM_BOOTSTRAP_PROPERTIES));
+            assertTrue(LibertyConfigFileManager.isBootstrapPropertiesFile(ANOTHER_BOOTSTRAP));
         } else {
+            WorkspaceFolder folder = new WorkspaceFolder(resourcesDir.toURI().toString());
+            LibertyConfigFileManager.processWorkspaceDir(folder);
             assertTrue(LibertyConfigFileManager.isServerEnvFile(WINDOWS_CUSTOM_SERVER_ENV));
             assertTrue(LibertyConfigFileManager.isBootstrapPropertiesFile(WINDOWS_CUSTOM_BOOTSTRAP_PROPERTIES));
         }
-
     }
 }

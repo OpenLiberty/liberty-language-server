@@ -141,10 +141,10 @@ public class LibertyConfigFileManager {
         // make sure Windows backslashes are replaced with forwardslash for URI.create
         String normalizedUriString = uri.replace("\\","/");
         String finalPath = null;
-        if (File.separator.equals("/")) { //unix
+        if (File.separator.equals("/")) { // unix
             Path path = Paths.get(URI.create(normalizedUriString));
             finalPath = path.toString();
-        } else { // windows - URI.create with string instead of URI to handle drive letters. normalize drive letter
+        } else { // windows - URI.create with string instead of URI to handle test paths in Windows. normalize drive letter
             String filepath = URI.create(normalizedUriString).getPath();
             if (filepath.charAt(0) == '/') {
                 filepath = filepath.substring(1);
@@ -152,6 +152,12 @@ public class LibertyConfigFileManager {
             Path path = Paths.get(filepath);
             finalPath = path.toString();
             finalPath = normalizeDriveLetter(finalPath);
+            /**
+             * Note - This else case is mostly needed for testing, which use fake paths that don't actually exist.
+             *      - Paths.get(URI) fails, whereas Paths.get(String) works with fake paths.
+             *      - In practice, when URIs are provided by the Liberty Tools IDE client, they are valid paths, where Paths.get(URI) will work
+             *          - just have to normalizeDriveLetter()
+             */
         }
         return finalPath;
     }
