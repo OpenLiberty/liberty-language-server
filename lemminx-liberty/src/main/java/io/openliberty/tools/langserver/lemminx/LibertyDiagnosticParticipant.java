@@ -43,6 +43,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     public static final String NOT_OPTIONAL_CODE = "not_optional";
     public static final String IMPLICIT_NOT_OPTIONAL_MESSAGE = "The specified resource cannot be skipped. Check location value or add optional attribute.";
     public static final String IMPLICIT_NOT_OPTIONAL_CODE = "implicit_not_optional";
+
+    public static final String INCORRECT_FEATURE_CODE = "incorrect_feature";
     
     @Override
     public void doDiagnostics(DOMDocument domDocument, List<Diagnostic> diagnostics,
@@ -92,7 +94,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                     Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
                             domDocument);
                     String message = "ERROR: The feature \"" + featureName + "\" does not exist.";
-                    list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, "liberty-lemminx"));
+                    list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, "liberty-lemminx", INCORRECT_FEATURE_CODE));
                 } else {
                     if (includedFeatures.contains(featureName)) {
                         Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
