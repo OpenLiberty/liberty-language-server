@@ -17,6 +17,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.nio.file.Path;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -32,24 +34,43 @@ import javax.xml.stream.events.XMLEvent;
 public class XmlReader {
     private static final Logger LOGGER = Logger.getLogger(XmlReader.class.getName());
 
-    public static boolean hasServerRoot(File file) {
-        if (!file.exists() || file.length() == 0) {
-            return false;
-        }
-
-        XMLInputFactory factory = XMLInputFactory.newInstance();
-        XMLEventReader reader = null;
+    public static boolean hasServerRoot(String filePath) {
+        File file = null;
+        
         try {
-            reader = factory.createXMLEventReader(new FileInputStream(file));
+            file = new File(new URI(filePath).getPath());
+            return hasServerRoot(file);
+        } catch (URISyntaxException e) {
+            LOGGER.severe("Error received converting file path to URI for path " + filePath);
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public static boolean hasServerRoot(Path filePath) {
+        return hasServerRoot(filePath.toFile());
+    }
+
+    public static boolean hasServerRoot(File xmlFile) {
+        XMLEventReader reader = null;
+        
+        try {
+            if (!xmlFile.exists() || xmlFile.length() == 0) {
+                return false;
+            }
+
+            XMLInputFactory factory = XMLInputFactory.newInstance();
+            reader = factory.createXMLEventReader(new FileInputStream(xmlFile));
             if (reader.hasNext()) {
                 XMLEvent firstTag = reader.nextTag(); // first start/end element
                 reader.close();
                 return isServerElement(firstTag);
             }
         } catch (FileNotFoundException e) {
-            LOGGER.severe("Unable to access file "+ file.getName());
+            LOGGER.severe("Unable to access file "+ xmlFile.getAbsolutePath());
         } catch (XMLStreamException e) {
-            LOGGER.severe("Error received trying to read XML file " + file.getName() + " : "+e.getMessage());
+            LOGGER.severe("Error received trying to read XML file: " + xmlFile.getAbsolutePath());
+            e.printStackTrace();
         } finally {
             if (reader != null) {
                 try {

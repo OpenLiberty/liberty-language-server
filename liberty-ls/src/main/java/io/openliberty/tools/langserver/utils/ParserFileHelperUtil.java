@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2023 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,7 +14,6 @@ import org.eclipse.lsp4j.Position;
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 
 public class ParserFileHelperUtil {
-
     public String getLine(LibertyTextDocument textDocumentItem, Position position) {
         return getLine(textDocumentItem, position.getLine());
     }
@@ -29,13 +28,5 @@ public class ParserFileHelperUtil {
             return lines[line];
         }
         return null;
-    }
-
-    public static boolean isServerEnvFile(LibertyTextDocument tdi) {
-        return tdi.getUri().endsWith("server.env");
-    }
-
-    public static boolean isBootstrapPropertiesFile(LibertyTextDocument tdi) {
-        return tdi.getUri().endsWith("bootstrap.properties");
     }
 }
