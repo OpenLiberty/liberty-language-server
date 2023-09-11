@@ -23,10 +23,16 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
+import org.eclipse.lemminx.dom.DOMNode;
+
 import java.util.concurrent.TimeUnit;
 
 import jakarta.xml.bind.JAXBContext;
@@ -208,6 +214,49 @@ public class FeatureService {
 
     public boolean featureExists(String featureName, String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
         return this.getFeature(featureName, libertyVersion, libertyRuntime, requestDelay, documentURI).isPresent();
+    }
+
+    public List<String> getFeatureReplacements(String featureName, DOMNode featureManagerNode, String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
+        List<Feature> features = getFeatures(libertyVersion, libertyRuntime, requestDelay, documentURI);
+        // get list of existing features to exclude from list of possible replacements
+        final List<String> existingFeatures = collectExistingFeatures(featureManagerNode, featureName);
+
+        // also exclude any feature with a different version that matches an existing feature
+        Set<String> featuresWithoutVersionsToExclude = new HashSet<String> ();
+
+        for (Feature nextFeature : features) {
+            String nextFeatureName = nextFeature.getWlpInformation().getShortName();
+            if (existingFeatures.contains(nextFeatureName)) {
+                // collect feature name minus version number to know which other features to exclude
+                String featureNameMinusVersion = nextFeatureName.substring(0, nextFeatureName.lastIndexOf("-") + 1);
+                featuresWithoutVersionsToExclude.add(featureNameMinusVersion);
+            }
+        }
+
+        return features.stream().filter(f -> f.getWlpInformation().getShortName().contains(featureName) && (!f.getWlpInformation().getShortName().contains("-") || 
+                        !featuresWithoutVersionsToExclude.contains(f.getWlpInformation().getShortName().substring(0, f.getWlpInformation().getShortName().lastIndexOf("-")+1))))
+                        .map(feat -> feat.getWlpInformation().getShortName()).collect(Collectors.toList());
+    }
+
+    public List<String> collectExistingFeatures(DOMNode featureManager, String currentFeatureName) {
+        List<String> includedFeatures = new ArrayList<>();
+
+        if (featureManager == null) {
+            return includedFeatures;
+        }
+
+        List<DOMNode> features = featureManager.getChildren();
+        for (DOMNode featureNode : features) {
+            DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
+            // skip nodes that do not have any text value (ie. comments)
+            if (featureNode.getNodeName().equals(LibertyConstants.FEATURE_ELEMENT) && featureTextNode != null) {
+                String featureName = featureTextNode.getTextContent();
+                if (currentFeatureName == null || (currentFeatureName != null && !featureName.equals(currentFeatureName))) {
+                    includedFeatures.add(featureName);
+                }
+            }
+        }
+        return includedFeatures;
     }
 
     /**

@@ -1,17 +1,18 @@
 package io.openliberty.tools.test;
 
-import static org.eclipse.lemminx.XMLAssert.r;
-
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.lang.StringBuilder;
 
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lsp4j.CompletionItem;
-
+import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.WorkspaceFolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -93,7 +94,7 @@ public class LibertyWorkspaceIT {
         String serverXML2 = String.join(newLine, //
                                 "<server description=\"Sample Liberty server\">", //
                                 "       <featureManager>", //
-                                "               <feature>cdi-|</feature>", //
+                                "               <feature>cdi-5.0|</feature>", //
                                 "               <feature>servlet-3.1</feature>", //
                                 "       </featureManager>", //
                                 "</server>" //
@@ -103,7 +104,33 @@ public class LibertyWorkspaceIT {
         CompletionItem cdiCompletion3 = c("cdi-3.0", "cdi-3.0");
         CompletionItem cdiCompletion4 = c("cdi-4.0", "cdi-4.0");
 
-        XMLAssert.testCompletionFor(serverXML2, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, cdiCompletion1, cdiCompletion2, cdiCompletion3, cdiCompletion4);
+        Set<String> cdiFeatures = new HashSet<String> ();
+        cdiFeatures.add("cdi-1.2");
+        cdiFeatures.add("cdi-2.0");
+        cdiFeatures.add("cdi-3.0");
+        cdiFeatures.add("cdi-4.0");
+
+        // changed to only return features that contain the passed in partial feature name (Note: if a version was listed after the hyphen, it gets stripped off in order to match all available versions of a feature)
+        // - includes the four cdi features and two random completion items with labels "<![CDATA[" and "<!--"
+        CompletionList completionList = XMLAssert.testCompletionFor(serverXML2, null, serverXmlFile.toURI().toString(), 6, cdiCompletion1, cdiCompletion2, cdiCompletion3, cdiCompletion4);
+
+        Set<String> foundLabels = new HashSet<String> ();
+        Set<String> unexpectedLabels = new HashSet<String> ();
+        StringBuilder sbGood = new StringBuilder();
+        StringBuilder sbBad = new StringBuilder();
+
+        for (CompletionItem nextItem : completionList.getItems()) {
+            if (!cdiFeatures.contains(nextItem.getLabel())) {
+                unexpectedLabels.add(nextItem.getLabel());
+                sbBad.append(nextItem.getLabel()+", ");
+            } else {
+                foundLabels.add(nextItem.getLabel());
+                sbGood.append(nextItem.getLabel());
+            }
+        }
+
+        org.junit.jupiter.api.Assertions.assertTrue(foundLabels.size() == 4, "Did not find all 4 expected labels: "+sbGood.toString());
+        //org.junit.jupiter.api.Assertions.assertTrue(unexpectedLabels.size() == 0, "Found unexpected completion items with labels "+sbBad.toString());
 
         org.junit.jupiter.api.Assertions.assertTrue(featurelistFile.exists(), "Did not find generated featurelist file: "+featureListName);
 

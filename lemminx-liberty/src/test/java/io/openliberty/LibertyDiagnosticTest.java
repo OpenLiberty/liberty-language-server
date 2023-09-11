@@ -1,13 +1,19 @@
 package io.openliberty;
 
 import org.eclipse.lemminx.XMLAssert;
+import org.eclipse.lemminx.commons.BadLocationException;
+import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceFolder;
 import org.junit.jupiter.api.Test;
 
+import io.openliberty.tools.langserver.lemminx.LibertyDiagnosticParticipant;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 
 import static org.eclipse.lemminx.XMLAssert.r;
+import static org.eclipse.lemminx.XMLAssert.ca;
+import static org.eclipse.lemminx.XMLAssert.te;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -15,6 +21,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collection;
+import java.util.Collections;
 
 public class LibertyDiagnosticTest {
 
@@ -47,7 +55,7 @@ public class LibertyDiagnosticTest {
     }
 
     @Test
-    public void testInvalidFeatureDiagnostic() {
+    public void testInvalidFeatureDiagnostic() throws BadLocationException{
         String serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
                 "       <featureManager>", //
@@ -61,13 +69,40 @@ public class LibertyDiagnosticTest {
         );
         Diagnostic invalid1 = new Diagnostic();
         invalid1.setRange(r(3, 24, 3, 27));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
         invalid1.setMessage("ERROR: The feature \"jax\" does not exist.");
 
         Diagnostic invalid2 = new Diagnostic();
         invalid2.setRange(r(6, 24, 6, 31));
+        invalid2.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
         invalid2.setMessage("ERROR: The feature \"invalid\" does not exist.");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, invalid1, invalid2);
+
+        List<Diagnostic> diagnostics = new ArrayList<Diagnostic>();
+        diagnostics.add(invalid1);
+
+        List<String> featuresStartWithJAX = new ArrayList<String>();
+        featuresStartWithJAX.add("jaxb-2.2");
+        //featuresStartWithJAX.add("jaxrs-2.0"); excluded because it matches an existing feature with a different version
+        //featuresStartWithJAX.add("jaxrs-2.1"); excluded because it matches an existing feature
+        featuresStartWithJAX.add("jaxrsClient-2.0");
+        featuresStartWithJAX.add("jaxrsClient-2.1");
+        featuresStartWithJAX.add("jaxws-2.2");
+        Collections.sort(featuresStartWithJAX);
+
+        List<CodeAction> codeActions = new ArrayList<CodeAction>();
+        for (String nextFeature: featuresStartWithJAX) {
+            TextEdit texted = te(invalid1.getRange().getStart().getLine(), invalid1.getRange().getStart().getCharacter(),
+                                invalid1.getRange().getEnd().getLine(), invalid1.getRange().getEnd().getCharacter(), nextFeature);
+            CodeAction invalidCodeAction = ca(invalid1, texted);
+
+            codeActions.add(invalidCodeAction);
+        }
+
+        XMLAssert.testCodeActionsFor(serverXML, invalid1, codeActions.get(0), codeActions.get(1), 
+                                    codeActions.get(2), codeActions.get(3)); 
+
     }
 
     @Test

@@ -15,7 +15,6 @@ package io.openliberty.tools.langserver.lemminx;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lemminx.dom.DOMDocument;
@@ -56,14 +55,19 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
         // if the parent element of cursor is a <feature>
         // provide the liberty features as completion options
         if (parentElement.getTagName().equals(LibertyConstants.FEATURE_ELEMENT)) {
-            List<String> existingFeatures = new ArrayList<>();
+            // narrow down completion list based on what was already entered
+            DOMNode featureTextNode = (DOMNode) parentElement.getChildNodes().item(0);
+            String featureName = featureTextNode != null ? featureTextNode.getTextContent() : null;
+
             // collect existing features
+            List<String> existingFeatures = new ArrayList<String>();
             if (parentElement.getParentNode() != null
                     && parentElement.getParentNode().getNodeName().equals(LibertyConstants.FEATURE_MANAGER_ELEMENT)) {
-                existingFeatures = collectExistingFeatures(parentElement.getParentNode());
+                existingFeatures = FeatureService.getInstance().collectExistingFeatures(parentElement.getParentNode(), featureName);
             }
+
             List<CompletionItem> featureCompletionItems = buildCompletionItems(parentElement, request.getXMLDocument(),
-                    existingFeatures);
+                    existingFeatures, featureName);
             featureCompletionItems.stream().forEach(item -> response.addCompletionItem(item));
         }
     }
@@ -87,7 +91,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
     }
 
     private List<CompletionItem> buildCompletionItems(DOMElement featureElement, DOMDocument domDocument,
-            List<String> existingFeatures) {
+            List<String> existingFeatures, String featureName) {
 
         LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
         String libertyVersion =  runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
@@ -96,25 +100,28 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
         List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
 
+        final boolean checkFeatureName = featureName != null && !featureName.isBlank();
+        // strip off version number after the - so that we can provide all possible valid versions of a feature for completion
+        final String featureNameToCompare = checkFeatureName && featureName.contains("-") ? featureName.substring(0, featureName.lastIndexOf("-")+1) : featureName;
+
         // filter out features that are already specified in the featureManager block
-        List<CompletionItem> uniqueFeatureCompletionItems = features.stream()
-                .filter(feature -> !existingFeatures.contains(feature.getWlpInformation().getShortName()))
-                .map(feat -> buildFeatureCompletionItem(feat, featureElement, domDocument)).collect(Collectors.toList());
+ 
+        return getUniqueFeatureCompletionItems(featureElement, domDocument, features, existingFeatures, checkFeatureName, featureNameToCompare);
+    }
+
+    private List<CompletionItem> getUniqueFeatureCompletionItems(DOMElement featureElement, DOMDocument domDocument, List<Feature> allFeatures, List<String> existingFeatureNames, boolean useRequestedFeatureName, String requestedFeatureName) {
+        List<CompletionItem> uniqueFeatureCompletionItems = new ArrayList<CompletionItem>();
+
+        for (Feature nextFeature : allFeatures) {
+            String nextFeatureName = nextFeature.getWlpInformation().getShortName();
+            if (!existingFeatureNames.contains(nextFeatureName) && (!useRequestedFeatureName ||
+                (useRequestedFeatureName && nextFeatureName.contains(requestedFeatureName)))) {
+                CompletionItem ci = buildFeatureCompletionItem(nextFeature, featureElement, domDocument);
+                uniqueFeatureCompletionItems.add(ci);
+            }
+        }
 
         return uniqueFeatureCompletionItems;
     }
 
-    private List<String> collectExistingFeatures(DOMNode featureManager) {
-        List<String> includedFeatures = new ArrayList<>();
-        List<DOMNode> features = featureManager.getChildren();
-        for (DOMNode featureNode : features) {
-            DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
-            // skip nodes that do not have any text value (ie. comments)
-            if (featureNode.getNodeName().equals(LibertyConstants.FEATURE_ELEMENT) && featureTextNode != null) {
-                String featureName = featureTextNode.getTextContent();
-                includedFeatures.add(featureName);
-            }
-        }
-        return includedFeatures;
-    }
 }
