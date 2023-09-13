@@ -60,7 +60,7 @@ public class LibertyDiagnosticTest {
                 "<server description=\"Sample Liberty server\">", //
                 "       <featureManager>", //
                 "               <feature>jaxrs-2.1</feature>", //
-                "               <feature>jax</feature>", //
+                "               <feature>jaX</feature>", //
                 "               <feature>jsonp-1.1</feature>", //
                 "               <!-- <feature>comment</feature> -->", //
                 "               <feature>invalid</feature>", //
@@ -70,7 +70,7 @@ public class LibertyDiagnosticTest {
         Diagnostic invalid1 = new Diagnostic();
         invalid1.setRange(r(3, 24, 3, 27));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
-        invalid1.setMessage("ERROR: The feature \"jax\" does not exist.");
+        invalid1.setMessage("ERROR: The feature \"jaX\" does not exist.");
 
         Diagnostic invalid2 = new Diagnostic();
         invalid2.setRange(r(6, 24, 6, 31));

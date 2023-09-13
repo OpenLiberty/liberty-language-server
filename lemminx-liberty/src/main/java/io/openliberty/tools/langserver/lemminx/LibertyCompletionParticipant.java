@@ -100,9 +100,11 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
         List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
 
-        final boolean checkFeatureName = featureName != null && !featureName.isBlank();
+        boolean checkFeatureName = featureName != null && !featureName.isBlank();
+        String featureNameLowerCase = checkFeatureName ? featureName.toLowerCase() : null;
+
         // strip off version number after the - so that we can provide all possible valid versions of a feature for completion
-        final String featureNameToCompare = checkFeatureName && featureName.contains("-") ? featureName.substring(0, featureName.lastIndexOf("-")+1) : featureName;
+        String featureNameToCompare = checkFeatureName && featureNameLowerCase.contains("-") ? featureNameLowerCase.substring(0, featureNameLowerCase.lastIndexOf("-")+1) : featureNameLowerCase;
 
         // filter out features that are already specified in the featureManager block
  
@@ -113,7 +115,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
         List<CompletionItem> uniqueFeatureCompletionItems = new ArrayList<CompletionItem>();
 
         for (Feature nextFeature : allFeatures) {
-            String nextFeatureName = nextFeature.getWlpInformation().getShortName();
+            String nextFeatureName = nextFeature.getWlpInformation().getShortName().toLowerCase();
             if (!existingFeatureNames.contains(nextFeatureName) && (!useRequestedFeatureName ||
                 (useRequestedFeatureName && nextFeatureName.contains(requestedFeatureName)))) {
                 CompletionItem ci = buildFeatureCompletionItem(nextFeature, featureElement, domDocument);
