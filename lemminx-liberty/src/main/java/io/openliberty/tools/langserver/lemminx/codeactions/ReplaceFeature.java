@@ -28,6 +28,7 @@ import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 import io.openliberty.tools.langserver.lemminx.LibertyExtension;
 import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
+import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
@@ -66,10 +67,12 @@ public class ReplaceFeature implements ICodeActionParticipant {
                 String libertyRuntime =  runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
         
                 final int requestDelay = SettingsService.getInstance().getRequestDelay();
-                List<String> replacementFeatures = FeatureService.getInstance().getFeatureReplacements(featureNameToReplace, featureManagerNode, libertyVersion, libertyRuntime, requestDelay, document.getDocumentURI());
-                Collections.sort(replacementFeatures); // sort these so they appear in alphabetical order in quick fixes - also helps the test case pass reliably
+                FeatureService fs = FeatureService.getInstance();
+                List<Feature> replacementFeatures = fs.getFeatureReplacements(featureNameToReplace, featureManagerNode, libertyVersion, libertyRuntime, requestDelay, document.getDocumentURI());
+                List<String> replacementFeatureNames = fs.getFeatureShortNames(replacementFeatures);
+                Collections.sort(replacementFeatureNames); // sort these so they appear in alphabetical order in quick fixes - also helps the test case pass reliably
 
-                for (String nextFeature : replacementFeatures) {
+                for (String nextFeature : replacementFeatureNames) {
                     String title = "Replace feature with "+nextFeature;
 
                     codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), nextFeature, document.getTextDocument(), diagnostic));

@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import org.eclipse.lemminx.dom.DOMNode;
 
@@ -212,20 +211,34 @@ public class FeatureService {
             .findFirst();
     }
 
+    public List<String> getFeatureShortNames(List<Feature> features) {
+        return getFeatureShortNames(features, false);
+    }
+
+    public List<String> getFeatureShortNames(List<Feature> features, boolean lowerCase) {
+        List<String> featureShortNames = new ArrayList<String> ();
+
+        for (Feature nextFeature: features) {
+            featureShortNames.add(lowerCase ? nextFeature.getWlpInformation().getShortName().toLowerCase() : nextFeature.getWlpInformation().getShortName());
+        }
+
+        return featureShortNames;
+    }
+
     public boolean featureExists(String featureName, String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
         return this.getFeature(featureName, libertyVersion, libertyRuntime, requestDelay, documentURI).isPresent();
     }
 
-    public List<String> getFeatureReplacements(String featureName, DOMNode featureManagerNode, String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
+    public List<Feature> getFeatureReplacements(String featureName, DOMNode featureManagerNode, String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
         List<Feature> features = getFeatures(libertyVersion, libertyRuntime, requestDelay, documentURI);
+        List<String> featureNamesLowerCase = getFeatureShortNames(features, true);
+
         // get list of existing features to exclude from list of possible replacements
-        final List<String> existingFeatures = collectExistingFeatures(featureManagerNode, featureName);
+        List<String> existingFeatures = collectExistingFeatures(featureManagerNode, featureName);
 
         // also exclude any feature with a different version that matches an existing feature
-        Set<String> featuresWithoutVersionsToExclude = new HashSet<String> ();
-
-        for (Feature nextFeature : features) {
-            String nextFeatureName = nextFeature.getWlpInformation().getShortName();
+        Set<String> featuresWithoutVersionsToExclude = new HashSet<String>();
+        for (String nextFeatureName : featureNamesLowerCase) {
             if (existingFeatures.contains(nextFeatureName)) {
                 // collect feature name minus version number to know which other features to exclude
                 String featureNameMinusVersion = nextFeatureName.substring(0, nextFeatureName.lastIndexOf("-") + 1);
@@ -233,11 +246,23 @@ public class FeatureService {
             }
         }
 
-        return features.stream().filter(f -> f.getWlpInformation().getShortName().contains(featureName) && (!f.getWlpInformation().getShortName().contains("-") || 
-                        !featuresWithoutVersionsToExclude.contains(f.getWlpInformation().getShortName().substring(0, f.getWlpInformation().getShortName().lastIndexOf("-")+1))))
-                        .map(feat -> feat.getWlpInformation().getShortName()).collect(Collectors.toList());
+        List<Feature> replacementFeatures = new ArrayList<Feature>();
+        String featureNameLowerCase = featureName.toLowerCase();
+
+        for (int i=0; i < featureNamesLowerCase.size(); i++) {
+            String nextFeatureName = featureNamesLowerCase.get(i);
+            if (nextFeatureName.contains(featureNameLowerCase) && (!nextFeatureName.contains("-") || 
+                !featuresWithoutVersionsToExclude.contains(nextFeatureName.substring(0, nextFeatureName.lastIndexOf("-") + 1)))) {
+                    replacementFeatures.add(features.get(i));
+            }
+        }
+
+        return replacementFeatures;
     }
 
+    /*
+     * Returns the feature names specified in the featureManager element in lower case, excluding the currentFeatureName if specified.
+     */
     public List<String> collectExistingFeatures(DOMNode featureManager, String currentFeatureName) {
         List<String> includedFeatures = new ArrayList<>();
 
@@ -251,8 +276,9 @@ public class FeatureService {
             // skip nodes that do not have any text value (ie. comments)
             if (featureNode.getNodeName().equals(LibertyConstants.FEATURE_ELEMENT) && featureTextNode != null) {
                 String featureName = featureTextNode.getTextContent();
-                if (currentFeatureName == null || (currentFeatureName != null && !featureName.equals(currentFeatureName))) {
-                    includedFeatures.add(featureName);
+                String featureNameLowerCase = featureName.toLowerCase();
+                if (currentFeatureName == null || (currentFeatureName != null && !featureNameLowerCase.equalsIgnoreCase(currentFeatureName))) {
+                    includedFeatures.add(featureNameLowerCase);
                 }
             }
         }
