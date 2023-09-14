@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 import org.eclipse.lemminx.dom.DOMNode;
 
@@ -212,11 +211,15 @@ public class FeatureService {
             .findFirst();
     }
 
-    public List<String> getFeatureShortNamesLowerCase(List<Feature> features) {
+    public List<String> getFeatureShortNames(List<Feature> features) {
+        return getFeatureShortNames(features, false);
+    }
+
+    public List<String> getFeatureShortNames(List<Feature> features, boolean lowerCase) {
         List<String> featureShortNames = new ArrayList<String> ();
 
-        for (Feature nexFeature: features) {
-            featureShortNames.add(nexFeature.getWlpInformation().getShortName().toLowerCase());
+        for (Feature nextFeature: features) {
+            featureShortNames.add(lowerCase ? nextFeature.getWlpInformation().getShortName().toLowerCase() : nextFeature.getWlpInformation().getShortName());
         }
 
         return featureShortNames;
@@ -226,9 +229,9 @@ public class FeatureService {
         return this.getFeature(featureName, libertyVersion, libertyRuntime, requestDelay, documentURI).isPresent();
     }
 
-    public List<String> getFeatureReplacements(String featureName, DOMNode featureManagerNode, String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
+    public List<Feature> getFeatureReplacements(String featureName, DOMNode featureManagerNode, String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
         List<Feature> features = getFeatures(libertyVersion, libertyRuntime, requestDelay, documentURI);
-        List<String> featureNamesLowerCase = getFeatureShortNamesLowerCase(features);
+        List<String> featureNamesLowerCase = getFeatureShortNames(features, true);
 
         // get list of existing features to exclude from list of possible replacements
         List<String> existingFeatures = collectExistingFeatures(featureManagerNode, featureName);
@@ -243,14 +246,14 @@ public class FeatureService {
             }
         }
 
-        List<String> replacementFeatures = new ArrayList<String>();
+        List<Feature> replacementFeatures = new ArrayList<Feature>();
         String featureNameLowerCase = featureName.toLowerCase();
 
         for (int i=0; i < featureNamesLowerCase.size(); i++) {
             String nextFeatureName = featureNamesLowerCase.get(i);
             if (nextFeatureName.contains(featureNameLowerCase) && (!nextFeatureName.contains("-") || 
                 !featuresWithoutVersionsToExclude.contains(nextFeatureName.substring(0, nextFeatureName.lastIndexOf("-") + 1)))) {
-                    replacementFeatures.add(features.get(i).getWlpInformation().getShortName()); // add the original feature shortName - not the lower case one
+                    replacementFeatures.add(features.get(i));
             }
         }
 

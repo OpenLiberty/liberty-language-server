@@ -61,13 +61,15 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
 
             // collect existing features
             List<String> existingFeatures = new ArrayList<String>();
+            DOMNode featureMgrNode = null;
             if (parentElement.getParentNode() != null
                     && parentElement.getParentNode().getNodeName().equals(LibertyConstants.FEATURE_MANAGER_ELEMENT)) {
+                featureMgrNode = parentElement.getParentNode();
                 existingFeatures = FeatureService.getInstance().collectExistingFeatures(parentElement.getParentNode(), featureName);
             }
 
             List<CompletionItem> featureCompletionItems = buildCompletionItems(parentElement, request.getXMLDocument(),
-                    existingFeatures, featureName);
+                    existingFeatures, featureName, featureMgrNode);
             featureCompletionItems.stream().forEach(item -> response.addCompletionItem(item));
         }
     }
@@ -91,33 +93,47 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
     }
 
     private List<CompletionItem> buildCompletionItems(DOMElement featureElement, DOMDocument domDocument,
-            List<String> existingFeatures, String featureName) {
+            List<String> existingFeatures, String featureName, DOMNode featureMgrNode) {
 
         LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
         String libertyVersion =  runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
         String libertyRuntime =  runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
 
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
-        List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
 
         boolean checkFeatureName = featureName != null && !featureName.isBlank();
-        String featureNameLowerCase = checkFeatureName ? featureName.toLowerCase() : null;
+        
+        if (checkFeatureName) {
+            String featureNameLowerCase = featureName.toLowerCase();
 
-        // strip off version number after the - so that we can provide all possible valid versions of a feature for completion
-        String featureNameToCompare = checkFeatureName && featureNameLowerCase.contains("-") ? featureNameLowerCase.substring(0, featureNameLowerCase.lastIndexOf("-")+1) : featureNameLowerCase;
+            // strip off version number after the - so that we can provide all possible valid versions of a feature for completion
+            String featureNameToCompare = featureNameLowerCase.contains("-") ? featureNameLowerCase.substring(0, featureNameLowerCase.lastIndexOf("-")+1) : featureNameLowerCase;
 
-        // filter out features that are already specified in the featureManager block
- 
-        return getUniqueFeatureCompletionItems(featureElement, domDocument, features, existingFeatures, checkFeatureName, featureNameToCompare);
+            List<Feature> completionFeatures = FeatureService.getInstance().getFeatureReplacements(featureNameToCompare, featureMgrNode, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
+            return getFeatureCompletionItems(featureElement, domDocument, completionFeatures);
+        } else {
+            List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
+            return getUniqueFeatureCompletionItems(featureElement, domDocument, features, existingFeatures);
+        }
     }
 
-    private List<CompletionItem> getUniqueFeatureCompletionItems(DOMElement featureElement, DOMDocument domDocument, List<Feature> allFeatures, List<String> existingFeatureNames, boolean useRequestedFeatureName, String requestedFeatureName) {
+     private List<CompletionItem> getFeatureCompletionItems(DOMElement featureElement, DOMDocument domDocument, List<Feature> completionFeatures) {
+        List<CompletionItem> uniqueFeatureCompletionItems = new ArrayList<CompletionItem>();
+
+        for (Feature nextFeature : completionFeatures) {
+            CompletionItem ci = buildFeatureCompletionItem(nextFeature, featureElement, domDocument);
+            uniqueFeatureCompletionItems.add(ci);
+        }
+
+        return uniqueFeatureCompletionItems;
+    }
+
+    private List<CompletionItem> getUniqueFeatureCompletionItems(DOMElement featureElement, DOMDocument domDocument, List<Feature> allFeatures, List<String> existingFeatureNames) {
         List<CompletionItem> uniqueFeatureCompletionItems = new ArrayList<CompletionItem>();
 
         for (Feature nextFeature : allFeatures) {
             String nextFeatureName = nextFeature.getWlpInformation().getShortName().toLowerCase();
-            if (!existingFeatureNames.contains(nextFeatureName) && (!useRequestedFeatureName ||
-                (useRequestedFeatureName && nextFeatureName.contains(requestedFeatureName)))) {
+            if (!existingFeatureNames.contains(nextFeatureName)) {
                 CompletionItem ci = buildFeatureCompletionItem(nextFeature, featureElement, domDocument);
                 uniqueFeatureCompletionItems.add(ci);
             }
