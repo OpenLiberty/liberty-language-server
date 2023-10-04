@@ -29,8 +29,7 @@ public class LibertyRuntime {
      */
     public LibertyRuntime(Path propertiesFilePath) {
 
-        try {
-            FileInputStream fis = new FileInputStream(propertiesFilePath.toFile());
+        try (FileInputStream fis = new FileInputStream(propertiesFilePath.toFile())) {
             Properties prop = new Properties();
             prop.load(fis);
 
