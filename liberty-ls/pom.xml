@@ -14,7 +14,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <lsp4j.version>0.17.0</lsp4j.version>
+        <lsp4j.version>0.20.1</lsp4j.version>
     </properties>
 
     <scm>
@@ -38,6 +38,12 @@
     </distributionManagement>
 
     <dependencies>
+        <!-- Including later version of guava dependency than gets pulled in by default to address CVE-2023-2976 -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>32.0.1-jre</version>
+        </dependency>        
         <dependency>
             <groupId>org.eclipse.lsp4j</groupId>
             <artifactId>org.eclipse.lsp4j</artifactId>
