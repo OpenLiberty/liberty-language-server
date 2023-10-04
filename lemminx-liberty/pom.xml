@@ -10,7 +10,7 @@
     <url>https://github.com/OpenLiberty/liberty-language-server</url>
 
     <properties>
-        <lemminx.version>0.25.0</lemminx.version>
+        <lemminx.version>0.26.1</lemminx.version>
     </properties>
 
     <scm>
