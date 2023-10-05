@@ -246,8 +246,8 @@ public class FeatureService {
                     featureListFile = generateFeatureListXml(libertyWorkspace, featureListJAR);
                 }
             } else if (libertyWorkspace.isContainerAlive()) {
-                DockerService docker = DockerService.getInstance();
-                featureListFile = docker.generateFeatureListFromContainer(libertyWorkspace);
+                ContainerService container = ContainerService.getInstance();
+                featureListFile = container.generateFeatureListFromContainer(libertyWorkspace);
             }
 
             if (featureListFile != null && featureListFile.exists()) {

@@ -22,6 +22,7 @@ public class LibertyWorkspaceTest {
         URI resourcesDir = srcResourcesDir.toURI();
         LibertyWorkspace libertyWorkspace = new LibertyWorkspace(resourcesDir.toString());
         assertNull(libertyWorkspace.getContainerName());
+        assertTrue(libertyWorkspace.getContainerType().equals("docker"));
         assertFalse(libertyWorkspace.isContainerAlive());
         assertNull(libertyWorkspace.findDevcMetadata());    // no alive containers return null
 

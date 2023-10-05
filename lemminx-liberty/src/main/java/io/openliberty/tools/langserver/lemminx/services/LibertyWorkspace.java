@@ -52,6 +52,7 @@ public class LibertyWorkspace {
 
     // devc vars
     private String containerName;
+    private String containerType;
     private boolean containerAlive;
 
     /**
@@ -70,6 +71,7 @@ public class LibertyWorkspace {
         this.libertyInstallationDir = null;
         this.installedFeatureList = new ArrayList<Feature>();
         this.containerName = null;
+        this.containerType = "docker";
         this.containerAlive = false;
 
         this.configFiles = new HashSet<String>();
@@ -158,6 +160,14 @@ public class LibertyWorkspace {
         this.containerName = containerName;
     }
 
+    public String getContainerType() {
+        return containerType;
+    }
+
+    public void setContainerType(String containerType) {
+        this.containerType = containerType != null && !containerType.isEmpty() ? containerType : "docker";
+    }
+
     public boolean isContainerAlive() {
         return this.containerAlive;
     }
@@ -181,6 +191,7 @@ public class LibertyWorkspace {
                 DevcMetadata devcMetadata = unmarshalDevcMetadataFile(metaDataFile);
                 if (devcMetadata.isContainerAlive()) {
                     setContainerName(devcMetadata.getContainerName());
+                    setContainerType(devcMetadata.getContainerType());
                     setContainerAlive(true);
                     return metaDataFile;
                 }

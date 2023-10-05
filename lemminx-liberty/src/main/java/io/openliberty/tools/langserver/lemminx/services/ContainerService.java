@@ -24,18 +24,18 @@ import java.util.logging.Logger;
 
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
-public class DockerService {
-    private static final Logger LOGGER = Logger.getLogger(DockerService.class.getName());
-    private final int DOCKER_TIMEOUT = 20; // seconds
+public class ContainerService {
+    private static final Logger LOGGER = Logger.getLogger(ContainerService.class.getName());
+    private final int CONTAINER_TIMEOUT = 20; // seconds
 
-    // Singleton so that only 1 Docker Service can be initialized and is
+    // Singleton so that only 1 Container Service can be initialized and is
     // shared between all Lemminx Language Feature Participants
   
-    private static DockerService instance;
+    private static ContainerService instance;
   
-    public static DockerService getInstance() {
+    public static ContainerService getInstance() {
         if (instance == null) {
-            instance = new DockerService();
+            instance = new ContainerService();
         }
         return instance;
     }
@@ -58,36 +58,39 @@ public class DockerService {
 
     /**
      * Method to execute a command inside the specified container
+     * @param containerType
      * @param containerName
      * @param cmd
      */
-    public void dockerExec(String containerName, String cmd) {
+    public void containerExec(String containerType, String containerName, String cmd) {
         // $ docker exec [OPTIONS] CONTAINER COMMAND [ARG...]
-        String dockerExec = MessageFormat.format("docker exec {0} {1}", containerName, cmd);
-        execDockerCmd(dockerExec);
+        String containerExec = MessageFormat.format("{0} exec {1} {2}", containerType, containerName, cmd);
+        execContainerCmd(containerExec);
     }
 
     /**
      * Method to copy a file out from the specified container
+     * @param containerType
      * @param containerName
      * @param containerSrc
      * @param localDest
      */
-    public void dockerCp(String containerName, String containerSrc, String localDest) {
-        dockerCp(containerName, containerSrc, localDest, false);
+    public void containerCp(String containerType, String containerName, String containerSrc, String localDest) {
+        containerCp(containerType, containerName, containerSrc, localDest, false);
     }
 
     /**
      * Method to copy a file out from the specified container
+     * @param containerType
      * @param containerName
      * @param containerSrc
      * @param localDest
      * @param suppressError - if the file may not be present, pass true for this boolean parameter to suppress the error/exception
      */
-    public void dockerCp(String containerName, String containerSrc, String localDest, boolean suppressError) {
+    public void containerCp(String containerType, String containerName, String containerSrc, String localDest, boolean suppressError) {
         // $ docker cp [OPTIONS] CONTAINER:SRC_PATH DEST_PATH|-
-        String dockerCp = MessageFormat.format("docker cp {0}:{1} {2}", containerName, containerSrc, localDest);
-        execDockerCmd(dockerCp, suppressError);
+        String containerCp = MessageFormat.format("{0} cp {1}:{2} {3}", containerType, containerName, containerSrc, localDest);
+        execContainerCmd(containerCp, suppressError);
     }
 
     /**
@@ -117,9 +120,9 @@ public class DockerService {
             LOGGER.info("Generating schema file for container at: " + xsdFile.getCanonicalPath());
 
             // generate xsd file inside container
-            dockerExec(libertyWorkspace.getContainerName(), cmd);
+            containerExec(libertyWorkspace.getContainerType(), libertyWorkspace.getContainerName(), cmd);
             // extract xsd file to local/temp dir
-            dockerCp(libertyWorkspace.getContainerName(), containerOutputFileString, tempDir.getCanonicalPath());
+            containerCp(libertyWorkspace.getContainerType(), libertyWorkspace.getContainerName(), containerOutputFileString, tempDir.getCanonicalPath());
         }
         // (re)confirm xsd generation
         if (!xsdFile.exists()) {
@@ -154,9 +157,9 @@ public class DockerService {
             LOGGER.info("Generating feature list file for container at: " + featureListFile.getCanonicalPath());
 
             // generate feature list file inside container
-            dockerExec(libertyWorkspace.getContainerName(), cmd);
+            containerExec(libertyWorkspace.getContainerType(), libertyWorkspace.getContainerName(), cmd);
             // extract feature list file to local/temp dir
-            dockerCp(libertyWorkspace.getContainerName(), containerOutputFileString, tempDir.getCanonicalPath());
+            containerCp(libertyWorkspace.getContainerType(), libertyWorkspace.getContainerName(), containerOutputFileString, tempDir.getCanonicalPath());
         }
         // (re)confirm feature list generation
         if (!featureListFile.exists()) {
@@ -171,8 +174,8 @@ public class DockerService {
      * @param command String containing the command to run
      * @return the stdout of the command or null for no output on stdout
      */
-    protected String execDockerCmd(String command) {
-        return execDockerCmd(command, false);
+    protected String execContainerCmd(String command) {
+        return execContainerCmd(command, false);
     }
 
     /**
@@ -180,15 +183,15 @@ public class DockerService {
      * @param suppressError If it is expected that the command may fail, pass true for this boolean parameter to suppress the error/exception.
      * @return the stdout of the command or null for no output on stdout
      */
-    protected String execDockerCmd(String command, boolean suppressError) {
+    protected String execContainerCmd(String command, boolean suppressError) {
         String result = null;
         try {
             // debug("execDocker, timeout=" + timeout + ", cmd=" + command);
             Process p = Runtime.getRuntime().exec(command);
-            p.waitFor(DOCKER_TIMEOUT, TimeUnit.SECONDS);
+            p.waitFor(CONTAINER_TIMEOUT, TimeUnit.SECONDS);
             // After waiting for the process, handle the error case and normal termination.
             if (p.exitValue() != 0 && !suppressError) {
-                LOGGER.severe("Received exit value=" + p.exitValue() + " when running Docker command: " + command);
+                LOGGER.severe("Received exit value=" + p.exitValue() + " when running container command: " + command);
                 // read messages from standard err
                 char[] d = new char[1023];
                 new InputStreamReader(p.getErrorStream(), StandardCharsets.UTF_8).read(d);
@@ -198,9 +201,9 @@ public class DockerService {
             }
             result = readStdOut(p);
         } catch (IllegalThreadStateException  e) {
-            // the timeout was too short and the docker command has not yet completed. There is no exit value.
+            // the timeout was too short and the container command has not yet completed. There is no exit value.
             LOGGER.warning("IllegalThreadStateException, message="+e.getMessage());
-            throw new RuntimeException("The Docker command did not complete within the timeout period: " + DOCKER_TIMEOUT + " seconds. ");
+            throw new RuntimeException("The container command did not complete within the timeout period: " + CONTAINER_TIMEOUT + " seconds. ");
         } catch (InterruptedException | IOException e) {
             // If a runtime exception occurred in the server task, log and rethrow
             throw new RuntimeException(e.getMessage());
