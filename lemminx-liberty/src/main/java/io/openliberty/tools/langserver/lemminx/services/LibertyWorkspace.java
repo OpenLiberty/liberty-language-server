@@ -71,7 +71,7 @@ public class LibertyWorkspace {
         this.libertyInstallationDir = null;
         this.installedFeatureList = new ArrayList<Feature>();
         this.containerName = null;
-        this.containerType = null;
+        this.containerType = "docker";
         this.containerAlive = false;
 
         this.configFiles = new HashSet<String>();
@@ -165,7 +165,9 @@ public class LibertyWorkspace {
     }
 
     public void setContainerType(String containerType) {
-        this.containerType = containerType;
+        if (containerType != null && !containerType.isEmpty()) {
+            this.containerType = containerType;
+        }
     }
 
     public boolean isContainerAlive() {
