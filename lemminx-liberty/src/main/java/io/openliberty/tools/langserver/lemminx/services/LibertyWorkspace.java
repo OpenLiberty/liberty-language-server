@@ -165,9 +165,7 @@ public class LibertyWorkspace {
     }
 
     public void setContainerType(String containerType) {
-        if (containerType != null && !containerType.isEmpty()) {
-            this.containerType = containerType;
-        }
+        this.containerType = containerType != null && !containerType.isEmpty() ? containerType : "docker";
     }
 
     public boolean isContainerAlive() {
