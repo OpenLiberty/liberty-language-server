@@ -22,6 +22,7 @@ public class LibertyWorkspaceTest {
         URI resourcesDir = srcResourcesDir.toURI();
         LibertyWorkspace libertyWorkspace = new LibertyWorkspace(resourcesDir.toString());
         assertNull(libertyWorkspace.getContainerName());
+        assertNull(libertyWorkspace.getContainerType());
         assertFalse(libertyWorkspace.isContainerAlive());
         assertNull(libertyWorkspace.findDevcMetadata());    // no alive containers return null
 

@@ -22,6 +22,7 @@ import jakarta.xml.bind.annotation.XmlRootElement;
 public class DevcMetadata {
 
     private String containerName;
+    private String containerType;
     private boolean containerAlive;
 
     public String getContainerName() {
@@ -30,6 +31,14 @@ public class DevcMetadata {
 
     public void setContainerName(String containerName) {
         this.containerName = containerName;
+    }
+
+    public String getContainerType() {
+        return containerType;
+    }
+
+    public void setContainerType(String containerType) {
+        this.containerType = containerType;
     }
 
     public boolean isContainerAlive() {

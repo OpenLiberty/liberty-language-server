@@ -33,7 +33,7 @@ import org.eclipse.lemminx.dom.DOMDocument;
 import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
 import io.openliberty.tools.langserver.lemminx.models.settings.DevcMetadata;
-import io.openliberty.tools.langserver.lemminx.services.DockerService;
+import io.openliberty.tools.langserver.lemminx.services.ContainerService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
@@ -343,25 +343,25 @@ public class LibertyUtils {
 
     public static Path getLibertyPropertiesFileForDevc(LibertyWorkspace libertyWorkspace) {
         try {
-            Path props = getFileFromContainer(libertyWorkspace, DockerService.DEFAULT_CONTAINER_WLP_PROPERTIES_PATH, true);
-            props = props.toFile().exists() ? props : getFileFromContainer(libertyWorkspace, DockerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH, true);
+            Path props = getFileFromContainer(libertyWorkspace, ContainerService.DEFAULT_CONTAINER_WLP_PROPERTIES_PATH, true);
+            props = props.toFile().exists() ? props : getFileFromContainer(libertyWorkspace, ContainerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH, true);
 
             if (props.toFile().exists()) {
                 return props;
             }
-            LOGGER.warning("Could not find properties for container at location: "+DockerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH);
+            LOGGER.warning("Could not find properties for container at location: "+ContainerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH);
         } catch (IOException e) {
-            LOGGER.warning("Could not find properties for container at location: "+DockerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH+" due to exception: "+e.getMessage());
+            LOGGER.warning("Could not find properties for container at location: "+ContainerService.DEFAULT_CONTAINER_OL_PROPERTIES_PATH+" due to exception: "+e.getMessage());
         }
 
         return null;
     }
 
     public static Path getFileFromContainer(LibertyWorkspace libertyWorkspace, String fileLocation, boolean suppressError) throws IOException {
-        DockerService docker = DockerService.getInstance();
+        ContainerService container = ContainerService.getInstance();
         Path tempDir = Files.createTempDirectory(null);
         File containerPropertiesFile = new File(tempDir.toFile(), "container.properties");
-        docker.dockerCp(libertyWorkspace.getContainerName(), fileLocation, containerPropertiesFile.toString(), suppressError);
+        container.containerCp(libertyWorkspace.getContainerType(), libertyWorkspace.getContainerName(), fileLocation, containerPropertiesFile.toString(), suppressError);
         return Paths.get(containerPropertiesFile.toString());
     }
 

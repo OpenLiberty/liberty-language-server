@@ -26,7 +26,7 @@ import org.eclipse.lemminx.uriresolver.IExternalGrammarLocationProvider;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager.ResourceToDeploy;
 import org.eclipse.lemminx.uriresolver.URIResolverExtension;
 
-import io.openliberty.tools.langserver.lemminx.services.DockerService;
+import io.openliberty.tools.langserver.lemminx.services.ContainerService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
@@ -84,8 +84,8 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
                         serverSchemaUri = generateServerSchemaXsd(libertyWorkspace, schemaGenJarPath);
                     }
                 } else if (libertyWorkspace.isContainerAlive()) {
-                    DockerService docker = DockerService.getInstance();
-                    serverSchemaUri = docker.generateServerSchemaXsdFromContainer(libertyWorkspace);
+                    ContainerService container = ContainerService.getInstance();
+                    serverSchemaUri = container.generateServerSchemaXsdFromContainer(libertyWorkspace);
                 }
                 if (serverSchemaUri != null && !serverSchemaUri.isEmpty()) {
                     return serverSchemaUri;
