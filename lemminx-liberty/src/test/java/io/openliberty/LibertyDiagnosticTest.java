@@ -9,7 +9,11 @@ import org.eclipse.lsp4j.WorkspaceFolder;
 import org.junit.jupiter.api.Test;
 
 import io.openliberty.tools.langserver.lemminx.LibertyDiagnosticParticipant;
+import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
+import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
+import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
+import jakarta.xml.bind.JAXBException;
 
 import static org.eclipse.lemminx.XMLAssert.r;
 import static org.eclipse.lemminx.XMLAssert.ca;
@@ -21,7 +25,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Collection;
 import java.util.Collections;
 
 public class LibertyDiagnosticTest {
@@ -174,5 +177,74 @@ public class LibertyDiagnosticTest {
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), 
                 not_xml, multi_liner, not_optional, missing_xml, optional_not_defined, missing_xml2);
+    }
+
+    @Test
+    public void testConfigElementMissingFeatureManager() throws JAXBException {
+        File featureList = new File("src/test/resources/featurelist-ol-23.0.0.1-beta.xml");
+        assertTrue(featureList.exists());
+        FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), 
+                new LibertyWorkspace(""), featureList);
+        
+        String serverXml = "ssl id=\"\"/>";
+        Diagnostic config_for_missing_feature = new Diagnostic();
+        config_for_missing_feature.setRange(r(0, 0, 0, serverXml.length()));
+        config_for_missing_feature.setCode(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE);
+        config_for_missing_feature.setMessage(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_MESSAGE);
+    }
+
+    @Test
+    public void testConfigElementDirect() throws JAXBException {
+        File featureList = new File("src/test/resources/featurelist-ol-23.0.0.1-beta.xml");
+        assertTrue(featureList.exists());
+        FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), 
+                new LibertyWorkspace(""), featureList);
+
+        String correctFeature   = "           <feature>ssl-1.0</feature>";
+        String incorrectFeature = "           <feature>jaxrs-2.0</feature>";
+        String configElement    = "   <ssl id=\"\"/>";
+        int diagnosticStart = configElement.indexOf("<");
+        int diagnosticLength = configElement.trim().length();
+
+        String serverXML1 = String.join(newLine,
+                "<server description=\"Sample Liberty server\">",
+                "   <featureManager>",
+                        correctFeature,
+                "   </featureManager>",
+                    configElement,
+                "</server>"
+        );
+        XMLAssert.testDiagnosticsFor(serverXML1, null, null, serverXMLURI);
+
+        String serverXML2 = String.join(newLine,
+                "<server description=\"Sample Liberty server\">",
+                "   <featureManager>",
+                        incorrectFeature,
+                "   </featureManager>",
+                    configElement,
+                "</server>"
+        );
+
+        Diagnostic config_for_missing_feature = new Diagnostic();
+        config_for_missing_feature.setRange(r(4, diagnosticStart, 4, diagnosticStart + diagnosticLength));
+        config_for_missing_feature.setCode(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE);
+        config_for_missing_feature.setMessage(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_MESSAGE);
+
+        XMLAssert.testDiagnosticsFor(serverXML2, null, null, serverXMLURI, config_for_missing_feature);
+    }
+
+    @Test
+    public void testConfigElementTransitive() {
+        File featureList = new File("src/test/resources/featurelist-ol-23.0.0.1-beta.xml");
+        assertTrue(featureList.exists());
+        String serverXML1 = String.join(newLine,
+                "<server description=\"Sample Liberty server\">",
+                "   <featureManager>",
+                "       <feature>microProfile-5.0</feature>",
+                "   </featureManager>",
+                "   <ssl id=\"\"/>",
+                "</server>"
+        );
+        XMLAssert.testDiagnosticsFor(serverXML1, null, null, serverXMLURI);
     }
 }

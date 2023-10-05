@@ -23,6 +23,7 @@ import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
+import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
 import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
@@ -30,13 +31,22 @@ import io.openliberty.tools.langserver.lemminx.util.*;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
+    private static final Logger LOGGER = Logger.getLogger(LibertyDiagnosticParticipant.class.getName());
+
+    public static final String LIBERTY_LEMMINX_SOURCE = "liberty-lemminx";
+
     public static final String MISSING_FILE_MESSAGE = "The resource at the specified location could not be found.";
     public static final String MISSING_FILE_CODE = "missing_file";
+
+    public static final String MISSING_CONFIGURED_FEATURE_MESSAGE = "This config element does not configure a feature in the featureManager. Remove this element or add a relevant feature.";
+    public static final String MISSING_CONFIGURED_FEATURE_CODE = "lost_config_element";
 
     public static final String NOT_OPTIONAL_MESSAGE = "The specified resource cannot be skipped. Check location value or set optional to true.";
     public static final String NOT_OPTIONAL_CODE = "not_optional";
@@ -44,6 +54,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     public static final String IMPLICIT_NOT_OPTIONAL_CODE = "implicit_not_optional";
 
     public static final String INCORRECT_FEATURE_CODE = "incorrect_feature";
+
+    private Set<String> includedFeatures = null;
     
     @Override
     public void doDiagnostics(DOMDocument domDocument, List<Diagnostic> diagnostics,
@@ -53,22 +65,33 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         try {
             validateDom(domDocument, diagnostics);
         } catch (IOException e) {
+            // LOGGER.severe("Error validating document " + domDocument.getDocumentURI());
+            // LOGGER.severe(e.getMessage());
             System.err.println("Error validating document " + domDocument.getDocumentURI());
             System.err.println(e.getMessage());
         }
     }
 
-    private void validateDom(DOMDocument domDocument, List<Diagnostic> list) throws IOException {
+    private void validateDom(DOMDocument domDocument, List<Diagnostic> diagnosticsList) throws IOException {
         List<DOMNode> nodes = domDocument.getDocumentElement().getChildren();
+        List<Diagnostic> tempDiagnosticsList = new ArrayList<Diagnostic>();
+
+        // TODO: consider initiallizing FeatureService even when features aren't detected
+        FeatureListGraph featureGraph = FeatureService.getInstance().getFeatureListGraph();
 
         for (DOMNode node : nodes) {
-            if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(node.getNodeName())) {
-                validateFeature(domDocument, list, node);
-            } else if (LibertyConstants.INCLUDE_ELEMENT.equals(node.getNodeName())) {
-                validateIncludeLocation(domDocument, list, node);
+            String nodeName = node.getNodeName();
+            if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(nodeName)) {
+                validateFeature(domDocument, diagnosticsList, node);
+            } else if (LibertyConstants.INCLUDE_ELEMENT.equals(nodeName)) {
+                validateIncludeLocation(domDocument, diagnosticsList, node);
+            } else if (featureGraph.isConfigElement(nodeName)) {
+                LOGGER.warning("Detected a config element!");
+                holdConfigElement(domDocument, diagnosticsList, node, tempDiagnosticsList);
             }
         }
-        
+        LOGGER.warning("Entering validateConfigElements");
+        validateConfigElements(diagnosticsList, tempDiagnosticsList, featureGraph);
     }
 
     private void validateFeature(DOMDocument domDocument, List<Diagnostic> list, DOMNode featureManager) {
@@ -93,19 +116,20 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                     Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
                             domDocument);
                     String message = "ERROR: The feature \"" + featureName + "\" does not exist.";
-                    list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, "liberty-lemminx", INCORRECT_FEATURE_CODE));
+                    list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
                 } else {
                     if (includedFeatures.contains(featureName)) {
                         Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
                                 featureTextNode.getEnd(), domDocument);
                         String message = "ERROR: " + featureName + " is already included.";
-                        list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, "liberty-lemminx"));
+                        list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
                     } else {
                         includedFeatures.add(featureName);
                     }
                 }
             }
         }
+        this.includedFeatures = includedFeatures;
     }
 
     /**
@@ -117,7 +141,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      * 2) performed in isConfigXMLFile
      * 4) not yet implemented/determined
      */
-    private void validateIncludeLocation(DOMDocument domDocument, List<Diagnostic> list, DOMNode node) {
+    private void validateIncludeLocation(DOMDocument domDocument, List<Diagnostic> diagnosticsList, DOMNode node) {
         String locAttribute = node.getAttribute("location");
         if (locAttribute == null) {
             return;
@@ -131,7 +155,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         Range range = XMLPositionUtility.createRange(locNode.getStart(), locNode.getEnd(), domDocument);
         if (!locAttribute.endsWith(".xml")) {
             String message = "The specified resource is not an XML file.";
-            list.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, "liberty-lemminx"));
+            diagnosticsList.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE));
             return;
         }
 
@@ -144,15 +168,38 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             if (!configFile.exists()) {
                 DOMAttr optNode = node.getAttributeNode("optional");
                 if (optNode == null) {
-                    list.add(new Diagnostic(range, IMPLICIT_NOT_OPTIONAL_MESSAGE, DiagnosticSeverity.Error, "liberty-lemminx", IMPLICIT_NOT_OPTIONAL_CODE));
+                    diagnosticsList.add(new Diagnostic(range, IMPLICIT_NOT_OPTIONAL_MESSAGE, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, IMPLICIT_NOT_OPTIONAL_CODE));
                 } else if (optNode.getValue().equals("false")) {
                     Range optRange = XMLPositionUtility.createRange(optNode.getStart(), optNode.getEnd(), domDocument);
-                    list.add(new Diagnostic(optRange, NOT_OPTIONAL_MESSAGE, DiagnosticSeverity.Error, "liberty-lemminx", NOT_OPTIONAL_CODE));
+                    diagnosticsList.add(new Diagnostic(optRange, NOT_OPTIONAL_MESSAGE, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, NOT_OPTIONAL_CODE));
                 }
-                list.add(new Diagnostic(range, MISSING_FILE_MESSAGE, DiagnosticSeverity.Warning, "liberty-lemminx", MISSING_FILE_CODE));
+                diagnosticsList.add(new Diagnostic(range, MISSING_FILE_MESSAGE, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE, MISSING_FILE_CODE));
             }
         } catch (IllegalArgumentException e) {
-            list.add(new Diagnostic(range, MISSING_FILE_MESSAGE, DiagnosticSeverity.Warning, "liberty-lemminx-exception", MISSING_FILE_CODE));
+            diagnosticsList.add(new Diagnostic(range, MISSING_FILE_MESSAGE, DiagnosticSeverity.Warning, "liberty-lemminx-exception", MISSING_FILE_CODE));
+        }
+    }
+
+    private void holdConfigElement(DOMDocument domDocument, List<Diagnostic> diagnosticsList, DOMNode configElementNode, 
+                List<Diagnostic> tempDiagnosticsList) {
+        String configElementName = configElementNode.getNodeName();
+        Range range = XMLPositionUtility.createRange(configElementNode.getStart(), configElementNode.getEnd(), domDocument);
+        Diagnostic tempDiagnostic = new Diagnostic(range, MISSING_CONFIGURED_FEATURE_MESSAGE, null, 
+                LIBERTY_LEMMINX_SOURCE, MISSING_CONFIGURED_FEATURE_CODE);
+        tempDiagnostic.setSource(configElementName);
+        tempDiagnosticsList.add(tempDiagnostic);
+    }
+
+    private void validateConfigElements(List<Diagnostic> diagnosticsList, List<Diagnostic> tempDiagnosticsList, 
+                FeatureListGraph featureGraph) {
+        for (Diagnostic tempDiagnostic : tempDiagnosticsList) {
+            String configElement = tempDiagnostic.getSource();
+            Set<String> includedFeaturesCopy = new HashSet<String>(includedFeatures);
+            Set<String> compatibleFeaturesList = featureGraph.getAllEnablers(configElement);
+            includedFeaturesCopy.retainAll(compatibleFeaturesList);
+            if (includedFeaturesCopy.isEmpty()) {
+                diagnosticsList.add(tempDiagnostic);
+            }
         }
     }
 }

@@ -42,7 +42,8 @@ import jakarta.xml.bind.Unmarshaller;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 
-
+import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
+import io.openliberty.tools.langserver.lemminx.data.FeatureListNode;
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
 import io.openliberty.tools.langserver.lemminx.models.feature.FeatureInfo;
 import io.openliberty.tools.langserver.lemminx.models.feature.WlpInformation;
@@ -72,8 +73,12 @@ public class FeatureService {
     private List<Feature> defaultFeatureList;
     private long featureUpdateTime;
 
+    // Contains the mapping a configElement to a set of features that use said configElement
+    private FeatureListGraph featureListGraph;
+
     private FeatureService() {
         featureCache = new HashMap<>();
+        featureListGraph = new FeatureListGraph();
         featureUpdateTime = -1;
     }
 
@@ -167,13 +172,18 @@ public class FeatureService {
         String featureCacheKey = libertyRuntime + "-" + libertyVersion;
 
         // if the features are already cached in the feature cache
-        if (featureCache.containsKey(featureCacheKey)) {
+        if (featureCache.containsKey(featureCacheKey) || !featureListGraph.isEmpty()) {
             LOGGER.info("Getting cached features for: " + featureCacheKey);
             return featureCache.get(featureCacheKey);
         }
 
         LOGGER.info("Getting features for: " + featureCacheKey);
 
+        List<Feature> installedFeatures = getInstalledFeaturesList(documentURI, libertyRuntime, libertyVersion);
+        if (installedFeatures.size() != 0) {
+            return installedFeatures;
+        }
+ 
         // if not a beta runtime, fetch features from maven central
         // - beta runtimes do not have a published features.json in mc
         if (!libertyVersion.endsWith("-beta")) {
@@ -192,13 +202,6 @@ public class FeatureService {
                 // do nothing, continue on to returning default feature list
                 LOGGER.warning("Received exception when trying to download features from Maven Central: "+e.getMessage());
             }
-        }
-
-        // fetch installed features list - this would only happen if a features.json was not able to be downloaded from Maven Central
-        // This is the case for beta runtimes and for very old runtimes pre 18.0.0.2 (or if within the requestDelay window of 120 seconds).
-        List<Feature> installedFeatures = getInstalledFeaturesList(documentURI, libertyRuntime, libertyVersion);
-        if (installedFeatures.size() != 0) {
-            return installedFeatures;
         }
 
         // return default feature list
@@ -271,7 +274,6 @@ public class FeatureService {
      */
     private List<Feature> getInstalledFeaturesList(String documentURI, String libertyRuntime, String libertyVersion) {
         List<Feature> installedFeatures = new ArrayList<Feature>();
-
         LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(documentURI);
         if (libertyWorkspace == null || libertyWorkspace.getWorkspaceString() == null) {
             return installedFeatures;
@@ -287,7 +289,6 @@ public class FeatureService {
         try {
             // Need to handle both local installation and container
             File featureListFile = null;
-
             if (libertyWorkspace.isLibertyInstalled()) {
                 Path featureListJAR = LibertyUtils.findLibertyFileForWorkspace(libertyWorkspace, Paths.get("bin", "tools", "ws-featurelist.jar"));
                 if (featureListJAR != null && featureListJAR.toFile().exists()) {
@@ -374,14 +375,32 @@ public class FeatureService {
         
         // Note: Only the public features are loaded when unmarshalling the passed featureListFile.
         if ((featureInfo.getFeatures() != null) && (featureInfo.getFeatures().size() > 0)) {
-            for (int i = 0; i < featureInfo.getFeatures().size(); i++) {
-                Feature f = featureInfo.getFeatures().get(i);
+            for (Feature f : featureInfo.getFeatures()) {
                 f.setShortDescription(f.getDescription());
                 // The xml featureListFile does not have a wlpInformation element like the json does, but our code depends on looking up 
                 // features by the shortName found in wlpInformation. So create a WlpInformation object and initialize the shortName to 
                 // the feature name.
                 WlpInformation wlpInfo = new WlpInformation(f.getName());
                 f.setWlpInformation(wlpInfo);
+
+                String currentFeature = f.getName();            
+                List<String> enables = f.getEnables();
+                List<String> configElements = f.getConfigElements();
+                FeatureListNode currentFeatureNode = featureListGraph.addFeature(currentFeature);
+                if (enables != null) {
+                    for (String enabledFeature : enables) {
+                        FeatureListNode feature = featureListGraph.addFeature(enabledFeature);
+                        feature.addEnabler(currentFeature);
+                        currentFeatureNode.addEnables(enabledFeature);
+                    }
+                }
+                if (configElements != null) {
+                    for (String configElement : configElements) {
+                        FeatureListNode configNode = featureListGraph.addConfigElement(configElement);
+                        configNode.addEnabler(currentFeature);
+                        currentFeatureNode.addEnables(configElement);
+                    }
+                }
             }
             installedFeatures = featureInfo.getFeatures();
             libertyWorkspace.setInstalledFeatureList(installedFeatures);
@@ -391,4 +410,7 @@ public class FeatureService {
         return installedFeatures;
     }
 
+    public FeatureListGraph getFeatureListGraph() {
+        return this.featureListGraph;
+    }
 }
