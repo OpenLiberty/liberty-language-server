@@ -21,13 +21,13 @@ import java.util.Set;
 
 public class FeatureListGraph {
     private Map<String, FeatureListNode> nodes;
-    // private Map<String, Set<String>> enablersCache;
-    // private Map<String, Set<String>> enablesCache;
+    private Map<String, Set<String>> enabledByCache;
+    private Map<String, Set<String>> enablesCache;
 
     public FeatureListGraph() {
         nodes = new HashMap<String, FeatureListNode>();
-        // enablersCache = new HashMap<String, Set<String>>();
-        // enablesCache = new HashMap<String, Set<String>>();
+        enabledByCache = new HashMap<String, Set<String>>();
+        enablesCache = new HashMap<String, Set<String>>();
     }
 
     public FeatureListNode addFeature(String nodeName) {
@@ -68,15 +68,15 @@ public class FeatureListGraph {
      * @param elementName
      * @return
      */
-    public Set<String> getAllEnablers(String elementName) {
-        // if (enablersCache.containsKey(elementName)) {
-        //     return enablersCache.get(elementName);
-        // }
+    public Set<String> getAllEnabledBy(String elementName) {
+        if (enabledByCache.containsKey(elementName)) {
+            return enabledByCache.get(elementName);
+        }
         if (!nodes.containsKey(elementName)) {
             return null;
         }
-        Set<String> allEnablers = nodes.get(elementName).getEnablers();
-        Deque<String> queue = new ArrayDeque<String>(allEnablers);
+        Set<String> allEnabledBy = new HashSet<String>(nodes.get(elementName).getEnabledBy());
+        Deque<String> queue = new ArrayDeque<String>(allEnabledBy);
         Set<String> visited = new HashSet<String>();
         while (!queue.isEmpty()) {
             String node = queue.getFirst();
@@ -84,12 +84,13 @@ public class FeatureListGraph {
             if (visited.contains(node)) {
                 continue;
             }
-            Set<String> enablers = nodes.get(node).getEnablers();
+            Set<String> enablers = nodes.get(node).getEnabledBy();
             visited.add(node);
-            allEnablers.addAll(enablers);
+            allEnabledBy.addAll(enablers);
             queue.addAll(enablers);
         }
-        return allEnablers;
+        enabledByCache.put(elementName, allEnabledBy);
+        return allEnabledBy;
     }
 
     /**
@@ -98,13 +99,13 @@ public class FeatureListGraph {
      * @return
      */
     public Set<String> getAllEnables(String feature) {
-        // if (enablesCache.containsKey(feature)) {
-        //     return enablesCache.get(feature);
-        // }
+        if (enablesCache.containsKey(feature)) {
+            return enablesCache.get(feature);
+        }
         if (!nodes.containsKey(feature)) {
             return null;
         }
-        Set<String> allEnables = nodes.get(feature).getEnables();
+        Set<String> allEnables = new HashSet<String>(nodes.get(feature).getEnables());
         Deque<String> queue = new ArrayDeque<String>(allEnables);
         Set<String> visited = new HashSet<String>();
         while (!queue.isEmpty()) {
@@ -118,7 +119,7 @@ public class FeatureListGraph {
             allEnables.addAll(enablers);
             queue.addAll(enablers);
         }
-        // enablesCache.put(feature, allEnables);
+        enablesCache.put(feature, allEnables);
         return allEnables;
     }
 

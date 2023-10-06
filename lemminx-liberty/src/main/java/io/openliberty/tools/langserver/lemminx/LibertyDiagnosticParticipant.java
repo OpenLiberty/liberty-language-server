@@ -76,8 +76,13 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         List<DOMNode> nodes = domDocument.getDocumentElement().getChildren();
         List<Diagnostic> tempDiagnosticsList = new ArrayList<Diagnostic>();
 
-        // TODO: consider initiallizing FeatureService even when features aren't detected
         FeatureListGraph featureGraph = FeatureService.getInstance().getFeatureListGraph();
+        if (featureGraph.isEmpty()) {
+            LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
+            String libertyVersion =  runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
+            String libertyRuntime =  runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
+            FeatureService.getInstance().getInstalledFeaturesList(domDocument.getDocumentURI(), libertyRuntime, libertyVersion);
+        }
 
         for (DOMNode node : nodes) {
             String nodeName = node.getNodeName();
@@ -86,11 +91,9 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             } else if (LibertyConstants.INCLUDE_ELEMENT.equals(nodeName)) {
                 validateIncludeLocation(domDocument, diagnosticsList, node);
             } else if (featureGraph.isConfigElement(nodeName)) {
-                LOGGER.warning("Detected a config element!");
                 holdConfigElement(domDocument, diagnosticsList, node, tempDiagnosticsList);
             }
         }
-        LOGGER.warning("Entering validateConfigElements");
         validateConfigElements(diagnosticsList, tempDiagnosticsList, featureGraph);
     }
 
@@ -180,22 +183,19 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         }
     }
 
-    private void holdConfigElement(DOMDocument domDocument, List<Diagnostic> diagnosticsList, DOMNode configElementNode, 
-                List<Diagnostic> tempDiagnosticsList) {
+    private void holdConfigElement(DOMDocument domDocument, List<Diagnostic> diagnosticsList, DOMNode configElementNode, List<Diagnostic> tempDiagnosticsList) {
         String configElementName = configElementNode.getNodeName();
         Range range = XMLPositionUtility.createRange(configElementNode.getStart(), configElementNode.getEnd(), domDocument);
-        Diagnostic tempDiagnostic = new Diagnostic(range, MISSING_CONFIGURED_FEATURE_MESSAGE, null, 
-                LIBERTY_LEMMINX_SOURCE, MISSING_CONFIGURED_FEATURE_CODE);
+        Diagnostic tempDiagnostic = new Diagnostic(range, MISSING_CONFIGURED_FEATURE_MESSAGE, null, LIBERTY_LEMMINX_SOURCE, MISSING_CONFIGURED_FEATURE_CODE);
         tempDiagnostic.setSource(configElementName);
         tempDiagnosticsList.add(tempDiagnostic);
     }
 
-    private void validateConfigElements(List<Diagnostic> diagnosticsList, List<Diagnostic> tempDiagnosticsList, 
-                FeatureListGraph featureGraph) {
+    private void validateConfigElements(List<Diagnostic> diagnosticsList, List<Diagnostic> tempDiagnosticsList, FeatureListGraph featureGraph) {
         for (Diagnostic tempDiagnostic : tempDiagnosticsList) {
             String configElement = tempDiagnostic.getSource();
             Set<String> includedFeaturesCopy = new HashSet<String>(includedFeatures);
-            Set<String> compatibleFeaturesList = featureGraph.getAllEnablers(configElement);
+            Set<String> compatibleFeaturesList = featureGraph.getAllEnabledBy(configElement);
             includedFeaturesCopy.retainAll(compatibleFeaturesList);
             if (includedFeaturesCopy.isEmpty()) {
                 diagnosticsList.add(tempDiagnostic);

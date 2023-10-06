@@ -26,7 +26,7 @@ public class FeatureListNode {
         this.nodeName = nodeName;
     }
 
-    public void addEnabler(String nodeName) {
+    public void addEnabledBy(String nodeName) {
         enabledBy.add(nodeName);
     }
 
@@ -34,7 +34,7 @@ public class FeatureListNode {
         enables.add(nodeName);
     }
 
-    public Set<String> getEnablers() {
+    public Set<String> getEnabledBy() {
         return enabledBy;
     }
 

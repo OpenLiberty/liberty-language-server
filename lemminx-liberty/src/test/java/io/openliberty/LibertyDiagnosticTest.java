@@ -234,9 +234,11 @@ public class LibertyDiagnosticTest {
     }
 
     @Test
-    public void testConfigElementTransitive() {
+    public void testConfigElementTransitive() throws JAXBException {
         File featureList = new File("src/test/resources/featurelist-ol-23.0.0.1-beta.xml");
         assertTrue(featureList.exists());
+        FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), 
+                new LibertyWorkspace(""), featureList);
         String serverXML1 = String.join(newLine,
                 "<server description=\"Sample Liberty server\">",
                 "   <featureManager>",
