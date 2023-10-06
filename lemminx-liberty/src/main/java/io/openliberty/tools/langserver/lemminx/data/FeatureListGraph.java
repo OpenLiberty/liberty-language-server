@@ -75,6 +75,7 @@ public class FeatureListGraph {
         if (!nodes.containsKey(elementName)) {
             return null;
         }
+        // Implements a breadth-first-search on parent nodes
         Set<String> allEnabledBy = new HashSet<String>(nodes.get(elementName).getEnabledBy());
         Deque<String> queue = new ArrayDeque<String>(allEnabledBy);
         Set<String> visited = new HashSet<String>();
@@ -105,6 +106,7 @@ public class FeatureListGraph {
         if (!nodes.containsKey(feature)) {
             return null;
         }
+        // Implements a breadth-first-search on child nodes
         Set<String> allEnables = new HashSet<String>(nodes.get(feature).getEnables());
         Deque<String> queue = new ArrayDeque<String>(allEnables);
         Set<String> visited = new HashSet<String>();
@@ -123,6 +125,8 @@ public class FeatureListGraph {
         return allEnables;
     }
 
+    /** Will be useful for future features **/
+    
     // public Set<String> getAllConfigElements(String feature) {
     //     Set<String> configElements = new HashSet<String>();
     //     for (String node : getAllEnables(feature)) {

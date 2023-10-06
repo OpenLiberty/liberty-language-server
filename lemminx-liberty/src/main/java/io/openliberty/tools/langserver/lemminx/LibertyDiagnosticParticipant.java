@@ -65,10 +65,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         try {
             validateDom(domDocument, diagnostics);
         } catch (IOException e) {
-            // LOGGER.severe("Error validating document " + domDocument.getDocumentURI());
-            // LOGGER.severe(e.getMessage());
-            System.err.println("Error validating document " + domDocument.getDocumentURI());
-            System.err.println(e.getMessage());
+            LOGGER.severe("Error validating document " + domDocument.getDocumentURI());
+            LOGGER.severe(e.getMessage());
         }
     }
 
@@ -77,6 +75,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         List<Diagnostic> tempDiagnosticsList = new ArrayList<Diagnostic>();
 
         FeatureListGraph featureGraph = FeatureService.getInstance().getFeatureListGraph();
+        // TODO: Consider adding a cached feature list onto repo to optimize
         if (featureGraph.isEmpty()) {
             LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
             String libertyVersion =  runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
@@ -90,7 +89,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 validateFeature(domDocument, diagnosticsList, node);
             } else if (LibertyConstants.INCLUDE_ELEMENT.equals(nodeName)) {
                 validateIncludeLocation(domDocument, diagnosticsList, node);
-            } else if (featureGraph.isConfigElement(nodeName)) {
+            } else if (featureGraph.isConfigElement(nodeName)) {    // defaults to false
                 holdConfigElement(domDocument, diagnosticsList, node, tempDiagnosticsList);
             }
         }
@@ -183,6 +182,13 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         }
     }
 
+    /**
+     * Create temporary diagnostics for validation for single pass-through.
+     * @param domDocument
+     * @param diagnosticsList
+     * @param configElementNode
+     * @param tempDiagnosticsList
+     */
     private void holdConfigElement(DOMDocument domDocument, List<Diagnostic> diagnosticsList, DOMNode configElementNode, List<Diagnostic> tempDiagnosticsList) {
         String configElementName = configElementNode.getNodeName();
         Range range = XMLPositionUtility.createRange(configElementNode.getStart(), configElementNode.getEnd(), domDocument);
@@ -191,10 +197,16 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         tempDiagnosticsList.add(tempDiagnostic);
     }
 
+    /**
+     * Compare the required feature set with included feature set for each config element.
+     * @param diagnosticsList
+     * @param tempDiagnosticsList
+     * @param featureGraph
+     */
     private void validateConfigElements(List<Diagnostic> diagnosticsList, List<Diagnostic> tempDiagnosticsList, FeatureListGraph featureGraph) {
         for (Diagnostic tempDiagnostic : tempDiagnosticsList) {
             String configElement = tempDiagnostic.getSource();
-            Set<String> includedFeaturesCopy = new HashSet<String>(includedFeatures);
+            Set<String> includedFeaturesCopy = (includedFeatures == null) ? new HashSet<String>() : new HashSet<String>(includedFeatures);
             Set<String> compatibleFeaturesList = featureGraph.getAllEnabledBy(configElement);
             includedFeaturesCopy.retainAll(compatibleFeaturesList);
             if (includedFeaturesCopy.isEmpty()) {

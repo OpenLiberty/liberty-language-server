@@ -15,6 +15,8 @@ package io.openliberty.tools.langserver.lemminx.data;
 import java.util.HashSet;
 import java.util.Set;
 
+
+// Class to represent a feature OR config element in a feature list xml
 public class FeatureListNode {
     protected String nodeName;
     protected Set<String> enabledBy;
@@ -42,6 +44,7 @@ public class FeatureListNode {
         return enables;
     }
 
+    // based on a heuristic that features use major versions and config elements don't use '.'
     public boolean isConfigElement() {
         return this.nodeName.indexOf('.') == -1;
     }
