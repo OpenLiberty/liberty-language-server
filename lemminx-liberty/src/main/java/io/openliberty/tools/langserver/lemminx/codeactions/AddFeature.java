@@ -14,7 +14,6 @@ package io.openliberty.tools.langserver.lemminx.codeactions;
 
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import org.eclipse.lemminx.commons.CodeActionFactory;
 import org.eclipse.lemminx.dom.DOMDocument;
@@ -66,8 +65,6 @@ public class AddFeature implements ICodeActionParticipant {
             }
 
             Range nodeRange = XMLPositionUtility.createRange(insertNode.getStart(), insertEndOffset, document);
-            Logger.getLogger("dshi").warning("startCharacter" + nodeRange.getStart().getCharacter());
-            Logger.getLogger("dshi").warning("endCharacter" + nodeRange.getEnd().getCharacter());
             insertText = IndentUtil.formatText(insertText, indent, nodeRange.getStart().getCharacter());
 
             // getAllEnabledBy would return all transitive features, but is too many to offer without a filter

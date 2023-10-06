@@ -45,7 +45,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     public static final String MISSING_FILE_MESSAGE = "The resource at the specified location could not be found.";
     public static final String MISSING_FILE_CODE = "missing_file";
 
-    public static final String MISSING_CONFIGURED_FEATURE_MESSAGE = "This config element does not configure a feature in the featureManager. Remove this element or add a relevant feature.";
+    public static final String MISSING_CONFIGURED_FEATURE_MESSAGE = "This config element does not relate to a feature configured in the featureManager. Remove this element or add a relevant feature.";
     public static final String MISSING_CONFIGURED_FEATURE_CODE = "lost_config_element";
 
     public static final String NOT_OPTIONAL_MESSAGE = "The specified resource cannot be skipped. Check location value or set optional to true.";
@@ -90,7 +90,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             } else if (LibertyConstants.INCLUDE_ELEMENT.equals(nodeName)) {
                 validateIncludeLocation(domDocument, diagnosticsList, node);
             } else if (featureGraph.isConfigElement(nodeName)) {    // defaults to false
-                holdConfigElement(domDocument, diagnosticsList, node, tempDiagnosticsList);
+                holdConfigElement(domDocument, node, tempDiagnosticsList);
             }
         }
         validateConfigElements(diagnosticsList, tempDiagnosticsList, featureGraph);
@@ -189,7 +189,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      * @param configElementNode
      * @param tempDiagnosticsList
      */
-    private void holdConfigElement(DOMDocument domDocument, List<Diagnostic> diagnosticsList, DOMNode configElementNode, List<Diagnostic> tempDiagnosticsList) {
+    private void holdConfigElement(DOMDocument domDocument, DOMNode configElementNode, List<Diagnostic> tempDiagnosticsList) {
         String configElementName = configElementNode.getNodeName();
         Range range = XMLPositionUtility.createRange(configElementNode.getStart(), configElementNode.getEnd(), domDocument);
         Diagnostic tempDiagnostic = new Diagnostic(range, MISSING_CONFIGURED_FEATURE_MESSAGE, null, LIBERTY_LEMMINX_SOURCE, MISSING_CONFIGURED_FEATURE_CODE);
@@ -205,8 +205,12 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      */
     private void validateConfigElements(List<Diagnostic> diagnosticsList, List<Diagnostic> tempDiagnosticsList, FeatureListGraph featureGraph) {
         for (Diagnostic tempDiagnostic : tempDiagnosticsList) {
+            if (includedFeatures == null) {
+                diagnosticsList.add(tempDiagnostic);
+                continue;
+            }
             String configElement = tempDiagnostic.getSource();
-            Set<String> includedFeaturesCopy = (includedFeatures == null) ? new HashSet<String>() : new HashSet<String>(includedFeatures);
+            Set<String> includedFeaturesCopy = new HashSet<String>(includedFeatures);
             Set<String> compatibleFeaturesList = featureGraph.getAllEnabledBy(configElement);
             includedFeaturesCopy.retainAll(compatibleFeaturesList);
             if (includedFeaturesCopy.isEmpty()) {
