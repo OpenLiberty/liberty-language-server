@@ -14,8 +14,11 @@ package io.openliberty.tools.langserver.lemminx.codeactions;
 
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
+import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lemminx.commons.CodeActionFactory;
+import org.eclipse.lemminx.commons.TextDocument;
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.dom.DOMElement;
 import org.eclipse.lemminx.dom.DOMNode;
@@ -27,55 +30,79 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
-import io.openliberty.tools.langserver.lemminx.services.FeatureService;
+import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.util.LibertyConstants;
 
 public class AddFeature implements ICodeActionParticipant {
-    public static final String FEATURE_FORMAT = "\n<feature>%s</feature>";
+
+    /** This code action adresses 3 main situations:
+     *      1) Add a feature to an existing empty featureManager
+     *      2) Add a feature to an existing featureManager with children
+     *      3) Add a feature and new featureManager
+     *  
+     *  To calculate where to insert, each scenario will use a reference point to calculate range
+     *      1) The startTag of the featureManager
+     *      2) The last child of the featureManager
+     *      3) The startTag of the server.xml
+     */
+    public static final String FEATURE_FORMAT = "<feature>%s</feature>";
     public static final String FEATUREMANAGER_FORMAT = 
-            "\n\t<featureManager>" + 
-            "\n\t\t<feature>%s</feature>"  +
+            "\n\t<featureManager>"+ 
+            "\n\t\t<feature>%s</feature>"+
             "\n\t</featureManager>";
 
     @Override
     public void doCodeAction(ICodeActionRequest request, List<CodeAction> codeActions, CancelChecker cancelChecker) {
         Diagnostic diagnostic = request.getDiagnostic();
-        DOMDocument document = request.getDocument();   
-        try {
-            String insertText = "";
-            DOMNode insertNode = null;
-            String indent = request.getXMLGenerator().getWhitespacesIndent();
+        DOMDocument document = request.getDocument();
+        TextDocument textDocument = document.getTextDocument();
+        String insertText = "";
+        int referenceRangeStart = 0;
+        int referenceRangeEnd = 0;
 
-            for (DOMNode node : document.getDocumentElement().getChildren()) {
-                if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(node.getNodeName())) {
-                    // If featureManager is empty, add new feature after featureManager start tag.
-                    // Otherwise, add feature after last feature child.
-                    insertNode = node.getLastChild();
-                    insertText = (insertNode == null) ? FEATURE_FORMAT.replace("\n", "\n\t") : FEATURE_FORMAT;
-                    insertNode = (insertNode == null) ? node : insertNode;
-                    break;
+        for (DOMNode node : document.getDocumentElement().getChildren()) {
+            if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(node.getNodeName())) {
+                DOMNode lastChild = node.getLastChild();
+                if (lastChild == null) {
+                    // Situation 1
+                    insertText = "\n\t" + FEATURE_FORMAT;
+                    DOMElement featureManager = (DOMElement) node;
+                    referenceRangeStart = featureManager.getStartTagOpenOffset();
+                    referenceRangeEnd = featureManager.getStartTagCloseOffset()+1;
+                } else {
+                    // Situation 2
+                    insertText = "\n" + FEATURE_FORMAT;
+                    referenceRangeStart = lastChild.getStart();
+                    referenceRangeEnd = lastChild.getEnd();
                 }
+                break;
             }
+        }
+        // Situation 3
+        if (insertText.isEmpty()) {
+            insertText = FEATUREMANAGER_FORMAT;
+            DOMElement server = document.getDocumentElement();
+            referenceRangeStart = server.getStart();
+            referenceRangeEnd = server.getStartTagCloseOffset()+1;
+        }
+        Range referenceRange = XMLPositionUtility.createRange(referenceRangeStart, referenceRangeEnd, document);
 
-            int insertEndOffset = (insertNode == null) ? ((DOMElement)document.getDocumentElement()).getStartTagCloseOffset()+1 : insertNode.getEnd();
-            // featureManager not found
-            if (insertNode == null) {
-                insertNode = document.getDocumentElement();
-                insertText = FEATUREMANAGER_FORMAT;
-            }
+        try {
+            String indent = request.getXMLGenerator().getWhitespacesIndent();
+            insertText = IndentUtil.formatText(insertText, indent, referenceRange.getStart().getCharacter());
+        } catch (BadLocationException e) {
+            e.printStackTrace();
+        }
 
-            Range nodeRange = XMLPositionUtility.createRange(insertNode.getStart(), insertEndOffset, document);
-            insertText = IndentUtil.formatText(insertText, indent, nodeRange.getStart().getCharacter());
+        // getAllEnabledBy would return all transitive features but typically offers too much
+        Set<String> featureCandidates = LibertyProjectsManager.getInstance()
+                .getWorkspaceFolder(document.getDocumentURI())
+                .getFeatureListGraph().get(diagnostic.getSource()).getEnabledBy();
 
-            // getAllEnabledBy would return all transitive features, but is too many to offer without a filter
-            Set<String> featureCandidates = FeatureService.getInstance().getFeatureListGraph().get(diagnostic.getSource()).getEnabledBy();
-            for (String feature : featureCandidates) {
-                String title = "Add feature " + feature;
-                codeActions.add(CodeActionFactory.insert(
-                        title, nodeRange.getEnd(), String.format(insertText, feature), document.getTextDocument(), diagnostic));
-            }
-        } catch (Exception e) {
-
+        for (String feature : featureCandidates) {
+            String title = "Add feature " + feature;
+            codeActions.add(CodeActionFactory.insert(
+                    title, referenceRange.getEnd(), String.format(insertText, feature), textDocument, diagnostic));
         }
     }
 }
