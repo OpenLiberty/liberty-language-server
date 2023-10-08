@@ -26,9 +26,11 @@ import java.util.stream.Collectors;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
-
+import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
+import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
 import io.openliberty.tools.langserver.lemminx.models.settings.DevcMetadata;
+import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 public class LibertyWorkspace {
 
@@ -43,6 +45,7 @@ public class LibertyWorkspace {
     private List<Feature> installedFeatureList;
     private String libertyInstallationDir;
     private boolean isExternalLibertyInstallation;
+    private FeatureListGraph featureListGraph;
 
     // devc vars
     private String containerName;
@@ -65,6 +68,7 @@ public class LibertyWorkspace {
         this.installedFeatureList = new ArrayList<Feature>();
         this.containerName = null;
         this.containerAlive = false;
+        this.featureListGraph = new FeatureListGraph();
     }
 
     public String getWorkspaceString() {
@@ -204,6 +208,23 @@ public class LibertyWorkspace {
     @Override
     public String toString() {
         return workspaceFolderURI;
+    }
+
+    public void setFeatureListGraph(FeatureListGraph featureListGraph) {
+        this.featureListGraph = featureListGraph;
+    }
+
+    public FeatureListGraph getFeatureListGraph() {
+        if (this.isLibertyInstalled && featureListGraph.isEmpty()) {
+            LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(this);
+            LOGGER.info("Generating installed features list and storing to cache for workspace " + workspaceFolderURI);
+            FeatureService.getInstance().getInstalledFeaturesList(this, 
+                    runtimeInfo.getRuntimeType(), runtimeInfo.getRuntimeVersion());
+            if (!this.featureListGraph.isEmpty()) {
+                LOGGER.info("Lost config element detection feature is available.");
+            }
+        }
+        return this.featureListGraph;
     }
 
 }

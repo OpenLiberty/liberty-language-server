@@ -73,11 +73,8 @@ public class FeatureService {
     private List<Feature> defaultFeatureList;
     private long featureUpdateTime;
 
-    private FeatureListGraph featureListGraph;
-
     private FeatureService() {
         featureCache = new HashMap<>();
-        featureListGraph = new FeatureListGraph();
         featureUpdateTime = -1;
     }
 
@@ -273,9 +270,8 @@ public class FeatureService {
      * @param libertyVersion must not be null and should be a valid Liberty version (e.g. 23.0.0.6)
      * @return list of installed features, or empty list
      */
-    public List<Feature> getInstalledFeaturesList(String documentURI, String libertyRuntime, String libertyVersion) {
+    public List<Feature> getInstalledFeaturesList(LibertyWorkspace libertyWorkspace, String libertyRuntime, String libertyVersion) {
         List<Feature> installedFeatures = new ArrayList<Feature>();
-        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(documentURI);
         if (libertyWorkspace == null || libertyWorkspace.getWorkspaceString() == null) {
             return installedFeatures;
         }
@@ -316,6 +312,11 @@ public class FeatureService {
 
         LOGGER.info("Returning installed features: " + installedFeatures.size());
         return installedFeatures;
+    }
+    
+    public List<Feature> getInstalledFeaturesList(String documentURI, String libertyRuntime, String libertyVersion) {
+        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(documentURI);
+        return getInstalledFeaturesList(libertyWorkspace, libertyRuntime, libertyVersion);
     }
 
     /**
@@ -376,6 +377,7 @@ public class FeatureService {
         
         // Note: Only the public features are loaded when unmarshalling the passed featureListFile.
         if ((featureInfo.getFeatures() != null) && (featureInfo.getFeatures().size() > 0)) {
+            FeatureListGraph featureListGraph = new FeatureListGraph();
             for (Feature f : featureInfo.getFeatures()) {
                 f.setShortDescription(f.getDescription());
                 // The xml featureListFile does not have a wlpInformation element like the json does, but our code depends on looking up 
@@ -404,14 +406,11 @@ public class FeatureService {
                 }
             }
             installedFeatures = featureInfo.getFeatures();
+            libertyWorkspace.setFeatureListGraph(featureListGraph);
             libertyWorkspace.setInstalledFeatureList(installedFeatures);
         } else {
             LOGGER.warning("Unable to get installed features for current Liberty workspace: " + libertyWorkspace.getWorkspaceString());
         }
         return installedFeatures;
-    }
-
-    public FeatureListGraph getFeatureListGraph() {
-        return this.featureListGraph;
     }
 }

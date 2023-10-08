@@ -6,6 +6,7 @@ import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceFolder;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.openliberty.tools.langserver.lemminx.LibertyDiagnosticParticipant;
@@ -30,7 +31,21 @@ import java.util.Collections;
 public class LibertyDiagnosticTest {
 
     static String newLine = System.lineSeparator();
-    static String serverXMLURI = "test/server.xml";
+
+    static File srcResourcesDir = new File("src/test/resources");
+    static File featureList = new File("src/test/resources/featurelist-ol-23.0.0.1-beta.xml");
+    static String serverXMLURI = new File(srcResourcesDir, "test/server.xml").toURI().toString();
+    static List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
+    LibertyProjectsManager libPM;
+    LibertyWorkspace libWorkspace;
+
+    @BeforeEach
+    public void setupWorkspace() {
+        initList.add(new WorkspaceFolder(srcResourcesDir.toURI().toString()));
+        libPM = LibertyProjectsManager.getInstance();
+        libPM.setWorkspaceFolders(initList);
+        libWorkspace = libPM.getLibertyWorkspaceFolders().iterator().next();
+    }
 
     @Test
     public void testFeatureDuplicateDiagnostic() {
@@ -181,24 +196,22 @@ public class LibertyDiagnosticTest {
 
     @Test
     public void testConfigElementMissingFeatureManager() throws JAXBException {
-        File featureList = new File("src/test/resources/featurelist-ol-23.0.0.1-beta.xml");
         assertTrue(featureList.exists());
-        FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), 
-                new LibertyWorkspace(""), featureList);
+        FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), libWorkspace, featureList);
         
-        String serverXml = "ssl id=\"\"/>";
+        String serverXml = "<server><ssl id=\"\"/></server>";
         Diagnostic config_for_missing_feature = new Diagnostic();
-        config_for_missing_feature.setRange(r(0, 0, 0, serverXml.length()));
+        config_for_missing_feature.setRange(r(0, serverXml.indexOf("<ssl"), 0, serverXml.length()-"</server>".length()));
         config_for_missing_feature.setCode(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE);
         config_for_missing_feature.setMessage(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_MESSAGE);
+
+        XMLAssert.testDiagnosticsFor(serverXml, null, null, serverXMLURI, config_for_missing_feature);
     }
 
     @Test
     public void testConfigElementDirect() throws JAXBException {
-        File featureList = new File("src/test/resources/featurelist-ol-23.0.0.1-beta.xml");
         assertTrue(featureList.exists());
-        FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), 
-                new LibertyWorkspace(""), featureList);
+        FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), libWorkspace, featureList);
 
         String correctFeature   = "           <feature>ssl-1.0</feature>";
         String incorrectFeature = "           <feature>jaxrs-2.0</feature>";
@@ -235,10 +248,8 @@ public class LibertyDiagnosticTest {
 
     @Test
     public void testConfigElementTransitive() throws JAXBException {
-        File featureList = new File("src/test/resources/featurelist-ol-23.0.0.1-beta.xml");
         assertTrue(featureList.exists());
-        FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), 
-                new LibertyWorkspace(""), featureList);
+        FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), libWorkspace, featureList);
         String serverXML1 = String.join(newLine,
                 "<server description=\"Sample Liberty server\">",
                 "   <featureManager>",

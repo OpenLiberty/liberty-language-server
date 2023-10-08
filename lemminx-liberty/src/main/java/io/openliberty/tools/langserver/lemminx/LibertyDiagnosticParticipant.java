@@ -26,6 +26,8 @@ import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
 import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
+import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
+import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import io.openliberty.tools.langserver.lemminx.util.*;
 
@@ -55,7 +57,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
 
     public static final String INCORRECT_FEATURE_CODE = "incorrect_feature";
 
-    private Set<String> includedFeatures = null;
+    private Set<String> includedFeatures;
     
     @Override
     public void doDiagnostics(DOMDocument domDocument, List<Diagnostic> diagnostics,
@@ -73,16 +75,10 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     private void validateDom(DOMDocument domDocument, List<Diagnostic> diagnosticsList) throws IOException {
         List<DOMNode> nodes = domDocument.getDocumentElement().getChildren();
         List<Diagnostic> tempDiagnosticsList = new ArrayList<Diagnostic>();
-
-        FeatureListGraph featureGraph = FeatureService.getInstance().getFeatureListGraph();
+        includedFeatures = new HashSet<>();
+        LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI());
         // TODO: Consider adding a cached feature list onto repo to optimize
-        if (featureGraph.isEmpty()) {
-            LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
-            String libertyVersion =  runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
-            String libertyRuntime =  runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
-            FeatureService.getInstance().getInstalledFeaturesList(domDocument.getDocumentURI(), libertyRuntime, libertyVersion);
-        }
-
+        FeatureListGraph featureGraph = workspace.getFeatureListGraph();
         for (DOMNode node : nodes) {
             String nodeName = node.getNodeName();
             if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(nodeName)) {
@@ -105,7 +101,6 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
 
         // Search for duplicate features
         // or features that do not exist
-        Set<String> includedFeatures = new HashSet<>();
         List<DOMNode> features = featureManager.getChildren();
         for (DOMNode featureNode : features) {
             DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
@@ -131,7 +126,6 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 }
             }
         }
-        this.includedFeatures = includedFeatures;
     }
 
     /**
@@ -191,7 +185,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      */
     private void holdConfigElement(DOMDocument domDocument, DOMNode configElementNode, List<Diagnostic> tempDiagnosticsList) {
         String configElementName = configElementNode.getNodeName();
-        Range range = XMLPositionUtility.createRange(configElementNode.getStart(), configElementNode.getEnd(), domDocument);
+        Range range = XMLPositionUtility
+                .createRange(configElementNode.getStart(), configElementNode.getEnd(), domDocument);
         Diagnostic tempDiagnostic = new Diagnostic(range, MISSING_CONFIGURED_FEATURE_MESSAGE, null, LIBERTY_LEMMINX_SOURCE, MISSING_CONFIGURED_FEATURE_CODE);
         tempDiagnostic.setSource(configElementName);
         tempDiagnosticsList.add(tempDiagnostic);
@@ -205,7 +200,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      */
     private void validateConfigElements(List<Diagnostic> diagnosticsList, List<Diagnostic> tempDiagnosticsList, FeatureListGraph featureGraph) {
         for (Diagnostic tempDiagnostic : tempDiagnosticsList) {
-            if (includedFeatures == null) {
+            if (includedFeatures.isEmpty()) {
                 diagnosticsList.add(tempDiagnostic);
                 continue;
             }

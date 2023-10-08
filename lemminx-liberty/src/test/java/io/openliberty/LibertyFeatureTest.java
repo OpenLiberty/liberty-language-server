@@ -45,7 +45,7 @@ public class LibertyFeatureTest {
         assertTrue(installedFeatures.removeIf(f -> (f.getName().equals("cdi-4.0"))));
 
         // Check if config map gets built
-        FeatureListGraph fg = fs.getFeatureListGraph();
+        FeatureListGraph fg = libWorkspace.getFeatureListGraph();
         assertEquals(76, fg.getAllEnabledBy("ssl-1.0").size());
         assertEquals(1, fg.get("ssl").getEnabledBy().size());
         assertTrue(fg.get("ssl").getEnabledBy().contains("ssl-1.0"));
