@@ -63,7 +63,7 @@ public class AddFeature implements ICodeActionParticipant {
         for (DOMNode node : document.getDocumentElement().getChildren()) {
             if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(node.getNodeName())) {
                 DOMNode lastChild = node.getLastChild();
-                if (lastChild == null) {
+                if (lastChild == null || !lastChild.hasChildNodes()) {
                     // Situation 1
                     insertText = "\n\t" + FEATURE_FORMAT;
                     DOMElement featureManager = (DOMElement) node;
