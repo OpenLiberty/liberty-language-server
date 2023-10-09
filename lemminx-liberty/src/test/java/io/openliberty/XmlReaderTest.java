@@ -21,26 +21,26 @@ public class XmlReaderTest {
     @Test
     public void readEmptyXml() throws IOException {
         File emptyXml = new File(resourcesDir, "empty_server.xml");
-        assertFalse(XmlReader.hasServerRoot(emptyXml.getCanonicalPath()));
-        assertFalse(LibertyUtils.isServerXMLFile(emptyXml.getCanonicalPath()));
-        assertFalse(LibertyUtils.isConfigXMLFile(emptyXml.getCanonicalPath()));
+        assertFalse(XmlReader.hasServerRoot(emptyXml.toURI().toString()));
+        assertFalse(LibertyUtils.isServerXMLFile(emptyXml.toURI().toString()));
+        assertFalse(LibertyUtils.isConfigXMLFile(emptyXml.toURI().toString()));
     }
 
     @Test
     public void readServerXml() throws IOException {
         File sampleServerXml = new File(resourcesDir, "sample/custom_server.xml");
-        assertTrue(XmlReader.hasServerRoot(sampleServerXml.getCanonicalPath()));
-        assertFalse(LibertyUtils.isServerXMLFile(sampleServerXml.getCanonicalPath()));
-        assertFalse(LibertyUtils.isConfigDirFile(sampleServerXml.getCanonicalPath()));
-        assertTrue(LibertyUtils.isConfigXMLFile(sampleServerXml.getCanonicalPath()));
+        assertTrue(XmlReader.hasServerRoot(sampleServerXml.toURI().toString()));
+        assertFalse(LibertyUtils.isServerXMLFile(sampleServerXml.toURI().toString()));
+        assertFalse(LibertyUtils.isConfigDirFile(sampleServerXml.toURI().toString()));
+        assertTrue(LibertyUtils.isConfigXMLFile(sampleServerXml.toURI().toString()));
     }
 
     @Test
     public void readLibertyPluginConfigXml() throws IOException {
         File lpcXml = new File(resourcesDir, "sample/liberty-plugin-config.xml");
         Path lpcXmlPath = lpcXml.toPath();
-        assertFalse(XmlReader.hasServerRoot(lpcXml.getCanonicalPath()));
-        assertFalse(LibertyUtils.isConfigXMLFile(lpcXml.getCanonicalPath()));
+        assertFalse(XmlReader.hasServerRoot(lpcXml.toURI().toString()));
+        assertFalse(LibertyUtils.isConfigXMLFile(lpcXml.toURI().toString()));
 
         Set<String> elementNames = new HashSet<String> ();
         elementNames.add("configFile");
