@@ -212,16 +212,19 @@ public class LibertyWorkspace {
 
     public void setFeatureListGraph(FeatureListGraph featureListGraph) {
         this.featureListGraph = featureListGraph;
+        if (isLibertyInstalled) {
+            this.featureListGraph.setRuntime(libertyRuntime + "-" + libertyVersion);
+        }
     }
 
     public FeatureListGraph getFeatureListGraph() {
-        if (this.isLibertyInstalled && featureListGraph.isEmpty()) {
-            LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(this);
+        String workspaceRuntime = libertyRuntime + "-" + libertyVersion;
+        boolean generateGraph = featureListGraph.isEmpty() || !featureListGraph.getRuntime().equals(workspaceRuntime);
+        if (this.isLibertyInstalled && generateGraph) {
             LOGGER.info("Generating installed features list and storing to cache for workspace " + workspaceFolderURI);
-            FeatureService.getInstance().getInstalledFeaturesList(this, 
-                    runtimeInfo.getRuntimeType(), runtimeInfo.getRuntimeVersion());
+            FeatureService.getInstance().getInstalledFeaturesList(this, libertyRuntime, libertyVersion);
             if (!this.featureListGraph.isEmpty()) {
-                LOGGER.info("Lost config element detection feature is available.");
+                LOGGER.info("Lost config element detection feature is available for workspace: " + workspaceFolderURI);
             }
         }
         return this.featureListGraph;

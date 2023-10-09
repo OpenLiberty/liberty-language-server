@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 public class FeatureListGraph {
+    private String runtime = "";
     private Map<String, FeatureListNode> nodes;
     private Map<String, Set<String>> enabledByCache;
     private Map<String, Set<String>> enablesCache;
@@ -61,7 +62,15 @@ public class FeatureListGraph {
             return false;
         }
         return nodes.get(featureListNode).isConfigElement();
-    } 
+    }
+    
+    public void setRuntime(String runtime) {
+        this.runtime = runtime;
+    }
+
+    public String getRuntime() {
+        return this.runtime;
+    }
 
     /**
      * Returns a superset of 'owning' features that enable a given config element or feature.
