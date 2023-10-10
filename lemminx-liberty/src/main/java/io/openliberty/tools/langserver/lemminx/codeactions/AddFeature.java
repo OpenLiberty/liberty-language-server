@@ -34,6 +34,7 @@ import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.util.LibertyConstants;
 
 public class AddFeature implements ICodeActionParticipant {
+    Logger LOGGER = Logger.getLogger(AddFeature.class.getName());
 
     /** This code action adresses 3 main situations:
      *      1) Add a feature to an existing empty featureManager
@@ -56,6 +57,14 @@ public class AddFeature implements ICodeActionParticipant {
         Diagnostic diagnostic = request.getDiagnostic();
         DOMDocument document = request.getDocument();
         TextDocument textDocument = document.getTextDocument();
+        // getAllEnabledBy would return all transitive features but typically offers too much
+        Set<String> featureCandidates = LibertyProjectsManager.getInstance()
+                .getWorkspaceFolder(document.getDocumentURI())
+                .getFeatureListGraph().get(diagnostic.getSource()).getEnabledBy();
+        if (featureCandidates.isEmpty()) {
+            return;
+        }
+
         String insertText = "";
         int referenceRangeStart = 0;
         int referenceRangeEnd = 0;
@@ -63,17 +72,24 @@ public class AddFeature implements ICodeActionParticipant {
         for (DOMNode node : document.getDocumentElement().getChildren()) {
             if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(node.getNodeName())) {
                 DOMNode lastChild = node.getLastChild();
-                if (lastChild == null || !lastChild.hasChildNodes()) {
-                    // Situation 1
-                    insertText = "\n\t" + FEATURE_FORMAT;
-                    DOMElement featureManager = (DOMElement) node;
-                    referenceRangeStart = featureManager.getStartTagOpenOffset();
-                    referenceRangeEnd = featureManager.getStartTagCloseOffset()+1;
-                } else {
+                if (node.getChildren().size() > 1) {
                     // Situation 2
                     insertText = "\n" + FEATURE_FORMAT;
                     referenceRangeStart = lastChild.getStart();
                     referenceRangeEnd = lastChild.getEnd();
+                } else {
+                    if (lastChild != null && (lastChild.hasChildNodes() || lastChild.isComment())) {
+                        // Situation 2
+                        insertText = "\n" + FEATURE_FORMAT;
+                        referenceRangeStart = lastChild.getStart();
+                        referenceRangeEnd = lastChild.getEnd();
+                    } else {
+                        // Situation 1
+                        insertText = "\n\t" + FEATURE_FORMAT;
+                        DOMElement featureManager = (DOMElement) node;
+                        referenceRangeStart = featureManager.getStartTagOpenOffset();
+                        referenceRangeEnd = featureManager.getStartTagCloseOffset()+1;
+                    }
                 }
                 break;
             }
@@ -87,17 +103,13 @@ public class AddFeature implements ICodeActionParticipant {
         }
         Range referenceRange = XMLPositionUtility.createRange(referenceRangeStart, referenceRangeEnd, document);
 
+        String indent = "    ";
         try {
-            String indent = request.getXMLGenerator().getWhitespacesIndent();
-            insertText = IndentUtil.formatText(insertText, indent, referenceRange.getStart().getCharacter());
+            indent = request.getXMLGenerator().getWhitespacesIndent();
         } catch (BadLocationException e) {
-            e.printStackTrace();
+            Logger.getLogger(AddFeature.class.getName()).info("Defaulting indent to four spaces.");
         }
-
-        // getAllEnabledBy would return all transitive features but typically offers too much
-        Set<String> featureCandidates = LibertyProjectsManager.getInstance()
-                .getWorkspaceFolder(document.getDocumentURI())
-                .getFeatureListGraph().get(diagnostic.getSource()).getEnabledBy();
+        insertText = IndentUtil.formatText(insertText, indent, referenceRange.getStart().getCharacter());
 
         for (String feature : featureCandidates) {
             String title = "Add feature " + feature;
