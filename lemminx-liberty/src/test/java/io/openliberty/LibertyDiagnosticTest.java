@@ -213,7 +213,7 @@ public class LibertyDiagnosticTest {
         assertTrue(featureList.exists());
         FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), libWorkspace, featureList);
 
-        String correctFeature   = "           <feature>ssl-1.0</feature>";
+        String correctFeature   = "           <feature>Ssl-1.0</feature>";
         String incorrectFeature = "           <feature>jaxrs-2.0</feature>";
         String configElement    = "   <ssl id=\"\"/>";
         int diagnosticStart = configElement.indexOf("<");
