@@ -4,7 +4,7 @@ on:
   push:
     branches: '**'
   pull_request:
-    branches: [4q2023]
+    branches: [main]
 
 jobs:
   liberty-config-language-server:
@@ -21,10 +21,10 @@ jobs:
           java-version: 17
       - name: Build LCLS
         working-directory: ./liberty-ls
-        run: ./mvnw clean package -ntp -DskipTests
+        run: ./mvnw clean package
       - name: Test LCLS
         working-directory: ./liberty-ls
-        run: ./mvnw verify -ntp
+        run: ./mvnw verify
   lemminx-liberty:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -39,7 +39,7 @@ jobs:
           java-version: 17
       - name: Build Lemminx Liberty
         working-directory: ./lemminx-liberty
-        run: ./mvnw clean package -ntp -DskipTests
+        run: ./mvnw clean package
       - name: Test Lemminx Liberty
         working-directory: ./lemminx-liberty
-        run: ./mvnw verify -ntp
+        run: ./mvnw verify
