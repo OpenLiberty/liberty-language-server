@@ -15,7 +15,6 @@ package io.openliberty.tools.langserver.lemminx;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lemminx.dom.DOMDocument;
@@ -56,14 +55,21 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
         // if the parent element of cursor is a <feature>
         // provide the liberty features as completion options
         if (parentElement.getTagName().equals(LibertyConstants.FEATURE_ELEMENT)) {
-            List<String> existingFeatures = new ArrayList<>();
+            // narrow down completion list based on what was already entered
+            DOMNode featureTextNode = (DOMNode) parentElement.getChildNodes().item(0);
+            String featureName = featureTextNode != null ? featureTextNode.getTextContent() : null;
+
             // collect existing features
+            List<String> existingFeatures = new ArrayList<String>();
+            DOMNode featureMgrNode = null;
             if (parentElement.getParentNode() != null
                     && parentElement.getParentNode().getNodeName().equals(LibertyConstants.FEATURE_MANAGER_ELEMENT)) {
-                existingFeatures = collectExistingFeatures(parentElement.getParentNode());
+                featureMgrNode = parentElement.getParentNode();
+                existingFeatures = FeatureService.getInstance().collectExistingFeatures(parentElement.getParentNode(), featureName);
             }
+
             List<CompletionItem> featureCompletionItems = buildCompletionItems(parentElement, request.getXMLDocument(),
-                    existingFeatures);
+                    existingFeatures, featureName, featureMgrNode);
             featureCompletionItems.stream().forEach(item -> response.addCompletionItem(item));
         }
     }
@@ -87,34 +93,53 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
     }
 
     private List<CompletionItem> buildCompletionItems(DOMElement featureElement, DOMDocument domDocument,
-            List<String> existingFeatures) {
+            List<String> existingFeatures, String featureName, DOMNode featureMgrNode) {
 
         LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
         String libertyVersion =  runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
         String libertyRuntime =  runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
 
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
-        List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
 
-        // filter out features that are already specified in the featureManager block
-        List<CompletionItem> uniqueFeatureCompletionItems = features.stream()
-                .filter(feature -> !existingFeatures.contains(feature.getWlpInformation().getShortName()))
-                .map(feat -> buildFeatureCompletionItem(feat, featureElement, domDocument)).collect(Collectors.toList());
+        boolean checkFeatureName = featureName != null && !featureName.isBlank();
+        
+        if (checkFeatureName) {
+            String featureNameLowerCase = featureName.toLowerCase();
+
+            // strip off version number after the - so that we can provide all possible valid versions of a feature for completion
+            String featureNameToCompare = featureNameLowerCase.contains("-") ? featureNameLowerCase.substring(0, featureNameLowerCase.lastIndexOf("-")+1) : featureNameLowerCase;
+
+            List<Feature> completionFeatures = FeatureService.getInstance().getFeatureReplacements(featureNameToCompare, featureMgrNode, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
+            return getFeatureCompletionItems(featureElement, domDocument, completionFeatures);
+        } else {
+            List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
+            return getUniqueFeatureCompletionItems(featureElement, domDocument, features, existingFeatures);
+        }
+    }
+
+     private List<CompletionItem> getFeatureCompletionItems(DOMElement featureElement, DOMDocument domDocument, List<Feature> completionFeatures) {
+        List<CompletionItem> uniqueFeatureCompletionItems = new ArrayList<CompletionItem>();
+
+        for (Feature nextFeature : completionFeatures) {
+            CompletionItem ci = buildFeatureCompletionItem(nextFeature, featureElement, domDocument);
+            uniqueFeatureCompletionItems.add(ci);
+        }
 
         return uniqueFeatureCompletionItems;
     }
 
-    private List<String> collectExistingFeatures(DOMNode featureManager) {
-        List<String> includedFeatures = new ArrayList<>();
-        List<DOMNode> features = featureManager.getChildren();
-        for (DOMNode featureNode : features) {
-            DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
-            // skip nodes that do not have any text value (ie. comments)
-            if (featureNode.getNodeName().equals(LibertyConstants.FEATURE_ELEMENT) && featureTextNode != null) {
-                String featureName = featureTextNode.getTextContent();
-                includedFeatures.add(featureName);
+    private List<CompletionItem> getUniqueFeatureCompletionItems(DOMElement featureElement, DOMDocument domDocument, List<Feature> allFeatures, List<String> existingFeatureNames) {
+        List<CompletionItem> uniqueFeatureCompletionItems = new ArrayList<CompletionItem>();
+
+        for (Feature nextFeature : allFeatures) {
+            String nextFeatureName = nextFeature.getWlpInformation().getShortName().toLowerCase();
+            if (!existingFeatureNames.contains(nextFeatureName)) {
+                CompletionItem ci = buildFeatureCompletionItem(nextFeature, featureElement, domDocument);
+                uniqueFeatureCompletionItems.add(ci);
             }
         }
-        return includedFeatures;
+
+        return uniqueFeatureCompletionItems;
     }
+
 }

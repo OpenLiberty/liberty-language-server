@@ -20,9 +20,12 @@ import java.nio.file.Paths;
 import java.util.List;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Set;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
@@ -33,6 +36,8 @@ public class LibertyProjectsManager {
     private static final Logger LOGGER = Logger.getLogger(LibertyProjectsManager.class.getName());
 
     private static final LibertyProjectsManager INSTANCE = new LibertyProjectsManager();
+
+    private static final Set<String> SRC_AND_BUILD_DIRS = Stream.of("target", "build", "src").collect(Collectors.toCollection(HashSet::new));
 
     private Map<String, LibertyWorkspace> libertyWorkspaceFolders;
 
@@ -47,7 +52,7 @@ public class LibertyProjectsManager {
     public void setWorkspaceFolders(List<WorkspaceFolder> workspaceFolders) {
         for (WorkspaceFolder folder : workspaceFolders) {
             // Add logic here to see if child folders are sub-modules in a multi-module project.
-            // If child folder is a Liberty project (has src/main/liberty/config/server.xml),
+            // If child folder is a Liberty project (has any xml files with a <server> root element),
             // then create a LibertyWorkspace for it and do not create one for the parent folder.
 
             String workspaceUriString = folder.getUri();
@@ -60,13 +65,14 @@ public class LibertyProjectsManager {
 
             URI workspaceUri =  URI.create(normalizedUriString);
             Path workspacePath = Paths.get(workspaceUri);
-            Path serverXmlPath = Paths.get("src", "main", "liberty", "config", "server.xml");
+
+            // Added logic to find all *.xml files with <server> root elements instead of only considering the default src/main/liberty/config/server.xml file.
             List<Path> serverXmlFiles = null;
 
             try {
-                serverXmlFiles = LibertyUtils.findFilesInDirectory(workspacePath, serverXmlPath);
+                serverXmlFiles = LibertyUtils.getXmlFilesWithServerRootInDirectory(workspacePath);
             } catch (IOException e) {
-                LOGGER.warning("Received exception while searching for server.xml files in: " + workspacePath + " exception: " + e.getMessage());
+                LOGGER.warning("Received exception while searching for xml files with a <server> root element in: " + workspacePath + ": " + e.getMessage());
             }
 
             if ((serverXmlFiles == null) || serverXmlFiles.isEmpty() || (serverXmlFiles.size() == 1)) {
@@ -84,6 +90,8 @@ public class LibertyProjectsManager {
                                         .filter(Files::isDirectory)
                                         .collect(Collectors.toList());
 
+                    boolean containsSrcOrBuildDir = LibertyUtils.containsDirectoryWithName(childrenDirs, SRC_AND_BUILD_DIRS);
+
                     for (Path nextChildDir : childrenDirs) {
                         lastChildDirPath = nextChildDir.toUri().toString().replace("///", "/");
                         if (nextChildDir.equals(workspacePath)) {
@@ -93,12 +101,15 @@ public class LibertyProjectsManager {
                             addedSubModule = true; 
                             continue;
                         }
-                        List<Path> serverXmlFile = LibertyUtils.findFilesInDirectory(nextChildDir, serverXmlPath);
-                        if (!serverXmlFile.isEmpty()) {
-                            LibertyWorkspace libertyWorkspace = new LibertyWorkspace(lastChildDirPath);
-                            this.libertyWorkspaceFolders.put(lastChildDirPath, libertyWorkspace);
-                            addedSubModule = true;
-                            LOGGER.info("Adding Liberty workspace for sub-module: " + lastChildDirPath);
+                        // Do not add child dirs as sub-modules if there are src/target/build dirs as siblings. This is not a sub-module.
+                        if (!containsSrcOrBuildDir) {
+                            // Since we already found all server root xml files earlier, just check if any start with this path.
+                            if (LibertyUtils.containsFileStartingWithRootPath(nextChildDir, serverXmlFiles)) {
+                                LibertyWorkspace libertyWorkspace = new LibertyWorkspace(lastChildDirPath);
+                                this.libertyWorkspaceFolders.put(lastChildDirPath, libertyWorkspace);
+                                addedSubModule = true;
+                                LOGGER.info("Adding Liberty workspace for sub-module: " + lastChildDirPath);
+                            }
                         }
                     }
                 } catch (IOException e) {

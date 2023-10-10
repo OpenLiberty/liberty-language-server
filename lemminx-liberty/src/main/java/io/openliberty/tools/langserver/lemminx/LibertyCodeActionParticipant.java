@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2023 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -24,8 +24,10 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 import io.openliberty.tools.langserver.lemminx.codeactions.AddAttribute;
+import io.openliberty.tools.langserver.lemminx.codeactions.AddFeature;
 import io.openliberty.tools.langserver.lemminx.codeactions.CreateFile;
 import io.openliberty.tools.langserver.lemminx.codeactions.EditAttribute;
+import io.openliberty.tools.langserver.lemminx.codeactions.ReplaceFeature;
 
 public class LibertyCodeActionParticipant implements ICodeActionParticipant {
     
@@ -53,6 +55,8 @@ public class LibertyCodeActionParticipant implements ICodeActionParticipant {
             codeActionParticipants.put(LibertyDiagnosticParticipant.MISSING_FILE_CODE, new CreateFile());
             codeActionParticipants.put(LibertyDiagnosticParticipant.NOT_OPTIONAL_CODE, new EditAttribute());
             codeActionParticipants.put(LibertyDiagnosticParticipant.IMPLICIT_NOT_OPTIONAL_CODE, new AddAttribute());
+            codeActionParticipants.put(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE, new ReplaceFeature());
+            codeActionParticipants.put(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE, new AddFeature());
         }
     }
 }

@@ -18,6 +18,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.Range;
 
+import io.openliberty.tools.langserver.LibertyConfigFileManager;
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 
 /**
@@ -91,9 +92,9 @@ public class ServerPropertyValues {
     }};
 
     public static boolean usesPredefinedValues(LibertyTextDocument tdi, String key) {
-        if (ParserFileHelperUtil.isBootstrapPropertiesFile(tdi)) {
+        if (LibertyConfigFileManager.isBootstrapPropertiesFile(tdi)) {
             return predefinedBootstrapValues.containsKey(key);
-        } else if (ParserFileHelperUtil.isServerEnvFile(tdi)) {
+        } else if (LibertyConfigFileManager.isServerEnvFile(tdi)) {
             return predefinedServerValues.containsKey(key);
         }
         return false;
@@ -112,9 +113,9 @@ public class ServerPropertyValues {
     }
 
     public static List<String> getValidValues(LibertyTextDocument tdi, String key) {
-        if (ParserFileHelperUtil.isBootstrapPropertiesFile(tdi)) {
+        if (LibertyConfigFileManager.isBootstrapPropertiesFile(tdi)) {
             return predefinedBootstrapValues.getOrDefault(key, Collections.emptyList());
-        } else if (ParserFileHelperUtil.isServerEnvFile(tdi)) {
+        } else if (LibertyConfigFileManager.isServerEnvFile(tdi)) {
             return predefinedServerValues.getOrDefault(key, Collections.emptyList());
         }
         return Collections.emptyList();

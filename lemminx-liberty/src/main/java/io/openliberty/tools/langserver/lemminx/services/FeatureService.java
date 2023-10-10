@@ -23,10 +23,15 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.logging.Logger;
+
+import org.eclipse.lemminx.dom.DOMNode;
+
 import java.util.concurrent.TimeUnit;
 
 import jakarta.xml.bind.JAXBContext;
@@ -36,7 +41,8 @@ import jakarta.xml.bind.Unmarshaller;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 
-
+import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
+import io.openliberty.tools.langserver.lemminx.data.FeatureListNode;
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
 import io.openliberty.tools.langserver.lemminx.models.feature.FeatureInfo;
 import io.openliberty.tools.langserver.lemminx.models.feature.WlpInformation;
@@ -173,7 +179,7 @@ public class FeatureService {
         if (!libertyVersion.endsWith("-beta")) {
             try {
                 // verify that request delay (seconds) has gone by since last fetch request
-                // Note that the default delay is 120 seconds and can cause us to generate a feature list instead of download from MC when
+                // Note that the default delay is 10 seconds and can cause us to generate a feature list instead of download from MC when
                 // switching back and forth between projects.
                 long currentTime = System.currentTimeMillis();
                 if (this.featureUpdateTime == -1 || currentTime >= (this.featureUpdateTime + (requestDelay * 1000))) {
@@ -206,8 +212,78 @@ public class FeatureService {
             .findFirst();
     }
 
+    public List<String> getFeatureShortNames(List<Feature> features) {
+        return getFeatureShortNames(features, false);
+    }
+
+    public List<String> getFeatureShortNames(List<Feature> features, boolean lowerCase) {
+        List<String> featureShortNames = new ArrayList<String> ();
+
+        for (Feature nextFeature: features) {
+            featureShortNames.add(lowerCase ? nextFeature.getWlpInformation().getShortName().toLowerCase() : nextFeature.getWlpInformation().getShortName());
+        }
+
+        return featureShortNames;
+    }
+
     public boolean featureExists(String featureName, String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
         return this.getFeature(featureName, libertyVersion, libertyRuntime, requestDelay, documentURI).isPresent();
+    }
+
+    public List<Feature> getFeatureReplacements(String featureName, DOMNode featureManagerNode, String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
+        List<Feature> features = getFeatures(libertyVersion, libertyRuntime, requestDelay, documentURI);
+        List<String> featureNamesLowerCase = getFeatureShortNames(features, true);
+
+        // get list of existing features to exclude from list of possible replacements
+        List<String> existingFeatures = collectExistingFeatures(featureManagerNode, featureName);
+
+        // also exclude any feature with a different version that matches an existing feature
+        Set<String> featuresWithoutVersionsToExclude = new HashSet<String>();
+        for (String nextFeatureName : featureNamesLowerCase) {
+            if (existingFeatures.contains(nextFeatureName)) {
+                // collect feature name minus version number to know which other features to exclude
+                String featureNameMinusVersion = nextFeatureName.substring(0, nextFeatureName.lastIndexOf("-") + 1);
+                featuresWithoutVersionsToExclude.add(featureNameMinusVersion);
+            }
+        }
+
+        List<Feature> replacementFeatures = new ArrayList<Feature>();
+        String featureNameLowerCase = featureName.toLowerCase();
+
+        for (int i=0; i < featureNamesLowerCase.size(); i++) {
+            String nextFeatureName = featureNamesLowerCase.get(i);
+            if (nextFeatureName.contains(featureNameLowerCase) && (!nextFeatureName.contains("-") || 
+                !featuresWithoutVersionsToExclude.contains(nextFeatureName.substring(0, nextFeatureName.lastIndexOf("-") + 1)))) {
+                    replacementFeatures.add(features.get(i));
+            }
+        }
+
+        return replacementFeatures;
+    }
+
+    /*
+     * Returns the feature names specified in the featureManager element in lower case, excluding the currentFeatureName if specified.
+     */
+    public List<String> collectExistingFeatures(DOMNode featureManager, String currentFeatureName) {
+        List<String> includedFeatures = new ArrayList<>();
+
+        if (featureManager == null) {
+            return includedFeatures;
+        }
+
+        List<DOMNode> features = featureManager.getChildren();
+        for (DOMNode featureNode : features) {
+            DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
+            // skip nodes that do not have any text value (ie. comments)
+            if (featureNode.getNodeName().equals(LibertyConstants.FEATURE_ELEMENT) && featureTextNode != null) {
+                String featureName = featureTextNode.getTextContent();
+                String featureNameLowerCase = featureName.toLowerCase();
+                if (currentFeatureName == null || (currentFeatureName != null && !featureNameLowerCase.equalsIgnoreCase(currentFeatureName))) {
+                    includedFeatures.add(featureNameLowerCase);
+                }
+            }
+        }
+        return includedFeatures;
     }
 
     /**
@@ -220,10 +296,8 @@ public class FeatureService {
      * @param libertyVersion must not be null and should be a valid Liberty version (e.g. 23.0.0.6)
      * @return list of installed features, or empty list
      */
-    private List<Feature> getInstalledFeaturesList(String documentURI, String libertyRuntime, String libertyVersion) {
+    public List<Feature> getInstalledFeaturesList(LibertyWorkspace libertyWorkspace, String libertyRuntime, String libertyVersion) {
         List<Feature> installedFeatures = new ArrayList<Feature>();
-
-        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(documentURI);
         if (libertyWorkspace == null || libertyWorkspace.getWorkspaceString() == null) {
             return installedFeatures;
         }
@@ -238,7 +312,6 @@ public class FeatureService {
         try {
             // Need to handle both local installation and container
             File featureListFile = null;
-
             if (libertyWorkspace.isLibertyInstalled()) {
                 Path featureListJAR = LibertyUtils.findLibertyFileForWorkspace(libertyWorkspace, Paths.get("bin", "tools", "ws-featurelist.jar"));
                 if (featureListJAR != null && featureListJAR.toFile().exists()) {
@@ -265,6 +338,11 @@ public class FeatureService {
 
         LOGGER.info("Returning installed features: " + installedFeatures.size());
         return installedFeatures;
+    }
+    
+    public List<Feature> getInstalledFeaturesList(String documentURI, String libertyRuntime, String libertyVersion) {
+        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(documentURI);
+        return getInstalledFeaturesList(libertyWorkspace, libertyRuntime, libertyVersion);
     }
 
     /**
@@ -325,21 +403,41 @@ public class FeatureService {
         
         // Note: Only the public features are loaded when unmarshalling the passed featureListFile.
         if ((featureInfo.getFeatures() != null) && (featureInfo.getFeatures().size() > 0)) {
-            for (int i = 0; i < featureInfo.getFeatures().size(); i++) {
-                Feature f = featureInfo.getFeatures().get(i);
+            FeatureListGraph featureListGraph = new FeatureListGraph();
+            for (Feature f : featureInfo.getFeatures()) {
                 f.setShortDescription(f.getDescription());
                 // The xml featureListFile does not have a wlpInformation element like the json does, but our code depends on looking up 
                 // features by the shortName found in wlpInformation. So create a WlpInformation object and initialize the shortName to 
                 // the feature name.
                 WlpInformation wlpInfo = new WlpInformation(f.getName());
                 f.setWlpInformation(wlpInfo);
+
+                String currentFeature = f.getName();            
+                List<String> enables = f.getEnables();
+                List<String> configElements = f.getConfigElements();
+                FeatureListNode currentFeatureNode = featureListGraph.addFeature(currentFeature);
+                if (enables != null) {
+                    for (String enabledFeature : enables) {
+                        FeatureListNode feature = featureListGraph.addFeature(enabledFeature);
+                        feature.addEnabledBy(currentFeature);
+                        currentFeatureNode.addEnables(enabledFeature);
+                    }
+                }
+                if (configElements != null) {
+                    for (String configElement : configElements) {
+                        FeatureListNode configNode = featureListGraph.addConfigElement(configElement);
+                        configNode.addEnabledBy(currentFeature);
+                        currentFeatureNode.addEnables(configElement);
+                    }
+                }
             }
             installedFeatures = featureInfo.getFeatures();
+            libertyWorkspace.setFeatureListGraph(featureListGraph);
             libertyWorkspace.setInstalledFeatureList(installedFeatures);
         } else {
             LOGGER.warning("Unable to get installed features for current Liberty workspace: " + libertyWorkspace.getWorkspaceString());
+            libertyWorkspace.setFeatureListGraph(new FeatureListGraph());
         }
         return installedFeatures;
     }
-
 }

@@ -5,34 +5,42 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import org.junit.jupiter.api.Test;
 
+import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 import io.openliberty.tools.langserver.lemminx.util.XmlReader;
 
 public class XmlReaderTest {
     File resourcesDir = new File("src/test/resources");
 
     @Test
-    public void readEmptyXml() {
+    public void readEmptyXml() throws IOException {
         File emptyXml = new File(resourcesDir, "empty_server.xml");
-        assertFalse(XmlReader.hasServerRoot(emptyXml));
+        assertFalse(XmlReader.hasServerRoot(emptyXml.toURI().toString()));
+        assertFalse(LibertyUtils.isServerXMLFile(emptyXml.toURI().toString()));
+        assertFalse(LibertyUtils.isConfigXMLFile(emptyXml.toURI().toString()));
     }
 
     @Test
-    public void readServerXml() {
-        File sampleServerXml = new File(resourcesDir, "sample/server.xml");
-        assertTrue(XmlReader.hasServerRoot(sampleServerXml));
+    public void readServerXml() throws IOException {
+        File sampleServerXml = new File(resourcesDir, "sample/custom_server.xml");
+        assertTrue(XmlReader.hasServerRoot(sampleServerXml.toURI().toString()));
+        assertFalse(LibertyUtils.isServerXMLFile(sampleServerXml.toURI().toString()));
+        assertFalse(LibertyUtils.isConfigDirFile(sampleServerXml.toURI().toString()));
+        assertTrue(LibertyUtils.isConfigXMLFile(sampleServerXml.toURI().toString()));
     }
 
     @Test
-    public void readLibertyPluginConfigXml() {
+    public void readLibertyPluginConfigXml() throws IOException {
         File lpcXml = new File(resourcesDir, "sample/liberty-plugin-config.xml");
         Path lpcXmlPath = lpcXml.toPath();
-        assertFalse(XmlReader.hasServerRoot(lpcXml));
+        assertFalse(XmlReader.hasServerRoot(lpcXml.toURI().toString()));
+        assertFalse(LibertyUtils.isConfigXMLFile(lpcXml.toURI().toString()));
 
         Set<String> elementNames = new HashSet<String> ();
         elementNames.add("configFile");

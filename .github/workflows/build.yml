@@ -21,10 +21,10 @@ jobs:
           java-version: 17
       - name: Build LCLS
         working-directory: ./liberty-ls
-        run: ./mvnw clean package
+        run: ./mvnw clean package -ntp -DskipTests
       - name: Test LCLS
         working-directory: ./liberty-ls
-        run: ./mvnw verify
+        run: ./mvnw verify -ntp
   lemminx-liberty:
     runs-on: ${{ matrix.os }}
     strategy:
@@ -39,7 +39,7 @@ jobs:
           java-version: 17
       - name: Build Lemminx Liberty
         working-directory: ./lemminx-liberty
-        run: ./mvnw clean package
+        run: ./mvnw clean package -ntp -DskipTests
       - name: Test Lemminx Liberty
         working-directory: ./lemminx-liberty
-        run: ./mvnw verify
+        run: ./mvnw verify -ntp
