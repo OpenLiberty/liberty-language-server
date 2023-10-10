@@ -115,13 +115,14 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                     String message = "ERROR: The feature \"" + featureName + "\" does not exist.";
                     list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
                 } else {
-                    if (includedFeatures.contains(featureName)) {
+                    String featureNameLower = featureName.toLowerCase();
+                    if (includedFeatures.contains(featureNameLower)) {
                         Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
                                 featureTextNode.getEnd(), domDocument);
                         String message = "ERROR: " + featureName + " is already included.";
                         list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
                     } else {
-                        includedFeatures.add(featureName);
+                        includedFeatures.add(featureNameLower);
                     }
                 }
             }

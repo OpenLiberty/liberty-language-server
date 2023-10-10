@@ -22,7 +22,7 @@ import java.util.Set;
 public class FeatureListGraph {
     private String runtime = "";
     private Map<String, FeatureListNode> nodes;
-    private Map<String, Set<String>> enabledByCache;
+    private Map<String, Set<String>> enabledByCache; // storing in lower case to enable diagnostics with configured features
     private Map<String, Set<String>> enablesCache;
 
     public FeatureListGraph() {
@@ -74,6 +74,7 @@ public class FeatureListGraph {
 
     /**
      * Returns a superset of 'owning' features that enable a given config element or feature.
+     * The features are returned in lower case to make the diagnostic code easier.
      * @param elementName
      * @return
      */
@@ -99,8 +100,16 @@ public class FeatureListGraph {
             allEnabledBy.addAll(enablers);
             queue.addAll(enablers);
         }
-        enabledByCache.put(elementName, allEnabledBy);
-        return allEnabledBy;
+        return addToEnabledByCacheInLowerCase(elementName, allEnabledBy);
+    }
+
+    private Set<String> addToEnabledByCacheInLowerCase(String configElement, Set<String> allEnabledBy) {
+        Set<String> lowercaseEnabledBy = new HashSet<String>();
+        for (String nextFeature: allEnabledBy) {
+            lowercaseEnabledBy.add(nextFeature.toLowerCase());
+        }
+        enabledByCache.put(configElement, lowercaseEnabledBy);
+        return lowercaseEnabledBy;
     }
 
     /**
