@@ -41,7 +41,8 @@ import jakarta.xml.bind.Unmarshaller;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 
-
+import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
+import io.openliberty.tools.langserver.lemminx.data.FeatureListNode;
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
 import io.openliberty.tools.langserver.lemminx.models.feature.FeatureInfo;
 import io.openliberty.tools.langserver.lemminx.models.feature.WlpInformation;
@@ -178,7 +179,7 @@ public class FeatureService {
         if (!libertyVersion.endsWith("-beta")) {
             try {
                 // verify that request delay (seconds) has gone by since last fetch request
-                // Note that the default delay is 120 seconds and can cause us to generate a feature list instead of download from MC when
+                // Note that the default delay is 10 seconds and can cause us to generate a feature list instead of download from MC when
                 // switching back and forth between projects.
                 long currentTime = System.currentTimeMillis();
                 if (this.featureUpdateTime == -1 || currentTime >= (this.featureUpdateTime + (requestDelay * 1000))) {
@@ -295,10 +296,8 @@ public class FeatureService {
      * @param libertyVersion must not be null and should be a valid Liberty version (e.g. 23.0.0.6)
      * @return list of installed features, or empty list
      */
-    private List<Feature> getInstalledFeaturesList(String documentURI, String libertyRuntime, String libertyVersion) {
+    public List<Feature> getInstalledFeaturesList(LibertyWorkspace libertyWorkspace, String libertyRuntime, String libertyVersion) {
         List<Feature> installedFeatures = new ArrayList<Feature>();
-
-        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(documentURI);
         if (libertyWorkspace == null || libertyWorkspace.getWorkspaceString() == null) {
             return installedFeatures;
         }
@@ -313,7 +312,6 @@ public class FeatureService {
         try {
             // Need to handle both local installation and container
             File featureListFile = null;
-
             if (libertyWorkspace.isLibertyInstalled()) {
                 Path featureListJAR = LibertyUtils.findLibertyFileForWorkspace(libertyWorkspace, Paths.get("bin", "tools", "ws-featurelist.jar"));
                 if (featureListJAR != null && featureListJAR.toFile().exists()) {
@@ -340,6 +338,11 @@ public class FeatureService {
 
         LOGGER.info("Returning installed features: " + installedFeatures.size());
         return installedFeatures;
+    }
+    
+    public List<Feature> getInstalledFeaturesList(String documentURI, String libertyRuntime, String libertyVersion) {
+        LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(documentURI);
+        return getInstalledFeaturesList(libertyWorkspace, libertyRuntime, libertyVersion);
     }
 
     /**
@@ -400,21 +403,41 @@ public class FeatureService {
         
         // Note: Only the public features are loaded when unmarshalling the passed featureListFile.
         if ((featureInfo.getFeatures() != null) && (featureInfo.getFeatures().size() > 0)) {
-            for (int i = 0; i < featureInfo.getFeatures().size(); i++) {
-                Feature f = featureInfo.getFeatures().get(i);
+            FeatureListGraph featureListGraph = new FeatureListGraph();
+            for (Feature f : featureInfo.getFeatures()) {
                 f.setShortDescription(f.getDescription());
                 // The xml featureListFile does not have a wlpInformation element like the json does, but our code depends on looking up 
                 // features by the shortName found in wlpInformation. So create a WlpInformation object and initialize the shortName to 
                 // the feature name.
                 WlpInformation wlpInfo = new WlpInformation(f.getName());
                 f.setWlpInformation(wlpInfo);
+
+                String currentFeature = f.getName();            
+                List<String> enables = f.getEnables();
+                List<String> configElements = f.getConfigElements();
+                FeatureListNode currentFeatureNode = featureListGraph.addFeature(currentFeature);
+                if (enables != null) {
+                    for (String enabledFeature : enables) {
+                        FeatureListNode feature = featureListGraph.addFeature(enabledFeature);
+                        feature.addEnabledBy(currentFeature);
+                        currentFeatureNode.addEnables(enabledFeature);
+                    }
+                }
+                if (configElements != null) {
+                    for (String configElement : configElements) {
+                        FeatureListNode configNode = featureListGraph.addConfigElement(configElement);
+                        configNode.addEnabledBy(currentFeature);
+                        currentFeatureNode.addEnables(configElement);
+                    }
+                }
             }
             installedFeatures = featureInfo.getFeatures();
+            libertyWorkspace.setFeatureListGraph(featureListGraph);
             libertyWorkspace.setInstalledFeatureList(installedFeatures);
         } else {
             LOGGER.warning("Unable to get installed features for current Liberty workspace: " + libertyWorkspace.getWorkspaceString());
+            libertyWorkspace.setFeatureListGraph(new FeatureListGraph());
         }
         return installedFeatures;
     }
-
 }

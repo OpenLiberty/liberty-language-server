@@ -16,6 +16,7 @@ import jakarta.xml.bind.annotation.XmlAccessorType;
 import jakarta.xml.bind.annotation.XmlAttribute;
 import jakarta.xml.bind.annotation.XmlAccessType;
 import jakarta.xml.bind.annotation.XmlRootElement;
+import java.util.List;
 
 @XmlRootElement(name = "feature")
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -32,6 +33,9 @@ public class Feature {
     private String type;
     private String version;
     WlpInformation wlpInformation;
+
+    private List<String> configElement;
+    private List<String> enables;
 
     // Getter Methods
 
@@ -67,6 +71,14 @@ public class Feature {
         return wlpInformation;
     }
 
+    public List<String> getConfigElements() {
+        return configElement;
+    }
+
+    public List<String> getEnables() {
+        return enables;
+    }
+
     // Setter Methods
 
     public void setDescription(String description) {
@@ -99,5 +111,13 @@ public class Feature {
 
     public void setWlpInformation(WlpInformation wlpInformation) {
         this.wlpInformation = wlpInformation;
+    }
+
+    public void setConfigElements(List<String> configElement) {
+        this.configElement = configElement;
+    }
+
+    public void setEnables(List<String> enables) {
+        this.enables = enables;
     }
 }

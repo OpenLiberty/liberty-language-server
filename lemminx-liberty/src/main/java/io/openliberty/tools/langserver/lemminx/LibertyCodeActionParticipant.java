@@ -24,6 +24,7 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 import io.openliberty.tools.langserver.lemminx.codeactions.AddAttribute;
+import io.openliberty.tools.langserver.lemminx.codeactions.AddFeature;
 import io.openliberty.tools.langserver.lemminx.codeactions.CreateFile;
 import io.openliberty.tools.langserver.lemminx.codeactions.EditAttribute;
 import io.openliberty.tools.langserver.lemminx.codeactions.ReplaceFeature;
@@ -55,6 +56,7 @@ public class LibertyCodeActionParticipant implements ICodeActionParticipant {
             codeActionParticipants.put(LibertyDiagnosticParticipant.NOT_OPTIONAL_CODE, new EditAttribute());
             codeActionParticipants.put(LibertyDiagnosticParticipant.IMPLICIT_NOT_OPTIONAL_CODE, new AddAttribute());
             codeActionParticipants.put(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE, new ReplaceFeature());
+            codeActionParticipants.put(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE, new AddFeature());
         }
     }
 }
