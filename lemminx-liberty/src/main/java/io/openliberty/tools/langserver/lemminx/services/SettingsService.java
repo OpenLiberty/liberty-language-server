@@ -26,8 +26,8 @@ public class SettingsService {
         return instance;
     }
 
-    // default request delay is 120 seconds
-    private static int DEFAULT_REQUEST_DELAY = 120;
+    // default request delay is 10 seconds
+    private static int DEFAULT_REQUEST_DELAY = 10;
 
     private SettingsService() {
     }

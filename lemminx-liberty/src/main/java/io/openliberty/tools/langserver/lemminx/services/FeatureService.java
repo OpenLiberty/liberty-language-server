@@ -180,7 +180,7 @@ public class FeatureService {
         if (!libertyVersion.endsWith("-beta")) {
             try {
                 // verify that request delay (seconds) has gone by since last fetch request
-                // Note that the default delay is 120 seconds and can cause us to generate a feature list instead of download from MC when
+                // Note that the default delay is 10 seconds and can cause us to generate a feature list instead of download from MC when
                 // switching back and forth between projects.
                 long currentTime = System.currentTimeMillis();
                 if (this.featureUpdateTime == -1 || currentTime >= (this.featureUpdateTime + (requestDelay * 1000))) {
@@ -410,6 +410,7 @@ public class FeatureService {
             libertyWorkspace.setInstalledFeatureList(installedFeatures);
         } else {
             LOGGER.warning("Unable to get installed features for current Liberty workspace: " + libertyWorkspace.getWorkspaceString());
+            libertyWorkspace.setFeatureListGraph(new FeatureListGraph());
         }
         return installedFeatures;
     }
