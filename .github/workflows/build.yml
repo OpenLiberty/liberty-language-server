@@ -39,7 +39,7 @@ jobs:
           java-version: 17
       - name: Build Lemminx Liberty
         working-directory: ./lemminx-liberty
-        run: ./mvnw clean package -ntp -DskipTests
+        run: ./mvnw clean package -ntp
       - name: Test Lemminx Liberty
         working-directory: ./lemminx-liberty
         run: ./mvnw verify -ntp

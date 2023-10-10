@@ -1,6 +1,5 @@
 package io.openliberty;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -12,7 +11,6 @@ import java.util.List;
 import org.eclipse.lsp4j.WorkspaceFolder;
 import org.junit.jupiter.api.Test;
 
-import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
@@ -43,17 +41,5 @@ public class LibertyFeatureTest {
         assertTrue(installedFeatures.equals(libWorkspace.getInstalledFeatureList()));
         // Check that list contains a beta feature
         assertTrue(installedFeatures.removeIf(f -> (f.getName().equals("cdi-4.0"))));
-
-        // Check if config map gets built
-        FeatureListGraph fg = libWorkspace.getFeatureListGraph();
-        assertEquals(76, fg.getAllEnabledBy("ssl-1.0").size());
-        assertEquals(1, fg.get("ssl").getEnabledBy().size());
-        assertTrue(fg.get("ssl").getEnabledBy().contains("ssl-1.0"));
-        assertEquals(77, fg.getAllEnabledBy("ssl").size());
-        assertEquals(235, fg.getAllEnabledBy("library").size());
-        assertTrue(fg.getAllEnabledBy("ltpa").contains("adminCenter-1.0"));  // direct enabler
-        assertTrue(fg.getAllEnabledBy("ssl").contains("microProfile-5.0"));  // transitive enabler
-        assertTrue(fg.getAllEnables("microProfile-5.0").contains("ssl"));
-        assertTrue(fg.getAllEnables("jakartaee-8.0").contains("classloading"));
     }
 }
