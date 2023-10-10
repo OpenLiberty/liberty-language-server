@@ -107,7 +107,7 @@ public class AddFeature implements ICodeActionParticipant {
         try {
             indent = request.getXMLGenerator().getWhitespacesIndent();
         } catch (BadLocationException e) {
-            Logger.getLogger(AddFeature.class.getName()).info("Defaulting indent to four spaces.");
+            LOGGER.info("Defaulting indent to four spaces.");
         }
         insertText = IndentUtil.formatText(insertText, indent, referenceRange.getStart().getCharacter());
 
