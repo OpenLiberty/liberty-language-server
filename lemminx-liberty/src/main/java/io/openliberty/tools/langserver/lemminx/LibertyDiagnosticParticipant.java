@@ -78,7 +78,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         includedFeatures = new HashSet<>();
         LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI());
         // TODO: Consider adding a cached feature list onto repo to optimize
-        FeatureListGraph featureGraph = workspace.getFeatureListGraph();
+        FeatureListGraph featureGraph = (workspace == null) ? new FeatureListGraph() : workspace.getFeatureListGraph();
         for (DOMNode node : nodes) {
             String nodeName = node.getNodeName();
             if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(nodeName)) {
@@ -199,11 +199,14 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      * @param featureGraph
      */
     private void validateConfigElements(List<Diagnostic> diagnosticsList, List<Diagnostic> tempDiagnosticsList, FeatureListGraph featureGraph) {
+        if (featureGraph.isEmpty()) {
+            return;
+        }
+        if (includedFeatures.isEmpty()) {
+            diagnosticsList.addAll(tempDiagnosticsList);
+            return;
+        }
         for (Diagnostic tempDiagnostic : tempDiagnosticsList) {
-            if (includedFeatures.isEmpty()) {
-                diagnosticsList.add(tempDiagnostic);
-                continue;
-            }
             String configElement = tempDiagnostic.getSource();
             Set<String> includedFeaturesCopy = new HashSet<String>(includedFeatures);
             Set<String> compatibleFeaturesList = featureGraph.getAllEnabledBy(configElement);

@@ -224,7 +224,7 @@ public class LibertyWorkspace {
             LOGGER.info("Generating installed features list and storing to cache for workspace " + workspaceFolderURI);
             FeatureService.getInstance().getInstalledFeaturesList(this, libertyRuntime, libertyVersion);
             if (!this.featureListGraph.isEmpty()) {
-                LOGGER.info("Lost config element detection feature is available for workspace: " + workspaceFolderURI);
+                LOGGER.info("Config element validation enabled for workspace: " + workspaceFolderURI);
             }
         }
         return this.featureListGraph;
