@@ -90,6 +90,7 @@ public class FeatureService {
     // Cache of Liberty version -> list of supported features
     private Map<String, List<Feature>> featureCache;   // the key consists of runtime-version, where runtime is 'ol' or 'wlp'
     private List<Feature> defaultFeatures;
+    private FeatureListGraph defaultFeatureList;
     private long featureUpdateTime;
 
     private FeatureService() {
@@ -181,6 +182,7 @@ public class FeatureService {
         if (libertyRuntime == null || libertyVersion == null) {
             // return default list of features
             List<Feature> defaultFeatures = getDefaultFeatures(); 
+            getDefaultFeatureList();
             return defaultFeatures;
         }
 
@@ -365,7 +367,11 @@ public class FeatureService {
         return getInstalledFeaturesList(libertyWorkspace, libertyRuntime, libertyVersion);
     }
 
-    public void loadCachedFeaturesList(LibertyWorkspace libertyWorkspace) {
+    public FeatureListGraph getDefaultFeatureList() {
+        if (defaultFeatureList != null) {
+            return defaultFeatureList;
+        }
+
         try {
             Path featurelistXmlFile = CacheResourcesManager.getResourceCachePath(FEATURELIST_XML_RESOURCE);
             LOGGER.info("Using cached Liberty featurelist xml file located at: " + featurelistXmlFile.toString());
@@ -374,16 +380,22 @@ public class FeatureService {
 
             if (featureListFile != null && featureListFile.exists()) {
                 try {
-                    readFeaturesFromFeatureListFile(null, libertyWorkspace, featureListFile, true);
+                    readFeaturesFromFeatureListFile(null, null, featureListFile, true);
                 } catch (JAXBException e) {
-                    LOGGER.severe("Error: Unable to load the default cached featurelist file for the Liberty workspace due to exception: "+e.getMessage());
+                    LOGGER.severe("Error: Unable to load the default cached featurelist file due to exception: "+e.getMessage());
                 }
             } else {
-                LOGGER.warning("Unable to find the cached featurelist for the current Liberty workspace:" + libertyWorkspace.getWorkspaceString() + " at location: "+featurelistXmlFile.toString());
+                LOGGER.warning("Unable to find the default cached featurelist at location: "+featurelistXmlFile.toString());
             }
         } catch (Exception e) {
-            LOGGER.severe("Error: Unable to retrieve default cached Liberty featurelist file due to exception: "+e.getMessage());
+            LOGGER.severe("Error: Unable to retrieve default cached featurelist file due to exception: "+e.getMessage());
         }
+
+        if (defaultFeatureList == null) {
+            defaultFeatureList = new FeatureListGraph();
+        }
+
+        return defaultFeatureList;
     }
 
     /**
@@ -441,15 +453,17 @@ public class FeatureService {
             return readFeaturesFromFeatureListFile(installedFeatures, libertyWorkspace, featureListFile, false);
     }
 
+    // If the graphOnly boolean is true, the libertyWorkspace parameter may be null. Also, the defaultFeatureList should be initialized
+    // after calling this method with graphOnly set to true.
     public List<Feature> readFeaturesFromFeatureListFile(List<Feature> installedFeatures, LibertyWorkspace libertyWorkspace,
         File featureListFile, boolean graphOnly) throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(FeatureInfo.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         FeatureInfo featureInfo = (FeatureInfo) jaxbUnmarshaller.unmarshal(featureListFile);
+        FeatureListGraph featureListGraph = new FeatureListGraph();
         
         // Note: Only the public features are loaded when unmarshalling the passed featureListFile.
         if ((featureInfo.getFeatures() != null) && (featureInfo.getFeatures().size() > 0)) {
-            FeatureListGraph featureListGraph = new FeatureListGraph();
             for (Feature f : featureInfo.getFeatures()) {
                 f.setShortDescription(f.getDescription());
                 // The xml featureListFile does not have a wlpInformation element like the json does, but our code depends on looking up 
@@ -481,11 +495,17 @@ public class FeatureService {
             if (!graphOnly) {
                 installedFeatures = featureInfo.getFeatures();
                 libertyWorkspace.setInstalledFeatureList(installedFeatures);
+                libertyWorkspace.setFeatureListGraph(featureListGraph);
+            } else {
+                defaultFeatureList = featureListGraph;
             }
-            libertyWorkspace.setFeatureListGraph(featureListGraph);
         } else {
-            LOGGER.warning("Unable to get installed features for current Liberty workspace: " + libertyWorkspace.getWorkspaceString());
-            libertyWorkspace.setFeatureListGraph(new FeatureListGraph());
+            if (!graphOnly) {
+                LOGGER.warning("Unable to get installed features for current Liberty workspace: " + libertyWorkspace.getWorkspaceString());
+                libertyWorkspace.setFeatureListGraph(new FeatureListGraph());
+            } else {
+                defaultFeatureList = featureListGraph;
+            }
         }
         return installedFeatures;
     }

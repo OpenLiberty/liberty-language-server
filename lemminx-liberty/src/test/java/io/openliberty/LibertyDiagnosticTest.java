@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import io.openliberty.tools.langserver.lemminx.LibertyDiagnosticParticipant;
+import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
@@ -216,7 +217,8 @@ public class LibertyDiagnosticTest {
     @Test
     public void testConfigElementMissingFeatureUsingCachedFeaturelist() throws JAXBException, BadLocationException {
         LibertyWorkspace ws = libPM.getWorkspaceFolder(sampleserverXMLURI);
-        FeatureService.getInstance().loadCachedFeaturesList(ws);
+        ws.setFeatureListGraph(new FeatureListGraph()); // need to clear out the already loaded featureList from other test methods
+        FeatureService.getInstance().getDefaultFeatureList();
 
         String correctFeature   = "        <feature>%s</feature>";
         String incorrectFeature = "        <feature>jaxrs-2.0</feature>";
@@ -262,8 +264,8 @@ public class LibertyDiagnosticTest {
             codeActions.add(invalidCodeAction);
         }
 
-        XMLAssert.testCodeActionsFor(serverXML, sampleserverXMLURI, config_for_missing_feature, (String) null, codeActions.get(0), codeActions.get(1), 
-                                    codeActions.get(2)); 
+        XMLAssert.testCodeActionsFor(serverXML, sampleserverXMLURI, config_for_missing_feature, (String) null, 
+                                    codeActions.get(0), codeActions.get(1), codeActions.get(2)); 
 
     }
 

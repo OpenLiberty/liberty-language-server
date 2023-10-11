@@ -236,20 +236,22 @@ public class LibertyWorkspace {
     }
 
     public FeatureListGraph getFeatureListGraph() {
+        FeatureListGraph useFeatureListGraph = this.featureListGraph;
         boolean generateGraph = featureListGraph.isEmpty() || !featureListGraph.getRuntime().equals(getWorkspaceRuntime());
         if (generateGraph) {
             if (isLibertyInstalled || isContainerAlive()) {
                 LOGGER.info("Generating installed features list and storing to cache for workspace " + workspaceFolderURI);
                 FeatureService.getInstance().getInstalledFeaturesList(this, libertyRuntime, libertyVersion);
+                useFeatureListGraph = this.featureListGraph;
             } else {
-                LOGGER.info("Loading cached features list for workspace " + workspaceFolderURI);
-                FeatureService.getInstance().loadCachedFeaturesList(this);
+                 LOGGER.info("Retrieving default cached feature list for workspace " + workspaceFolderURI);
+                 useFeatureListGraph = FeatureService.getInstance().getDefaultFeatureList();
             }
-            if (!this.featureListGraph.isEmpty()) {
+            if (!useFeatureListGraph.isEmpty()) {
                 LOGGER.info("Config element validation enabled for workspace: " + workspaceFolderURI);
             }
         }
-        return this.featureListGraph;
+        return useFeatureListGraph;
     }
 
 }

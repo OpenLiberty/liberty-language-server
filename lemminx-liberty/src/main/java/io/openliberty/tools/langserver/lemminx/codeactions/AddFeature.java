@@ -32,6 +32,7 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
+import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
 import io.openliberty.tools.langserver.lemminx.data.FeatureListNode;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
@@ -62,9 +63,8 @@ public class AddFeature implements ICodeActionParticipant {
         Diagnostic diagnostic = request.getDiagnostic();
         DOMDocument document = request.getDocument();
         TextDocument textDocument = document.getTextDocument();
-        // getAllEnabledBy would return all transitive features but typically offers too much
+
         LibertyWorkspace ws = LibertyProjectsManager.getInstance().getWorkspaceFolder(document.getDocumentURI());    
-        
         if (ws == null) {
             LOGGER.warning("Could not add quick fix for missing feature because could not find Liberty workspace for document: "+document.getDocumentURI());
             return;
@@ -72,18 +72,11 @@ public class AddFeature implements ICodeActionParticipant {
 
         FeatureListNode flNode = ws.getFeatureListGraph().get(diagnostic.getSource());
         if (flNode == null) {
-            // FeatureListGraph must be empty. Initialize it with the default cached feature list.
-            if (ws.getFeatureListGraph().isEmpty()) {
-                FeatureService.getInstance().loadCachedFeaturesList(ws);
-                flNode = ws.getFeatureListGraph().get(diagnostic.getSource());
-            } 
-            
-            if (flNode == null) {
-                LOGGER.warning("Could not add quick fix for missing feature for config element due to missing information in the feature list: "+diagnostic.getSource());
-                return;
-            }
+            LOGGER.warning("Could not add quick fix for missing feature for config element due to missing information in the feature list: "+diagnostic.getSource());
+            return;
         }
 
+        // getAllEnabledBy would return all transitive features but typically offers too much
         Set<String> featureCandidates = flNode.getEnabledBy();
         if (featureCandidates.isEmpty()) {
             return;
