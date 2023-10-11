@@ -4,8 +4,11 @@ import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.TextDocumentEdit;
 import org.eclipse.lsp4j.TextEdit;
+import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.WorkspaceFolder;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,6 +22,7 @@ import jakarta.xml.bind.JAXBException;
 import static org.eclipse.lemminx.XMLAssert.r;
 import static org.eclipse.lemminx.XMLAssert.ca;
 import static org.eclipse.lemminx.XMLAssert.te;
+import static org.eclipse.lemminx.XMLAssert.tde;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -32,9 +36,10 @@ public class LibertyDiagnosticTest {
 
     static String newLine = System.lineSeparator();
 
-    static File srcResourcesDir = new File("src/test/resources");
+    static File srcResourcesDir = new File("src/test/resources/sample");
     static File featureList = new File("src/test/resources/featurelist-ol-23.0.0.1-beta.xml");
     static String serverXMLURI = new File(srcResourcesDir, "test/server.xml").toURI().toString();
+    static String sampleserverXMLURI = new File(srcResourcesDir, "sample-server.xml").toURI().toString();
     static List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
     LibertyProjectsManager libPM;
     LibertyWorkspace libWorkspace;
@@ -207,6 +212,61 @@ public class LibertyDiagnosticTest {
 
         XMLAssert.testDiagnosticsFor(serverXml, null, null, serverXMLURI, config_for_missing_feature);
     }
+
+    @Test
+    public void testConfigElementMissingFeatureUsingCachedFeaturelist() throws JAXBException, BadLocationException {
+        LibertyWorkspace ws = libPM.getWorkspaceFolder(sampleserverXMLURI);
+        FeatureService.getInstance().loadCachedFeaturesList(ws);
+
+        String correctFeature   = "        <feature>%s</feature>";
+        String incorrectFeature = "        <feature>jaxrs-2.0</feature>";
+        String configElement    = "    <springBootApplication location=\"\"/>";
+        int diagnosticStart = configElement.indexOf("<");
+        int diagnosticLength = configElement.trim().length();
+
+        String serverXML = String.join(newLine,
+                "<server description=\"Sample Liberty server\">",
+                "    <featureManager>",
+                    incorrectFeature,
+                "    </featureManager>",
+                    configElement,
+                "</server>"
+        );
+
+        Diagnostic config_for_missing_feature = new Diagnostic();
+        config_for_missing_feature.setRange(r(4, diagnosticStart, 4, diagnosticStart + diagnosticLength));
+        config_for_missing_feature.setCode(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE);
+        config_for_missing_feature.setMessage(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_MESSAGE);
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, sampleserverXMLURI, config_for_missing_feature);
+
+        // TODO: Add code to check the CodeActions also.
+        config_for_missing_feature.setSource("springBootApplication");
+
+        List<String> featuresToAdd = new ArrayList<String>();
+        featuresToAdd.add("springBoot-1.5");
+        featuresToAdd.add("springBoot-2.0");
+        featuresToAdd.add("springBoot-3.0");
+        Collections.sort(featuresToAdd);
+
+        List<CodeAction> codeActions = new ArrayList<CodeAction>();
+        for (String nextFeature: featuresToAdd) {
+            String addFeature = System.lineSeparator()+String.format(correctFeature, nextFeature);
+            TextEdit texted = te(2, 36, 2, 36, addFeature);
+            CodeAction invalidCodeAction = ca(config_for_missing_feature, texted);
+
+            TextDocumentEdit textDoc = tde(sampleserverXMLURI, 0, texted);
+            WorkspaceEdit workspaceEdit = new WorkspaceEdit(Collections.singletonList(Either.forLeft(textDoc)));
+            
+            invalidCodeAction.setEdit(workspaceEdit);
+            codeActions.add(invalidCodeAction);
+        }
+
+        XMLAssert.testCodeActionsFor(serverXML, sampleserverXMLURI, config_for_missing_feature, (String) null, codeActions.get(0), codeActions.get(1), 
+                                    codeActions.get(2)); 
+
+    }
+
 
     @Test
     public void testConfigElementDirect() throws JAXBException {

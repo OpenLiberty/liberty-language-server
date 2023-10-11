@@ -77,7 +77,6 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         List<Diagnostic> tempDiagnosticsList = new ArrayList<Diagnostic>();
         includedFeatures = new HashSet<>();
         LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI());
-        // TODO: Consider adding a cached feature list onto repo to optimize
         FeatureListGraph featureGraph = (workspace == null) ? new FeatureListGraph() : workspace.getFeatureListGraph();
         for (DOMNode node : nodes) {
             String nodeName = node.getNodeName();

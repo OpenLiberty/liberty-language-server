@@ -31,6 +31,8 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import org.eclipse.lemminx.dom.DOMNode;
+import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
+import org.eclipse.lemminx.uriresolver.CacheResourcesManager.ResourceToDeploy;
 
 import java.util.concurrent.TimeUnit;
 
@@ -60,6 +62,24 @@ public class FeatureService {
     private static String olFeatureEndpoint = "https://repo1.maven.org/maven2/io/openliberty/features/features/%1$s/features-%1$s.json";
     private static String wlpFeatureEndpoint = "https://repo1.maven.org/maven2/com/ibm/websphere/appserver/features/features/%1$s/features-%1$s.json";
 
+    // This file is copied to the local .lemminx cache. 
+    // This is how we ensure the latest default featurelist xml gets used in each developer environment. 
+    private static final String FEATURELIST_XML_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist-cached-23.0.0.9.xml";
+    private static final String FEATURELIST_XML_CLASSPATH_LOCATION = "/featurelist-cached-23.0.0.9.xml";
+
+    /**
+     * FEATURELIST_XML_RESOURCE is the featurelist xml that is located at FEATURELIST_XML_CLASSPATH_LOCATION
+     * that gets deployed (copied) to the .lemminx cache. The FEATURELIST_XML_RESOURCE_URL is
+     * used by lemmix to determine the path to store the file in the cache. So for the
+     * featurelist xml it takes the resource located at FEATURELIST_XML_CLASSPATH_LOCATION and deploys
+     * it to:
+     * ~/.lemminx/cache/https/github.com/OpenLiberty/liberty-language-server/master/lemminx-liberty/featurelist-cached-<version>.xml
+     * 
+     * Declared public to be used by tests
+     */
+    public static final ResourceToDeploy FEATURELIST_XML_RESOURCE = new ResourceToDeploy(FEATURELIST_XML_RESOURCE_URL,
+            FEATURELIST_XML_CLASSPATH_LOCATION);
+
     public static FeatureService getInstance() {
         if (instance == null) {
             instance = new FeatureService();
@@ -69,7 +89,7 @@ public class FeatureService {
 
     // Cache of Liberty version -> list of supported features
     private Map<String, List<Feature>> featureCache;   // the key consists of runtime-version, where runtime is 'ol' or 'wlp'
-    private List<Feature> defaultFeatureList;
+    private List<Feature> defaultFeatures;
     private long featureUpdateTime;
 
     private FeatureService() {
@@ -103,28 +123,28 @@ public class FeatureService {
     }
 
     /**
-     * Returns the default feature list
+     * Returns the default list of features
      *
      * @return list of features supported by the default version of Liberty
      */
-    private List<Feature> getDefaultFeatureList() {
+    private List<Feature> getDefaultFeatures() {
         try {
-            if (defaultFeatureList == null) {
+            if (defaultFeatures == null) {
                 // Changing this to contain the version in the file name since the file is copied to the local .lemminx cache. 
                 // This is how we ensure the latest default features json gets used in each developer environment. 
                 InputStream is = getClass().getClassLoader().getResourceAsStream("features-cached-23.0.0.9.json");
                 InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
 
                 // Only need the public features
-                defaultFeatureList = readPublicFeatures(reader);
+                defaultFeatures = readPublicFeatures(reader);
             }
-            LOGGER.info("Returning default feature list");
-            return defaultFeatureList;
+            LOGGER.info("Returning default list of features");
+            return defaultFeatures;
 
         } catch (JsonParseException e) {
             // unable to read json in resources file, return empty list
             LOGGER.severe("Error: Unable to get default features.");
-            return defaultFeatureList;
+            return defaultFeatures;
         }
     }
 
@@ -147,7 +167,7 @@ public class FeatureService {
 
     /**
      * Returns the Liberty features corresponding to the Liberty version. First
-     * attempts to fetch the feature list from Maven, otherwise falls back to the
+     * attempts to fetch the feature json from Maven, otherwise falls back to the
      * list of installed features. If the installed features list cannot be
      * gathered, falls back to the default cached features json file.
      * 
@@ -159,8 +179,8 @@ public class FeatureService {
      */
     public List<Feature> getFeatures(String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
         if (libertyRuntime == null || libertyVersion == null) {
-            // return default feature list
-            List<Feature> defaultFeatures = getDefaultFeatureList(); 
+            // return default list of features
+            List<Feature> defaultFeatures = getDefaultFeatures(); 
             return defaultFeatures;
         }
 
@@ -201,8 +221,8 @@ public class FeatureService {
             return installedFeatures;
         }
 
-        // return default feature list
-        List<Feature> defaultFeatures = getDefaultFeatureList(); 
+        // return default list of features
+        List<Feature> defaultFeatures = getDefaultFeatures(); 
         return defaultFeatures;
     }
 
@@ -345,6 +365,27 @@ public class FeatureService {
         return getInstalledFeaturesList(libertyWorkspace, libertyRuntime, libertyVersion);
     }
 
+    public void loadCachedFeaturesList(LibertyWorkspace libertyWorkspace) {
+        try {
+            Path featurelistXmlFile = CacheResourcesManager.getResourceCachePath(FEATURELIST_XML_RESOURCE);
+            LOGGER.info("Using cached Liberty featurelist xml file located at: " + featurelistXmlFile.toString());
+
+            File featureListFile = featurelistXmlFile.toFile();
+
+            if (featureListFile != null && featureListFile.exists()) {
+                try {
+                    readFeaturesFromFeatureListFile(null, libertyWorkspace, featureListFile, true);
+                } catch (JAXBException e) {
+                    LOGGER.severe("Error: Unable to load the default cached featurelist file for the Liberty workspace due to exception: "+e.getMessage());
+                }
+            } else {
+                LOGGER.warning("Unable to find the cached featurelist for the current Liberty workspace:" + libertyWorkspace.getWorkspaceString() + " at location: "+featurelistXmlFile.toString());
+            }
+        } catch (Exception e) {
+            LOGGER.severe("Error: Unable to retrieve default cached Liberty featurelist file due to exception: "+e.getMessage());
+        }
+    }
+
     /**
      * Generate the featurelist file for a LibertyWorkspace using the ws-featurelist.jar in the corresponding Liberty installation
      * @param libertyWorkspace
@@ -397,6 +438,11 @@ public class FeatureService {
 
     public List<Feature> readFeaturesFromFeatureListFile(List<Feature> installedFeatures, LibertyWorkspace libertyWorkspace,
         File featureListFile) throws JAXBException {
+            return readFeaturesFromFeatureListFile(installedFeatures, libertyWorkspace, featureListFile, false);
+    }
+
+    public List<Feature> readFeaturesFromFeatureListFile(List<Feature> installedFeatures, LibertyWorkspace libertyWorkspace,
+        File featureListFile, boolean graphOnly) throws JAXBException {
         JAXBContext jaxbContext = JAXBContext.newInstance(FeatureInfo.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         FeatureInfo featureInfo = (FeatureInfo) jaxbUnmarshaller.unmarshal(featureListFile);
@@ -431,9 +477,12 @@ public class FeatureService {
                     }
                 }
             }
-            installedFeatures = featureInfo.getFeatures();
+
+            if (!graphOnly) {
+                installedFeatures = featureInfo.getFeatures();
+                libertyWorkspace.setInstalledFeatureList(installedFeatures);
+            }
             libertyWorkspace.setFeatureListGraph(featureListGraph);
-            libertyWorkspace.setInstalledFeatureList(installedFeatures);
         } else {
             LOGGER.warning("Unable to get installed features for current Liberty workspace: " + libertyWorkspace.getWorkspaceString());
             libertyWorkspace.setFeatureListGraph(new FeatureListGraph());
