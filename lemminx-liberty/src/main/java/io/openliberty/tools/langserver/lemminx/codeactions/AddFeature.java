@@ -12,6 +12,8 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx.codeactions;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -30,7 +32,11 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
+import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
+import io.openliberty.tools.langserver.lemminx.data.FeatureListNode;
+import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
+import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.util.LibertyConstants;
 
 public class AddFeature implements ICodeActionParticipant {
@@ -57,13 +63,29 @@ public class AddFeature implements ICodeActionParticipant {
         Diagnostic diagnostic = request.getDiagnostic();
         DOMDocument document = request.getDocument();
         TextDocument textDocument = document.getTextDocument();
+
+        LibertyWorkspace ws = LibertyProjectsManager.getInstance().getWorkspaceFolder(document.getDocumentURI());    
+        if (ws == null) {
+            LOGGER.warning("Could not add quick fix for missing feature because could not find Liberty workspace for document: "+document.getDocumentURI());
+            return;
+        }
+
+        FeatureListNode flNode = ws.getFeatureListGraph().get(diagnostic.getSource());
+        if (flNode == null) {
+            LOGGER.warning("Could not add quick fix for missing feature for config element due to missing information in the feature list: "+diagnostic.getSource());
+            return;
+        }
+
         // getAllEnabledBy would return all transitive features but typically offers too much
-        Set<String> featureCandidates = LibertyProjectsManager.getInstance()
-                .getWorkspaceFolder(document.getDocumentURI())
-                .getFeatureListGraph().get(diagnostic.getSource()).getEnabledBy();
+        Set<String> featureCandidates = flNode.getEnabledBy();
         if (featureCandidates.isEmpty()) {
             return;
         }
+
+        // Need to sort the collection of features so that they are in a reliable order for tests.
+        ArrayList<String> sortedFeatures = new ArrayList<String>();
+        sortedFeatures.addAll(featureCandidates);
+        Collections.sort(sortedFeatures);
 
         String insertText = "";
         int referenceRangeStart = 0;
@@ -111,7 +133,7 @@ public class AddFeature implements ICodeActionParticipant {
         }
         insertText = IndentUtil.formatText(insertText, indent, referenceRange.getStart().getCharacter());
 
-        for (String feature : featureCandidates) {
+        for (String feature : sortedFeatures) {
             String title = "Add feature " + feature;
             codeActions.add(CodeActionFactory.insert(
                     title, referenceRange.getEnd(), String.format(insertText, feature), textDocument, diagnostic));

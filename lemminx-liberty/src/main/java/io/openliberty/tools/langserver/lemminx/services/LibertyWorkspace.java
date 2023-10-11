@@ -27,10 +27,8 @@ import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
-import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
 import io.openliberty.tools.langserver.lemminx.models.settings.DevcMetadata;
-import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 public class LibertyWorkspace {
 
@@ -221,24 +219,39 @@ public class LibertyWorkspace {
         return workspaceFolderURI;
     }
 
+    public String getWorkspaceRuntime() {
+        if (libertyRuntime == null || libertyVersion == null) {
+            return "";
+        }
+        return libertyRuntime + "-" + libertyVersion;
+    }
+
     public void setFeatureListGraph(FeatureListGraph featureListGraph) {
         this.featureListGraph = featureListGraph;
-        if (isLibertyInstalled) {
+        if (isLibertyInstalled || isContainerAlive()) {
             this.featureListGraph.setRuntime(libertyRuntime + "-" + libertyVersion);
+        } else {
+            this.featureListGraph.setRuntime("");
         }
     }
 
     public FeatureListGraph getFeatureListGraph() {
-        String workspaceRuntime = libertyRuntime + "-" + libertyVersion;
-        boolean generateGraph = featureListGraph.isEmpty() || !featureListGraph.getRuntime().equals(workspaceRuntime);
-        if (this.isLibertyInstalled && generateGraph) {
-            LOGGER.info("Generating installed features list and storing to cache for workspace " + workspaceFolderURI);
-            FeatureService.getInstance().getInstalledFeaturesList(this, libertyRuntime, libertyVersion);
-            if (!this.featureListGraph.isEmpty()) {
+        FeatureListGraph useFeatureListGraph = this.featureListGraph;
+        boolean generateGraph = featureListGraph.isEmpty() || !featureListGraph.getRuntime().equals(getWorkspaceRuntime());
+        if (generateGraph) {
+            if (isLibertyInstalled || isContainerAlive()) {
+                LOGGER.info("Generating installed features list and storing to cache for workspace " + workspaceFolderURI);
+                FeatureService.getInstance().getInstalledFeaturesList(this, libertyRuntime, libertyVersion);
+                useFeatureListGraph = this.featureListGraph;
+            } else {
+                 LOGGER.info("Retrieving default cached feature list for workspace " + workspaceFolderURI);
+                 useFeatureListGraph = FeatureService.getInstance().getDefaultFeatureList();
+            }
+            if (!useFeatureListGraph.isEmpty()) {
                 LOGGER.info("Config element validation enabled for workspace: " + workspaceFolderURI);
             }
         }
-        return this.featureListGraph;
+        return useFeatureListGraph;
     }
 
 }
