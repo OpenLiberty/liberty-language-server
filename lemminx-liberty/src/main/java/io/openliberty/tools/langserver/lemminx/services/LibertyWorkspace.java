@@ -242,9 +242,8 @@ public class LibertyWorkspace {
         if (!generateGraph && (isLibertyInstalled || isContainerAlive())) {
             // Check if FeatureListGraph needs to be reinitialized. This can happen if new features are installed.
             // The contents of the .libertyls folder are deleted when features are installed, which means we need to 
-            // regenerated it and load the FeatureListGraph.
-            boolean exists = FeatureService.getInstance().doesGeneratedFeatureListExist(this);
-            if (!exists) {
+            // regenerate the feature list xml and load the FeatureListGraph.
+            if (!FeatureService.getInstance().doesGeneratedFeatureListExist(this)) {
                 generateGraph = true;
                 this.setInstalledFeatureList(new ArrayList<Feature> ()); // clear out cached feature list
             }
