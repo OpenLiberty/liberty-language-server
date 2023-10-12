@@ -132,8 +132,7 @@ public class LibertyWorkspaceIT {
                         "Source: [" + schemaFileModCName + "](" + serverCGenXSDURI + ")", //
                         r(4, 8, 4, 18));                        
        } catch (Exception e) {
-           e.printStackTrace();
-           org.junit.jupiter.api.Assertions.fail("Test FAILED...received unexpected exception.");
+           org.junit.jupiter.api.Assertions.fail("Test FAILED...received unexpected exception: "+e.getMessage());
        }
     }
 
@@ -187,8 +186,7 @@ public class LibertyWorkspaceIT {
 
             org.junit.jupiter.api.Assertions.assertFalse(featurelistFile.exists(), "Found unexpected generated featurelist file: "+featureListName);
         } catch (Exception e) {
-            e.printStackTrace();
-            org.junit.jupiter.api.Assertions.fail("Test FAILED...received unexpected exception.");
+            org.junit.jupiter.api.Assertions.fail("Test FAILED...received unexpected exception: "+e.getMessage());
         }
 
     }
