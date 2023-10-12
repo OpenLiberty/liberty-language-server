@@ -104,8 +104,7 @@ public class ContainerService {
         File tempDir = LibertyUtils.getTempDir(libertyWorkspace);
         String libertyRuntime = libertyWorkspace.getLibertyRuntime();
         String libertyVersion = libertyWorkspace.getLibertyVersion();
-        String xsdFileName = (libertyVersion != null && libertyRuntime != null &&
-                            !libertyVersion.isEmpty() && !libertyRuntime.isEmpty()) ?
+        String xsdFileName = libertyWorkspace.isLibertyRuntimeAndVersionSet() ?
                             libertyRuntime + "-" + libertyVersion + ".xsd" :
                             "server.xsd";
         File xsdFile = new File(tempDir, xsdFileName);
@@ -147,8 +146,7 @@ public class ContainerService {
         File tempDir = LibertyUtils.getTempDir(libertyWorkspace);
         String libertyRuntime = libertyWorkspace.getLibertyRuntime();
         String libertyVersion = libertyWorkspace.getLibertyVersion();
-        String featureListFileName = (libertyVersion != null && libertyRuntime != null &&
-                            !libertyVersion.isEmpty() && !libertyRuntime.isEmpty()) ?
+        String featureListFileName = libertyWorkspace.isLibertyRuntimeAndVersionSet() ?
                             "featurelist-" + libertyRuntime + "-" + libertyVersion + ".xml" :
                             "featurelist.xml";
         File featureListFile = new File(tempDir, featureListFileName);

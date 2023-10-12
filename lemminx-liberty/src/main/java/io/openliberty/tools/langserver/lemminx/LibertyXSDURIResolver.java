@@ -135,8 +135,7 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
         }
 
         File xsdDestFile = new File(tempDir, "server.xsd");
-        if (libertyWorkspace.getLibertyVersion()!= null && !libertyWorkspace.getLibertyVersion().isEmpty() &&
-                libertyWorkspace.getLibertyRuntime()!= null && !libertyWorkspace.getLibertyRuntime().isEmpty()) {
+        if (libertyWorkspace.isLibertyRuntimeAndVersionSet()) {
             xsdDestFile = new File(tempDir, libertyWorkspace.getLibertyRuntime() + "-" + libertyWorkspace.getLibertyVersion() + ".xsd");
         }
 

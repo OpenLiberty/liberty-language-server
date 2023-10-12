@@ -169,6 +169,11 @@ public class LibertyWorkspace {
         this.containerAlive = containerAlive;
     }
 
+    public boolean isLibertyRuntimeAndVersionSet() {
+        return getLibertyVersion()!= null && !getLibertyVersion().isEmpty() &&
+        getLibertyRuntime()!= null && !getLibertyRuntime().isEmpty();
+    }
+
     /**
      * Return the path of the first *-liberty-devc-metadata.xml 
      * in the workspace with a running container
@@ -238,6 +243,17 @@ public class LibertyWorkspace {
     public FeatureListGraph getFeatureListGraph() {
         FeatureListGraph useFeatureListGraph = this.featureListGraph;
         boolean generateGraph = featureListGraph.isEmpty() || !featureListGraph.getRuntime().equals(getWorkspaceRuntime());
+
+        if (!generateGraph && (isLibertyInstalled || isContainerAlive())) {
+            // Check if FeatureListGraph needs to be reinitialized. This can happen if new features are installed.
+            // The contents of the .libertyls folder are deleted when features are installed, which means we need to 
+            // regenerate the feature list xml and load the FeatureListGraph.
+            if (!FeatureService.getInstance().doesGeneratedFeatureListExist(this)) {
+                generateGraph = true;
+                this.setInstalledFeatureList(new ArrayList<Feature> ()); // clear out cached feature list
+            }
+        }
+
         if (generateGraph) {
             if (isLibertyInstalled || isContainerAlive()) {
                 LOGGER.info("Generating installed features list and storing to cache for workspace " + workspaceFolderURI);
