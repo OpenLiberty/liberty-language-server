@@ -42,7 +42,7 @@ public class XmlReader {
             return hasServerRoot(file);
         } catch (URISyntaxException e) {
             LOGGER.severe("Error received converting file path to URI for path " + filePath);
-            e.printStackTrace();
+            LOGGER.severe("Exception: "+e.getMessage());
         }
         return false;
     }
@@ -70,7 +70,7 @@ public class XmlReader {
             LOGGER.severe("Unable to access file "+ xmlFile.getAbsolutePath());
         } catch (XMLStreamException e) {
             LOGGER.severe("Error received trying to read XML file: " + xmlFile.getAbsolutePath());
-            e.printStackTrace();
+            LOGGER.severe("Exception: "+e.getMessage());
         } finally {
             if (reader != null) {
                 try {
