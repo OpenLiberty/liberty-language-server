@@ -169,6 +169,11 @@ public class LibertyWorkspace {
         this.containerAlive = containerAlive;
     }
 
+    public boolean isLibertyRuntimeAndVersionSet() {
+        return getLibertyVersion()!= null && !getLibertyVersion().isEmpty() &&
+        getLibertyRuntime()!= null && !getLibertyRuntime().isEmpty();
+    }
+
     /**
      * Return the path of the first *-liberty-devc-metadata.xml 
      * in the workspace with a running container

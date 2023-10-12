@@ -287,7 +287,7 @@ public class LibertyUtils {
         boolean updateRuntimeInfo = false;
 
         // return version from cache if set and Liberty is installed
-        if (runtime != null  && version != null && (libertyWorkspace.isLibertyInstalled() || libertyWorkspace.isContainerAlive())) {
+        if (libertyWorkspace.isLibertyRuntimeAndVersionSet() && (libertyWorkspace.isLibertyInstalled() || libertyWorkspace.isContainerAlive())) {
             // double check that the location has not changed - rare scenario where Liberty was previously installed and then build file
             // is changed to install somewhere else - should not use old location and potentially wrong runtime/version
             if (libertyWorkspace.isLibertyInstalled()) {

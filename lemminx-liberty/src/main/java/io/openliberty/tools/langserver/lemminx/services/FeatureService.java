@@ -414,8 +414,7 @@ public class FeatureService {
 
     public File getGeneratedFeatureListFileLocation(LibertyWorkspace libertyWorkspace, File tempDir) {
         File featureListFile = new File(tempDir, "featurelist.xml");
-        if (libertyWorkspace.getLibertyVersion()!= null && !libertyWorkspace.getLibertyVersion().isEmpty() &&
-                libertyWorkspace.getLibertyRuntime()!= null && !libertyWorkspace.getLibertyRuntime().isEmpty()) {
+        if (libertyWorkspace.isLibertyRuntimeAndVersionSet()) {
             featureListFile = new File(tempDir, "featurelist-" + libertyWorkspace.getLibertyRuntime() + "-" + libertyWorkspace.getLibertyVersion() + ".xml");
         }
 
