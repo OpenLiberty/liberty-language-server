@@ -43,7 +43,7 @@ public class LibertyDocumentLinkParticipant implements IDocumentLinkParticipant 
         List<DOMNode> nodes = document.getDocumentElement().getChildren();
 
         // collect all <include> nodes that are children of the document element
-        List<DOMNode> includeDomNodes = nodes.stream().filter(n -> n.getNodeName().equals("include"))
+        List<DOMNode> includeDomNodes = nodes.stream().filter(n -> ((n.getNodeName() != null) && n.getNodeName().equals("include")))
                 .collect(Collectors.toList());
 
         for (DOMNode includeNode : includeDomNodes) {

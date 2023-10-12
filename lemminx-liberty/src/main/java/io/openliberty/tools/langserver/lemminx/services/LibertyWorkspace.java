@@ -238,6 +238,18 @@ public class LibertyWorkspace {
     public FeatureListGraph getFeatureListGraph() {
         FeatureListGraph useFeatureListGraph = this.featureListGraph;
         boolean generateGraph = featureListGraph.isEmpty() || !featureListGraph.getRuntime().equals(getWorkspaceRuntime());
+
+        if (!generateGraph && (isLibertyInstalled || isContainerAlive())) {
+            // Check if FeatureListGraph needs to be reinitialized. This can happen if new features are installed.
+            // The contents of the .libertyls folder are deleted when features are installed, which means we need to 
+            // regenerated it and load the FeatureListGraph.
+            boolean exists = FeatureService.getInstance().doesGeneratedFeatureListExist(this);
+            if (!exists) {
+                generateGraph = true;
+                this.setInstalledFeatureList(new ArrayList<Feature> ()); // clear out cached feature list
+            }
+        }
+
         if (generateGraph) {
             if (isLibertyInstalled || isContainerAlive()) {
                 LOGGER.info("Generating installed features list and storing to cache for workspace " + workspaceFolderURI);

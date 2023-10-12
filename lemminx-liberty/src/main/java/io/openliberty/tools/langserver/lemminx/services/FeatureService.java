@@ -398,6 +398,30 @@ public class FeatureService {
         return defaultFeatureList;
     }
 
+    public boolean doesGeneratedFeatureListExist(LibertyWorkspace libertyWorkspace) {
+        File tempDir = LibertyUtils.getTempDir(libertyWorkspace);
+
+        //If tempDir is null, issue a warning for the current LibertyWorkspace URI
+        if (tempDir == null) {
+            LOGGER.warning("Unable to locate the feature list for the current Liberty workspace:" + libertyWorkspace.getWorkspaceString());
+            return false;
+        }
+
+        File featureListFile = getGeneratedFeatureListFileLocation(libertyWorkspace, tempDir);
+
+        return featureListFile.exists();
+    }
+
+    public File getGeneratedFeatureListFileLocation(LibertyWorkspace libertyWorkspace, File tempDir) {
+        File featureListFile = new File(tempDir, "featurelist.xml");
+        if (libertyWorkspace.getLibertyVersion()!= null && !libertyWorkspace.getLibertyVersion().isEmpty() &&
+                libertyWorkspace.getLibertyRuntime()!= null && !libertyWorkspace.getLibertyRuntime().isEmpty()) {
+            featureListFile = new File(tempDir, "featurelist-" + libertyWorkspace.getLibertyRuntime() + "-" + libertyWorkspace.getLibertyVersion() + ".xml");
+        }
+
+        return featureListFile;
+    }
+
     /**
      * Generate the featurelist file for a LibertyWorkspace using the ws-featurelist.jar in the corresponding Liberty installation
      * @param libertyWorkspace
@@ -414,11 +438,7 @@ public class FeatureService {
             return null;
         }
 
-        File featureListFile = new File(tempDir, "featurelist.xml");
-        if (libertyWorkspace.getLibertyVersion()!= null && !libertyWorkspace.getLibertyVersion().isEmpty() &&
-                libertyWorkspace.getLibertyRuntime()!= null && !libertyWorkspace.getLibertyRuntime().isEmpty()) {
-            featureListFile = new File(tempDir, "featurelist-" + libertyWorkspace.getLibertyRuntime() + "-" + libertyWorkspace.getLibertyVersion() + ".xml");
-        }
+        File featureListFile = getGeneratedFeatureListFileLocation(libertyWorkspace, tempDir);
 
         try {
             LOGGER.info("Generating feature list file from: " + featurelistJarPath.toString());
