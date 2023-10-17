@@ -14,16 +14,15 @@ The Liberty Config Language Server is included in the following client IDEs.
 
 ## Supported files
 
-Liberty Config Language Server features are avaialble for the following configuration files.
+Liberty Config Language Server features are available for the following configuration files.
 
-- `server.env`
-- `bootstrap.properties`
-- `server.xml` and any XML files that are referenced through the `include` element in the `server.xml` file.
-- Any XML files that contain the `server` root element and exist in the `src/main/liberty/config`, `configDropins/overrides`, `configDropins/defaults`, `usr/shared/config`, or `usr/servers` directory.
+- Any XML file that contains a `server` root element.
+- `server.env` or any file with the extension `.env` that is specified by the `serverEnvFile` configuration in the Liberty Maven or Gradle plugin.
+- `bootstrap.properties` or any file with the extension `.properties` that is specified by the `bootstrapPropertiesFile` configuration in the Liberty Maven or Gradle plugin.
 
 ## Features
 
-The following language server features are avaialble through any of the supported client IDEs.
+The following language server features are available through any of the supported client IDEs.
 
 ### Completion for Liberty server configuration files
 
@@ -54,24 +53,30 @@ Hover your cursor over Liberty properties, variables, or XML configuration to vi
 
 ![Screen capture of feature documentation appearing when hovering over a Liberty feature in a server.xml file](./docs/images/feature-hover.png "Hover on Liberty features in server.xml")
 
-### Diagnostics on Liberty server configuration files
+### Diagnostics and quick fixes on Liberty server configuration files
 
-Diagnostics highlight potential problems in your configuration, such as invalid values. 
+Diagnostics highlight potential problems in your configuration, such as invalid values. Quick fixes provide potential solutions to those problems.
 
 * Diagnostics on Liberty properties and variables
 
 ![Screen capture showing diagnostics marking an invalid value for a Liberty property in a bootstrap.properties file. Hovering over the diagnostic will provide more details.](./docs/images/property-diagnostic.png "Diagnostics on Liberty properties in bootstrap.properties")
 ![Screen capture showing diagnostics marking an invalid value for a Liberty variable in a server.env file. Hovering over the diagnostic will provide more details.](./docs/images/variable-diagnostic.png "Diagnostics on Liberty variables in server.env")
 
-* Diagnostics for Liberty XML configs
+* Diagnostics and quick fixes for Liberty XML configs
 
 ![Screen capture showing diagnostics marking an invalid feature defined in a server.xml file. Hovering over the diagnostic will provide more details.](./docs/images/feature-diagnostic.png "Diagnostics on Liberty features in server.xml")
+
+![Screen capture showing a quick fix for a diagnostic on an invalid feature defined in a server.xml file. Hovering over the diagnostic and selecting Quick Fix... will provide more details.](./docs/images/feature-quickFix.png "Quick fixes on Liberty features in server.xml")
+
+![Screen capture showing diagnostics marking an configuration element defined in a server.xml file. Hovering over the diagnostic will provide more details.](./docs/images/config-diagnostic.png "Diagnostics on configuration elements in server.xml")
+
+![Screen capture showing a quick foix for a diagnostics on a configuration element defined in a server.xml file. Hovering over the diagnostic and selecting Quick Fix... will provide more details.](./docs/images/config-quickFix.png "Quick fixes on configuration elements in server.xml")
 
 ## Minimum version recommendations for the Liberty Maven and Gradle plug-ins
 
 A minimum version of the Liberty Maven Plug-in 3.7.1 or Liberty Gradle Plug-in 3.5.1 is recommended. If the [Liberty Maven Plug-in](https://github.com/OpenLiberty/ci.maven) or [Liberty Gradle Plug-in](https://github.com/OpenLiberty/ci.gradle) is configured with the Liberty project, the Liberty Config Language Server automatically generates a schema file based on the Liberty runtime and version. This schema file provides relevant information about the supported `server.xml` elements and Liberty features. If an earlier version of either plug-in is used, the schema file is not regenerated when additional features are installed. This limitation might result in a lack of hover, completion, or diagnostic support for elements related to those newly installed features.
 
-If you are using dev mode for containers, a minimum version of the Liberty Maven Plug-in 3.7 or Liberty Gradle Plug-in 3.5 is recommended. If an earlier version is used, the Liberty Config Language Server cannot generate a schema file for use with `server.xml` editing. In this case, a default schema that is based on Liberty 22.0.0.9 is used instead.
+If you are using dev mode for containers, a minimum version of the Liberty Maven Plug-in 3.7 or Liberty Gradle Plug-in 3.5 is recommended. If an earlier version is used, the Liberty Config Language Server cannot generate a schema file for use with `server.xml` editing. In this case, a default schema that is based on Liberty 23.0.0.9 is used instead.
 
 ## Contributing
 See the [DEVELOPING](./DEVELOPING.md) and [CONTRIBUTING](./CONTRIBUTING.md) documents for more details.
