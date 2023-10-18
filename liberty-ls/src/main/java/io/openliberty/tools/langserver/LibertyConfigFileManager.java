@@ -114,13 +114,16 @@ public class LibertyConfigFileManager {
      */
     public static boolean isServerEnvFile(String uri) {
         String filePath = normalizeFilePath(uri);
-        for (String configDir : customConfigDirs) {
-            String customDirConfigPath = normalizeFilePath(new File(configDir, "server.env").toURI().toString());
-            if (filePath.equals(customDirConfigPath)) {
-                return true;
-            }
+        boolean isConfiguredServerEnv = filePath.endsWith(DEFAULT_SERVER_ENV) || customServerEnvFiles.contains(filePath);
+        if (isConfiguredServerEnv) {
+            return true;
         }
-        return filePath.endsWith(DEFAULT_SERVER_ENV) || customServerEnvFiles.contains(filePath);
+
+        File file = new File(filePath);
+        if (file.getName().equals("server.env")) {
+            return customConfigDirs.contains(file.getParent());
+        }
+        return false;
     }
 
     public static boolean isBootstrapPropertiesFile(LibertyTextDocument tdi) {
@@ -138,13 +141,16 @@ public class LibertyConfigFileManager {
      */
     public static boolean isBootstrapPropertiesFile(String uri) {
         String filePath = normalizeFilePath(uri);
-        for (String configDir : customConfigDirs) {
-            String customDirConfigPath = normalizeFilePath(new File(configDir, "bootstrap.properties").toURI().toString());
-            if (filePath.equals(customDirConfigPath)) {
-                return true;
-            }
+        boolean isConfiguredBootstrapProp = filePath.endsWith(DEFAULT_BOOTSTRAP_PROPERTIES) || customBootstrapFiles.contains(filePath);
+        if (isConfiguredBootstrapProp) {
+            return true;
         }
-        return filePath.endsWith(DEFAULT_BOOTSTRAP_PROPERTIES) || customBootstrapFiles.contains(filePath);
+
+        File file = new File(filePath);
+        if (file.getName().equals("bootstrap.properties")) {
+            return customConfigDirs.contains(file.getParent());
+        }
+        return false;
     }
 
     public static boolean isConfigFile(LibertyTextDocument tdi) {
