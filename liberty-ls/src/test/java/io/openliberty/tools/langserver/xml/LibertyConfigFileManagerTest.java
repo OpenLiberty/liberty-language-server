@@ -44,7 +44,7 @@ public class LibertyConfigFileManagerTest {
         if (!File.separator.equals("/")) {
             File lpcXml = new File(resourcesDir, "xml/windows/liberty-plugin-config.xml");
 
-            LibertyConfigFileManager.processLibertyPluginConfigXml(lpcXml.getCanonicalPath());
+            LibertyConfigFileManager.processLibertyPluginConfigXml(lpcXml.toURI().toString());
             assertTrue(LibertyConfigFileManager.isServerEnvFile(WINDOWS_CUSTOM_SERVER_ENV));
             assertTrue(LibertyConfigFileManager.isBootstrapPropertiesFile(WINDOWS_CUSTOM_BOOTSTRAP_PROPERTIES));
             assertTrue(LibertyConfigFileManager.isServerEnvFile(WINDOWS_CUSTOM_CONFIG_DIR_ENV));
