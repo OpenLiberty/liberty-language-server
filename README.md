@@ -17,8 +17,10 @@ The Liberty Config Language Server is included in the following client IDEs.
 Liberty Config Language Server features are available for the following configuration files.
 
 - Any XML file that contains a `server` root element.
-- `server.env` or any file with the extension `.env` that is specified by the `serverEnvFile` configuration in the Liberty Maven or Gradle plugin.
-- `bootstrap.properties` or any file with the extension `.properties` that is specified by the `bootstrapPropertiesFile` configuration in the Liberty Maven or Gradle plugin.
+- A `server.env` file located in a directory specified by the `configDirectory` configuration in the Liberty Maven or Gradle plugin, or in the default `src/main/liberty/config` directory.
+- Any file with the extension `.env` that is specified by the `serverEnvFile` configuration in the Liberty Maven or Gradle plugin.
+- A `bootstrap.properties` file located in a directory specified by the `configDirectory` configuration in the Liberty Maven or Gradle plugin, or in the default `src/main/liberty/config` directory.
+- Any file with the extension `.properties` that is specified by the `bootstrapPropertiesFile` configuration in the Liberty Maven or Gradle plugin.
 
 ## Features
 
