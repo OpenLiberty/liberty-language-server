@@ -108,14 +108,14 @@ public class LibertyConfigFileManager {
      * - is default server.env file in `src/main/liberty/config`
      * - is custom env file specified in liberty-plugin-config.xml (generated from
      * build file)
+     * - is default server.env file in custom configDirectory
      * 
      * @param uri - normally comes from LibertyTextDocument.getUri() which is a URI formatted string (file:///path/to/file)
      * @return
      */
     public static boolean isServerEnvFile(String uri) {
         String filePath = normalizeFilePath(uri);
-        boolean isConfiguredServerEnv = filePath.endsWith(DEFAULT_SERVER_ENV) || customServerEnvFiles.contains(filePath);
-        if (isConfiguredServerEnv) {
+        if (filePath.endsWith(DEFAULT_SERVER_ENV) || customServerEnvFiles.contains(filePath)) {
             return true;
         }
 
@@ -135,14 +135,14 @@ public class LibertyConfigFileManager {
      * - is default bootstrap.properties file in `src/main/liberty/config`
      * - is custom properties file specified in liberty-plugin-config.xml (generated
      * from build file)
+     * - is default bootstrap.properties file in custom configDirectory
      * 
      * @param uri - normally comes from LibertyTextDocument.getUri() which is a URI formatted string (file:///path/to/file)
      * @return
      */
     public static boolean isBootstrapPropertiesFile(String uri) {
         String filePath = normalizeFilePath(uri);
-        boolean isConfiguredBootstrapProp = filePath.endsWith(DEFAULT_BOOTSTRAP_PROPERTIES) || customBootstrapFiles.contains(filePath);
-        if (isConfiguredBootstrapProp) {
+        if (filePath.endsWith(DEFAULT_BOOTSTRAP_PROPERTIES) || customBootstrapFiles.contains(filePath)) {
             return true;
         }
 
@@ -153,6 +153,11 @@ public class LibertyConfigFileManager {
         return false;
     }
 
+    /**
+     * Returns true if valid server.env or bootstrap.properties file defined by defaults or custom settings
+     * @param tdi
+     * @return
+     */
     public static boolean isConfigFile(LibertyTextDocument tdi) {
         return isServerEnvFile(tdi) || isBootstrapPropertiesFile(tdi);
     }
