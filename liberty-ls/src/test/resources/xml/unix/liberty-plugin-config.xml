@@ -5,7 +5,7 @@
     <userDirectory>/user/sample-project/target/liberty/wlp/usr</userDirectory>
     <serverOutputDirectory>/user/sample-project/target/liberty/wlp/usr/servers/defaultServer</serverOutputDirectory>
     <serverName>defaultServer</serverName>
-    <configDirectory>/user/sample-project/src/main/liberty/config</configDirectory>
+    <configDirectory>/user/sample-project/src/main/liberty/config2</configDirectory>
     <configFile>/user/sample-project/src/main/liberty/config/server.xml</configFile>
     <bootstrapPropertiesFile>/user/sample-project/src/main/liberty/config/custombootstrapprops.properties</bootstrapPropertiesFile>
     <serverEnv>/user/sample-project/src/main/liberty/config/customserverenv.env</serverEnv>

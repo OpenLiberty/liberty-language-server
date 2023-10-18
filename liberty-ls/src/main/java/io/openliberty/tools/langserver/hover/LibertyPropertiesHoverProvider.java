@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2023 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -12,8 +12,10 @@ package io.openliberty.tools.langserver.hover;
 import java.util.concurrent.CompletableFuture;
 
 import org.eclipse.lsp4j.Hover;
+import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.Position;
 
+import io.openliberty.tools.langserver.LibertyConfigFileManager;
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 import io.openliberty.tools.langserver.model.propertiesfile.PropertiesEntryInstance;
 import io.openliberty.tools.langserver.utils.ParserFileHelperUtil;
@@ -26,6 +28,10 @@ public class LibertyPropertiesHoverProvider {
     }
 
     public CompletableFuture<Hover> getHover(Position position) {
+        if (!LibertyConfigFileManager.isConfigFile(textDocumentItem)) {
+            // return empty Hover if not a server config file
+            return CompletableFuture.completedFuture(new Hover(new MarkupContent("plaintext", "")));
+        }
         String entryLine = new ParserFileHelperUtil().getLine(textDocumentItem, position);
         return new PropertiesEntryInstance(entryLine, textDocumentItem).getHover(position);
     }
