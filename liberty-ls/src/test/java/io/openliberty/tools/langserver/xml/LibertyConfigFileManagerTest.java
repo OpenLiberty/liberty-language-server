@@ -17,8 +17,13 @@ public class LibertyConfigFileManagerTest {
 
     public final String CUSTOM_SERVER_ENV = "file:/user/sample-project/src/main/liberty/config/customserverenv.env";
     public final String CUSTOM_BOOTSTRAP_PROPERTIES = "file:/user/sample-project/src/main/liberty/config/custombootstrapprops.properties";
+    public final String CUSTOM_CONFIG_DIR_ENV = "file:/user/sample-project/src/main/liberty/config2/server.env";
+    public final String CUSTOM_CONFIG_DIR_PROP = "file:/user/sample-project/src/main/liberty/config2/bootstrap.properties";
     public final String WINDOWS_CUSTOM_SERVER_ENV = "file:/C:/user/sample-project/src/main/liberty/config/customserverenv.env";
     public final String WINDOWS_CUSTOM_BOOTSTRAP_PROPERTIES = "file:/C:/user/sample-project/src/main/liberty/config/custombootstrapprops.properties";
+    public final String WINDOWS_CUSTOM_CONFIG_DIR_ENV = "file:/C:/user/sample-project/src/main/liberty/config2/server.env";
+    public final String WINDOWS_CUSTOM_CONFIG_DIR_PROP = "file:/C:/user/sample-project/src/main/liberty/config2/bootstrap.properties";
+
     public final String ANOTHER_BOOTSTRAP = "file:/user/sample-project/src/main/another.properties";
 
     @Test
@@ -29,6 +34,8 @@ public class LibertyConfigFileManagerTest {
             LibertyConfigFileManager.processLibertyPluginConfigXml(lpcXml.toURI().toString());
             assertTrue(LibertyConfigFileManager.isServerEnvFile(CUSTOM_SERVER_ENV));
             assertTrue(LibertyConfigFileManager.isBootstrapPropertiesFile(CUSTOM_BOOTSTRAP_PROPERTIES));
+            assertTrue(LibertyConfigFileManager.isServerEnvFile(CUSTOM_CONFIG_DIR_ENV));
+            assertTrue(LibertyConfigFileManager.isBootstrapPropertiesFile(CUSTOM_CONFIG_DIR_PROP));
         }
     }
 
@@ -40,6 +47,8 @@ public class LibertyConfigFileManagerTest {
             LibertyConfigFileManager.processLibertyPluginConfigXml(lpcXml.getCanonicalPath());
             assertTrue(LibertyConfigFileManager.isServerEnvFile(WINDOWS_CUSTOM_SERVER_ENV));
             assertTrue(LibertyConfigFileManager.isBootstrapPropertiesFile(WINDOWS_CUSTOM_BOOTSTRAP_PROPERTIES));
+            assertTrue(LibertyConfigFileManager.isServerEnvFile(WINDOWS_CUSTOM_CONFIG_DIR_ENV));
+            assertTrue(LibertyConfigFileManager.isBootstrapPropertiesFile(WINDOWS_CUSTOM_CONFIG_DIR_PROP));
         }
     }
 
