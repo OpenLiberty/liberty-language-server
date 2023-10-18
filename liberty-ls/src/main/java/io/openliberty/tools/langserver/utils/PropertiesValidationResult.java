@@ -66,7 +66,6 @@ public class PropertiesValidationResult {
         String value = entry.getValue();
         
         // check whitespace around equal sign (=)
-        LOGGER.info("Validating property line: " + entry.getLineContent());
         if (LibertyConfigFileManager.isServerEnvFile(textDocumentItem)) {
             if (property.endsWith(" ") || value.startsWith(" ")) {
                 startChar = property.trim().length();

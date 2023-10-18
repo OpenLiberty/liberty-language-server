@@ -34,13 +34,14 @@ public class LibertyConfigFileManager {
     public static final String LIBERTY_PLUGIN_CONFIG_XML = "liberty-plugin-config.xml";
     public static final String CUSTOM_SERVER_ENV_XML_TAG = "serverEnv";
     public static final String CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG = "bootstrapPropertiesFile";
+    public static final String CUSTOM_SERVER_CONFIG_DIR_TAG = "configDirectory";
 
     private static final String DEFAULT_SERVER_ENV = "src/main/liberty/config/server.env".replace("/", File.separator);
     private static final String DEFAULT_BOOTSTRAP_PROPERTIES = "src/main/liberty/config/bootstrap.properties".replace("/", File.separator);
 
-
     private static Set<String> customServerEnvFiles = new HashSet<String>();
     private static Set<String> customBootstrapFiles = new HashSet<String>();
+    private static Set<String> customConfigDirs = new HashSet<String>();
 
     private static final Logger LOGGER = Logger.getLogger(LibertyConfigFileManager.class.getName());
 
@@ -81,16 +82,20 @@ public class LibertyConfigFileManager {
         if (!uri.endsWith(LIBERTY_PLUGIN_CONFIG_XML)) {
             return;
         }
-        Map<String, String> customConfigFiles = XmlReader.readTagsFromXml(uri,
+        Map<String, String> customConfigs = XmlReader.readTagsFromXml(uri,
                 CUSTOM_SERVER_ENV_XML_TAG,
-                CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG);
+                CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG,
+                CUSTOM_SERVER_CONFIG_DIR_TAG);
         // TODO: handle deletions
         // match uri
-        if (customConfigFiles.containsKey(CUSTOM_SERVER_ENV_XML_TAG)) {
-            customServerEnvFiles.add(customConfigFiles.get(CUSTOM_SERVER_ENV_XML_TAG));
+        if (customConfigs.containsKey(CUSTOM_SERVER_ENV_XML_TAG)) {
+            customServerEnvFiles.add(customConfigs.get(CUSTOM_SERVER_ENV_XML_TAG));
         }
-        if (customConfigFiles.containsKey(CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG)) {
-            customBootstrapFiles.add(customConfigFiles.get(CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG));
+        if (customConfigs.containsKey(CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG)) {
+            customBootstrapFiles.add(customConfigs.get(CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG));
+        }
+        if (customConfigs.containsKey(CUSTOM_SERVER_CONFIG_DIR_TAG)) {
+            customConfigDirs.add(customConfigs.get(CUSTOM_SERVER_CONFIG_DIR_TAG));
         }
     }
 
@@ -109,6 +114,12 @@ public class LibertyConfigFileManager {
      */
     public static boolean isServerEnvFile(String uri) {
         String filePath = normalizeFilePath(uri);
+        for (String configDir : customConfigDirs) {
+            String customDirConfigPath = normalizeFilePath(new File(configDir, "server.env").toURI().toString());
+            if (filePath.equals(customDirConfigPath)) {
+                return true;
+            }
+        }
         return filePath.endsWith(DEFAULT_SERVER_ENV) || customServerEnvFiles.contains(filePath);
     }
 
@@ -127,7 +138,17 @@ public class LibertyConfigFileManager {
      */
     public static boolean isBootstrapPropertiesFile(String uri) {
         String filePath = normalizeFilePath(uri);
+        for (String configDir : customConfigDirs) {
+            String customDirConfigPath = normalizeFilePath(new File(configDir, "bootstrap.properties").toURI().toString());
+            if (filePath.equals(customDirConfigPath)) {
+                return true;
+            }
+        }
         return filePath.endsWith(DEFAULT_BOOTSTRAP_PROPERTIES) || customBootstrapFiles.contains(filePath);
+    }
+
+    public static boolean isConfigFile(LibertyTextDocument tdi) {
+        return isServerEnvFile(tdi) || isBootstrapPropertiesFile(tdi);
     }
 
     /**
