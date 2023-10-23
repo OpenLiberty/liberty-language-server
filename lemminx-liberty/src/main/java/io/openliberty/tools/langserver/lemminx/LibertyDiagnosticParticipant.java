@@ -58,6 +58,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     public static final String INCORRECT_FEATURE_CODE = "incorrect_feature";
 
     private Set<String> includedFeatures;
+    private boolean featureManagerPresent;
     
     @Override
     public void doDiagnostics(DOMDocument domDocument, List<Diagnostic> diagnostics,
@@ -76,6 +77,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         List<DOMNode> nodes = domDocument.getDocumentElement().getChildren();
         List<Diagnostic> tempDiagnosticsList = new ArrayList<Diagnostic>();
         includedFeatures = new HashSet<>();
+        featureManagerPresent = false;
         LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI());
         FeatureListGraph featureGraph = (workspace == null) ? new FeatureListGraph() : workspace.getFeatureListGraph();
         for (DOMNode node : nodes) {
@@ -88,10 +90,12 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 holdConfigElement(domDocument, node, tempDiagnosticsList);
             }
         }
-        validateConfigElements(diagnosticsList, tempDiagnosticsList, featureGraph);
+        validateConfigElements(domDocument, diagnosticsList, tempDiagnosticsList, featureGraph);
     }
 
     private void validateFeature(DOMDocument domDocument, List<Diagnostic> list, DOMNode featureManager) {
+        featureManagerPresent = true;
+
         LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
         String libertyVersion =  runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
         String libertyRuntime =  runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
@@ -198,12 +202,16 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      * @param tempDiagnosticsList
      * @param featureGraph
      */
-    private void validateConfigElements(List<Diagnostic> diagnosticsList, List<Diagnostic> tempDiagnosticsList, FeatureListGraph featureGraph) {
+    private void validateConfigElements(DOMDocument domDocument, List<Diagnostic> diagnosticsList, List<Diagnostic> tempDiagnosticsList, FeatureListGraph featureGraph) {
         if (featureGraph.isEmpty()) {
             return;
         }
         if (includedFeatures.isEmpty()) {
-            diagnosticsList.addAll(tempDiagnosticsList);
+            if (featureManagerPresent) {
+                diagnosticsList.addAll(tempDiagnosticsList);
+            } else {
+                LOGGER.warning("No featureManager element found in document. Config element validation for missing features disabled for this document: " + domDocument.getDocumentURI());
+            }
             return;
         }
         for (Diagnostic tempDiagnostic : tempDiagnosticsList) {

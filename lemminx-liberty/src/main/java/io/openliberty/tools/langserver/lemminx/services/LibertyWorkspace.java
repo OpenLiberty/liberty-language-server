@@ -264,7 +264,7 @@ public class LibertyWorkspace {
                  useFeatureListGraph = FeatureService.getInstance().getDefaultFeatureList();
             }
             if (!useFeatureListGraph.isEmpty()) {
-                LOGGER.info("Config element validation enabled for workspace: " + workspaceFolderURI);
+                LOGGER.info("Config element validation for missing features enabled for workspace: " + workspaceFolderURI);
             }
         }
         return useFeatureListGraph;
