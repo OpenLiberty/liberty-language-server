@@ -36,8 +36,8 @@ public class LibertyConfigFileManager {
     public static final String CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG = "bootstrapPropertiesFile";
     public static final String CUSTOM_SERVER_CONFIG_DIR_TAG = "configDirectory";
 
-    private static final String DEFAULT_SERVER_ENV = "src/main/liberty/config/server.env".replace("/", File.separator);
-    private static final String DEFAULT_BOOTSTRAP_PROPERTIES = "src/main/liberty/config/bootstrap.properties".replace("/", File.separator);
+    public static final String SERVER_ENV_FILENAME = "server.env";
+    public static final String BOOTSTRAP_PROPERTIES_FILENAME = "bootstrap.properties";
 
     private static Set<String> customServerEnvFiles = new HashSet<String>();
     private static Set<String> customBootstrapFiles = new HashSet<String>();
@@ -86,7 +86,6 @@ public class LibertyConfigFileManager {
                 CUSTOM_SERVER_ENV_XML_TAG,
                 CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG,
                 CUSTOM_SERVER_CONFIG_DIR_TAG);
-        // TODO: handle deletions
         // match uri
         if (customConfigs.containsKey(CUSTOM_SERVER_ENV_XML_TAG)) {
             customServerEnvFiles.add(customConfigs.get(CUSTOM_SERVER_ENV_XML_TAG));
@@ -94,6 +93,7 @@ public class LibertyConfigFileManager {
         if (customConfigs.containsKey(CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG)) {
             customBootstrapFiles.add(customConfigs.get(CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG));
         }
+        // currently unused because keying off of filename only
         if (customConfigs.containsKey(CUSTOM_SERVER_CONFIG_DIR_TAG)) {
             customConfigDirs.add(customConfigs.get(CUSTOM_SERVER_CONFIG_DIR_TAG));
         }
@@ -105,25 +105,18 @@ public class LibertyConfigFileManager {
 
     /**
      * Checks if file matches one of these conditions:
-     * - is default server.env file in `src/main/liberty/config`
-     * - is custom env file specified in liberty-plugin-config.xml (generated from
+     * - is named `server.env`
+     * - is custom `<serverEnv>` specified in liberty-plugin-config.xml (generated from
      * build file)
-     * - is default server.env file in custom configDirectory
      * 
      * @param uri - normally comes from LibertyTextDocument.getUri() which is a URI formatted string (file:///path/to/file)
      * @return
      */
     public static boolean isServerEnvFile(String uri) {
         String filePath = normalizeFilePath(uri);
-        if (filePath.endsWith(DEFAULT_SERVER_ENV) || customServerEnvFiles.contains(filePath)) {
-            return true;
-        }
-
         File file = new File(filePath);
-        if (file.getName().equals("server.env")) {
-            return customConfigDirs.contains(file.getParent());
-        }
-        return false;
+        return file.getName().equals(SERVER_ENV_FILENAME) || 
+                customServerEnvFiles.contains(filePath);
     }
 
     public static boolean isBootstrapPropertiesFile(LibertyTextDocument tdi) {
@@ -132,25 +125,18 @@ public class LibertyConfigFileManager {
 
     /**
      * Checks if file matches one of these conditions:
-     * - is default bootstrap.properties file in `src/main/liberty/config`
-     * - is custom properties file specified in liberty-plugin-config.xml (generated
+     * - is named `bootstrap.properties`
+     * - is custom `<bootstrapPropertiesFile>` specified in liberty-plugin-config.xml (generated
      * from build file)
-     * - is default bootstrap.properties file in custom configDirectory
      * 
      * @param uri - normally comes from LibertyTextDocument.getUri() which is a URI formatted string (file:///path/to/file)
      * @return
      */
     public static boolean isBootstrapPropertiesFile(String uri) {
         String filePath = normalizeFilePath(uri);
-        if (filePath.endsWith(DEFAULT_BOOTSTRAP_PROPERTIES) || customBootstrapFiles.contains(filePath)) {
-            return true;
-        }
-
         File file = new File(filePath);
-        if (file.getName().equals("bootstrap.properties")) {
-            return customConfigDirs.contains(file.getParent());
-        }
-        return false;
+        return file.getName().equals(BOOTSTRAP_PROPERTIES_FILENAME) || 
+                customBootstrapFiles.contains(filePath);
     }
 
     /**
