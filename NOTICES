@@ -233,10 +233,10 @@ The Program includes some or all of the following that IBM obtained
 under the Eclipse Public License (source code available via the
 indicated URL):
 
-org.eclipse.lemminx:org.eclipse.lemminx | https://mvnrepository.com/artifact/org.eclipse.lemminx/org.eclipse.lemminx/0.22.0
-org.eclipse.lsp4j:org.eclipse.lsp4j | https://mvnrepository.com/artifact/org.eclipse.lsp4j/org.eclipse.lsp4j.debug/0.14.0
-org.eclipse.lsp4j:org.eclipse.lsp4j.generator | https://mvnrepository.com/artifact/org.eclipse.lsp4j/org.eclipse.lsp4j.generator/0.14.0
-org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc | https://mvnrepository.com/artifact/org.eclipse.lsp4j/org.eclipse.lsp4j.jsonrpc/0.14.0
+org.eclipse.lemminx:org.eclipse.lemminx | https://mvnrepository.com/artifact/org.eclipse.lemminx/org.eclipse.lemminx/0.26.1
+org.eclipse.lsp4j:org.eclipse.lsp4j | https://mvnrepository.com/artifact/org.eclipse.lsp4j/org.eclipse.lsp4j/0.20.1
+org.eclipse.lsp4j:org.eclipse.lsp4j.generator | https://mvnrepository.com/artifact/org.eclipse.lsp4j/org.eclipse.lsp4j.generator/0.20.1
+org.eclipse.lsp4j:org.eclipse.lsp4j.jsonrpc | https://mvnrepository.com/artifact/org.eclipse.lsp4j/org.eclipse.lsp4j.jsonrpc/0.20.1
 org.eclipse.xtend:org.eclipse.xtend.lib | https://mvnrepository.com/artifact/org.eclipse.xtend/org.eclipse.xtend.lib/2.28.0
 org.eclipse.xtend:org.eclipse.xtend.lib.macro | https://mvnrepository.com/artifact/org.eclipse.xtend/org.eclipse.xtend.lib.macro/2.28.0
 org.eclipse.xtext:org.eclipse.xtext.xbase.lib | https://mvnrepository.com/artifact/org.eclipse.xtext/org.eclipse.xtext.xbase.lib/2.28.0
