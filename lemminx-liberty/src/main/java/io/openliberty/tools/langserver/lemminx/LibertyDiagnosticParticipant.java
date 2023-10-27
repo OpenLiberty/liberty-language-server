@@ -89,7 +89,6 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(nodeName)) {
                 validateFeature(domDocument, diagnosticsList, node);
             } else if (LibertyConstants.INCLUDE_ELEMENT.equals(nodeName)) {
-                // TODO: process includes for features
                 validateIncludeLocation(domDocument, diagnosticsList, node);
             } else if (featureGraph.isConfigElement(nodeName)) {    // defaults to false
                 holdConfigElement(domDocument, node, tempDiagnosticsList);
@@ -200,7 +199,6 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     private void validateFileOrDirIncludeLocation(File f, String location, Range range, List<Diagnostic> diagnosticsList) {
         boolean isLibertyDirectory = location.endsWith("/"); // Liberty uses this to determine if directory. 
         if (f.isFile() && isLibertyDirectory) {
-            // Note: will never actually come here because we filter by endWith(.xml) for files
             diagnosticsList.add(new Diagnostic(range, SPECIFIED_DIR_IS_FILE, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, FILETYPE_MISMATCH_CODE));
         } else if (f.isDirectory() && !isLibertyDirectory) {
             diagnosticsList.add(new Diagnostic(range, SPECIFIED_FILE_IS_DIR, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, FILETYPE_MISMATCH_CODE));

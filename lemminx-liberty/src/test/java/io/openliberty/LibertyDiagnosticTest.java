@@ -158,6 +158,8 @@ public class LibertyDiagnosticTest {
                 "            optional=\"true\" location=\"MULTI LINER\"/>", //
                 "    <include optional=\"false\" location=\"MISSING FILE.xml\"/>", //
                 "    <include location=\"MISSING FILE.xml\"/>", //
+                "    <include location=\"/empty_server.xml/\"/>", //
+                "    <include location=\"/testDir.xml\"/>", //
                 "</server>"
         );
         
@@ -169,11 +171,11 @@ public class LibertyDiagnosticTest {
 
         Diagnostic not_xml = new Diagnostic();
         not_xml.setRange(r(3, 29, 3, 52));
-        not_xml.setMessage("The specified resource is not an XML file.");
+        not_xml.setMessage("The specified resource is not an XML file or directory.");
 
         Diagnostic multi_liner = new Diagnostic();
         multi_liner.setRange(r(5, 28, 5, 50));
-        multi_liner.setMessage("The specified resource is not an XML file.");
+        multi_liner.setMessage("The specified resource is not an XML file or directory.");
 
         Diagnostic not_optional = new Diagnostic();
         not_optional.setRange(r(6, 13, 6, 29));
@@ -195,9 +197,20 @@ public class LibertyDiagnosticTest {
         missing_xml2.setCode("missing_file");
         missing_xml2.setMessage("The resource at the specified location could not be found.");
 
+        // test dir not file? might be hard to test...
+        Diagnostic dirIsFile = new Diagnostic();
+        dirIsFile.setRange(r(8, 13, 8, 42));
+        dirIsFile.setCode("filetype_mismatch");
+        dirIsFile.setMessage("Path specified a directory, but resource exists as a file.");
+
+        Diagnostic fileIsDir = new Diagnostic();
+        fileIsDir.setRange(r(9, 13, 9, 36));
+        fileIsDir.setCode("filetype_mismatch");
+        fileIsDir.setMessage("Path specified a file, but resource exists as a directory.");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), 
-                not_xml, multi_liner, not_optional, missing_xml, optional_not_defined, missing_xml2);
+                not_xml, multi_liner, not_optional, missing_xml, optional_not_defined, missing_xml2,
+                dirIsFile, fileIsDir);
     }
 
     @Test
