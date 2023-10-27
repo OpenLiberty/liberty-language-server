@@ -55,6 +55,10 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     public static final String IMPLICIT_NOT_OPTIONAL_MESSAGE = "The specified resource cannot be skipped. Check location value or add optional attribute.";
     public static final String IMPLICIT_NOT_OPTIONAL_CODE = "implicit_not_optional";
 
+    public static final String SPECIFIED_DIR_IS_FILE = "Path specified a directory, but resource exists as a file.";
+    public static final String SPECIFIED_FILE_IS_DIR = "Path specified a file, but resource exists as a directory.";
+    public static final String FILETYPE_MISMATCH_CODE = "filetype_mismatch";
+
     public static final String INCORRECT_FEATURE_CODE = "incorrect_feature";
 
     private Set<String> includedFeatures;
@@ -85,6 +89,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(nodeName)) {
                 validateFeature(domDocument, diagnosticsList, node);
             } else if (LibertyConstants.INCLUDE_ELEMENT.equals(nodeName)) {
+                // TODO: process includes for features
                 validateIncludeLocation(domDocument, diagnosticsList, node);
             } else if (featureGraph.isConfigElement(nodeName)) {    // defaults to false
                 holdConfigElement(domDocument, node, tempDiagnosticsList);
@@ -153,8 +158,10 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
 
         DOMNode locNode = node.getAttributeNode("location");
         Range range = XMLPositionUtility.createRange(locNode.getStart(), locNode.getEnd(), domDocument);
-        if (!locAttribute.endsWith(".xml")) {
-            String message = "The specified resource is not an XML file.";
+        if (!locAttribute.endsWith(".xml")
+         && !locAttribute.endsWith("/")
+         && !locAttribute.endsWith("\\")) { // TODO: check this condition on Windows, or use File.separator?
+            String message = "The specified resource is not an XML file or directory.";
             diagnosticsList.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE));
             return;
         }
@@ -168,6 +175,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             if (!configFile.exists()) {
                 DOMAttr optNode = node.getAttributeNode("optional");
                 if (optNode == null) {
+                    // TODO: may fail on Windows due to path resolution with \
                     diagnosticsList.add(new Diagnostic(range, IMPLICIT_NOT_OPTIONAL_MESSAGE, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, IMPLICIT_NOT_OPTIONAL_CODE));
                 } else if (optNode.getValue().equals("false")) {
                     Range optRange = XMLPositionUtility.createRange(optNode.getStart(), optNode.getEnd(), domDocument);
@@ -175,8 +183,27 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 }
                 diagnosticsList.add(new Diagnostic(range, MISSING_FILE_MESSAGE, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE, MISSING_FILE_CODE));
             }
+            validateFileOrDirIncludeLocation(configFile, locAttribute, range, diagnosticsList);
         } catch (IllegalArgumentException e) {
             diagnosticsList.add(new Diagnostic(range, MISSING_FILE_MESSAGE, DiagnosticSeverity.Warning, "liberty-lemminx-exception", MISSING_FILE_CODE));
+        }
+    }
+
+    /**
+     * Checks if specified file or dir is the correct filetype.
+     * Adds diagnostics if it is mismatched.
+     * @param f
+     * @param location
+     * @param range
+     * @param diagnosticsList
+     */
+    private void validateFileOrDirIncludeLocation(File f, String location, Range range, List<Diagnostic> diagnosticsList) {
+        boolean isLibertyDirectory = location.endsWith("/"); // Liberty uses this to determine if directory. 
+        if (f.isFile() && isLibertyDirectory) {
+            // Note: will never actually come here because we filter by endWith(.xml) for files
+            diagnosticsList.add(new Diagnostic(range, SPECIFIED_DIR_IS_FILE, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, FILETYPE_MISMATCH_CODE));
+        } else if (f.isDirectory() && !isLibertyDirectory) {
+            diagnosticsList.add(new Diagnostic(range, SPECIFIED_FILE_IS_DIR, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, FILETYPE_MISMATCH_CODE));
         }
     }
 
