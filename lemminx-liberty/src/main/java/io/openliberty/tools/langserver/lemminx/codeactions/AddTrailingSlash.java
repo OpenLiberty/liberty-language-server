@@ -20,8 +20,11 @@ public class AddTrailingSlash implements ICodeActionParticipant {
         try {
             String fileSeparator = "/";
             String locationText = document.findNodeAt(document.offsetAt(diagnostic.getRange().getEnd())).getAttribute("location");
-             // if Windows and path using \, continue using it
-            if (File.separator.equals("\\") && locationText.contains("\\")) {
+            if (locationText.contains("\\") && locationText.contains("/")) {
+                // if using mismatched slashes, replace all with /
+                locationText = locationText.replaceAll("\\", "/");
+            } else if (File.separator.equals("\\") && locationText.contains("\\")) {
+                // if Windows and path using \, continue using it
                 fileSeparator = "\\";
             }
             String title = "Add trailing slash to specify directory.";
