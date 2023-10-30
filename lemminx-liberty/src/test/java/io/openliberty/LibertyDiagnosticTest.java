@@ -200,12 +200,12 @@ public class LibertyDiagnosticTest {
         // test dir not file? might be hard to test...
         Diagnostic dirIsFile = new Diagnostic();
         dirIsFile.setRange(r(8, 13, 8, 42));
-        dirIsFile.setCode("filetype_mismatch");
+        dirIsFile.setCode("is_file_not_dir");
         dirIsFile.setMessage("Path specified a directory, but resource exists as a file. Please remove the trailing slash.");
 
         Diagnostic fileIsDir = new Diagnostic();
         fileIsDir.setRange(r(9, 13, 9, 36));
-        fileIsDir.setCode("filetype_mismatch");
+        fileIsDir.setCode("is_dir_not_file");
         fileIsDir.setMessage("Path specified a file, but resource exists as a directory. Please add a trailing slash.");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), 
