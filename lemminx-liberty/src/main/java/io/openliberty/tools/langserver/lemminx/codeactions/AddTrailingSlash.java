@@ -22,7 +22,7 @@ public class AddTrailingSlash implements ICodeActionParticipant {
             String locationText = document.findNodeAt(document.offsetAt(diagnostic.getRange().getEnd())).getAttribute("location");
             if (locationText.contains("\\") && locationText.contains("/")) {
                 // if using mismatched slashes, replace all with /
-                locationText = locationText.replaceAll("\\", "/");
+                locationText = locationText.replace("\\", "/");
             } else if (File.separator.equals("\\") && locationText.contains("\\")) {
                 // if Windows and path using \, continue using it
                 fileSeparator = "\\";
