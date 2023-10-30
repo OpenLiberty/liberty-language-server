@@ -55,8 +55,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     public static final String IMPLICIT_NOT_OPTIONAL_MESSAGE = "The specified resource cannot be skipped. Check location value or add optional attribute.";
     public static final String IMPLICIT_NOT_OPTIONAL_CODE = "implicit_not_optional";
 
-    public static final String SPECIFIED_DIR_IS_FILE = "Path specified a directory, but resource exists as a file.";
-    public static final String SPECIFIED_FILE_IS_DIR = "Path specified a file, but resource exists as a directory.";
+    public static final String SPECIFIED_DIR_IS_FILE = "Path specified a directory, but resource exists as a file. Please remove the trailing slash.";
+    public static final String SPECIFIED_FILE_IS_DIR = "Path specified a file, but resource exists as a directory. Please add a trailing slash.";
     public static final String FILETYPE_MISMATCH_CODE = "filetype_mismatch";
 
     public static final String INCORRECT_FEATURE_CODE = "incorrect_feature";
@@ -161,7 +161,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         Range range = XMLPositionUtility.createRange(locNode.getStart(), locNode.getEnd(), domDocument);
         if (!locAttribute.endsWith(".xml")
          && !isLibertyDirectory) {
-            String message = "The specified resource is not an XML file or directory.";
+            String message = "The specified resource is not an XML file. If it is a directory, it must end with a trailing slash.";
             diagnosticsList.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE));
             return;
         }
