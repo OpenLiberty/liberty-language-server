@@ -57,7 +57,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
 
     public static final String SPECIFIED_DIR_IS_FILE = "Path specified a directory, but resource exists as a file. Please remove the trailing slash.";
     public static final String SPECIFIED_FILE_IS_DIR = "Path specified a file, but resource exists as a directory. Please add a trailing slash.";
-    public static final String FILETYPE_MISMATCH_CODE = "filetype_mismatch";
+    public static final String IS_FILE_NOT_DIR_CODE = "is_file_not_dir";
+    public static final String Is_DIR_NOT_FILE_CODE = "is_dir_not_file";
 
     public static final String INCORRECT_FEATURE_CODE = "incorrect_feature";
 
@@ -198,9 +199,9 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      */
     private void validateFileOrDirIncludeLocation(File f, boolean isLibertyDirectory, Range range, List<Diagnostic> diagnosticsList) {
         if (f.isFile() && isLibertyDirectory) {
-            diagnosticsList.add(new Diagnostic(range, SPECIFIED_DIR_IS_FILE, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, FILETYPE_MISMATCH_CODE));
+            diagnosticsList.add(new Diagnostic(range, SPECIFIED_DIR_IS_FILE, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, IS_FILE_NOT_DIR_CODE));
         } else if (f.isDirectory() && !isLibertyDirectory) {
-            diagnosticsList.add(new Diagnostic(range, SPECIFIED_FILE_IS_DIR, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, FILETYPE_MISMATCH_CODE));
+            diagnosticsList.add(new Diagnostic(range, SPECIFIED_FILE_IS_DIR, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, Is_DIR_NOT_FILE_CODE));
         }
     }
 
