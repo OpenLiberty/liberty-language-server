@@ -65,12 +65,15 @@ public class AddFeature implements ICodeActionParticipant {
         TextDocument textDocument = document.getTextDocument();
 
         LibertyWorkspace ws = LibertyProjectsManager.getInstance().getWorkspaceFolder(document.getDocumentURI());    
+        FeatureListGraph featureGraph = null;
         if (ws == null) {
-            LOGGER.warning("Could not add quick fix for missing feature because could not find Liberty workspace for document: "+document.getDocumentURI());
-            return;
+            LOGGER.warning("Could not get workspace for: "+document.getDocumentURI() + ". Using cached feature list for quick fix.");
+            featureGraph = FeatureService.getInstance().getDefaultFeatureList();
+        } else {
+            featureGraph = ws.getFeatureListGraph();
         }
 
-        FeatureListNode flNode = ws.getFeatureListGraph().get(diagnostic.getSource());
+        FeatureListNode flNode = featureGraph.get(diagnostic.getSource());
         if (flNode == null) {
             LOGGER.warning("Could not add quick fix for missing feature for config element due to missing information in the feature list: "+diagnostic.getSource());
             return;
