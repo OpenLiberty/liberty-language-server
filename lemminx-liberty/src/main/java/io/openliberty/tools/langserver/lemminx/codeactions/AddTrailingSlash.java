@@ -52,7 +52,7 @@ public class AddTrailingSlash implements ICodeActionParticipant {
      * @param locationText
      * @return
      */
-    protected static String getReplaceText(String fileSeparator, String locationText) {
+    public static String getReplaceText(String fileSeparator, String locationText) {
         if (locationText.contains(BACK_SLASH) && locationText.contains(FORWARD_SLASH)) {
             // if using mismatched slashes, replace all with /
             locationText = locationText.replace(BACK_SLASH, FORWARD_SLASH);
