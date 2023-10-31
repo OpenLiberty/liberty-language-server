@@ -1,3 +1,15 @@
+/*******************************************************************************
+* Copyright (c) 2023 IBM Corporation and others.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Eclipse Public License v. 2.0 which is available at
+* http://www.eclipse.org/legal/epl-2.0.
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*     IBM Corporation
+*******************************************************************************/
 package io.openliberty.tools.langserver.lemminx.codeactions;
 
 import java.io.File;
@@ -12,24 +24,28 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 public class AddTrailingSlash implements ICodeActionParticipant {
+
+    public static final String CODEACTION_TITLE = "Add trailing slash to specify directory.";
+
+    public static final String FORWARD_SLASH = "/";
+    public static final String BACK_SLASH = "\\";
     
     @Override
     public void doCodeAction(ICodeActionRequest request, List<CodeAction> codeActions, CancelChecker cancelChecker) {
         Diagnostic diagnostic = request.getDiagnostic();
         DOMDocument document = request.getDocument();
         try {
-            String fileSeparator = "/";
+            String fileSeparator = FORWARD_SLASH;
             String locationText = document.findNodeAt(document.offsetAt(diagnostic.getRange().getEnd())).getAttribute("location");
-            if (locationText.contains("\\") && locationText.contains("/")) {
+            if (locationText.contains(BACK_SLASH) && locationText.contains(FORWARD_SLASH)) {
                 // if using mismatched slashes, replace all with /
-                locationText = locationText.replace("\\", "/");
-            } else if (File.separator.equals("\\") && locationText.contains("\\")) {
+                locationText = locationText.replace(BACK_SLASH, FORWARD_SLASH);
+            } else if (File.separator.equals(BACK_SLASH) && locationText.contains(BACK_SLASH)) {
                 // if Windows and path using \, continue using it
-                fileSeparator = "\\";
+                fileSeparator = BACK_SLASH;
             }
-            String title = "Add trailing slash to specify directory.";
             String replaceText = "location=\"" + locationText + fileSeparator + "\"";
-            codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), replaceText, document.getTextDocument(), diagnostic));
+            codeActions.add(CodeActionFactory.replace(CODEACTION_TITLE, diagnostic.getRange(), replaceText, document.getTextDocument(), diagnostic));
         } catch (Exception e) {
             // do nothing
         }

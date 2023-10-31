@@ -44,6 +44,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
 
     public static final String LIBERTY_LEMMINX_SOURCE = "liberty-lemminx";
 
+    public static final String NOT_XML_OR_DIR = "The specified resource is not an XML file. If it is a directory, it must end with a trailing slash.";
+
     public static final String MISSING_FILE_MESSAGE = "The resource at the specified location could not be found.";
     public static final String MISSING_FILE_CODE = "missing_file";
 
@@ -162,8 +164,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         Range range = XMLPositionUtility.createRange(locNode.getStart(), locNode.getEnd(), domDocument);
         if (!locAttribute.endsWith(".xml")
          && !isLibertyDirectory) {
-            String message = "The specified resource is not an XML file. If it is a directory, it must end with a trailing slash.";
-            diagnosticsList.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE));
+            diagnosticsList.add(new Diagnostic(range, NOT_XML_OR_DIR, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE));
             return;
         }
 
