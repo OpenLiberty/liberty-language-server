@@ -214,7 +214,7 @@ public class LibertyDiagnosticTest {
 
     @Test
     public void testDiagnosticsForIncludeWindows() {
-        if (File.separator.equals("\\")) { // skip test if not Windows
+        if (!File.separator.equals("\\")) { // skip test if not Windows
             return;
         }
         // LibertyWorkspace must be initialized

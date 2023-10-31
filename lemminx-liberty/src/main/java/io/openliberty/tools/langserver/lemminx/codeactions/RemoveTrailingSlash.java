@@ -13,6 +13,7 @@
 package io.openliberty.tools.langserver.lemminx.codeactions;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.lemminx.commons.CodeActionFactory;
 import org.eclipse.lemminx.dom.DOMDocument;
@@ -23,6 +24,7 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 public class RemoveTrailingSlash implements ICodeActionParticipant {
+    private static final Logger LOGGER = Logger.getLogger(RemoveTrailingSlash.class.getName());
 
     public static final String CODEACTION_TITLE = "Remove trailing slash to specify file.";
     @Override
@@ -34,7 +36,7 @@ public class RemoveTrailingSlash implements ICodeActionParticipant {
             String replaceText = "location=\"" + locationText.substring(0, locationText.length()-1) + "\"";
             codeActions.add(CodeActionFactory.replace(CODEACTION_TITLE, diagnostic.getRange(), replaceText, document.getTextDocument(), diagnostic));
         } catch (Exception e) {
-            // do nothing
+            LOGGER.warning("Could not generate code action for removing trailing slash." + e);
         }
     }
 }

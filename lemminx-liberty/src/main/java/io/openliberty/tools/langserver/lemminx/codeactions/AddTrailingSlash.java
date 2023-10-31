@@ -14,6 +14,7 @@ package io.openliberty.tools.langserver.lemminx.codeactions;
 
 import java.io.File;
 import java.util.List;
+import java.util.logging.Logger;
 
 import org.eclipse.lemminx.commons.CodeActionFactory;
 import org.eclipse.lemminx.dom.DOMDocument;
@@ -24,6 +25,7 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 public class AddTrailingSlash implements ICodeActionParticipant {
+    private static final Logger LOGGER = Logger.getLogger(AddTrailingSlash.class.getName());
 
     public static final String CODEACTION_TITLE = "Add trailing slash to specify directory.";
 
@@ -37,17 +39,28 @@ public class AddTrailingSlash implements ICodeActionParticipant {
         try {
             String fileSeparator = FORWARD_SLASH;
             String locationText = document.findNodeAt(document.offsetAt(diagnostic.getRange().getEnd())).getAttribute("location");
-            if (locationText.contains(BACK_SLASH) && locationText.contains(FORWARD_SLASH)) {
-                // if using mismatched slashes, replace all with /
-                locationText = locationText.replace(BACK_SLASH, FORWARD_SLASH);
-            } else if (File.separator.equals(BACK_SLASH) && locationText.contains(BACK_SLASH)) {
-                // if Windows and path using \, continue using it
-                fileSeparator = BACK_SLASH;
-            }
-            String replaceText = "location=\"" + locationText + fileSeparator + "\"";
+            String replaceText = getReplaceText(fileSeparator, locationText);
             codeActions.add(CodeActionFactory.replace(CODEACTION_TITLE, diagnostic.getRange(), replaceText, document.getTextDocument(), diagnostic));
         } catch (Exception e) {
-            // do nothing
+            LOGGER.warning("Could not generate code action for adding trailing slash." + e);
         }
+    }
+
+    /**
+     * Gets replace text based on OS and slash usage
+     * @param fileSeparator
+     * @param locationText
+     * @return
+     */
+    protected static String getReplaceText(String fileSeparator, String locationText) {
+        if (locationText.contains(BACK_SLASH) && locationText.contains(FORWARD_SLASH)) {
+            // if using mismatched slashes, replace all with /
+            locationText = locationText.replace(BACK_SLASH, FORWARD_SLASH);
+        } else if (File.separator.equals(BACK_SLASH) && locationText.contains(BACK_SLASH)) {
+            // if Windows and path using \, continue using it
+            fileSeparator = BACK_SLASH;
+        }
+        String replaceText = "location=\"" + locationText + fileSeparator + "\"";
+        return replaceText;
     }
 }
