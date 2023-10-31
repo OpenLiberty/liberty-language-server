@@ -143,7 +143,7 @@ public class LibertyDiagnosticTest {
     }
 
     @Test
-    public void testDiagnosticsForInclude() throws IOException {
+    public void testDiagnosticsForInclude() throws IOException, BadLocationException {
         // LibertyWorkspace must be initialized
         List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
         initList.add(new WorkspaceFolder(new File("src/test/resources").toURI().toString()));
@@ -210,10 +210,26 @@ public class LibertyDiagnosticTest {
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), 
                 not_xml, multi_liner, not_optional, missing_xml, optional_not_defined, missing_xml2,
                 dirIsFile, fileIsDir);
+
+        // Check code actions for add/remove trailing slashes
+        String fixedFilePath = "location=\"/empty_server.xml\"";
+        TextEdit dirIsFileTextEdit = te(dirIsFile.getRange().getStart().getLine(), dirIsFile.getRange().getStart().getCharacter(),
+                            dirIsFile.getRange().getEnd().getLine(), dirIsFile.getRange().getEnd().getCharacter(), fixedFilePath);
+        CodeAction dirIsFileCodeAction = ca(dirIsFile, dirIsFileTextEdit);
+
+        String fixedDirPath = "location=\"/testDir.xml/\"";
+        TextEdit fileIsDirTextEdit = te(fileIsDir.getRange().getStart().getLine(), fileIsDir.getRange().getStart().getCharacter(),
+                            fileIsDir.getRange().getEnd().getLine(), fileIsDir.getRange().getEnd().getCharacter(), fixedDirPath);
+        CodeAction fileIsDirCodeAction = ca(fileIsDir, fileIsDirTextEdit);
+
+
+        XMLAssert.testCodeActionsFor(serverXML, dirIsFile, dirIsFileCodeAction); 
+
+        XMLAssert.testCodeActionsFor(serverXML, fileIsDir, fileIsDirCodeAction);
     }
 
     @Test
-    public void testDiagnosticsForIncludeWindows() {
+    public void testDiagnosticsForIncludeWindows() throws BadLocationException {
         if (!File.separator.equals("\\")) { // skip test if not Windows
             return;
         }
@@ -247,6 +263,20 @@ public class LibertyDiagnosticTest {
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), 
                 dirIsFile, fileIsDir);
+
+        String fixedFilePath = "location=\"\\empty_server.xml\"";
+        TextEdit dirIsFileTextEdit = te(dirIsFile.getRange().getStart().getLine(), dirIsFile.getRange().getStart().getCharacter(),
+                            dirIsFile.getRange().getEnd().getLine(), dirIsFile.getRange().getEnd().getCharacter(), fixedFilePath);
+        CodeAction dirIsFileCodeAction = ca(dirIsFile, dirIsFileTextEdit);
+
+        String fixedDirPath = "location=\"\\testDir.xml\\\"";
+        TextEdit fileIsDirTextEdit = te(fileIsDir.getRange().getStart().getLine(), fileIsDir.getRange().getStart().getCharacter(),
+                            fileIsDir.getRange().getEnd().getLine(), fileIsDir.getRange().getEnd().getCharacter(), fixedDirPath);
+        CodeAction fileIsDirCodeAction = ca(fileIsDir, fileIsDirTextEdit);
+
+        XMLAssert.testCodeActionsFor(serverXML, dirIsFile, dirIsFileCodeAction); 
+
+        XMLAssert.testCodeActionsFor(serverXML, fileIsDir, fileIsDirCodeAction);
     }
 
     @Test
