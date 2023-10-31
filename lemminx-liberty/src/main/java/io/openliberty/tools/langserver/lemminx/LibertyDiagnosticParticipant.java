@@ -79,7 +79,10 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         includedFeatures = new HashSet<>();
         featureManagerPresent = false;
         LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI());
-        FeatureListGraph featureGraph = (workspace == null) ? new FeatureListGraph() : workspace.getFeatureListGraph();
+        if (workspace == null) {
+            LOGGER.warning("Could not get workspace, using default cached feature list");
+        }
+        FeatureListGraph featureGraph = (workspace == null) ? FeatureService.getInstance().getDefaultFeatureList() : workspace.getFeatureListGraph();
         for (DOMNode node : nodes) {
             String nodeName = node.getNodeName();
             if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(nodeName)) {
