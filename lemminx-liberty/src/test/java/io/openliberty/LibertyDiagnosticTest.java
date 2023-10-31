@@ -197,7 +197,6 @@ public class LibertyDiagnosticTest {
         missing_xml2.setCode("missing_file");
         missing_xml2.setMessage("The resource at the specified location could not be found.");
 
-        // test dir not file? might be hard to test...
         Diagnostic dirIsFile = new Diagnostic();
         dirIsFile.setRange(r(8, 13, 8, 42));
         dirIsFile.setCode("is_file_not_dir");
@@ -210,6 +209,43 @@ public class LibertyDiagnosticTest {
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), 
                 not_xml, multi_liner, not_optional, missing_xml, optional_not_defined, missing_xml2,
+                dirIsFile, fileIsDir);
+    }
+
+    @Test
+    public void testDiagnosticsForIncludeWindows() {
+        if (File.separator.equals("\\")) { // skip test if not Windows
+            return;
+        }
+        // LibertyWorkspace must be initialized
+        List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
+        initList.add(new WorkspaceFolder(new File("src/test/resources").toURI().toString()));
+        LibertyProjectsManager.getInstance().setWorkspaceFolders(initList);
+
+        String serverXML = String.join(newLine, //
+                "<server description=\"default server\">", //
+                "    <include location=\"\\empty_server.xml\\\"/>", //
+                "    <include location=\"\\testDir.xml\"/>", //
+                "</server>"
+        );
+        
+        // Diagnostic location1 = new Diagnostic();
+        File serverXMLFile = new File("src/test/resources/server.xml");
+        assertFalse(serverXMLFile.exists());
+        // Diagnostic will not be made if found
+        assertTrue(new File("src/test/resources/empty_server.xml").exists());
+
+        Diagnostic dirIsFile = new Diagnostic();
+        dirIsFile.setRange(r(1, 13, 1, 42));
+        dirIsFile.setCode("is_file_not_dir");
+        dirIsFile.setMessage("Path specified a directory, but resource exists as a file. Please remove the trailing slash.");
+
+        Diagnostic fileIsDir = new Diagnostic();
+        fileIsDir.setRange(r(2, 13, 2, 36));
+        fileIsDir.setCode("is_dir_not_file");
+        fileIsDir.setMessage("Path specified a file, but resource exists as a directory. Please add a trailing slash.");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), 
                 dirIsFile, fileIsDir);
     }
 
