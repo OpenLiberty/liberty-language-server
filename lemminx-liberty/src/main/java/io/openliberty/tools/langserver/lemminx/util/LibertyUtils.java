@@ -44,7 +44,7 @@ import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 public class LibertyUtils {
 
     private static final Logger LOGGER = Logger.getLogger(LibertyUtils.class.getName());
-    private static final String INCLUDE_PATTERN_REGEX = ".*/(?:usr/shared/config/.+|configDropins/(?:defaults|overrides)/.+|server.xml)$";
+    private static final String INCLUDE_PATTERN_REGEX = ".*/(?:usr/shared/config/.+|configDropins/(?:defaults|overrides)/.+|server\\.xml)$";
     private static final Pattern INCLUDE_PATTERN = Pattern.compile(INCLUDE_PATTERN_REGEX);
 
     private static final String EXCLUDE_PATTERN_REGEX = ".*/(?:target(?!/it/)|build)/.+$";
