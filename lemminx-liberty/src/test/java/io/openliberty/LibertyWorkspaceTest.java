@@ -43,10 +43,10 @@ public class LibertyWorkspaceTest {
         String filePathString = mockXML.getCanonicalPath();
         URI filePathURI = mockXML.toURI();
 
-        assertFalse(LibertyUtils.isConfigDirFile(filePathString));
-        assertTrue(LibertyUtils.isConfigDirFile(filePathURI.toString()));
+        assertTrue(LibertyUtils.isConfigXMLFile(filePathString));
+        assertTrue(LibertyUtils.isConfigXMLFile(filePathURI.toString()));
         // mock replacement
         filePathString = filePathString.replace("\\", "/");
-        assertTrue(LibertyUtils.isConfigDirFile(filePathString));
+        assertTrue(LibertyUtils.isConfigXMLFile(filePathString));
     }
 }
