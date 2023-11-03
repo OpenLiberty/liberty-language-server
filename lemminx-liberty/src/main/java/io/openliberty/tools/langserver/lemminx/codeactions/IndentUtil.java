@@ -18,8 +18,10 @@ public class IndentUtil {
 
     public static String whitespaceBuffer(String indent, int column) {
         StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < column / indent.length(); ++i) {
-            sb.append(indent);
+        if ((indent != null) && (indent.length() > 0)) {
+            for (int i = 0; i < column / indent.length(); ++i) {
+                sb.append(indent);
+            }
         }
         return sb.toString();
     }
