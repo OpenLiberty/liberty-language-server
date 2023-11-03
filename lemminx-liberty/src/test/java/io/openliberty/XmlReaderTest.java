@@ -22,7 +22,6 @@ public class XmlReaderTest {
     public void readEmptyXml() throws IOException {
         File emptyXml = new File(resourcesDir, "empty_server.xml");
         assertFalse(XmlReader.hasServerRoot(emptyXml.toURI().toString()));
-        assertFalse(LibertyUtils.isServerXMLFile(emptyXml.toURI().toString()));
         assertFalse(LibertyUtils.isConfigXMLFile(emptyXml.toURI().toString()));
     }
 
@@ -30,8 +29,6 @@ public class XmlReaderTest {
     public void readServerXml() throws IOException {
         File sampleServerXml = new File(resourcesDir, "sample/custom_server.xml");
         assertTrue(XmlReader.hasServerRoot(sampleServerXml.toURI().toString()));
-        assertFalse(LibertyUtils.isServerXMLFile(sampleServerXml.toURI().toString()));
-        assertFalse(LibertyUtils.isConfigDirFile(sampleServerXml.toURI().toString()));
         assertTrue(LibertyUtils.isConfigXMLFile(sampleServerXml.toURI().toString()));
     }
 

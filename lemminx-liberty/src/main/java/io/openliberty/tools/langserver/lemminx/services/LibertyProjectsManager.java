@@ -71,7 +71,7 @@ public class LibertyProjectsManager {
 
             try {
                 serverXmlFiles = LibertyUtils.getXmlFilesWithServerRootInDirectory(workspacePath);
-            } catch (IOException e) {
+            } catch (Exception e) {
                 LOGGER.warning("Received exception while searching for xml files with a <server> root element in: " + workspacePath + ": " + e.getMessage());
             }
 
@@ -80,6 +80,7 @@ public class LibertyProjectsManager {
                 LibertyWorkspace libertyWorkspace = new LibertyWorkspace(normalizedUriString);
                 this.libertyWorkspaceFolders.put(normalizedUriString, libertyWorkspace);
             } else {
+                LOGGER.info("Checking Liberty workspace for sub-modules: " + normalizedUriString);
                 boolean addedSubModule = false;
 
                 List<Path> childrenDirs = null;
@@ -95,9 +96,11 @@ public class LibertyProjectsManager {
                     for (Path nextChildDir : childrenDirs) {
                         lastChildDirPath = nextChildDir.toUri().toString().replace("///", "/");
                         if (nextChildDir.equals(workspacePath)) {
+                            LOGGER.info("Skipping parent module: " + lastChildDirPath);
                             continue; // skip parent module
                         } else if (this.libertyWorkspaceFolders.containsKey(lastChildDirPath)) {
                             // this sub-module was already added but we still don't want to add the parent module
+                            LOGGER.info("Skipping already added sub-module: " + lastChildDirPath);
                             addedSubModule = true; 
                             continue;
                         }
@@ -112,7 +115,7 @@ public class LibertyProjectsManager {
                             }
                         }
                     }
-                } catch (IOException e) {
+                } catch (Exception e) {
                     LOGGER.warning("Received exception while processing workspace folder: " + lastChildDirPath);
                 }
 

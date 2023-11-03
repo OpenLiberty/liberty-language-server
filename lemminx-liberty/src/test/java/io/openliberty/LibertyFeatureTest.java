@@ -24,12 +24,13 @@ public class LibertyFeatureTest {
     @Test
     public void getInstalledFeaturesListTest() throws JAXBException {
         FeatureService fs = FeatureService.getInstance();
-        File srcResourcesDir = new File("src/test/resources");
-        File featureListFile = new File(srcResourcesDir, "featurelist-ol-23.0.0.1-beta.xml");
+        File srcResourcesDir = new File("src/test/resources/sample");
+        File featureListFile = new File(srcResourcesDir.getParentFile(), "featurelist-ol-23.0.0.1-beta.xml");
         
         // LibertyWorkspace must be initialized
         List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
         initList.add(new WorkspaceFolder(srcResourcesDir.toURI().toString()));
+        LibertyProjectsManager.getInstance().cleanInstance();
         LibertyProjectsManager.getInstance().setWorkspaceFolders(initList);
         Collection<LibertyWorkspace> workspaceFolders = LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders();
         assertTrue(workspaceFolders.size() == 1);

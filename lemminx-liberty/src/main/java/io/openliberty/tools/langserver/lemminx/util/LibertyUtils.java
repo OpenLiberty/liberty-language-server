@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.eclipse.lemminx.dom.DOMDocument;
@@ -42,37 +44,63 @@ import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 public class LibertyUtils {
 
     private static final Logger LOGGER = Logger.getLogger(LibertyUtils.class.getName());
+    private static final String INCLUDE_PATTERN_REGEX = ".*/(?:usr/shared/config/.+|configDropins/(?:defaults|overrides)/.+|server\\.xml)$";
+    private static final Pattern INCLUDE_PATTERN = Pattern.compile(INCLUDE_PATTERN_REGEX);
+
+    private static final String EXCLUDE_PATTERN_REGEX = ".*/(?:target(?!/it/)|build)/.+$";
+    private static final Pattern EXCLUDE_PATTERN = Pattern.compile(EXCLUDE_PATTERN_REGEX);
 
     private static Thread thread;
 
     private LibertyUtils() {
     }
 
-    public static boolean isServerXMLFile(String filePath) {
-        return filePath.endsWith("/" + LibertyConstants.SERVER_XML);
-    }
+    /*
+     * Check the filePath to see if it is a Liberty config file. The following qualify as a Liberty config file:
+     * - an XML file in the /usr/shared/config/, /configDropins/overrides/, or /configDropins/defaults/ directories
+     * - an XML file in any directory ending with /server.xml
+     * - an XML file with a <server> root element
+     * 
+     * If the rootPath is null, all XML files that do not fall into category 1 or 2 will be checked for a <server> root element.
+     * If the rootPath is not null, only XML files that that do not fall into category 1 or 2 and are not located in a target/build 
+     * directory will be checked for a <server> root element. The rootPath is non-null when called from getXmlFilesWithServerRootInDirectory method.
+     * 
+     * @param rootPath - String path of root directory for the filePath - only consider the portion of the filePath after the rootPath
+     * @param filePath - String path of the XML file to check
+     * @return boolean - true if the XML file is a Liberty config file, false otherwise
+     */
+    public static boolean isConfigXMLFile(String rootPath, String filePath) {
+        String pathToCheck = rootPath == null ? filePath : filePath.substring(rootPath.length());
 
-    public static boolean isServerXMLFile(DOMDocument file) {
-        return file.getDocumentURI().endsWith("/" + LibertyConstants.SERVER_XML);
-    }
+        if (File.separator.equals("\\")) {
+            pathToCheck = pathToCheck.replace("\\", "/");
+        }
 
-    public static boolean isConfigDirFile(String filePath) {
-        return filePath.contains(LibertyConstants.WLP_USER_CONFIG_DIR) ||
-                filePath.contains(LibertyConstants.SERVER_CONFIG_DROPINS_DEFAULTS) ||
-                filePath.contains(LibertyConstants.SERVER_CONFIG_DROPINS_OVERRIDES);
+        // if path contains one of the pre-defined Liberty config dirs or ends with /server.xml, 
+        // just return true without checking for server root
+        Matcher m = INCLUDE_PATTERN.matcher(pathToCheck);
+        if (m.find()) {
+            return true;
+        }
+
+        if (rootPath != null) {
+            // if path contains target/build dir (except for target/it for test purposes), just return false
+            m = EXCLUDE_PATTERN.matcher(pathToCheck);
+            if (m.find()) {
+                return false;
+            }
+        }
+
+        // need to check if file has a server root element
+        return XmlReader.hasServerRoot(filePath);
     }
 
     public static boolean isConfigXMLFile(String filePath) {
-        if (File.separator.equals("\\")) {
-            filePath = filePath.replace("\\", "/");
-        }
-
-        return isServerXMLFile(filePath) || isConfigDirFile(filePath) || 
-                XmlReader.hasServerRoot(filePath);
+        return isConfigXMLFile(null, filePath);
     }
 
     public static boolean isConfigXMLFile(DOMDocument file) {
-        return isConfigXMLFile(file.getDocumentURI());
+        return isConfigXMLFile(null, file.getDocumentURI());
     }
 
     // Convenience methods
@@ -124,10 +152,11 @@ public class LibertyUtils {
      */
     public static List<Path> getXmlFilesWithServerRootInDirectory(Path dir) throws IOException {
         List<Path> serverRootXmlFiles = new ArrayList<Path>();
+        String rootPath = dir.toString();
 
         List<Path> xmlFiles = findFilesEndsWithInDirectory(dir, ".xml");
         for (Path nextXmlFile : xmlFiles) {
-            if (XmlReader.hasServerRoot(nextXmlFile)) {
+            if (isConfigXMLFile(rootPath, nextXmlFile.toString())) {
                 serverRootXmlFiles.add(nextXmlFile);
             }
         }       

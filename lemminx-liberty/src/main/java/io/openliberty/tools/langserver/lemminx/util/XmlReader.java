@@ -51,31 +51,42 @@ public class XmlReader {
     }
 
     public static boolean hasServerRoot(File xmlFile) {
-        XMLEventReader reader = null;
+        if (!xmlFile.exists() || xmlFile.length() == 0) {
+            return false;
+        }
         
         try {
-            if (!xmlFile.exists() || xmlFile.length() == 0) {
-                return false;
+            XMLInputFactory factory = XMLInputFactory.newInstance();
+            try {
+                factory.setProperty(XMLInputFactory.IS_VALIDATING, Boolean.FALSE);
+                factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
+                factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
+            } catch (Exception e) {
+                LOGGER.warning("Could not set properties on XMLInputFactory.");
             }
 
-            XMLInputFactory factory = XMLInputFactory.newInstance();
-            reader = factory.createXMLEventReader(new FileInputStream(xmlFile));
-            if (reader.hasNext()) {
-                XMLEvent firstTag = reader.nextTag(); // first start/end element
-                reader.close();
-                return isServerElement(firstTag);
-            }
-        } catch (FileNotFoundException e) {
-            LOGGER.severe("Unable to access file "+ xmlFile.getAbsolutePath());
-        } catch (XMLStreamException e) {
-            LOGGER.severe("Error received trying to read XML file: " + xmlFile.getAbsolutePath());
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception ignored) {   
+            XMLEventReader reader = null;
+
+            try (FileInputStream fis = new FileInputStream(xmlFile)) {
+                reader = factory.createXMLEventReader(fis);
+                while (reader.hasNext()) {
+                    XMLEvent nextEvent = reader.nextEvent();
+                    if (nextEvent.isStartElement()) {
+                        return isServerElement(nextEvent);
+                    }
                 }
-            }
+            } catch (XMLStreamException | FileNotFoundException e) {
+                LOGGER.severe("Error received trying to read XML file: " + xmlFile.getAbsolutePath()); 
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (Exception ignored) {   
+                    }
+                }
+            }            
+        } catch (Exception e) {
+            LOGGER.severe("Unable to access XML file "+ xmlFile.getAbsolutePath());
         }
 
         return false;
