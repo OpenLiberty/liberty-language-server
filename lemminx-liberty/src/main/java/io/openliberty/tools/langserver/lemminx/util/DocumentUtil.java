@@ -44,6 +44,7 @@ public class DocumentUtil {
             docFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
             docFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
             docFactory.setNamespaceAware(true);
+            docFactory.setExpandEntityReferences(false);
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             return docBuilder.parse(inputFile);
         } catch (Exception e) {
