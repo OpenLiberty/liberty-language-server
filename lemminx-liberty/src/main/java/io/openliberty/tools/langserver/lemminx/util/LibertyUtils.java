@@ -65,16 +65,12 @@ public class LibertyUtils {
      * If the rootPath is not null, only XML files that that do not fall into category 1 or 2 and are not located in a target/build 
      * directory will be checked for a <server> root element. The rootPath is non-null when called from getXmlFilesWithServerRootInDirectory method.
      * 
-     * @param rootPath - String path of root directory for the filePath - only consider the portion of the filePath after the rootPath
-     * @param filePath - String path of the XML file to check
+     * @param rootPath - String path of root directory for the filePath in URI format - only consider the portion of the filePath after the rootPath
+     * @param filePath - String path of the XML file to check in URI format
      * @return boolean - true if the XML file is a Liberty config file, false otherwise
      */
     public static boolean isConfigXMLFile(String rootPath, String filePath) {
         String pathToCheck = rootPath == null ? filePath : filePath.substring(rootPath.length());
-
-        if (File.separator.equals("\\")) {
-            pathToCheck = pathToCheck.replace("\\", "/");
-        }
 
         // if path contains one of the pre-defined Liberty config dirs or ends with /server.xml, 
         // just return true without checking for server root
@@ -152,11 +148,11 @@ public class LibertyUtils {
      */
     public static List<Path> getXmlFilesWithServerRootInDirectory(Path dir) throws IOException {
         List<Path> serverRootXmlFiles = new ArrayList<Path>();
-        String rootPath = dir.toString();
+        String rootPath = dir.toFile().toURI().toString();
 
         List<Path> xmlFiles = findFilesEndsWithInDirectory(dir, ".xml");
         for (Path nextXmlFile : xmlFiles) {
-            if (isConfigXMLFile(rootPath, nextXmlFile.toString())) {
+            if (isConfigXMLFile(rootPath, nextXmlFile.toFile().toURI().toString())) {
                 serverRootXmlFiles.add(nextXmlFile);
             }
         }       
@@ -174,7 +170,7 @@ public class LibertyUtils {
      */
     public static List<Path> findFilesEndsWithInDirectory(Path dir, String nameOrExtension) throws IOException {
         List<Path> matchingFiles = Files.walk(dir)
-                .filter(p -> (Files.isRegularFile(p) && p.toFile().getName().endsWith(nameOrExtension)))
+                .filter(p -> (Files.isRegularFile(p) && p.toFile().getName().toLowerCase().endsWith(nameOrExtension)))
                 .collect(Collectors.toList());
 
         return matchingFiles;
