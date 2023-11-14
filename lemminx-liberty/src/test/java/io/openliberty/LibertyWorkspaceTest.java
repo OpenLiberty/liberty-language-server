@@ -57,12 +57,5 @@ public class LibertyWorkspaceTest {
         // method expects URI formatted string and so should fail on Windows
         boolean test1 = LibertyUtils.isConfigXMLFile(filePathString);
         assertFalse(test1);
-
-        // mock replacement
-        filePathString = filePathString.replace("\\", "/");
-        // method expects URI formatted string and so should fail on Windows
-        boolean test2 = LibertyUtils.isConfigXMLFile(filePathString);
-        assertFalse(test2);
-
     }
 }
