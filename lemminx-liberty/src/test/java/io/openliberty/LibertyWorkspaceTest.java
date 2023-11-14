@@ -33,20 +33,36 @@ public class LibertyWorkspaceTest {
     }
 
     @Test
+    public void testConfigDropinsDefaults() throws IOException {
+        File mockXML = new File("src/test/resources/configDropins/defaults/my.xml");
+        URI filePathURI = mockXML.toURI();
+
+        assertTrue(LibertyUtils.isConfigXMLFile(filePathURI.toString()));
+
+    }
+
+    @Test
     public void testBackslashConfigDetection() throws IOException {
         // run test on Windows
         if (File.separator.equals("/")) {
             return;
         }
 
-        File mockXML = new File("src/test/resources/configDropins/defaults/my.xml");
+        File mockXML = new File("src/test/resources/sample/custom_server.xml");
         String filePathString = mockXML.getCanonicalPath();
         URI filePathURI = mockXML.toURI();
 
-        assertTrue(LibertyUtils.isConfigXMLFile(filePathString));
         assertTrue(LibertyUtils.isConfigXMLFile(filePathURI.toString()));
+
+        // method expects URI formatted string and so should fail on Windows
+        boolean test1 = LibertyUtils.isConfigXMLFile(filePathString);
+        assertFalse(test1);
+
         // mock replacement
         filePathString = filePathString.replace("\\", "/");
-        assertTrue(LibertyUtils.isConfigXMLFile(filePathString));
+        // method expects URI formatted string and so should fail on Windows
+        boolean test2 = LibertyUtils.isConfigXMLFile(filePathString);
+        assertFalse(test2);
+
     }
 }
