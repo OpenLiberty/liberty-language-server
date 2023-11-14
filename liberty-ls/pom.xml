@@ -5,7 +5,7 @@
 
     <groupId>io.openliberty.tools</groupId>
     <artifactId>liberty-langserver</artifactId>
-    <version>2.1.1-SNAPSHOT</version>
+    <version>2.1.1</version>
 
     <name>liberty.langserver</name>
     <url>https://openliberty.io/</url>
@@ -21,7 +21,7 @@
         <connection>scm:git:git@github.com:OpenLiberty/liberty-language-server.git</connection>
         <developerConnection>scm:git:git@github.com:OpenLiberty/liberty-language-server.git</developerConnection>
         <url>git@github.com:OpenLiberty/liberty-language-server.git</url>
-        <tag>HEAD</tag>
+        <tag>liberty-langserver-2.1.1</tag>
     </scm>
 
     <distributionManagement>
