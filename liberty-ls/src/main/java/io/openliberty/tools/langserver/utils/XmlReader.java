@@ -54,35 +54,45 @@ public class XmlReader {
         }
 
         XMLInputFactory factory = XMLInputFactory.newInstance();
+        try {
+            factory.setProperty(XMLInputFactory.IS_VALIDATING, Boolean.FALSE);
+            factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
+            factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
+        } catch (Exception e) {
+            LOGGER.warning("Could not set properties on XMLInputFactory.");
+        }
+
         XMLEventReader reader = null;
         try {
-            reader = factory.createXMLEventReader(new FileInputStream(file));
-            while (reader.hasNext()) {
-                XMLEvent event = reader.nextEvent();
-                if (!event.isStartElement()) {
-                    continue;
+            try (FileInputStream fis = new FileInputStream(file)) {
+                reader = factory.createXMLEventReader(fis);
+                while (reader.hasNext()) {
+                    XMLEvent nextEvent = reader.nextEvent();
+                    if (!nextEvent.isStartElement()) {
+                        continue;
+                    }
+                    String elementName = getElementName(nextEvent);
+                    if (elementNames.contains(elementName) && reader.hasNext()) {
+                        XMLEvent elementContent = reader.nextEvent();
+                        if (elementContent.isCharacters()) {
+                            Characters value = elementContent.asCharacters();
+                            returnValues.put(elementName, value.getData());
+                        }
+                    }
                 }
-                String elementName = getElementName(event);
-                if (elementNames.contains(elementName) && reader.hasNext()) {
-                    XMLEvent elementContent = reader.nextEvent();
-                    if (elementContent.isCharacters()) {
-                        Characters value = elementContent.asCharacters();
-                        returnValues.put(elementName, value.getData());
+            } catch (XMLStreamException | FileNotFoundException e) {
+                LOGGER.severe("Error received trying to read XML file: " + file.getName() + 
+                          "\n\tError" + e.getMessage());
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (Exception ignored) {   
                     }
                 }
             } 
-        } catch (FileNotFoundException e) {
-            LOGGER.severe("Unable to access file "+ file.getName());
-        } catch (XMLStreamException e) {
-            LOGGER.severe("Error received trying to read XML file: " + file.getName() + 
-                          "\n\tError" + e.getMessage());
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (Exception ignored) {   
-                }
-            }
+        } catch (Exception e) {
+            LOGGER.severe("Unable to access XML file "+ file.getAbsolutePath());
         }
 
         return returnValues;
