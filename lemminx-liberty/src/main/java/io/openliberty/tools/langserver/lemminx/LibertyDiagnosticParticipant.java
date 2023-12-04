@@ -56,9 +56,6 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     public static final String IMPLICIT_NOT_OPTIONAL_CODE = "implicit_not_optional";
 
     public static final String INCORRECT_FEATURE_CODE = "incorrect_feature";
-
-    private Set<String> includedFeatures;
-    private boolean featureManagerPresent;
     
     @Override
     public void doDiagnostics(DOMDocument domDocument, List<Diagnostic> diagnostics,
@@ -76,8 +73,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     private void validateDom(DOMDocument domDocument, List<Diagnostic> diagnosticsList) throws IOException {
         List<DOMNode> nodes = domDocument.getDocumentElement().getChildren();
         List<Diagnostic> tempDiagnosticsList = new ArrayList<Diagnostic>();
-        includedFeatures = new HashSet<>();
-        featureManagerPresent = false;
+        Set<String> includedFeatures = new HashSet<String>();
+        boolean featureManagerPresent = false;
         LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI());
         if (workspace == null) {
             LOGGER.warning("Could not get workspace, using default cached feature list");
@@ -86,18 +83,18 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         for (DOMNode node : nodes) {
             String nodeName = node.getNodeName();
             if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(nodeName)) {
-                validateFeature(domDocument, diagnosticsList, node);
+                featureManagerPresent = true;
+                validateFeature(domDocument, diagnosticsList, node, includedFeatures);
             } else if (LibertyConstants.INCLUDE_ELEMENT.equals(nodeName)) {
                 validateIncludeLocation(domDocument, diagnosticsList, node);
             } else if (featureGraph.isConfigElement(nodeName)) {    // defaults to false
                 holdConfigElement(domDocument, node, tempDiagnosticsList);
             }
         }
-        validateConfigElements(domDocument, diagnosticsList, tempDiagnosticsList, featureGraph);
+        validateConfigElements(domDocument, diagnosticsList, tempDiagnosticsList, featureGraph, includedFeatures, featureManagerPresent);
     }
 
-    private void validateFeature(DOMDocument domDocument, List<Diagnostic> list, DOMNode featureManager) {
-        featureManagerPresent = true;
+    private void validateFeature(DOMDocument domDocument, List<Diagnostic> list, DOMNode featureManager, Set<String> includedFeatures) {
 
         LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
         String libertyVersion =  runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
@@ -205,7 +202,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      * @param tempDiagnosticsList
      * @param featureGraph
      */
-    private void validateConfigElements(DOMDocument domDocument, List<Diagnostic> diagnosticsList, List<Diagnostic> tempDiagnosticsList, FeatureListGraph featureGraph) {
+    private void validateConfigElements(DOMDocument domDocument, List<Diagnostic> diagnosticsList, List<Diagnostic> tempDiagnosticsList, 
+                                        FeatureListGraph featureGraph, Set<String> includedFeatures, boolean featureManagerPresent) {
         if (featureGraph.isEmpty()) {
             return;
         }
