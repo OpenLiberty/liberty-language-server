@@ -44,6 +44,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
 
     public static final String LIBERTY_LEMMINX_SOURCE = "liberty-lemminx";
 
+    public static final String NOT_XML_OR_DIR = "The specified resource is not an XML file. If it is a directory, it must end with a trailing slash.";
+
     public static final String MISSING_FILE_MESSAGE = "The resource at the specified location could not be found.";
     public static final String MISSING_FILE_CODE = "missing_file";
 
@@ -54,6 +56,11 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     public static final String NOT_OPTIONAL_CODE = "not_optional";
     public static final String IMPLICIT_NOT_OPTIONAL_MESSAGE = "The specified resource cannot be skipped. Check location value or add optional attribute.";
     public static final String IMPLICIT_NOT_OPTIONAL_CODE = "implicit_not_optional";
+
+    public static final String SPECIFIED_DIR_IS_FILE = "Path specified a directory, but resource exists as a file. Please remove the trailing slash.";
+    public static final String SPECIFIED_FILE_IS_DIR = "Path specified a file, but resource exists as a directory. Please add a trailing slash.";
+    public static final String IS_FILE_NOT_DIR_CODE = "is_file_not_dir";
+    public static final String Is_DIR_NOT_FILE_CODE = "is_dir_not_file";
 
     public static final String INCORRECT_FEATURE_CODE = "incorrect_feature";
     
@@ -150,12 +157,14 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         if (locAttribute.startsWith("http") || locAttribute.contains("$")) {
             return;
         }
+        // Liberty uses this to determine if directory. 
+        boolean isLibertyDirectory = locAttribute.endsWith("/") || locAttribute.endsWith(File.separator);
 
         DOMNode locNode = node.getAttributeNode("location");
         Range range = XMLPositionUtility.createRange(locNode.getStart(), locNode.getEnd(), domDocument);
-        if (!locAttribute.endsWith(".xml")) {
-            String message = "The specified resource is not an XML file.";
-            diagnosticsList.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE));
+        if (!locAttribute.endsWith(".xml")
+         && !isLibertyDirectory) {
+            diagnosticsList.add(new Diagnostic(range, NOT_XML_OR_DIR, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE));
             return;
         }
 
@@ -175,8 +184,25 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 }
                 diagnosticsList.add(new Diagnostic(range, MISSING_FILE_MESSAGE, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE, MISSING_FILE_CODE));
             }
+            validateFileOrDirIncludeLocation(configFile, isLibertyDirectory, range, diagnosticsList);
         } catch (IllegalArgumentException e) {
             diagnosticsList.add(new Diagnostic(range, MISSING_FILE_MESSAGE, DiagnosticSeverity.Warning, "liberty-lemminx-exception", MISSING_FILE_CODE));
+        }
+    }
+
+    /**
+     * Checks if specified file or dir is the correct filetype.
+     * Adds diagnostics if it is mismatched.
+     * @param f - <include> location file
+     * @param isLibertyDirectory - whether Liberty considers this specified as a dir (path ends in slash)
+     * @param range - Range to apply diagnostic message
+     * @param diagnosticsList
+     */
+    private void validateFileOrDirIncludeLocation(File f, boolean isLibertyDirectory, Range range, List<Diagnostic> diagnosticsList) {
+        if (f.isFile() && isLibertyDirectory) {
+            diagnosticsList.add(new Diagnostic(range, SPECIFIED_DIR_IS_FILE, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, IS_FILE_NOT_DIR_CODE));
+        } else if (f.isDirectory() && !isLibertyDirectory) {
+            diagnosticsList.add(new Diagnostic(range, SPECIFIED_FILE_IS_DIR, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, Is_DIR_NOT_FILE_CODE));
         }
     }
 

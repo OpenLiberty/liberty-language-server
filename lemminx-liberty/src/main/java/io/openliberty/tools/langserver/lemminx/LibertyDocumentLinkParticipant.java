@@ -27,8 +27,8 @@ import org.eclipse.lemminx.utils.XMLPositionUtility;
 import org.eclipse.lsp4j.DocumentLink;
 import org.eclipse.lsp4j.Range;
 
+import io.openliberty.tools.langserver.lemminx.util.LibertyConstants;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
-
 
 public class LibertyDocumentLinkParticipant implements IDocumentLinkParticipant {
 
@@ -43,7 +43,7 @@ public class LibertyDocumentLinkParticipant implements IDocumentLinkParticipant 
         List<DOMNode> nodes = document.getDocumentElement().getChildren();
 
         // collect all <include> nodes that are children of the document element
-        List<DOMNode> includeDomNodes = nodes.stream().filter(n -> ((n.getNodeName() != null) && n.getNodeName().equals("include")))
+        List<DOMNode> includeDomNodes = nodes.stream().filter(n -> ((n.getNodeName() != null) && n.getNodeName().equals(LibertyConstants.INCLUDE_ELEMENT)))
                 .collect(Collectors.toList());
 
         for (DOMNode includeNode : includeDomNodes) {

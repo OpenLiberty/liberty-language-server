@@ -143,7 +143,7 @@ public class LibertyDiagnosticTest {
     }
 
     @Test
-    public void testDiagnosticsForInclude() throws IOException {
+    public void testDiagnosticsForInclude() throws IOException, BadLocationException {
         // LibertyWorkspace must be initialized
         List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
         initList.add(new WorkspaceFolder(new File("src/test/resources").toURI().toString()));
@@ -158,6 +158,8 @@ public class LibertyDiagnosticTest {
                 "            optional=\"true\" location=\"MULTI LINER\"/>", //
                 "    <include optional=\"false\" location=\"MISSING FILE.xml\"/>", //
                 "    <include location=\"MISSING FILE.xml\"/>", //
+                "    <include location=\"/empty_server.xml/\"/>", //
+                "    <include location=\"/testDir.xml\"/>", //
                 "</server>"
         );
         
@@ -169,11 +171,11 @@ public class LibertyDiagnosticTest {
 
         Diagnostic not_xml = new Diagnostic();
         not_xml.setRange(r(3, 29, 3, 52));
-        not_xml.setMessage("The specified resource is not an XML file.");
+        not_xml.setMessage("The specified resource is not an XML file. If it is a directory, it must end with a trailing slash.");
 
         Diagnostic multi_liner = new Diagnostic();
         multi_liner.setRange(r(5, 28, 5, 50));
-        multi_liner.setMessage("The specified resource is not an XML file.");
+        multi_liner.setMessage("The specified resource is not an XML file. If it is a directory, it must end with a trailing slash.");
 
         Diagnostic not_optional = new Diagnostic();
         not_optional.setRange(r(6, 13, 6, 29));
@@ -195,9 +197,86 @@ public class LibertyDiagnosticTest {
         missing_xml2.setCode("missing_file");
         missing_xml2.setMessage("The resource at the specified location could not be found.");
 
+        Diagnostic dirIsFile = new Diagnostic();
+        dirIsFile.setRange(r(8, 13, 8, 42));
+        dirIsFile.setCode("is_file_not_dir");
+        dirIsFile.setMessage("Path specified a directory, but resource exists as a file. Please remove the trailing slash.");
+
+        Diagnostic fileIsDir = new Diagnostic();
+        fileIsDir.setRange(r(9, 13, 9, 36));
+        fileIsDir.setCode("is_dir_not_file");
+        fileIsDir.setMessage("Path specified a file, but resource exists as a directory. Please add a trailing slash.");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), 
-                not_xml, multi_liner, not_optional, missing_xml, optional_not_defined, missing_xml2);
+                not_xml, multi_liner, not_optional, missing_xml, optional_not_defined, missing_xml2,
+                dirIsFile, fileIsDir);
+
+        // Check code actions for add/remove trailing slashes
+        String fixedFilePath = "location=\"/empty_server.xml\"";
+        TextEdit dirIsFileTextEdit = te(dirIsFile.getRange().getStart().getLine(), dirIsFile.getRange().getStart().getCharacter(),
+                            dirIsFile.getRange().getEnd().getLine(), dirIsFile.getRange().getEnd().getCharacter(), fixedFilePath);
+        CodeAction dirIsFileCodeAction = ca(dirIsFile, dirIsFileTextEdit);
+
+        String fixedDirPath = "location=\"/testDir.xml/\"";
+        TextEdit fileIsDirTextEdit = te(fileIsDir.getRange().getStart().getLine(), fileIsDir.getRange().getStart().getCharacter(),
+                            fileIsDir.getRange().getEnd().getLine(), fileIsDir.getRange().getEnd().getCharacter(), fixedDirPath);
+        CodeAction fileIsDirCodeAction = ca(fileIsDir, fileIsDirTextEdit);
+
+
+        XMLAssert.testCodeActionsFor(serverXML, dirIsFile, dirIsFileCodeAction); 
+
+        XMLAssert.testCodeActionsFor(serverXML, fileIsDir, fileIsDirCodeAction);
+    }
+
+    @Test
+    public void testDiagnosticsForIncludeWindows() throws BadLocationException {
+        if (!File.separator.equals("\\")) { // skip test if not Windows
+            return;
+        }
+        // LibertyWorkspace must be initialized
+        List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
+        initList.add(new WorkspaceFolder(new File("src/test/resources").toURI().toString()));
+        LibertyProjectsManager.getInstance().setWorkspaceFolders(initList);
+
+        String serverXML = String.join(newLine, //
+                "<server description=\"default server\">", //
+                "    <include location=\"\\empty_server.xml\\\"/>", //
+                "    <include location=\"\\testDir.xml\"/>", //
+                "</server>"
+        );
+        
+        // Diagnostic location1 = new Diagnostic();
+        File serverXMLFile = new File("src/test/resources/server.xml");
+        assertFalse(serverXMLFile.exists());
+        // Diagnostic will not be made if found
+        assertTrue(new File("src/test/resources/empty_server.xml").exists());
+
+        Diagnostic dirIsFile = new Diagnostic();
+        dirIsFile.setRange(r(1, 13, 1, 42));
+        dirIsFile.setCode("is_file_not_dir");
+        dirIsFile.setMessage("Path specified a directory, but resource exists as a file. Please remove the trailing slash.");
+
+        Diagnostic fileIsDir = new Diagnostic();
+        fileIsDir.setRange(r(2, 13, 2, 36));
+        fileIsDir.setCode("is_dir_not_file");
+        fileIsDir.setMessage("Path specified a file, but resource exists as a directory. Please add a trailing slash.");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), 
+                dirIsFile, fileIsDir);
+
+        String fixedFilePath = "location=\"\\empty_server.xml\"";
+        TextEdit dirIsFileTextEdit = te(dirIsFile.getRange().getStart().getLine(), dirIsFile.getRange().getStart().getCharacter(),
+                            dirIsFile.getRange().getEnd().getLine(), dirIsFile.getRange().getEnd().getCharacter(), fixedFilePath);
+        CodeAction dirIsFileCodeAction = ca(dirIsFile, dirIsFileTextEdit);
+
+        String fixedDirPath = "location=\"\\testDir.xml\\\"";
+        TextEdit fileIsDirTextEdit = te(fileIsDir.getRange().getStart().getLine(), fileIsDir.getRange().getStart().getCharacter(),
+                            fileIsDir.getRange().getEnd().getLine(), fileIsDir.getRange().getEnd().getCharacter(), fixedDirPath);
+        CodeAction fileIsDirCodeAction = ca(fileIsDir, fileIsDirTextEdit);
+
+        XMLAssert.testCodeActionsFor(serverXML, dirIsFile, dirIsFileCodeAction); 
+
+        XMLAssert.testCodeActionsFor(serverXML, fileIsDir, fileIsDirCodeAction);
     }
 
     @Test

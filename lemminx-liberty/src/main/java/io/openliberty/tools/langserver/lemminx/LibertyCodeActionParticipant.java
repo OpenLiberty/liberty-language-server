@@ -25,8 +25,10 @@ import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 import io.openliberty.tools.langserver.lemminx.codeactions.AddAttribute;
 import io.openliberty.tools.langserver.lemminx.codeactions.AddFeature;
+import io.openliberty.tools.langserver.lemminx.codeactions.AddTrailingSlash;
 import io.openliberty.tools.langserver.lemminx.codeactions.CreateFile;
 import io.openliberty.tools.langserver.lemminx.codeactions.EditAttribute;
+import io.openliberty.tools.langserver.lemminx.codeactions.RemoveTrailingSlash;
 import io.openliberty.tools.langserver.lemminx.codeactions.ReplaceFeature;
 
 public class LibertyCodeActionParticipant implements ICodeActionParticipant {
@@ -57,6 +59,8 @@ public class LibertyCodeActionParticipant implements ICodeActionParticipant {
             codeActionParticipants.put(LibertyDiagnosticParticipant.IMPLICIT_NOT_OPTIONAL_CODE, new AddAttribute());
             codeActionParticipants.put(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE, new ReplaceFeature());
             codeActionParticipants.put(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE, new AddFeature());
+            codeActionParticipants.put(LibertyDiagnosticParticipant.IS_FILE_NOT_DIR_CODE, new RemoveTrailingSlash());
+            codeActionParticipants.put(LibertyDiagnosticParticipant.Is_DIR_NOT_FILE_CODE, new AddTrailingSlash());
         }
     }
 }
