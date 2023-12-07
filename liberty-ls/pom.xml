@@ -71,6 +71,11 @@
             <version>4.2.0</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>io.openliberty.tools</groupId>
+            <artifactId>ci.common</artifactId>
+            <version>1.8.30-SNAPSHOT</version>
+        </dependency>
     </dependencies>
   
     <build>

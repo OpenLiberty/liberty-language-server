@@ -19,6 +19,8 @@ import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
 import org.eclipse.lsp4j.FileEvent;
 import org.eclipse.lsp4j.services.WorkspaceService;
 
+import io.openliberty.tools.langserver.utils.ServerConfigUtil;
+
 public class LibertyWorkspaceService implements WorkspaceService {
 
     private final LibertyLanguageServer libertyLanguageServer;
@@ -39,6 +41,9 @@ public class LibertyWorkspaceService implements WorkspaceService {
             String uri = change.getUri();
             if (uri.endsWith(LibertyConfigFileManager.LIBERTY_PLUGIN_CONFIG_XML)) {
                 LibertyConfigFileManager.processLibertyPluginConfigXml(uri);
+            } else if (uri.endsWith(".xml")) {
+                ServerConfigUtil.requestParseXml(uri);
+                LOGGER.warning("parsed document and found vars: " + ServerConfigUtil.getProperties());
             }
         }
     }
