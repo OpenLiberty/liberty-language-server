@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022, 2023 IBM Corporation and others.
+* Copyright (c) 2022, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -26,6 +26,7 @@ import java.util.ResourceBundle;
 import java.util.logging.Logger;
 
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 
@@ -81,7 +82,7 @@ public class LibertyPropertiesDiagnosticService  {
             
             // Currently the last arg (getIntegerRange) is only used for the Integer messages which use {2}. Otherwise null is passed and is ignored by the other messages.
             String message = MessageFormat.format(messageTemplate, validationResult.getValue(), property, ServerPropertyValues.getIntegerRange(property));
-            lspDiagnostics.add(new Diagnostic(computeRange(validationResult, lineContentInError), message));
+            lspDiagnostics.add(new Diagnostic(computeRange(validationResult, lineContentInError), message, DiagnosticSeverity.Error, "Liberty Config Language Server"));
         }
         return lspDiagnostics;
     }

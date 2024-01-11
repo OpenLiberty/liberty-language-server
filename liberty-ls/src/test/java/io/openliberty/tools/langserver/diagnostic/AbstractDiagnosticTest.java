@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.awaitility.core.ConditionFactory;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
@@ -76,7 +77,8 @@ public class AbstractDiagnosticTest extends AbstractLibertyLanguageServerTest {
         List<String> expectedMessages = new LinkedList<String>(Arrays.asList(messages));
 
         for (Diagnostic diag : diags) {
-            assertFalse(diag.getMessage().isEmpty());
+            assertFalse("Diagnostic message is unexpectedly empty.", diag.getMessage().isEmpty());
+            assertTrue("Diagnostic severity not set to Error as expected.", diag.getSeverity() == DiagnosticSeverity.Error);
             expectedMessages.remove(diag.getMessage());
         }
         assertEquals("Did not find all the expected diagnostic messages. These messages were not found: " + expectedMessages.toString(), 0, expectedMessages.size());
