@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2023 IBM Corporation and others.
+* Copyright (c) 2020, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -42,7 +42,6 @@ public class LibertyWorkspace {
     private boolean isLibertyInstalled;
     private List<Feature> installedFeatureList;
     private String libertyInstallationDir;
-    private boolean isExternalLibertyInstallation;
     private FeatureListGraph featureListGraph;
 
     // devc vars
@@ -62,7 +61,6 @@ public class LibertyWorkspace {
         this.libertyVersion = null;
         this.libertyRuntime = null;
         this.isLibertyInstalled = false;
-        this.isExternalLibertyInstallation = false;
         this.libertyInstallationDir = null;
         this.installedFeatureList = new ArrayList<Feature>();
         this.containerName = null;
@@ -110,7 +108,6 @@ public class LibertyWorkspace {
         this.isLibertyInstalled = isLibertyInstalled;
         if (!isLibertyInstalled) {
             // do not clear out the libertyRuntime or libertyVersion since those could be set for a live container
-            setExternalLibertyInstallation(isLibertyInstalled);
             setLibertyInstallationDir(null);
             // clear the cached feature list when Liberty is no longer installed
             this.installedFeatureList = new ArrayList<Feature>();
@@ -119,14 +116,6 @@ public class LibertyWorkspace {
 
     public boolean isLibertyInstalled() {
         return this.isLibertyInstalled;
-    }
-
-    public void setExternalLibertyInstallation(boolean flag) {
-        this.isExternalLibertyInstallation = flag;
-    }
-
-    public boolean isExternalLibertyInstallation() {
-        return this.isExternalLibertyInstallation;
     }
 
     public void setLibertyInstallationDir(String dir) {
