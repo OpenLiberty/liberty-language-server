@@ -21,7 +21,9 @@ import java.util.logging.Logger;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
+import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
+import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextDocumentItem;
 
 import io.openliberty.tools.langserver.LibertyLanguageServer;
@@ -54,7 +56,13 @@ public class DiagnosticRunner {
         CompletableFuture.runAsync(() -> {
             LibertyTextDocument openedDocument = libertyLanguageServer.getTextDocumentService().getOpenedDocument(uri);
             List<Diagnostic> diagnostics = new ArrayList<>();
+            LOGGER.warning("About to calculate diagnostics");
             Map<String, PropertiesValidationResult> propertiesErrors = libertyPropertiesDiagnosticService.compute(text, openedDocument);
+            if (openedDocument.isServerXml()) {
+                LOGGER.warning("Running server.xml diagnostics");
+                Diagnostic testDiagnostic = new Diagnostic(new Range(new Position(0, 0), new Position(0,1)), "This is our proof of concept diagnostic.");
+                diagnostics.add(testDiagnostic);
+            }
             diagnostics.addAll(libertyPropertiesDiagnosticService.convertToLSPDiagnostics(propertiesErrors));
             libertyLanguageServer.getLanguageClient().publishDiagnostics(new PublishDiagnosticsParams(uri, diagnostics));
         });

@@ -74,7 +74,7 @@
         <dependency>
             <groupId>io.openliberty.tools</groupId>
             <artifactId>ci.common</artifactId>
-            <version>1.8.30-SNAPSHOT</version>
+            <version>1.8.31-SNAPSHOT</version>
         </dependency>
     </dependencies>
   
