@@ -49,7 +49,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     public static final String MISSING_FILE_MESSAGE = "The resource at the specified location could not be found.";
     public static final String MISSING_FILE_CODE = "missing_file";
 
-    public static final String MISSING_CONFIGURED_FEATURE_MESSAGE = "This config element does not relate to a feature configured in the featureManager. Remove this element or add a relevant feature.";
+    public static final String MISSING_CONFIGURED_FEATURE_MESSAGE = "This config element does not relate to a feature configured in the featureManager. If the relevant feature is specified in another server configuration file, this message can be ignored. Otherwise, remove this element or add a relevant feature.";
     public static final String MISSING_CONFIGURED_FEATURE_CODE = "lost_config_element";
 
     public static final String NOT_OPTIONAL_MESSAGE = "The specified resource cannot be skipped. Check location value or set optional to true.";
@@ -217,7 +217,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         String configElementName = configElementNode.getNodeName();
         Range range = XMLPositionUtility
                 .createRange(configElementNode.getStart(), configElementNode.getEnd(), domDocument);
-        Diagnostic tempDiagnostic = new Diagnostic(range, MISSING_CONFIGURED_FEATURE_MESSAGE, null, LIBERTY_LEMMINX_SOURCE, MISSING_CONFIGURED_FEATURE_CODE);
+        Diagnostic tempDiagnostic = new Diagnostic(range, MISSING_CONFIGURED_FEATURE_MESSAGE, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE, MISSING_CONFIGURED_FEATURE_CODE);
         tempDiagnostic.setSource(configElementName);
         tempDiagnosticsList.add(tempDiagnostic);
     }
