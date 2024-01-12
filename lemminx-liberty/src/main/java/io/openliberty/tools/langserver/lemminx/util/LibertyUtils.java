@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2023 IBM Corporation and others.
+* Copyright (c) 2020, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -354,14 +354,8 @@ public class LibertyUtils {
                 libertyWorkspace.setLibertyRuntime(libertyRuntimeInfo.getRuntimeType());
                 libertyWorkspace.setLibertyVersion(libertyRuntimeInfo.getRuntimeVersion());
 
-                // compare paths to see if it is an external installation
+                // if not a container, set the Liberty installation dir
                 if (!devcOn && (libertyRuntimeInfo.getRuntimeLocation() != null)) {
-                    // Need to add the trailing / to avoid matching a path with similar dir (e.g. /some/path/myliberty/wlp starts with /some/path/mylib)
-                    if (!libertyRuntimeInfo.getRuntimeLocation().startsWith(libertyWorkspace.getWorkspaceStringWithTrailingSlash())) {
-                        libertyWorkspace.setExternalLibertyInstallation(true);
-                    } else {
-                        libertyWorkspace.setExternalLibertyInstallation(false);
-                    }
                     libertyWorkspace.setLibertyInstallationDir(libertyRuntimeInfo.getRuntimeLocation());
                 }
 
