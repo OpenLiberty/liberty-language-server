@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2022 IBM Corporation and others.
+* Copyright (c) 2020, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,12 +13,7 @@
 package io.openliberty.tools.langserver.ls;
 
 import java.util.List;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.eclipse.lsp4j.Position;
-import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextDocumentContentChangeEvent;
 import org.eclipse.lsp4j.TextDocumentItem;
 
@@ -28,8 +23,6 @@ import org.eclipse.lsp4j.TextDocumentItem;
  *
  */
 public class LibertyTextDocument extends TextDocumentItem {
-
-    private static final Logger LOGGER = Logger.getLogger(LibertyTextDocument.class.getName());
 
     public LibertyTextDocument(TextDocumentItem document) {
         this(document.getText(), document.getUri());
@@ -59,7 +52,6 @@ public class LibertyTextDocument extends TextDocumentItem {
         TextDocumentContentChangeEvent last = changes.size() > 0 ? changes.get(changes.size() - 1) : null;
         if (last != null) {
             setText(last.getText());
-            LOGGER.info(last.getText());
         }
     }
 
