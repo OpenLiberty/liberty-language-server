@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2023 IBM Corporation and others.
+* Copyright (c) 2020, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -494,7 +494,7 @@ public class FeatureService {
                 String currentFeature = f.getName();            
                 List<String> enables = f.getEnables();
                 List<String> configElements = f.getConfigElements();
-                FeatureListNode currentFeatureNode = featureListGraph.addFeature(currentFeature);
+                FeatureListNode currentFeatureNode = featureListGraph.addFeature(currentFeature, f.getDescription());
                 if (enables != null) {
                     for (String enabledFeature : enables) {
                         FeatureListNode feature = featureListGraph.addFeature(enabledFeature);

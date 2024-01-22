@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2023 IBM Corporation and others.
+* Copyright (c) 2023, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -22,11 +22,13 @@ import java.util.Set;
 public class FeatureListGraph {
     private String runtime = "";
     private Map<String, FeatureListNode> nodes;
-    private Map<String, Set<String>> enabledByCache; // storing in lower case to enable diagnostics with configured features
+    private Map<String, Set<String>> enabledByCache; 
+    private Map<String, Set<String>> enabledByCacheLowerCase; // storing in lower case to enable diagnostics with configured features
     private Map<String, Set<String>> enablesCache;
 
     public FeatureListGraph() {
         nodes = new HashMap<String, FeatureListNode>();
+        enabledByCacheLowerCase = new HashMap<String, Set<String>>();
         enabledByCache = new HashMap<String, Set<String>>();
         enablesCache = new HashMap<String, Set<String>>();
     }
@@ -40,6 +42,19 @@ public class FeatureListGraph {
         return node;
     }
 
+    public FeatureListNode addFeature(String nodeName, String description) {
+        if (nodes.containsKey(nodeName)) {
+            FeatureListNode node = nodes.get(nodeName);
+            if (node.getDescription().isEmpty()) {
+                node.setDescription(description);
+            }
+            return node;
+        }
+        FeatureListNode node = new FeatureListNode(nodeName, description);
+        nodes.put(nodeName, node);
+        return node;
+    }
+    
     public FeatureListNode addConfigElement(String nodeName) {
         if (nodes.containsKey(nodeName)) {
             return nodes.get(nodeName);
@@ -79,9 +94,26 @@ public class FeatureListGraph {
      * @return
      */
     public Set<String> getAllEnabledBy(String elementName) {
+        return getAllEnabledBy(elementName, true);
+    }
+            
+    /**
+     * Returns a superset of 'owning' features that enable a given config element or feature.
+     * The features are returned in lower case if the 'lowerCase' boolean is true. Otherwise,
+     * the features are returned in their original case.
+     * @param elementName
+     * @return
+     */
+    public Set<String> getAllEnabledBy(String elementName, boolean lowerCase) {
+
+        if (lowerCase && enabledByCacheLowerCase.containsKey(elementName)) {
+            return enabledByCacheLowerCase.get(elementName);
+        }
+
         if (enabledByCache.containsKey(elementName)) {
             return enabledByCache.get(elementName);
         }
+        
         if (!nodes.containsKey(elementName)) {
             return null;
         }
@@ -100,16 +132,22 @@ public class FeatureListGraph {
             allEnabledBy.addAll(enablers);
             queue.addAll(enablers);
         }
-        return addToEnabledByCacheInLowerCase(elementName, allEnabledBy);
+        return addToEnabledByCache(elementName, allEnabledBy, lowerCase);
     }
 
-    private Set<String> addToEnabledByCacheInLowerCase(String configElement, Set<String> allEnabledBy) {
+    private Set<String> addToEnabledByCache(String configElement, Set<String> allEnabledBy, boolean lowerCase) {
         Set<String> lowercaseEnabledBy = new HashSet<String>();
+        Set<String> originalcaseEnabledBy = new HashSet<String>();
+        originalcaseEnabledBy.addAll(allEnabledBy);
+
         for (String nextFeature: allEnabledBy) {
             lowercaseEnabledBy.add(nextFeature.toLowerCase());
         }
-        enabledByCache.put(configElement, lowercaseEnabledBy);
-        return lowercaseEnabledBy;
+
+        enabledByCacheLowerCase.put(configElement, lowercaseEnabledBy);
+        enabledByCache.put(configElement, originalcaseEnabledBy);
+
+        return lowerCase ? lowercaseEnabledBy : originalcaseEnabledBy;
     }
 
     /**

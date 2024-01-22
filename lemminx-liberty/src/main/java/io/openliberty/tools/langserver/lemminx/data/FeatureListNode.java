@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2023 IBM Corporation and others.
+* Copyright (c) 2023, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -19,6 +19,7 @@ import java.util.Set;
 // Class to represent a feature OR config element in a feature list xml
 public class FeatureListNode {
     protected String nodeName;
+    protected String description;  // only used for features
     protected Set<String> enabledBy;
     protected Set<String> enables;
 
@@ -28,6 +29,21 @@ public class FeatureListNode {
         this.nodeName = nodeName;
     }
 
+    public FeatureListNode(String nodeName, String description) {
+        enabledBy = new HashSet<String>();
+        enables = new HashSet<String>();
+        this.nodeName = nodeName;
+        this.description = description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDescription() {
+        return this.description == null ? "" : this.description;
+    }
+    
     public void addEnabledBy(String nodeName) {
         enabledBy.add(nodeName);
     }
@@ -42,6 +58,16 @@ public class FeatureListNode {
 
     public Set<String> getEnables() {
         return enables;
+    }
+
+    public Set<String> getEnablesFeatures() {
+        Set<String> enablesFeatures = new HashSet<String>();
+        for (String next: enables) {
+            if (next.contains("-")) {
+                enablesFeatures.add(next);
+            }
+        }
+        return enablesFeatures;
     }
 
     // based on a heuristic that features use major versions and config elements don't use '.'
