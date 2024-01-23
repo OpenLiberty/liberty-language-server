@@ -43,6 +43,7 @@ import jakarta.xml.bind.Unmarshaller;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 
+import io.openliberty.tools.langserver.lemminx.data.ConfigElementNode;
 import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
 import io.openliberty.tools.langserver.lemminx.data.FeatureListNode;
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
@@ -499,14 +500,14 @@ public class FeatureService {
                     for (String enabledFeature : enables) {
                         FeatureListNode feature = featureListGraph.addFeature(enabledFeature);
                         feature.addEnabledBy(currentFeature);
-                        currentFeatureNode.addEnables(enabledFeature);
+                        currentFeatureNode.addEnablesFeature(enabledFeature);
                     }
                 }
                 if (configElements != null) {
                     for (String configElement : configElements) {
-                        FeatureListNode configNode = featureListGraph.addConfigElement(configElement);
+                        ConfigElementNode configNode = featureListGraph.addConfigElement(configElement);
                         configNode.addEnabledBy(currentFeature);
-                        currentFeatureNode.addEnables(configElement);
+                        currentFeatureNode.addEnablesConfigElement(configElement);
                     }
                 }
             }

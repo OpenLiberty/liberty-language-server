@@ -21,62 +21,68 @@ import java.util.Set;
 
 public class FeatureListGraph {
     private String runtime = "";
-    private Map<String, FeatureListNode> nodes;
+    private Map<String, FeatureListNode> featureNodes;
+    private Map<String, ConfigElementNode> configElementNodes;
+    private Map<String, Node> nodes;
     private Map<String, Set<String>> enabledByCache; 
     private Map<String, Set<String>> enabledByCacheLowerCase; // storing in lower case to enable diagnostics with configured features
-    private Map<String, Set<String>> enablesCache;
-
+    
     public FeatureListGraph() {
-        nodes = new HashMap<String, FeatureListNode>();
+        nodes = new HashMap<String, Node>();
+        featureNodes = new HashMap<String, FeatureListNode>();
+        configElementNodes = new HashMap<String, ConfigElementNode>();
         enabledByCacheLowerCase = new HashMap<String, Set<String>>();
         enabledByCache = new HashMap<String, Set<String>>();
-        enablesCache = new HashMap<String, Set<String>>();
     }
 
     public FeatureListNode addFeature(String nodeName) {
-        if (nodes.containsKey(nodeName)) {
-            return nodes.get(nodeName);
+        if (featureNodes.containsKey(nodeName)) {
+            return featureNodes.get(nodeName);
         }
         FeatureListNode node = new FeatureListNode(nodeName);
+        featureNodes.put(nodeName, node);
         nodes.put(nodeName, node);
         return node;
     }
 
     public FeatureListNode addFeature(String nodeName, String description) {
-        if (nodes.containsKey(nodeName)) {
-            FeatureListNode node = nodes.get(nodeName);
+        if (featureNodes.containsKey(nodeName)) {
+            FeatureListNode node = featureNodes.get(nodeName);
             if (node.getDescription().isEmpty()) {
                 node.setDescription(description);
             }
             return node;
         }
         FeatureListNode node = new FeatureListNode(nodeName, description);
+        featureNodes.put(nodeName, node);
         nodes.put(nodeName, node);
         return node;
     }
     
-    public FeatureListNode addConfigElement(String nodeName) {
-        if (nodes.containsKey(nodeName)) {
-            return nodes.get(nodeName);
+    public ConfigElementNode addConfigElement(String nodeName) {
+        if (configElementNodes.containsKey(nodeName)) {
+            return configElementNodes.get(nodeName);
         }
-        FeatureListNode node = new FeatureListNode(nodeName);
+        ConfigElementNode node = new ConfigElementNode(nodeName);
+        configElementNodes.put(nodeName, node);
         nodes.put(nodeName, node);
         return node;
     }
 
-    public FeatureListNode get(String nodeName) {
-        return nodes.get(nodeName);
+    public FeatureListNode getFeatureListNode(String nodeName) {
+        return featureNodes.get(nodeName);
+    }
+
+    public ConfigElementNode getConfigElementNode(String nodeName) {
+        return configElementNodes.get(nodeName);
     }
 
     public boolean isEmpty() {
-        return nodes.isEmpty();
+        return configElementNodes.isEmpty() && featureNodes.isEmpty();
     }
     
-    public boolean isConfigElement(String featureListNode) {
-        if (!nodes.containsKey(featureListNode)) {
-            return false;
-        }
-        return nodes.get(featureListNode).isConfigElement();
+    public boolean isConfigElement(String name) {
+        return configElementNodes.containsKey(name);
     }
     
     public void setRuntime(String runtime) {
@@ -113,12 +119,13 @@ public class FeatureListGraph {
         if (enabledByCache.containsKey(elementName)) {
             return enabledByCache.get(elementName);
         }
-        
+
         if (!nodes.containsKey(elementName)) {
             return null;
         }
+
         // Implements a breadth-first-search on parent nodes
-        Set<String> allEnabledBy = new HashSet<String>(nodes.get(elementName).getEnabledBy());
+        Set<String> allEnabledBy = new HashSet<String>(nodes.get(elementName).getEnabledBy());;
         Deque<String> queue = new ArrayDeque<String>(allEnabledBy);
         Set<String> visited = new HashSet<String>();
         while (!queue.isEmpty()) {
@@ -149,57 +156,5 @@ public class FeatureListGraph {
 
         return lowerCase ? lowercaseEnabledBy : originalcaseEnabledBy;
     }
-
-    /**
-     * Returns the set of supported features or config elements for a given feature.
-     * @param feature
-     * @return
-     */
-    public Set<String> getAllEnables(String feature) {
-        if (enablesCache.containsKey(feature)) {
-            return enablesCache.get(feature);
-        }
-        if (!nodes.containsKey(feature)) {
-            return null;
-        }
-        // Implements a breadth-first-search on child nodes
-        Set<String> allEnables = new HashSet<String>(nodes.get(feature).getEnables());
-        Deque<String> queue = new ArrayDeque<String>(allEnables);
-        Set<String> visited = new HashSet<String>();
-        while (!queue.isEmpty()) {
-            String node = queue.getFirst();
-            queue.removeFirst();
-            if (visited.contains(node)) {
-                continue;
-            }
-            Set<String> enablers = nodes.get(node).getEnables();
-            visited.add(node);
-            allEnables.addAll(enablers);
-            queue.addAll(enablers);
-        }
-        enablesCache.put(feature, allEnables);
-        return allEnables;
-    }
-
-    /** Will be useful for future features **/
-    
-    // public Set<String> getAllConfigElements(String feature) {
-    //     Set<String> configElements = new HashSet<String>();
-    //     for (String node : getAllEnables(feature)) {
-    //         if (isConfigElement(node)) {
-    //             configElements.add(node);
-    //         }
-    //     }
-    //     return configElements;
-    // }
-
-    // public Set<String> getAllEnabledFeatures(String feature) {
-    //     Set<String> enabledFeatures = new HashSet<String>();
-    //     for (String node : getAllEnables(feature)) {
-    //         if (!isConfigElement(node)) {
-    //             enabledFeatures.add(node);
-    //         }
-    //     }
-    //     return enabledFeatures;
-    // }
+   
 }

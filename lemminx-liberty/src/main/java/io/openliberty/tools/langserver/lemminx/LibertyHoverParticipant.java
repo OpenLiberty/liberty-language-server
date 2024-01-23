@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2023 IBM Corporation and others.
+* Copyright (c) 2020, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -25,8 +25,6 @@ import io.openliberty.tools.langserver.lemminx.data.FeatureListNode;
 import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
 import io.openliberty.tools.langserver.lemminx.models.feature.*;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
-import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
-import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import io.openliberty.tools.langserver.lemminx.util.*;
 
@@ -87,18 +85,13 @@ public class LibertyHoverParticipant implements IHoverParticipant {
     }
 
     private Hover getHoverFeatureDescription(String featureName, DOMDocument document) {
-        LibertyWorkspace ws = LibertyProjectsManager.getInstance().getWorkspaceFolder(document.getDocumentURI());    
-        FeatureListGraph featureGraph = null;
-        if (ws == null) {
-            LOGGER.warning("Could not get workspace for: "+document.getDocumentURI() + ". Using cached feature list for hover.");
-            featureGraph = FeatureService.getInstance().getDefaultFeatureList();
-        } else {
-            featureGraph = ws.getFeatureListGraph();
-        }
-
-        FeatureListNode flNode = featureGraph.get(featureName);
+        // Choosing to use the default feature list to get the full enables/enabled by information to display, as quite often the generated
+        // feature list will only be a subset of the default one. If the feature is not found in the default feature list, this code will 
+        // default to the original description only which is available from the downloaded features.json file.
+        FeatureListGraph featureGraph = FeatureService.getInstance().getDefaultFeatureList();
+        FeatureListNode flNode = featureGraph.getFeatureListNode(featureName);
         if (flNode == null) {
-            LOGGER.warning("Could not get full description for feature: "+featureName+"  from cached feature list.");
+            LOGGER.warning("Could not get full description for feature: "+featureName+"  from cached feature list. Using description from features.json file.");
             return getFeatureDescription(featureName, document);
         }
 
@@ -108,7 +101,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
         sb.append(description);
         sb.append(System.lineSeparator());
 
-        // getAllEnabledBy would return all transitive features but typically offers too much
+        // get features that directly enable this feature
         Set<String> featureEnabledBy = flNode.getEnabledBy();
         if (!featureEnabledBy.isEmpty()) {
             sb.append("Enabled by: ");
@@ -124,6 +117,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
             sb.append(System.lineSeparator());
         }
 
+        // get features that this feature directly enables
         Set<String> featureEnables = flNode.getEnablesFeatures();
         if (!featureEnables.isEmpty()) {
             sb.append("Enables: ");

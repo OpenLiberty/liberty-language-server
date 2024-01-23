@@ -16,23 +16,20 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-// Class to represent a feature OR config element in a feature list xml
-public class FeatureListNode {
-    protected String nodeName;
-    protected String description;  // only used for features
-    protected Set<String> enabledBy;
-    protected Set<String> enables;
+// Class to represent a feature in a feature list xml
+public class FeatureListNode extends Node {
+    protected String description;
+    protected Set<String> enablesFeatures;
+    protected Set<String> enablesConfigElements;
 
     public FeatureListNode(String nodeName) {
-        enabledBy = new HashSet<String>();
-        enables = new HashSet<String>();
-        this.nodeName = nodeName;
+        super(nodeName);
+        enablesFeatures = new HashSet<String>();
+        enablesConfigElements = new HashSet<String>();
     }
 
     public FeatureListNode(String nodeName, String description) {
-        enabledBy = new HashSet<String>();
-        enables = new HashSet<String>();
-        this.nodeName = nodeName;
+        this(nodeName);
         this.description = description;
     }
 
@@ -43,35 +40,20 @@ public class FeatureListNode {
     public String getDescription() {
         return this.description == null ? "" : this.description;
     }
-    
-    public void addEnabledBy(String nodeName) {
-        enabledBy.add(nodeName);
+
+    public void addEnablesFeature(String nodeName) {
+        enablesFeatures.add(nodeName);
     }
 
-    public void addEnables(String nodeName) {
-        enables.add(nodeName);
-    }
-
-    public Set<String> getEnabledBy() {
-        return enabledBy;
-    }
-
-    public Set<String> getEnables() {
-        return enables;
+    public void addEnablesConfigElement(String nodeName) {
+        enablesConfigElements.add(nodeName);
     }
 
     public Set<String> getEnablesFeatures() {
-        Set<String> enablesFeatures = new HashSet<String>();
-        for (String next: enables) {
-            if (next.contains("-")) {
-                enablesFeatures.add(next);
-            }
-        }
         return enablesFeatures;
     }
 
-    // based on a heuristic that features use major versions and config elements don't use '.'
-    public boolean isConfigElement() {
-        return this.nodeName.indexOf('.') == -1;
+    public Set<String> getEnablesConfigElements() {
+        return enablesConfigElements;
     }
 }
