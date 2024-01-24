@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2023 IBM Corporation and others.
+* Copyright (c) 2023, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -16,36 +16,44 @@ import java.util.HashSet;
 import java.util.Set;
 
 
-// Class to represent a feature OR config element in a feature list xml
-public class FeatureListNode {
-    protected String nodeName;
-    protected Set<String> enabledBy;
-    protected Set<String> enables;
+// Class to represent a feature in a feature list xml
+public class FeatureListNode extends Node {
+    protected String description;
+    protected Set<String> enablesFeatures;
+    protected Set<String> enablesConfigElements;
 
     public FeatureListNode(String nodeName) {
-        enabledBy = new HashSet<String>();
-        enables = new HashSet<String>();
-        this.nodeName = nodeName;
+        super(nodeName);
+        enablesFeatures = new HashSet<String>();
+        enablesConfigElements = new HashSet<String>();
     }
 
-    public void addEnabledBy(String nodeName) {
-        enabledBy.add(nodeName);
+    public FeatureListNode(String nodeName, String description) {
+        this(nodeName);
+        this.description = description;
     }
 
-    public void addEnables(String nodeName) {
-        enables.add(nodeName);
+    public void setDescription(String description) {
+        this.description = description;
     }
 
-    public Set<String> getEnabledBy() {
-        return enabledBy;
+    public String getDescription() {
+        return this.description == null ? "" : this.description;
     }
 
-    public Set<String> getEnables() {
-        return enables;
+    public void addEnablesFeature(String nodeName) {
+        enablesFeatures.add(nodeName);
     }
 
-    // based on a heuristic that features use major versions and config elements don't use '.'
-    public boolean isConfigElement() {
-        return this.nodeName.indexOf('.') == -1;
+    public void addEnablesConfigElement(String nodeName) {
+        enablesConfigElements.add(nodeName);
+    }
+
+    public Set<String> getEnablesFeatures() {
+        return enablesFeatures;
+    }
+
+    public Set<String> getEnablesConfigElements() {
+        return enablesConfigElements;
     }
 }

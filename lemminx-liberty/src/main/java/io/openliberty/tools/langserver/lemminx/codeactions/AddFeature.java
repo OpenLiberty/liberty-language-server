@@ -32,8 +32,8 @@ import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
+import io.openliberty.tools.langserver.lemminx.data.ConfigElementNode;
 import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
-import io.openliberty.tools.langserver.lemminx.data.FeatureListNode;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
@@ -73,14 +73,15 @@ public class AddFeature implements ICodeActionParticipant {
             featureGraph = ws.getFeatureListGraph();
         }
 
-        FeatureListNode flNode = featureGraph.get(diagnostic.getSource());
-        if (flNode == null) {
+        ConfigElementNode configElement = featureGraph.getConfigElementNode(diagnostic.getSource());
+        if (configElement == null) {
             LOGGER.warning("Could not add quick fix for missing feature for config element due to missing information in the feature list: "+diagnostic.getSource());
             return;
         }
 
-        // getAllEnabledBy would return all transitive features but typically offers too much
-        Set<String> featureCandidates = flNode.getEnabledBy();
+        // This is getting features that directly enable the config element and not all transitive features 
+        // as that would typically be too much to display/offer in a quick fix.
+        Set<String> featureCandidates = configElement.getEnabledBy();
         if (featureCandidates.isEmpty()) {
             return;
         }

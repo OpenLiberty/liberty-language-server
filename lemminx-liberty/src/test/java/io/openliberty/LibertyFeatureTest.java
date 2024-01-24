@@ -48,13 +48,11 @@ public class LibertyFeatureTest {
         // Check if config map gets built
         FeatureListGraph fg = libWorkspace.getFeatureListGraph();
         assertEquals(76, fg.getAllEnabledBy("ssl-1.0").size());
-        assertEquals(1, fg.get("ssl").getEnabledBy().size());
-        assertTrue(fg.get("ssl").getEnabledBy().contains("ssl-1.0"));
+        assertEquals(1, fg.getConfigElementNode("ssl").getEnabledBy().size());
+        assertTrue(fg.getConfigElementNode("ssl").getEnabledBy().contains("ssl-1.0"));
         assertEquals(77, fg.getAllEnabledBy("ssl").size());
         assertEquals(235, fg.getAllEnabledBy("library").size());
         assertTrue(fg.getAllEnabledBy("ltpa").contains("admincenter-1.0"));  // direct enabler
         assertTrue(fg.getAllEnabledBy("ssl").contains("microprofile-5.0"));  // transitive enabler
-        assertTrue(fg.getAllEnables("microProfile-5.0").contains("ssl"));
-        assertTrue(fg.getAllEnables("jakartaee-8.0").contains("classloading"));
     }
 }
