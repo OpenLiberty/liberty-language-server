@@ -79,6 +79,25 @@ public class LibertyDiagnosticTest {
     }
 
     @Test
+    public void testAnotherVersionOfFeatureDuplicateDiagnostic() {
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>jaxrs-2.0</feature>", //
+                "               <feature>jaxrs-2.1</feature>", //
+                "               <feature>jsonp-1.1</feature>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+
+        Diagnostic dup1 = new Diagnostic();
+        dup1.setRange(r(3, 24, 3, 33));
+        dup1.setMessage("ERROR: More than one version of feature jaxrs is included. Only one version of a feature may be specified.");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, dup1);
+    }
+
+    @Test
     public void testInvalidFeatureDiagnostic() throws BadLocationException{
         String serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
