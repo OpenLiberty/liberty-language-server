@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2023 IBM Corporation and others.
+* Copyright (c) 2020, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -37,8 +37,8 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
 
     // Changing this to contain the version in the file name since the file is copied to the local .lemminx cache. 
     // This is how we ensure the latest default server schema gets used in each developer environment. 
-    private static final String XSD_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server-cached-23.0.0.9.xsd";
-    private static final String XSD_CLASSPATH_LOCATION = "/schema/xsd/liberty/server-cached-23.0.0.9.xsd";
+    private static final String XSD_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server-cached-24.0.0.1.xsd";
+    private static final String XSD_CLASSPATH_LOCATION = "/schema/xsd/liberty/server-cached-24.0.0.1.xsd";
 
     /**
      * SERVER_XSD_RESOURCE is the server schema that is located at XSD_CLASSPATH_LOCATION
