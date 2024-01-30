@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2023 IBM Corporation and others.
+* Copyright (c) 2020, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -109,6 +109,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
 
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
 
+        Set<String> featuresWithoutVersions = new HashSet<String>();
+
         // Search for duplicate features
         // or features that do not exist
         List<DOMNode> features = featureManager.getChildren();
@@ -126,14 +128,22 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                     list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
                 } else {
                     String featureNameLower = featureName.toLowerCase();
+                    String featureNameNoVersionLower = featureNameLower.substring(0,featureNameLower.lastIndexOf("-"));
+                    // if this exact feature already exists, or another version of this feature already exists, then show a diagnostic
                     if (includedFeatures.contains(featureNameLower)) {
                         Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
                                 featureTextNode.getEnd(), domDocument);
                         String message = "ERROR: " + featureName + " is already included.";
                         list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
-                    } else {
-                        includedFeatures.add(featureNameLower);
+                    } else if (featuresWithoutVersions.contains(featureNameNoVersionLower)) {
+                        Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
+                                featureTextNode.getEnd(), domDocument);
+                        String featureNameNoVersion = featureName.substring(0,featureName.lastIndexOf("-"));
+                        String message = "ERROR: More than one version of feature " + featureNameNoVersion + " is included. Only one version of a feature may be specified.";
+                        list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
                     }
+                    includedFeatures.add(featureNameLower);
+                    featuresWithoutVersions.add(featureNameNoVersionLower);
                 }
             }
         }
