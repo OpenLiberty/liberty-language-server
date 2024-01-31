@@ -30,7 +30,7 @@ public class LibertyCompletionTest {
                                 "<webApplication location=\"\"></webApplication>");
                 CompletionItem httpEndpointCompletion = c("httpEndpoint", "<httpEndpoint></httpEndpoint>");
 
-                final int TOTAL_ITEMS = 170; // total number of available completion items
+                final int TOTAL_ITEMS = 171; // total number of available completion items
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, applicationManagerCompletion,
                                 webApplicationCompletion, httpEndpointCompletion);
@@ -76,7 +76,7 @@ public class LibertyCompletionTest {
                 CompletionItem microProfileCompletion = c("microProfile-2.2", "microProfile-2.2");
 
                 // would be 262 if mpConfig-1.4 was not already specified
-                final int TOTAL_ITEMS = 261; // total number of available completion items
+                final int TOTAL_ITEMS = 265; // total number of available completion items
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, jaxrsCompletion, websocket,
                                 microProfileCompletion);
