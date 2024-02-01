@@ -1,0 +1,4 @@
+<server>
+    <variable name="abc" value="def"/>
+    <include location="${abc}"/>
+</server>
