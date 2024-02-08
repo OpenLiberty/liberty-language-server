@@ -26,8 +26,8 @@ import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 import io.openliberty.tools.langserver.utils.ServerConfigUtil;
 
 public class ExpansionVariableInstance {
-    // regex for "$word" or "${...}" respectively
-    private Pattern pattern = Pattern.compile("\\$([\\w]+)|\\$\\{([^}]+)\\}");
+    // regex for "${...}"
+    private Pattern pattern = Pattern.compile("\\$\\{([^}]+)\\}");
     private final Logger LOGGER = Logger.getLogger(ExpansionVariableInstance.class.getName());
     private Properties documentProperties;
     private String entryLine;
@@ -41,17 +41,8 @@ public class ExpansionVariableInstance {
     public String captureProperty(String input, int charOffset) {
         Matcher matcher = pattern.matcher(input);
         while (matcher.find()) {
-            int startIndex = matcher.start();
-            int endIndex = matcher.end();
-            if (charOffset >= startIndex && charOffset <= endIndex) {
-                // return match for "$word"
-                if (matcher.group(1) != null) {
-                    return matcher.group(1);
-                }
-                // return match for "${...}"
-                else if (matcher.group(2) != null) {
-                    return matcher.group(2);
-                }
+            if (charOffset >= matcher.start() && charOffset <= matcher.end()) {
+                return matcher.group(1);
             }
         }
         return "";
