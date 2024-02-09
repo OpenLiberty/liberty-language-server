@@ -19,7 +19,6 @@ public class ServerConfigUtil {
     private static CommonLogger log = CommonLogger.getInstance(LOGGER);
     private static ServerConfigDocument configDocument = new ServerConfigDocument(log);
 
-    // need method to request ci.common to parse vars from an xml file
     public static void requestParseXml(String uri) {
         Document doc;
         try {
@@ -32,7 +31,6 @@ public class ServerConfigUtil {
         }
     }
 
-    // need method to request Properties from ci.common
     public static Properties getProperties() {
         return configDocument.getProperties();
     }

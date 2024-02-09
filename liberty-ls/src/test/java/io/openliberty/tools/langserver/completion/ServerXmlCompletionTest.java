@@ -1,12 +1,3 @@
-/*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
-*
-* This program and the accompanying materials are made available under the
-* terms of the Eclipse Public License v. 2.0 which is available at
-* http://www.eclipse.org/legal/epl-2.0.
-*
-* SPDX-License-Identifier: EPL-2.0
-*******************************************************************************/
 package io.openliberty.tools.langserver.completion;
 
 import static org.junit.Assert.assertEquals;
@@ -30,49 +21,65 @@ import io.openliberty.tools.langserver.LibertyLanguageServer;
 
 public class ServerXmlCompletionTest extends AbstractCompletionTest {
 
+    static CompletableFuture<Either<List<CompletionItem>, CompletionList>> completions;
+    static List<CompletionItem> completionItems;
+
     @Test
-    public void expansionVariableCompletionRecognitionFalse() throws Exception {
-        CompletableFuture<Either<List<CompletionItem>, CompletionList>> completions = getCompletion("    <include location=\"$", new Position(0, 24));
-        List<CompletionItem> completionItems = completions.get().getLeft();
+    public void completionRecognition() throws Exception {
+        // failed trigger -- needs {
+        completions = getCompletion("    <include location=\"$", new Position(0, 24));
+        completionItems = completions.get().getLeft();
         assertEquals(0, completionItems.size());
-    }
 
-    @Test
-    public void expansionVariableCompletionEarlyPosition() throws Exception {
-        CompletableFuture<Either<List<CompletionItem>, CompletionList>> completions = getCompletion("    <include location=\"${", new Position(0, 0));
-        List<CompletionItem> completionItems = completions.get().getLeft();
+        // failed trigger -- cursor position still at $
+        completions = getCompletion("    <include location=\"${", new Position(0, 24));
+        completionItems = completions.get().getLeft();
         assertEquals(0, completionItems.size());
-    }
 
-    @Test
-    public void expansionVariableCompletionCorrectPosition() throws Exception {
-        CompletableFuture<Either<List<CompletionItem>, CompletionList>> completions = getCompletion("    <include location=\"${", new Position(0, 25));
-        List<CompletionItem> completionItems = completions.get().getLeft();
-        assertEquals(2, completionItems.size());
-    }
-
-    // This behavior needs to be verified
-    @Test
-    public void expansionVariableCompletionMiddlePosition() throws Exception {
-        CompletableFuture<Either<List<CompletionItem>, CompletionList>> completions = getCompletion("    <include location=\"${abc", new Position(0, 25));
-        List<CompletionItem> completionItems = completions.get().getLeft();
+        // trigger
+        completions = getCompletion("    <include location=\"${", new Position(0, 25));
+        completionItems = completions.get().getLeft();
         assertEquals(2, completionItems.size());
     }
 
     @Test
-    public void expansionVariableCompletionFiltration() throws Exception {
-        CompletableFuture<Either<List<CompletionItem>, CompletionList>> completions = getCompletion("    <include location=\"${a", new Position(0, 26));
-        List<CompletionItem> completionItems = completions.get().getLeft();
+    public void completionAmongstText() throws Exception {
+        // the cursor is at ${, therefore all completion items are available without filtration
+        completions = getCompletion("    <include location=\"${abc", new Position(0, 25));
+        completionItems = completions.get().getLeft();
+        assertEquals(2, completionItems.size());
+    }
+
+    @Test
+    public void filtration() throws Exception {
+        completions = getCompletion("    <include location=\"${a", new Position(0, 26));
+        completionItems= completions.get().getLeft();
         assertEquals(1, completionItems.size());
         assertEquals("abc", completionItems.get(0).getLabel());
+        assertEquals("abc}", completionItems.get(0).getInsertText());
+
+        completions = getCompletion("    <include location=\"${http.", new Position(0, 30));
+        completionItems = completions.get().getLeft();
+        assertEquals(1, completionItems.size());
+        assertEquals("http.port", completionItems.get(0).getLabel());
+        assertEquals("http.port}", completionItems.get(0).getInsertText());
     }
 
     @Test
-    public void expansionVariableCompletionFiltration2() throws Exception {
-        CompletableFuture<Either<List<CompletionItem>, CompletionList>> completions = getCompletion("    <include location=\"${http.", new Position(0, 30));
-        List<CompletionItem> completionItems = completions.get().getLeft();
+    public void multipleBrackets() throws Exception {
+        completions = getCompletion("${ab${http}", new Position(0, 4));
+        completionItems= completions.get().getLeft();
+        assertEquals(1, completionItems.size());
+        assertEquals("abc", completionItems.get(0).getLabel());
+
+        completions = getCompletion("${ab${http}", new Position(0, 10));
+        completionItems= completions.get().getLeft();
         assertEquals(1, completionItems.size());
         assertEquals("http.port", completionItems.get(0).getLabel());
+
+        completions = getCompletion("${ab${http}", new Position(0, 11));
+        completionItems= completions.get().getLeft();
+        assertEquals(0, completionItems.size());
     }
 
     protected CompletableFuture<Either<List<CompletionItem>, CompletionList>> getCompletion(String enteredText, Position position) throws URISyntaxException, InterruptedException, ExecutionException, IOException {

@@ -65,8 +65,8 @@ public class ExpansionVariableInstance {
     }
 
     public CompletableFuture<List<CompletionItem>> getCompletions(Position position) {
-        int startIndex = this.entryLine.lastIndexOf("${");
         int cursorIndex = position.getCharacter();
+        int startIndex = this.entryLine.substring(0, cursorIndex).lastIndexOf("${");
         if (startIndex == -1 || cursorIndex < startIndex + 2 || documentProperties.isEmpty()) {
             return CompletableFuture.completedFuture(Collections.emptyList());
         }
@@ -83,6 +83,9 @@ public class ExpansionVariableInstance {
         };
 
         List<CompletionItem> completionList = documentProperties.keySet().stream().map(s -> s.toString()).filter(filter).map(s -> new CompletionItem(s)).collect(Collectors.toList());
+        for (CompletionItem item : completionList) {
+            item.setInsertText(item.getLabel() + "}");
+        }
         return CompletableFuture.completedFuture(completionList);
     }
 }
