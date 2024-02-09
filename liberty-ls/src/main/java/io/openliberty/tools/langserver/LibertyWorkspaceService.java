@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2023 IBM Corporation and others.
+* Copyright (c) 2020, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -18,8 +18,6 @@ import org.eclipse.lsp4j.DidChangeConfigurationParams;
 import org.eclipse.lsp4j.DidChangeWatchedFilesParams;
 import org.eclipse.lsp4j.FileEvent;
 import org.eclipse.lsp4j.services.WorkspaceService;
-
-import io.openliberty.tools.langserver.utils.ServerConfigUtil;
 
 public class LibertyWorkspaceService implements WorkspaceService {
 
@@ -41,9 +39,6 @@ public class LibertyWorkspaceService implements WorkspaceService {
             String uri = change.getUri();
             if (uri.endsWith(LibertyConfigFileManager.LIBERTY_PLUGIN_CONFIG_XML)) {
                 LibertyConfigFileManager.processLibertyPluginConfigXml(uri);
-            } else if (uri.endsWith(".xml")) {
-                ServerConfigUtil.requestParseXml(uri);
-                LOGGER.warning("parsed document and found vars: " + ServerConfigUtil.getProperties());
             }
         }
     }

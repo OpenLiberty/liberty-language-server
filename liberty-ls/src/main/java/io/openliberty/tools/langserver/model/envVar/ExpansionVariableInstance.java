@@ -35,8 +35,7 @@ public class ExpansionVariableInstance {
     private String entryLine;
 
     public ExpansionVariableInstance(String entryLine, LibertyTextDocument textDocumentItem) {
-        ServerConfigUtil.requestParseXml(textDocumentItem.getUri());
-        this.documentProperties = ServerConfigUtil.getProperties();
+        this.documentProperties = ServerConfigUtil.parseDocumentAndGetProperties(textDocumentItem.getUri());
         this.entryLine = entryLine;
     }
 
@@ -61,7 +60,8 @@ public class ExpansionVariableInstance {
             return CompletableFuture.completedFuture(new Hover(new MarkupContent("plaintext", "")));
         }
         LOGGER.info("Hover has detected a variable: " + variableName);
-        return CompletableFuture.completedFuture(new Hover(new MarkupContent("plaintext", documentProperties.getProperty(variableName))));
+        String hoverValue = documentProperties.getProperty(variableName);
+        return CompletableFuture.completedFuture(new Hover(new MarkupContent("plaintext", hoverValue)));
     }
 
     public CompletableFuture<List<CompletionItem>> getCompletions(Position position) {
@@ -71,9 +71,8 @@ public class ExpansionVariableInstance {
             return CompletableFuture.completedFuture(Collections.emptyList());
         }
 
-        LOGGER.info("The list of pre-filtered completable items are: " + documentProperties.keySet().toString());
+        // LOGGER.info("The list of pre-filtered completable items are: " + documentProperties.keySet().toString());
         String query = this.entryLine.substring(startIndex + 2, cursorIndex);
-
         Predicate<String> filter = s -> {
             for (int i = s.length() - query.length(); i >= 0; --i) {
                 if (s.regionMatches(true, i, query, 0, query.length()))
@@ -82,7 +81,9 @@ public class ExpansionVariableInstance {
             return false;
         };
 
-        List<CompletionItem> completionList = documentProperties.keySet().stream().map(s -> s.toString()).filter(filter).map(s -> new CompletionItem(s)).collect(Collectors.toList());
+        List<CompletionItem> completionList = documentProperties.keySet().stream()
+                .map(s -> s.toString()).filter(filter)
+                .map(s -> new CompletionItem(s)).collect(Collectors.toList());
         for (CompletionItem item : completionList) {
             item.setInsertText(item.getLabel() + "}");
         }

@@ -1,6 +1,6 @@
 
 /*******************************************************************************
-* Copyright (c) 2020, 2022 IBM Corporation and others.
+* Copyright (c) 2020, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -19,6 +19,7 @@ import java.util.concurrent.CompletableFuture;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Position;
 
+import io.openliberty.tools.langserver.LibertyConfigFileManager;
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 import io.openliberty.tools.langserver.model.envVar.ExpansionVariableInstance;
 import io.openliberty.tools.langserver.model.propertiesfile.PropertiesEntryInstance;
@@ -33,7 +34,7 @@ public class LibertyPropertiesCompletionProvider {
 
     public CompletableFuture<List<CompletionItem>> getCompletions(Position position) {
         String line = new ParserFileHelperUtil().getLine(textDocumentItem, position);
-        if (textDocumentItem.isServerXml()) {
+        if (LibertyConfigFileManager.isServerXml(textDocumentItem)) {
             return new ExpansionVariableInstance(line, textDocumentItem).getCompletions(position);
         }
         return new PropertiesEntryInstance(line, textDocumentItem).getCompletions(position);
