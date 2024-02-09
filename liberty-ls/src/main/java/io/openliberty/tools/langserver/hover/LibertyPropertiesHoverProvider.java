@@ -32,13 +32,14 @@ public class LibertyPropertiesHoverProvider {
 
     public CompletableFuture<Hover> getHover(Position position) {
         String entryLine = new ParserFileHelperUtil().getLine(textDocumentItem, position);
-        if (textDocumentItem.isServerXml()) {
-            return new ExpansionVariableInstance(entryLine, textDocumentItem).getHover(position);
-        }
         if (!LibertyConfigFileManager.isConfigFile(textDocumentItem)) {
             // return empty Hover if not a server config file
             return CompletableFuture.completedFuture(new Hover(new MarkupContent("plaintext", "")));
         }
+        if (LibertyConfigFileManager.isServerXml(textDocumentItem)) {
+            return new ExpansionVariableInstance(entryLine, textDocumentItem).getHover(position);
+        }
+
         return new PropertiesEntryInstance(entryLine, textDocumentItem).getHover(position);
     }
 }

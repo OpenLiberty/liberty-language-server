@@ -139,13 +139,18 @@ public class LibertyConfigFileManager {
                 customBootstrapFiles.contains(filePath);
     }
 
+    // TODO: similar treatment to server.env and bootstrap.properties. Improve during liberty-plugin-config.xml enhancement
+    public static boolean isServerXml(LibertyTextDocument textDocument) {
+        return textDocument.getUri().endsWith("server.xml");
+    }
+
     /**
-     * Returns true if valid server.env or bootstrap.properties file defined by defaults or custom settings
+     * Returns true if valid server.env, bootstrap.properties, or server.xml file defined by defaults or custom settings
      * @param tdi
      * @return
      */
     public static boolean isConfigFile(LibertyTextDocument tdi) {
-        return isServerEnvFile(tdi) || isBootstrapPropertiesFile(tdi);
+        return isServerEnvFile(tdi) || isBootstrapPropertiesFile(tdi) || isServerXml(tdi);
     }
 
     /**

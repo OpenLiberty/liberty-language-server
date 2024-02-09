@@ -62,10 +62,4 @@ public class LibertyTextDocument extends TextDocumentItem {
             LOGGER.info(last.getText());
         }
     }
-
-    // TODO: improve this -- likely expand to isConfigFile
-    public boolean isServerXml() {
-        return this.getUri().endsWith("server.xml");
-    }
-
 }
