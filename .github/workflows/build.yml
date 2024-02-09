@@ -25,7 +25,7 @@ jobs:
           repository: OpenLiberty/ci.common
           path: ci.common
       - name: Build ci.common
-        run: mvn clean install
+        run: ./mvnw clean install -f ci.common -DskipTests
       - name: Build LCLS
         working-directory: ./liberty-ls
         run: ./mvnw clean package -ntp -DskipTests
