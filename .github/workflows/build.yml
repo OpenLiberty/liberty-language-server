@@ -4,7 +4,7 @@ on:
   push:
     branches: '**'
   pull_request:
-    branches: [main]
+    branches: [main, 2q2024]
 
 jobs:
   liberty-config-language-server:
