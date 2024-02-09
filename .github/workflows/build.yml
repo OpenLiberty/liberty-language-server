@@ -19,6 +19,13 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 17
+      - name: Checkout ci.common
+        uses: actions/checkout@v3
+        with:
+          repository: OpenLiberty/ci.common
+          path: ci.common
+      - name: Build ci.common
+        run: mvn clean install
       - name: Build LCLS
         working-directory: ./liberty-ls
         run: ./mvnw clean package -ntp -DskipTests
