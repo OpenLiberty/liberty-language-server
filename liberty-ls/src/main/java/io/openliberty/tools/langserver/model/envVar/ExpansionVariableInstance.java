@@ -88,7 +88,7 @@ public class ExpansionVariableInstance {
         String entryRemainder = this.entryLine.substring(cursorIndex);
         int open = entryRemainder.indexOf("${");
         int close = entryRemainder.indexOf("}");
-        if (close == -1 || open != -1) {
+        if (close == -1 || (close > open && open != -1)) {
             for (CompletionItem item : completionList) {
                 item.setInsertText(item.getLabel() + "}");
             }

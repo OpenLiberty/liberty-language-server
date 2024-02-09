@@ -1,6 +1,7 @@
 package io.openliberty.tools.langserver.completion;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 import java.io.File;
@@ -77,7 +78,7 @@ public class ServerXmlCompletionTest extends AbstractCompletionTest {
         completionItems= completions.get().getLeft();
         assertEquals(1, completionItems.size());
         assertEquals("http.port", completionItems.get(0).getLabel());
-        assertEquals(null, completionItems.get(0).getInsertText());
+        assertNull(completionItems.get(0).getInsertText());
 
         completions = getCompletion("${ab${http}", new Position(0, 11));
         completionItems= completions.get().getLeft();
@@ -88,6 +89,13 @@ public class ServerXmlCompletionTest extends AbstractCompletionTest {
         assertEquals(2, completionItems.size());
         for (CompletionItem item : completionItems) {
             assertTrue(item.getInsertText().contains("}"));;
+        }
+
+        completions = getCompletion("${}${ab${http}", new Position(0, 2));
+        completionItems= completions.get().getLeft();
+        assertEquals(2, completionItems.size());
+        for (CompletionItem item : completionItems) {
+            assertNull(item.getInsertText());
         }
     }
 
