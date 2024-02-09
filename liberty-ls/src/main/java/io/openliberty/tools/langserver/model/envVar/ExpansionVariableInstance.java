@@ -74,7 +74,6 @@ public class ExpansionVariableInstance {
         LOGGER.info("The list of pre-filtered completable items are: " + documentProperties.keySet().toString());
         String query = this.entryLine.substring(startIndex + 2, cursorIndex);
 
-        // predicate loaned from Messages.java
         Predicate<String> filter = s -> {
             for (int i = s.length() - query.length(); i >= 0; --i) {
                 if (s.regionMatches(true, i, query, 0, query.length()))

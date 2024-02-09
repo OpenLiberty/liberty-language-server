@@ -27,7 +27,6 @@ public class LibertyPropertiesHoverProvider {
     private LibertyTextDocument textDocumentItem;
 
     public LibertyPropertiesHoverProvider(LibertyTextDocument textDocumentItem) {
-        // LOGGER.warning("The hover provider has been initialized");
         this.textDocumentItem = textDocumentItem;
     }
 
