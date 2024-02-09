@@ -84,8 +84,14 @@ public class ExpansionVariableInstance {
         List<CompletionItem> completionList = documentProperties.keySet().stream()
                 .map(s -> s.toString()).filter(filter)
                 .map(s -> new CompletionItem(s)).collect(Collectors.toList());
-        for (CompletionItem item : completionList) {
-            item.setInsertText(item.getLabel() + "}");
+
+        String entryRemainder = this.entryLine.substring(cursorIndex);
+        int open = entryRemainder.indexOf("${");
+        int close = entryRemainder.indexOf("}");
+        if (close == -1 || open != -1) {
+            for (CompletionItem item : completionList) {
+                item.setInsertText(item.getLabel() + "}");
+            }
         }
         return CompletableFuture.completedFuture(completionList);
     }

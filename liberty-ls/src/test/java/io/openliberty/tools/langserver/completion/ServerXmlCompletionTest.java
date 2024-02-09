@@ -71,15 +71,24 @@ public class ServerXmlCompletionTest extends AbstractCompletionTest {
         completionItems= completions.get().getLeft();
         assertEquals(1, completionItems.size());
         assertEquals("abc", completionItems.get(0).getLabel());
+        assertEquals("abc}", completionItems.get(0).getInsertText());
 
         completions = getCompletion("${ab${http}", new Position(0, 10));
         completionItems= completions.get().getLeft();
         assertEquals(1, completionItems.size());
         assertEquals("http.port", completionItems.get(0).getLabel());
+        assertEquals(null, completionItems.get(0).getInsertText());
 
         completions = getCompletion("${ab${http}", new Position(0, 11));
         completionItems= completions.get().getLeft();
         assertEquals(0, completionItems.size());
+
+        completions = getCompletion("${${ab${http}", new Position(0, 2));
+        completionItems= completions.get().getLeft();
+        assertEquals(2, completionItems.size());
+        for (CompletionItem item : completionItems) {
+            assertTrue(item.getInsertText().contains("}"));;
+        }
     }
 
     protected CompletableFuture<Either<List<CompletionItem>, CompletionList>> getCompletion(String enteredText, Position position) throws URISyntaxException, InterruptedException, ExecutionException, IOException {
