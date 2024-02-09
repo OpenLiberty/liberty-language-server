@@ -26,16 +26,30 @@ public class ServerXmlHoverTest extends AbstractHoverTest {
 
     @Test
     public void testHoverEmpty() throws Exception {
-        String propertyEntry = "    <include location=\"${abc}\"/>";
-        CompletableFuture<Hover> hover = getHover(propertyEntry, 0);
+        String intputLine = "    <include location=\"${abc}\"/>";
+        CompletableFuture<Hover> hover = getHover(intputLine, 0);
         assertEquals("", hover.get().getContents().getRight().getValue());
     }
 
     @Test
     public void testHoverValue() throws Exception {
-        String propertyEntry = "    <include location=\"${abc}\"/>";
-        CompletableFuture<Hover> hover = getHover(propertyEntry, 27);
+        String inputLine = "    <include location=\"${abc}\"/>";
+        CompletableFuture<Hover> hover = getHover(inputLine, 27);
         assertEquals("def", hover.get().getContents().getRight().getValue());
+    }
+
+    @Test
+    public void testHoverEmpty2() throws Exception {
+        String inputLine = "    <httpEndpoint httpPort=\"${http.port}\" httpsPort=\"9443\" id=\"defaultHttpEndpoint\"/>";
+        CompletableFuture<Hover> hover = getHover(inputLine, 42);
+        assertEquals("", hover.get().getContents().getRight().getValue());
+    }
+
+    @Test
+    public void testHoverValue2() throws Exception {
+        String inputLine = "    <httpEndpoint httpPort=\"${http.port}\" httpsPort=\"9443\" id=\"defaultHttpEndpoint\"/>";
+        CompletableFuture<Hover> hover = getHover(inputLine, 33);
+        assertEquals("9080", hover.get().getContents().getRight().getValue());
     }
 
     private CompletableFuture<Hover> getHover(String propertyEntry, int position) throws URISyntaxException, InterruptedException, ExecutionException {

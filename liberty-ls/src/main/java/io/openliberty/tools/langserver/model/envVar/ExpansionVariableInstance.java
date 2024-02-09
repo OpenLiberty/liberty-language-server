@@ -13,9 +13,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Properties;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Hover;
@@ -26,10 +28,10 @@ import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 import io.openliberty.tools.langserver.utils.ServerConfigUtil;
 
 public class ExpansionVariableInstance {
-    // regex for "${...}"
-    private Pattern pattern = Pattern.compile("\\$\\{([^}]+)\\}");
     private final Logger LOGGER = Logger.getLogger(ExpansionVariableInstance.class.getName());
     private Properties documentProperties;
+
+    private Pattern pattern = Pattern.compile("\\$\\{([^}]+)\\}");
     private String entryLine;
 
     public ExpansionVariableInstance(String entryLine, LibertyTextDocument textDocumentItem) {
@@ -38,8 +40,13 @@ public class ExpansionVariableInstance {
         this.entryLine = entryLine;
     }
 
-    public String captureProperty(String input, int charOffset) {
-        Matcher matcher = pattern.matcher(input);
+    /**
+     * @param entryLine
+     * @param charOffset
+     * @return Returns the string of text wrapped in ${...} if the offset is enclosed. Returns a blank string otherwise.
+     */
+    public String captureVariableName(String entryLine, int charOffset) {
+        Matcher matcher = pattern.matcher(entryLine);
         while (matcher.find()) {
             if (charOffset >= matcher.start() && charOffset <= matcher.end()) {
                 return matcher.group(1);
@@ -49,32 +56,34 @@ public class ExpansionVariableInstance {
     }
 
     public CompletableFuture<Hover> getHover(Position position) {
-        String propertyString = captureProperty(this.entryLine, position.getCharacter());
-        LOGGER.warning("The captured word is: " + propertyString);
-        if (documentProperties.containsKey(propertyString)) {
-            return CompletableFuture.completedFuture(new Hover(new MarkupContent("plaintext", documentProperties.getProperty(propertyString))));
+        String variableName = captureVariableName(this.entryLine, position.getCharacter());
+        if (variableName.isBlank() || !documentProperties.containsKey(variableName)) {
+            return CompletableFuture.completedFuture(new Hover(new MarkupContent("plaintext", "")));
         }
-        return CompletableFuture.completedFuture(new Hover(new MarkupContent("plaintext", "")));
+        LOGGER.info("Hover has detected a variable: " + variableName);
+        return CompletableFuture.completedFuture(new Hover(new MarkupContent("plaintext", documentProperties.getProperty(variableName))));
     }
 
     public CompletableFuture<List<CompletionItem>> getCompletions(Position position) {
-        // return list of variables
-        LOGGER.warning("Completions is revealing: " + documentProperties.keySet().toString());
-        return CompletableFuture.completedFuture(Collections.emptyList());
-    }
+        int startIndex = this.entryLine.lastIndexOf("${");
+        int cursorIndex = position.getCharacter();
+        if (startIndex == -1 || cursorIndex < startIndex + 2 || documentProperties.isEmpty()) {
+            return CompletableFuture.completedFuture(Collections.emptyList());
+        }
 
-    /**
-     * Loaned from Messages.java
-     */
-    public List<String> getMatchingKeys(String query, LibertyTextDocument textDocument) {
-        // remove completion results that don't contain the query string (case-insensitive search)
-        // Predicate<String> filter = s -> {
-        //     for (int i = s.length() - query.length(); i >= 0; --i) {
-        //         if (s.regionMatches(true, i, query, 0, query.length()))
-        //             return false;
-        //     }
-        //     return true;
-        // };
-        return Collections.emptyList();
+        LOGGER.info("The list of pre-filtered completable items are: " + documentProperties.keySet().toString());
+        String query = this.entryLine.substring(startIndex + 2, cursorIndex);
+
+        // predicate loaned from Messages.java
+        Predicate<String> filter = s -> {
+            for (int i = s.length() - query.length(); i >= 0; --i) {
+                if (s.regionMatches(true, i, query, 0, query.length()))
+                    return true;
+            }
+            return false;
+        };
+
+        List<CompletionItem> completionList = documentProperties.keySet().stream().map(s -> s.toString()).filter(filter).map(s -> new CompletionItem(s)).collect(Collectors.toList());
+        return CompletableFuture.completedFuture(completionList);
     }
 }

@@ -1,4 +1,6 @@
 <server>
     <variable name="abc" value="def"/>
+    <variable name="http.port" value="9080"/>
     <include location="${abc}"/>
+    <httpEndpoint httpPort="${http.port}" httpsPort="9443" id="defaultHttpEndpoint"/>
 </server>
