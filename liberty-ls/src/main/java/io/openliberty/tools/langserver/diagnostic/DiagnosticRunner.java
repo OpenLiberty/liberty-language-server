@@ -26,6 +26,7 @@ import org.eclipse.lsp4j.PublishDiagnosticsParams;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextDocumentItem;
 
+import io.openliberty.tools.langserver.LibertyConfigFileManager;
 import io.openliberty.tools.langserver.LibertyLanguageServer;
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 import io.openliberty.tools.langserver.utils.PropertiesValidationResult;
@@ -56,10 +57,8 @@ public class DiagnosticRunner {
         CompletableFuture.runAsync(() -> {
             LibertyTextDocument openedDocument = libertyLanguageServer.getTextDocumentService().getOpenedDocument(uri);
             List<Diagnostic> diagnostics = new ArrayList<>();
-            LOGGER.warning("About to calculate diagnostics");
             Map<String, PropertiesValidationResult> propertiesErrors = libertyPropertiesDiagnosticService.compute(text, openedDocument);
-            if (openedDocument.isServerXml()) {
-                LOGGER.warning("Running server.xml diagnostics");
+            if (LibertyConfigFileManager.isServerXml(openedDocument)) {
                 Diagnostic testDiagnostic = new Diagnostic(new Range(new Position(0, 0), new Position(0,1)), "This is our proof of concept diagnostic.");
                 diagnostics.add(testDiagnostic);
             }
