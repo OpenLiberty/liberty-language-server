@@ -48,6 +48,7 @@ public class DocumentUtil {
             docFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
             docFactory.setFeature("http://xml.org/sax/features/external-parameter-entities",false);
             docFactory.setFeature("http://xml.org/sax/features/external-general-entities",false);
+
             docFactory.setXIncludeAware(false);
             docFactory.setNamespaceAware(true);
             docFactory.setExpandEntityReferences(false);
