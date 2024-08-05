@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import javax.xml.XMLConstants;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -55,9 +56,11 @@ public class XmlReader {
 
         XMLInputFactory factory = XMLInputFactory.newInstance();
         try {
-            factory.setProperty(XMLInputFactory.IS_VALIDATING, Boolean.FALSE);
-            factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
-            factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
+          factory.setProperty(XMLInputFactory.IS_VALIDATING, Boolean.FALSE);
+          factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
+          factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
+          factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES,Boolean.FALSE);
+
         } catch (Exception e) {
             LOGGER.warning("Could not set properties on XMLInputFactory.");
         }
