@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2023 IBM Corporation and others.
+* Copyright (c) 2024     IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -42,13 +42,12 @@ public class DocumentUtil {
     public static Document getDocument(File inputFile) throws Exception {
         try {
             DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-            docFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING,true);
             docFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
             docFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-            docFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
-            docFactory.setFeature("http://xml.org/sax/features/external-parameter-entities",false);
-            docFactory.setFeature("http://xml.org/sax/features/external-general-entities",false);
-
+            docFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+            docFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+            docFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+            docFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
             docFactory.setXIncludeAware(false);
             docFactory.setNamespaceAware(true);
             docFactory.setExpandEntityReferences(false);
