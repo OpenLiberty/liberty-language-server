@@ -54,16 +54,7 @@ public class XmlReader {
             return returnValues;
         }
 
-        XMLInputFactory factory = XMLInputFactory.newInstance();
-        try {
-            factory.setProperty(XMLInputFactory.IS_VALIDATING, Boolean.FALSE);
-            factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
-            factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
-            factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Boolean.FALSE);
-
-        } catch (Exception e) {
-            LOGGER.warning("Could not set properties on XMLInputFactory.");
-        }
+        XMLInputFactory factory = getXmlInputFactory();
 
         XMLEventReader reader = null;
         try {
@@ -99,6 +90,20 @@ public class XmlReader {
         }
 
         return returnValues;
+    }
+
+    private static XMLInputFactory getXmlInputFactory() {
+        XMLInputFactory factory = XMLInputFactory.newInstance();
+        try {
+            factory.setProperty(XMLInputFactory.IS_VALIDATING, Boolean.FALSE);
+            factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
+            factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
+            factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Boolean.FALSE);
+
+        } catch (Exception e) {
+            LOGGER.warning("Could not set properties on XMLInputFactory.");
+        }
+        return factory;
     }
 
     protected static String getElementName(XMLEvent event) {

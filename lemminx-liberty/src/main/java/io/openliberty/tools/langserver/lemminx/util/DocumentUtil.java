@@ -29,8 +29,10 @@ import org.w3c.dom.NodeList;
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerConfigurationException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
@@ -41,16 +43,7 @@ public class DocumentUtil {
 
     public static Document getDocument(File inputFile) throws Exception {
         try {
-            DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
-            docFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
-            docFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
-            docFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
-            docFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
-            docFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
-            docFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
-            docFactory.setXIncludeAware(false);
-            docFactory.setNamespaceAware(true);
-            docFactory.setExpandEntityReferences(false);
+            DocumentBuilderFactory docFactory = getDocumentBuilderFactory();
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             return docBuilder.parse(inputFile);
         } catch (Exception e) {
@@ -59,11 +52,25 @@ public class DocumentUtil {
         }
     }
 
+    private static DocumentBuilderFactory getDocumentBuilderFactory() throws ParserConfigurationException {
+        DocumentBuilderFactory docFactory = DocumentBuilderFactory.newInstance();
+        docFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-dtd-grammar", false);
+        docFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+        docFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl", true);
+        docFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+        docFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+        docFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+        docFactory.setXIncludeAware(false);
+        docFactory.setNamespaceAware(true);
+        docFactory.setExpandEntityReferences(false);
+        return docFactory;
+    }
+
     public static void writeDocToXmlFile(Document doc, File inputFile) throws Exception {
-        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        TransformerFactory transformerFactory = getTransformerFactory();
         // Need to use this xsl to prevent extra lines in the updated xsd file. It is a known issue in Java 9 and up that is not going to be fixed.
         // It was a design decision. Ref link: https://bugs.openjdk.org/browse/JDK-8262285?attachmentViewMode=list
-        InputStream is = DocumentUtil.class.getClassLoader().getResourceAsStream("formatxsd.xsl"); 
+        InputStream is = DocumentUtil.class.getClassLoader().getResourceAsStream("formatxsd.xsl");
         Transformer transformer = transformerFactory.newTransformer(new StreamSource(is));
         transformer.setOutputProperty(OutputKeys.METHOD, "xml");
         transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
@@ -71,11 +78,16 @@ public class DocumentUtil {
         transformer.setOutputProperty(OutputKeys.STANDALONE, "yes");
         transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
         transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "yes");
-
         doc.setXmlStandalone(true);
         DOMSource source = new DOMSource(doc);
         StreamResult file = new StreamResult(new OutputStreamWriter(new FileOutputStream(inputFile), "UTF-8"));
         transformer.transform(source, file);
+    }
+
+    private static TransformerFactory getTransformerFactory() throws TransformerConfigurationException {
+        TransformerFactory transformerFactory = TransformerFactory.newInstance();
+        transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
+        return transformerFactory;
     }
 
     public static void removeExtraneousAnyAttributeElements(File schemaFile) {
