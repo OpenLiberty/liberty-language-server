@@ -86,7 +86,7 @@ public class XmlReader {
     }
 
     private static XMLInputFactory getXmlInputFactory() {
-        XMLInputFactory factory = XMLInputFactory.newInstance();
+        XMLInputFactory factory = XMLInputFactory.newFactory();
         try {
             factory.setProperty(XMLInputFactory.IS_VALIDATING, Boolean.FALSE);
             factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
@@ -114,7 +114,7 @@ public class XmlReader {
         }
         Map<String, String> returnValues = new HashMap<String, String> ();
 
-        XMLInputFactory factory = XMLInputFactory.newInstance();
+        XMLInputFactory factory = getXmlInputFactory();
         XMLEventReader reader = null;
         try {
             reader = factory.createXMLEventReader(new FileInputStream(file.toFile()));
