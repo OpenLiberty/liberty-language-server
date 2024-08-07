@@ -30,6 +30,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
+import javax.xml.transform.stream.StreamSource;
 
 public class XmlReader {
     private static final Logger LOGGER = Logger.getLogger(XmlReader.class.getName());
@@ -61,7 +62,7 @@ public class XmlReader {
             XMLEventReader reader = null;
 
             try (FileInputStream fis = new FileInputStream(xmlFile)) {
-                reader = factory.createXMLEventReader(fis);
+                reader = factory.createXMLEventReader(new StreamSource(fis));
                 while (reader.hasNext()) {
                     XMLEvent nextEvent = reader.nextEvent();
                     if (nextEvent.isStartElement()) {
@@ -117,7 +118,7 @@ public class XmlReader {
         XMLInputFactory factory = getXmlInputFactory();
         XMLEventReader reader = null;
         try {
-            reader = factory.createXMLEventReader(new FileInputStream(file.toFile()));
+            reader = factory.createXMLEventReader(new StreamSource(new FileInputStream(file.toFile())));
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
                 if (!event.isStartElement()) {
