@@ -51,7 +51,7 @@ public class XmlReader {
         return hasServerRoot(filePath.toFile());
     }
 
-    public static boolean hasServerRoot(File xmlFile) {
+    private static boolean hasServerRoot(File xmlFile) {
         if (!xmlFile.exists() || xmlFile.length() == 0) {
             return false;
         }
