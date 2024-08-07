@@ -70,8 +70,9 @@ public class XmlReader {
 
     private static void readElements(File file, Set<String> elementNames, Map<String, String> returnValues, XMLInputFactory factory) {
         XMLEventReader reader = null;
+        FileInputStream fis = null;
         try {
-            FileInputStream fis = new FileInputStream(file);
+            fis = new FileInputStream(file);
             reader = factory.createXMLEventReader(fis);
             while (reader.hasNext()) {
                 XMLEvent nextEvent = reader.nextEvent();
@@ -97,6 +98,12 @@ public class XmlReader {
                 } catch (Exception ignored) {
                 }
             }
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (Exception ignored) {
+                }
+            }
         }
     }
 
@@ -107,7 +114,9 @@ public class XmlReader {
             factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
             factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
             factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Boolean.FALSE);
+            // XMLConstants.ACCESS_EXTERNAL_DTD an empty string to deny all access to external references;
             factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            // XMLConstants.ACCESS_EXTERNAL_SCHEMA uses an empty string to deny all access to external references;
             factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
         } catch (Exception e) {
             LOGGER.warning("Could not set properties on XMLInputFactory.");

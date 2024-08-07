@@ -68,8 +68,9 @@ public class XmlReader {
 
     private static boolean hasSeverRootValues(XMLInputFactory factory, File xmlFile) {
         XMLEventReader reader=null;
+        FileInputStream fis = null;
         try {
-            FileInputStream fis = new FileInputStream(xmlFile);
+            fis = new FileInputStream(xmlFile);
 
             reader = factory.createXMLEventReader(fis);
             while (reader.hasNext()) {
@@ -81,6 +82,12 @@ public class XmlReader {
         } catch (XMLStreamException | FileNotFoundException e) {
             LOGGER.severe("Error received trying to read XML file: " + xmlFile.getAbsolutePath());
         } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (Exception ignored) {
+                }
+            }
             if (reader != null) {
                 try {
                     reader.close();
@@ -98,7 +105,9 @@ public class XmlReader {
             factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
             factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
             factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Boolean.FALSE);
+            // XMLConstants.ACCESS_EXTERNAL_DTD an empty string to deny all access to external references;
             factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            // XMLConstants.ACCESS_EXTERNAL_SCHEMA uses an empty string to deny all access to external references;
             factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
         } catch (Exception e) {
             LOGGER.warning("Could not set properties on XMLInputFactory.");
