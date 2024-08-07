@@ -1,15 +1,15 @@
 /*******************************************************************************
-* Copyright (c) 2023, 2024 IBM Corporation and others.
-*
-* This program and the accompanying materials are made available under the
-* terms of the Eclipse Public License v. 2.0 which is available at
-* http://www.eclipse.org/legal/epl-2.0.
-*
-* SPDX-License-Identifier: EPL-2.0
-*
-* Contributors:
-*     IBM Corporation - initial API and implementation
-*******************************************************************************/
+ * Copyright (c) 2023, 2024 IBM Corporation and others.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 
 package io.openliberty.tools.langserver.lemminx.util;
 
@@ -25,19 +25,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import javax.xml.XMLConstants;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
-import javax.xml.transform.stream.StreamSource;
 
 public class XmlReader {
     private static final Logger LOGGER = Logger.getLogger(XmlReader.class.getName());
 
     public static boolean hasServerRoot(String filePath) {
         File file = null;
-        
+
         try {
             file = new File(new URI(filePath).getPath());
             return hasServerRoot(file);
@@ -55,14 +55,14 @@ public class XmlReader {
         if (!xmlFile.exists() || xmlFile.length() == 0) {
             return false;
         }
-        
+
         try {
             XMLInputFactory factory = getXmlInputFactory();
 
             XMLEventReader reader = null;
 
             try (FileInputStream fis = new FileInputStream(xmlFile)) {
-                reader = factory.createXMLEventReader(new StreamSource(fis));
+                reader = factory.createXMLEventReader(fis);
                 while (reader.hasNext()) {
                     XMLEvent nextEvent = reader.nextEvent();
                     if (nextEvent.isStartElement()) {
@@ -70,15 +70,15 @@ public class XmlReader {
                     }
                 }
             } catch (XMLStreamException | FileNotFoundException e) {
-                LOGGER.severe("Error received trying to read XML file: " + xmlFile.getAbsolutePath()); 
+                LOGGER.severe("Error received trying to read XML file: " + xmlFile.getAbsolutePath());
             } finally {
                 if (reader != null) {
                     try {
                         reader.close();
-                    } catch (Exception ignored) {   
+                    } catch (Exception ignored) {
                     }
                 }
-            }            
+            }
         } catch (Exception e) {
             LOGGER.severe("Unable to access XML file "+ xmlFile.getAbsolutePath());
         }
@@ -87,12 +87,13 @@ public class XmlReader {
     }
 
     private static XMLInputFactory getXmlInputFactory() {
-        XMLInputFactory factory = XMLInputFactory.newFactory();
+        XMLInputFactory factory = XMLInputFactory.newInstance();
         try {
             factory.setProperty(XMLInputFactory.IS_VALIDATING, Boolean.FALSE);
             factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
             factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
             factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Boolean.FALSE);
+            factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD,"");
         } catch (Exception e) {
             LOGGER.warning("Could not set properties on XMLInputFactory.");
         }
@@ -118,7 +119,7 @@ public class XmlReader {
         XMLInputFactory factory = getXmlInputFactory();
         XMLEventReader reader = null;
         try {
-            reader = factory.createXMLEventReader(new StreamSource(new FileInputStream(file.toFile())));
+            reader = factory.createXMLEventReader(new FileInputStream(file.toFile()));
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
                 if (!event.isStartElement()) {
@@ -132,7 +133,7 @@ public class XmlReader {
                         returnValues.put(elementName, value.getData());
                     }
                 }
-            } 
+            }
         } catch (FileNotFoundException e) {
             LOGGER.severe("Unable to access file "+ file.toFile().getName());
         } catch (XMLStreamException e) {
@@ -141,7 +142,7 @@ public class XmlReader {
             if (reader != null) {
                 try {
                     reader.close();
-                } catch (Exception ignored) {   
+                } catch (Exception ignored) {
                 }
             }
         }
