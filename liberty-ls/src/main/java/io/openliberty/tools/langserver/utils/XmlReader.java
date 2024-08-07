@@ -61,15 +61,15 @@ public class XmlReader {
 
     private static void readElementValues(File file, Set<String> elementNames, Map<String, String> returnValues) {
         XMLInputFactory factory = getXmlInputFactory();
-        XMLEventReader reader = null;
         try {
-            readElements(file, elementNames, returnValues, reader, factory);
+            readElements(file, elementNames, returnValues, factory);
         } catch (Exception e) {
             LOGGER.severe("Unable to access XML file "+ file.getAbsolutePath());
         }
     }
 
-    private static void readElements(File file, Set<String> elementNames, Map<String, String> returnValues, XMLEventReader reader, XMLInputFactory factory) {
+    private static void readElements(File file, Set<String> elementNames, Map<String, String> returnValues, XMLInputFactory factory) {
+        XMLEventReader reader = null;
         try {
             FileInputStream fis = new FileInputStream(file);
             reader = factory.createXMLEventReader(fis);
