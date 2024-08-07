@@ -80,13 +80,21 @@ public class DocumentUtil {
         transformer.setOutputProperty(OutputKeys.DOCTYPE_PUBLIC, "yes");
         doc.setXmlStandalone(true);
         DOMSource source = new DOMSource(doc);
-        StreamResult file = new StreamResult(new OutputStreamWriter(new FileOutputStream(inputFile), "UTF-8"));
-        transformer.transform(source, file);
+        try {
+            StreamResult file = new StreamResult(new OutputStreamWriter(new FileOutputStream(inputFile), "UTF-8"));
+            transformer.transform(source, file);
+        } catch (Exception ex) {
+            LOGGER.warning("Received exception during post processing of schema file " + inputFile.getAbsolutePath() + " : " + ex.getMessage());
+        }
     }
 
     private static TransformerFactory getTransformerFactory() throws TransformerConfigurationException {
         TransformerFactory transformerFactory = TransformerFactory.newInstance();
         transformerFactory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, Boolean.TRUE);
+        // XMLConstants.ACCESS_EXTERNAL_DTD uses an empty string to deny all access to external references;
+        transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        // XMLConstants.ACCESS_EXTERNAL_STYLESHEET uses an empty string to deny all access to external references;
+        transformerFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
         return transformerFactory;
     }
 
