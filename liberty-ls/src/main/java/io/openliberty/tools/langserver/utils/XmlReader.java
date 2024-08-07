@@ -54,6 +54,12 @@ public class XmlReader {
             return returnValues;
         }
 
+        readElementValues(file, elementNames, returnValues);
+
+        return returnValues;
+    }
+
+    private static void readElementValues(File file, Set<String> elementNames, Map<String, String> returnValues) {
         XMLInputFactory factory = getXmlInputFactory();
         XMLEventReader reader = null;
         try {
@@ -74,21 +80,19 @@ public class XmlReader {
                     }
                 }
             } catch (XMLStreamException | FileNotFoundException e) {
-                LOGGER.severe("Error received trying to read XML file: " + file.getName() + 
+                LOGGER.severe("Error received trying to read XML file: " + file.getName() +
                           "\n\tError" + e.getMessage());
             } finally {
                 if (reader != null) {
                     try {
                         reader.close();
-                    } catch (Exception ignored) {   
+                    } catch (Exception ignored) {
                     }
                 }
-            } 
+            }
         } catch (Exception e) {
             LOGGER.severe("Unable to access XML file "+ file.getAbsolutePath());
         }
-
-        return returnValues;
     }
 
     private static XMLInputFactory getXmlInputFactory() {
@@ -98,7 +102,8 @@ public class XmlReader {
             factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
             factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
             factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Boolean.FALSE);
-
+            factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
         } catch (Exception e) {
             LOGGER.warning("Could not set properties on XMLInputFactory.");
         }
