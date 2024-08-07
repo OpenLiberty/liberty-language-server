@@ -63,13 +63,13 @@ public class XmlReader {
         XMLInputFactory factory = getXmlInputFactory();
         XMLEventReader reader = null;
         try {
-            readElementValues(file, elementNames, returnValues, reader, factory);
+            readElements(file, elementNames, returnValues, reader, factory);
         } catch (Exception e) {
             LOGGER.severe("Unable to access XML file "+ file.getAbsolutePath());
         }
     }
 
-    private static void readElementValues(File file, Set<String> elementNames, Map<String, String> returnValues, XMLEventReader reader, XMLInputFactory factory) {
+    private static void readElements(File file, Set<String> elementNames, Map<String, String> returnValues, XMLEventReader reader, XMLInputFactory factory) {
         try {
             FileInputStream fis = new FileInputStream(file);
             reader = factory.createXMLEventReader(fis);
