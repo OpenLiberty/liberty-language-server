@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import javax.xml.XMLConstants;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -92,6 +93,7 @@ public class XmlReader {
             factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
             factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
             factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Boolean.FALSE);
+            factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
         } catch (Exception e) {
             LOGGER.warning("Could not set properties on XMLInputFactory.");
         }
@@ -114,7 +116,7 @@ public class XmlReader {
         }
         Map<String, String> returnValues = new HashMap<String, String> ();
 
-        XMLInputFactory factory = XMLInputFactory.newInstance();
+        XMLInputFactory factory = getXmlInputFactory();
         XMLEventReader reader = null;
         try {
             reader = factory.createXMLEventReader(new FileInputStream(file.toFile()));
