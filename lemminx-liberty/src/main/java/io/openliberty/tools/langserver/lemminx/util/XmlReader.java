@@ -31,7 +31,6 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Characters;
 import javax.xml.stream.events.XMLEvent;
-import javax.xml.transform.stream.StreamSource;
 
 public class XmlReader {
     private static final Logger LOGGER = Logger.getLogger(XmlReader.class.getName());
@@ -63,7 +62,7 @@ public class XmlReader {
             XMLEventReader reader = null;
 
             try (FileInputStream fis = new FileInputStream(xmlFile)) {
-                reader = factory.createXMLEventReader(new StreamSource(fis));
+                reader = factory.createXMLEventReader(fis);
                 while (reader.hasNext()) {
                     XMLEvent nextEvent = reader.nextEvent();
                     if (nextEvent.isStartElement()) {
@@ -96,6 +95,7 @@ public class XmlReader {
             factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Boolean.FALSE);
             factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
             factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+            factory.setProperty("http://java.sun.com/xml/stream/properties/ignore-external-dtd",Boolean.TRUE);
         } catch (Exception e) {
             LOGGER.warning("Could not set properties on XMLInputFactory.");
         }
@@ -119,9 +119,15 @@ public class XmlReader {
         Map<String, String> returnValues = new HashMap<String, String> ();
 
         XMLInputFactory factory = getXmlInputFactory();
+        readElementValues(file, elementNames, factory, returnValues);
+
+        return returnValues;
+    }
+
+    private static void readElementValues(Path file, Set<String> elementNames, XMLInputFactory factory, Map<String, String> returnValues) {
         XMLEventReader reader = null;
         try {
-            reader = factory.createXMLEventReader(new StreamSource(new FileInputStream(file.toFile())));
+            reader = factory.createXMLEventReader(new FileInputStream(file.toFile()));
 
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
@@ -136,7 +142,7 @@ public class XmlReader {
                         returnValues.put(elementName, value.getData());
                     }
                 }
-            } 
+            }
         } catch (FileNotFoundException e) {
             LOGGER.severe("Unable to access file "+ file.toFile().getName());
         } catch (XMLStreamException e) {
@@ -145,12 +151,10 @@ public class XmlReader {
             if (reader != null) {
                 try {
                     reader.close();
-                } catch (Exception ignored) {   
+                } catch (Exception ignored) {
                 }
             }
         }
-
-        return returnValues;
     }
 
     protected static String getElementName(XMLEvent event) {
