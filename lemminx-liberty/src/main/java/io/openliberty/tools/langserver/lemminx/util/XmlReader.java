@@ -61,8 +61,8 @@ public class XmlReader {
 
             XMLEventReader reader = null;
 
-            try (FileInputStream fis = new FileInputStream(xmlFile)) {
-                reader = factory.createXMLEventReader(fis);
+            try {
+                reader = getReader(factory, xmlFile);
                 while (reader.hasNext()) {
                     XMLEvent nextEvent = reader.nextEvent();
                     if (nextEvent.isStartElement()) {
@@ -70,20 +70,26 @@ public class XmlReader {
                     }
                 }
             } catch (XMLStreamException | FileNotFoundException e) {
-                LOGGER.severe("Error received trying to read XML file: " + xmlFile.getAbsolutePath()); 
+                LOGGER.severe("Error received trying to read XML file: " + xmlFile.getAbsolutePath());
             } finally {
                 if (reader != null) {
                     try {
                         reader.close();
-                    } catch (Exception ignored) {   
+                    } catch (Exception ignored) {
                     }
                 }
-            }            
+            }
         } catch (Exception e) {
             LOGGER.severe("Unable to access XML file "+ xmlFile.getAbsolutePath());
         }
 
         return false;
+    }
+
+    private static XMLEventReader getReader(XMLInputFactory factory, File xmlFile)
+            throws FileNotFoundException, XMLStreamException {
+        FileInputStream fis = new FileInputStream(xmlFile);
+        return factory.createXMLEventReader(fis);
     }
 
     private static XMLInputFactory getXmlInputFactory() {
@@ -95,7 +101,6 @@ public class XmlReader {
             factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Boolean.FALSE);
             factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
             factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
-            factory.setProperty("http://java.sun.com/xml/stream/properties/ignore-external-dtd",Boolean.TRUE);
         } catch (Exception e) {
             LOGGER.warning("Could not set properties on XMLInputFactory.");
         }
