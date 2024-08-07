@@ -58,27 +58,7 @@ public class XmlReader {
         
         try {
             XMLInputFactory factory = getXmlInputFactory();
-
-            XMLEventReader reader = null;
-
-            try {
-                reader = getReader(factory, xmlFile);
-                while (reader.hasNext()) {
-                    XMLEvent nextEvent = reader.nextEvent();
-                    if (nextEvent.isStartElement()) {
-                        return isServerElement(nextEvent);
-                    }
-                }
-            } catch (XMLStreamException | FileNotFoundException e) {
-                LOGGER.severe("Error received trying to read XML file: " + xmlFile.getAbsolutePath());
-            } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (Exception ignored) {
-                    }
-                }
-            }
+            return hasSeverRootValues(factory,xmlFile);
         } catch (Exception e) {
             LOGGER.severe("Unable to access XML file "+ xmlFile.getAbsolutePath());
         }
@@ -86,10 +66,29 @@ public class XmlReader {
         return false;
     }
 
-    private static XMLEventReader getReader(XMLInputFactory factory, File xmlFile)
-            throws FileNotFoundException, XMLStreamException {
-        FileInputStream fis = new FileInputStream(xmlFile);
-        return factory.createXMLEventReader(fis);
+    private static boolean hasSeverRootValues(XMLInputFactory factory, File xmlFile) {
+        XMLEventReader reader=null;
+        try {
+            FileInputStream fis = new FileInputStream(xmlFile);
+
+            reader = factory.createXMLEventReader(fis);
+            while (reader.hasNext()) {
+                XMLEvent nextEvent = reader.nextEvent();
+                if (nextEvent.isStartElement()) {
+                    return isServerElement(nextEvent);
+                }
+            }
+        } catch (XMLStreamException | FileNotFoundException e) {
+            LOGGER.severe("Error received trying to read XML file: " + xmlFile.getAbsolutePath());
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        return false;
     }
 
     private static XMLInputFactory getXmlInputFactory() {
@@ -125,7 +124,6 @@ public class XmlReader {
 
         XMLInputFactory factory = getXmlInputFactory();
         readElementValues(file, elementNames, factory, returnValues);
-
         return returnValues;
     }
 
