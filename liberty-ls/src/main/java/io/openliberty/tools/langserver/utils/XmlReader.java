@@ -63,7 +63,8 @@ public class XmlReader {
         XMLInputFactory factory = getXmlInputFactory();
         XMLEventReader reader = null;
         try {
-            try (FileInputStream fis = new FileInputStream(file)) {
+            try {
+                FileInputStream fis = new FileInputStream(file);
                 reader = factory.createXMLEventReader(fis);
                 while (reader.hasNext()) {
                     XMLEvent nextEvent = reader.nextEvent();
