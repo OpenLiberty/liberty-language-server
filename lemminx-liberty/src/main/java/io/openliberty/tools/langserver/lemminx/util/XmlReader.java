@@ -138,8 +138,10 @@ public class XmlReader {
 
     private static void readElementValues(Path file, Set<String> elementNames, XMLInputFactory factory, Map<String, String> returnValues) {
         XMLEventReader reader = null;
+        FileInputStream fis = null;
         try {
-            reader = factory.createXMLEventReader(new FileInputStream(file.toFile()));
+            fis = new FileInputStream(file.toFile());
+            reader = factory.createXMLEventReader(fis);
 
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
@@ -160,6 +162,12 @@ public class XmlReader {
         } catch (XMLStreamException e) {
             LOGGER.severe("Error received trying to read XML file " + file.toFile().getName() + " : "+e.getMessage());
         } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (Exception ignored) {
+                }
+            }
             if (reader != null) {
                 try {
                     reader.close();
