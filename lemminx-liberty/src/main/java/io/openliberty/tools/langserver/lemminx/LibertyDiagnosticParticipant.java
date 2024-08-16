@@ -104,46 +104,72 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     private void validateFeature(DOMDocument domDocument, List<Diagnostic> list, DOMNode featureManager, Set<String> includedFeatures) {
 
         LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
-        String libertyVersion =  runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
-        String libertyRuntime =  runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
+        String libertyVersion = runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
+        String libertyRuntime = runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
 
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
 
         Set<String> featuresWithoutVersions = new HashSet<String>();
+        Set<String> selectedPlatforms = new HashSet<String>();
+        Set<String> selectedPlatformsWithoutVersion = new HashSet<String>();
 
         // Search for duplicate features
         // or features that do not exist
         List<DOMNode> features = featureManager.getChildren();
         for (DOMNode featureNode : features) {
             DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
-            // skip nodes that do not have any text value (ie. comments)
-            if (featureTextNode != null && featureTextNode.getTextContent() != null) {
-                String featureName = featureTextNode.getTextContent().trim();
-                // if the feature is not a user defined feature and the feature does not exist in the list of
-                // supported features show a "Feature does not exist" diagnostic
-                if (!featureName.startsWith("usr:") && !FeatureService.getInstance().featureExists(featureName, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI())) {
-                    Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
-                            domDocument);
-                    String message = "ERROR: The feature \"" + featureName + "\" does not exist.";
-                    list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
-                } else {
-                    String featureNameLower = featureName.toLowerCase();
-                    String featureNameNoVersionLower = featureNameLower.substring(0,featureNameLower.lastIndexOf("-"));
-                    // if this exact feature already exists, or another version of this feature already exists, then show a diagnostic
-                    if (includedFeatures.contains(featureNameLower)) {
-                        Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
-                                featureTextNode.getEnd(), domDocument);
-                        String message = "ERROR: " + featureName + " is already included.";
-                        list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
-                    } else if (featuresWithoutVersions.contains(featureNameNoVersionLower)) {
-                        Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
-                                featureTextNode.getEnd(), domDocument);
-                        String featureNameNoVersion = featureName.substring(0,featureName.lastIndexOf("-"));
-                        String message = "ERROR: More than one version of feature " + featureNameNoVersion + " is included. Only one version of a feature may be specified.";
-                        list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
+            // check for platform element
+            if (LibertyConstants.PLATFORM_ELEMENT.equals(featureNode.getLocalName())) {
+                validatePlatform(domDocument, list, featureTextNode, selectedPlatformsWithoutVersion, selectedPlatforms);
+            } else {
+                // skip nodes that do not have any text value (ie. comments)
+                if (featureTextNode != null && featureTextNode.getTextContent() != null) {
+                    String featureName = featureTextNode.getTextContent().trim();
+                    // if the feature is not a user defined feature and the feature does not exist in the list of
+                    // supported features show a "Feature does not exist" diagnostic
+                    if (!featureName.startsWith("usr:") && !FeatureService.getInstance().featureExists(featureName, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI())) {
+                        Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
+                                domDocument);
+                        String message = "ERROR: The feature \"" + featureName + "\" does not exist.";
+                        list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
+                    } else {
+                        String featureNameLower = featureName.toLowerCase();
+                        String featureNameNoVersionLower = featureNameLower.substring(0, featureNameLower.lastIndexOf("-"));
+                        // if this exact feature already exists, or another version of this feature already exists, then show a diagnostic
+                        if (includedFeatures.contains(featureNameLower)) {
+                            Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
+                                    featureTextNode.getEnd(), domDocument);
+                            String message = "ERROR: " + featureName + " is already included.";
+                            list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
+                        } else if (featuresWithoutVersions.contains(featureNameNoVersionLower)) {
+                            Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
+                                    featureTextNode.getEnd(), domDocument);
+                            String featureNameNoVersion = featureName.substring(0, featureName.lastIndexOf("-"));
+                            String message = "ERROR: More than one version of feature " + featureNameNoVersion + " is included. Only one version of a feature may be specified.";
+                            list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
+                        }
+                        includedFeatures.add(featureNameLower);
+                        featuresWithoutVersions.add(featureNameNoVersionLower);
                     }
-                    includedFeatures.add(featureNameLower);
-                    featuresWithoutVersions.add(featureNameNoVersionLower);
+                }
+            }
+        }
+        // if any platform is selected, it should be allowed for all features, otherwise throw error
+        if (!selectedPlatforms.isEmpty()) {
+            for (DOMNode featureNode : features) {
+                DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
+                if (LibertyConstants.FEATURE_ELEMENT.equals(featureNode.getLocalName())) {
+                    if (featureTextNode != null && featureTextNode.getTextContent() != null) {
+                        String featureName = featureTextNode.getTextContent().trim();
+                        Set<String> invalidPlatforms = FeatureService.getInstance()
+                                .getInvalidPlatformsForFeature(featureName, selectedPlatforms,libertyVersion,libertyRuntime,requestDelay, domDocument.getDocumentURI());
+                        if (!invalidPlatforms.isEmpty()) {
+                            Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
+                                    domDocument);
+                            String message = "ERROR: The feature \"" + featureName + "\" does not support platforms" + invalidPlatforms;
+                            list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
+                        }
+                    }
                 }
             }
         }
@@ -259,6 +285,51 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             if (includedFeaturesCopy.isEmpty()) {
                 diagnosticsList.add(tempDiagnostic);
             }
+        }
+    }
+
+    /**
+     * validate platform element
+     * @param domDocument xml document
+     * @param list diagnostics list
+     * @param featureTextNode current feature manager node
+     * @param selectedPlatformsWithoutVersion platforms in xml without version
+     * @param selectedPlatforms platforms in xml
+     */
+    private static void validatePlatform(DOMDocument domDocument, List<Diagnostic> list, DOMNode featureTextNode, Set<String> selectedPlatformsWithoutVersion,
+                                         Set<String> selectedPlatforms) {
+        LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
+        String libertyVersion = runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
+        String libertyRuntime = runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
+
+        final int requestDelay = SettingsService.getInstance().getRequestDelay();
+        if (featureTextNode != null && featureTextNode.getTextContent() != null) {
+            String platformName = featureTextNode.getTextContent().trim();
+            String platformNameLowerCase = platformName.toLowerCase();
+            String platformNoVersionLower = platformNameLowerCase.contains("-") ? platformNameLowerCase.substring(0, platformNameLowerCase.lastIndexOf("-"))
+                    : platformNameLowerCase;
+
+            if (!FeatureService.getInstance().platformExists(platformName,libertyVersion,libertyRuntime,requestDelay,domDocument.getDocumentURI())) {
+                Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
+                        domDocument);
+                String message = "ERROR: The platform \"" + platformName + "\" does not exist.";
+                list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
+            }
+            // if this exact platform already exists, or another version of this feature already exists, then show a diagnostic
+            if (selectedPlatforms.contains(platformNameLowerCase)) {
+                Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
+                        featureTextNode.getEnd(), domDocument);
+                String message = "ERROR: " + platformName + " is already included.";
+                list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
+            } else if (selectedPlatformsWithoutVersion.contains(platformNoVersionLower)) {
+                Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
+                        featureTextNode.getEnd(), domDocument);
+                String platformNameNoVersion = platformName.substring(0, platformName.lastIndexOf("-"));
+                String message = "ERROR: More than one version of platform " + platformNameNoVersion + " is included. Only one version of a platform may be specified.";
+                list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
+            }
+            selectedPlatformsWithoutVersion.add(platformNoVersionLower);
+            selectedPlatforms.add(platformNameLowerCase);
         }
     }
 }

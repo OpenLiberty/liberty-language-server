@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2023 IBM Corporation and others.
+* Copyright (c) 2023, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -23,7 +23,7 @@ public final class LibertyConstants {
     public static final String FEATURE_MANAGER_ELEMENT = "featureManager";
     public static final String FEATURE_ELEMENT = "feature";
     public static final String INCLUDE_ELEMENT = "include";
-
+    public static final String PLATFORM_ELEMENT = "platform";
     public static final String PUBLIC_VISIBILITY = "PUBLIC";
 
     // following URI standard of using "/"

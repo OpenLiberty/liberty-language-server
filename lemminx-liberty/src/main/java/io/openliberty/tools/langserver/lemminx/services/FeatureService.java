@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -35,6 +36,7 @@ import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager.ResourceToDeploy;
 
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
@@ -134,7 +136,7 @@ public class FeatureService {
             if (defaultFeatures == null) {
                 // Changing this to contain the version in the file name since the file is copied to the local .lemminx cache. 
                 // This is how we ensure the latest default features json gets used in each developer environment. 
-                InputStream is = getClass().getClassLoader().getResourceAsStream("features-cached-24.0.0.6.json");
+                InputStream is = getClass().getClassLoader().getResourceAsStream("features-cached-24.0.0.8.json");
                 InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
 
                 // Only need the public features
@@ -528,5 +530,67 @@ public class FeatureService {
             }
         }
         return installedFeatures;
+    }
+
+    /**
+     * get all platforms for all features from feature json
+     * @param libertyVersion liberty version
+     * @param libertyRuntime runtime
+     * @param requestDelay request delay
+     * @param documentURI document uri link
+     * @return set of unique platforms
+     */
+    public Set<String> getAllPlatforms(String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
+        List<Feature> features = this.getFeatures(libertyVersion, libertyRuntime, requestDelay, documentURI);
+        return features.stream()
+                .map(Feature::getWlpInformation)
+                .filter(Objects::nonNull)
+                .map(WlpInformation::getPlatforms)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream).collect(Collectors.toSet());
+    }
+
+    /**
+     * check platform name exists or not
+     * @param platformName platform name
+     * @param libertyVersion liberty version
+     * @param libertyRuntime liberty runtime
+     * @param requestDelay request delay
+     * @param documentURI xml document uri
+     * @return true or false
+     */
+    public boolean platformExists(String platformName, String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
+        Set<String> platforms = this.getAllPlatforms(libertyVersion, libertyRuntime, requestDelay, documentURI);
+        return platforms.stream()
+                .anyMatch(platform -> platform.equalsIgnoreCase(platformName));
+    }
+
+    /**
+     * get invalid platforms for a selected feature
+     *
+     * @param featureName       feature name
+     * @param selectedPlatforms list of already entered platforms
+     * @param libertyVersion    liberty version
+     * @param libertyRuntime    liberty run time
+     * @param requestDelay      request delay
+     * @param documentURI       document uri
+     * @return set of platforms
+     */
+    public Set<String> getInvalidPlatformsForFeature(String featureName, Set<String> selectedPlatforms, String libertyVersion, String libertyRuntime,
+                                                     int requestDelay, String documentURI) {
+        Set<String> invalidPlatforms = new HashSet<>(selectedPlatforms);
+        List<Feature> features = this.getFeatures(libertyVersion, libertyRuntime, requestDelay, documentURI);
+        Set<String> validPlatforms = features.stream().map(Feature::getWlpInformation)
+                .filter(Objects::nonNull)
+                .filter(wlpInformation -> featureName.equalsIgnoreCase(wlpInformation.getShortName()))
+                .map(WlpInformation::getPlatforms)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream).collect(Collectors.toSet());
+        if (validPlatforms.isEmpty()) {
+            return new HashSet<>();
+        } else {
+            invalidPlatforms.removeAll(validPlatforms);
+            return invalidPlatforms;
+        }
     }
 }

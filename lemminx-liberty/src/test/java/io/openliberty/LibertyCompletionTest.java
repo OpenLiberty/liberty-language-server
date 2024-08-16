@@ -76,10 +76,28 @@ public class LibertyCompletionTest {
                 CompletionItem microProfileCompletion = c("microProfile-2.2", "microProfile-2.2");
 
                 // would be 269 if mpConfig-1.4 was not already specified
-                final int TOTAL_ITEMS = 268; // total number of available completion items
+                final int TOTAL_ITEMS = 337; // total number of available completion items
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, jaxrsCompletion, websocket,
                                 microProfileCompletion);
+        }
+
+        // Tests the
+        // availability of feature completion
+        @Test
+        public void testPlatformCompletionItem() throws BadLocationException {
+                String serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <platform>|</platform>", //
+                        "               <feature>mpConfig-1.4</feature>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+
+                final int TOTAL_ITEMS = 23; // total number of available completion items
+
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS);
         }
 
 }

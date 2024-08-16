@@ -22166,6 +22166,14 @@
                     </xsd:appinfo>
                 </xsd:annotation>
             </xsd:element>
+            <xsd:element maxOccurs="unbounded" minOccurs="0" name="platform" type="xsd:string">
+                <xsd:annotation>
+                    <xsd:documentation>Specifies a platform to be used when the server runs.</xsd:documentation>
+                    <xsd:appinfo>
+                        <ext:label>Platform</ext:label>
+                    </xsd:appinfo>
+                </xsd:annotation>
+            </xsd:element>
         </xsd:sequence>
         <xsd:attribute default="WARN" name="onError" use="optional">
             <xsd:annotation>
