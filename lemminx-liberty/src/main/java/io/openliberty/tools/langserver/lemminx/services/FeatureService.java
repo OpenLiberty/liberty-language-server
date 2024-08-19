@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -67,8 +68,8 @@ public class FeatureService {
 
     // This file is copied to the local .lemminx cache. 
     // This is how we ensure the latest default featurelist xml gets used in each developer environment. 
-    private static final String FEATURELIST_XML_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist-cached-24.0.0.6.xml";
-    private static final String FEATURELIST_XML_CLASSPATH_LOCATION = "/featurelist-cached-24.0.0.6.xml";
+    private static final String FEATURELIST_XML_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist-cached-24.0.0.8.xml";
+    private static final String FEATURELIST_XML_CLASSPATH_LOCATION = "/featurelist-cached-24.0.0.8.xml";
 
     /**
      * FEATURELIST_XML_RESOURCE is the featurelist xml that is located at FEATURELIST_XML_CLASSPATH_LOCATION
@@ -579,18 +580,30 @@ public class FeatureService {
     public Set<String> getInvalidPlatformsForFeature(String featureName, Set<String> selectedPlatforms, String libertyVersion, String libertyRuntime,
                                                      int requestDelay, String documentURI) {
         Set<String> invalidPlatforms = new HashSet<>(selectedPlatforms);
-        List<Feature> features = this.getFeatures(libertyVersion, libertyRuntime, requestDelay, documentURI);
-        Set<String> validPlatforms = features.stream().map(Feature::getWlpInformation)
-                .filter(Objects::nonNull)
-                .filter(wlpInformation -> featureName.equalsIgnoreCase(wlpInformation.getShortName()))
-                .map(WlpInformation::getPlatforms)
-                .filter(Objects::nonNull)
-                .flatMap(List::stream).collect(Collectors.toSet());
-        if (validPlatforms.isEmpty()) {
-            return new HashSet<>();
-        } else {
-            invalidPlatforms.removeAll(validPlatforms);
+        List<String> validPlatforms = this.getAllPlatformsForFeature(featureName, libertyVersion, libertyRuntime, requestDelay, documentURI);
+        if (Objects.nonNull(validPlatforms) && !validPlatforms.isEmpty()) {
+            validPlatforms.forEach(invalidPlatforms::remove);
             return invalidPlatforms;
+        } else {
+            return new HashSet<>();
         }
+    }
+
+    /**
+     * return all allowed platforms for a feature
+     * @param featureName feature shortname
+     * @param libertyVersion liberty version
+     * @param libertyRuntime runtime
+     * @param requestDelay request delay
+     * @param documentURI document uri
+     * @return list of platforms
+     */
+    public List<String> getAllPlatformsForFeature(String featureName, String libertyVersion, String libertyRuntime,
+                                                     int requestDelay, String documentURI) {
+        Optional<Feature> feature=this.getFeature(featureName,libertyVersion, libertyRuntime, requestDelay, documentURI);
+        if(feature.isPresent()){
+            return feature.get().getWlpInformation().getPlatforms();
+        }
+       return Collections.emptyList();
     }
 }

@@ -353,7 +353,6 @@ public class LibertyDiagnosticTest {
         List<String> featuresToAdd = new ArrayList<String>();
         featuresToAdd.add("springBoot-1.5");
         featuresToAdd.add("springBoot-2.0");
-        featuresToAdd.add("springBoot-3.0");
         Collections.sort(featuresToAdd);
 
         List<CodeAction> codeActions = new ArrayList<CodeAction>();
@@ -370,7 +369,7 @@ public class LibertyDiagnosticTest {
         }
 
         XMLAssert.testCodeActionsFor(serverXML, sampleserverXMLURI, config_for_missing_feature, (String) null, 
-                                    codeActions.get(0), codeActions.get(1), codeActions.get(2)); 
+                                    codeActions.get(0), codeActions.get(1));
 
     }
 
@@ -429,7 +428,7 @@ public class LibertyDiagnosticTest {
     }
 
     @Test
-    public void testInvalidPlatformDiagnostic() throws BadLocationException{
+    public void testInvalidPlatformDiagnostic() throws BadLocationException {
         String serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
                 "       <featureManager>", //
@@ -439,6 +438,7 @@ public class LibertyDiagnosticTest {
                 "               <!-- <feature>comment</feature> -->", //
                 "               <platform>javaee-7.0</platform>", //
                 "               <platform>javaee-8.0</platform>", //
+                "               <platform>jakartaee-9.1</platform>", //
                 "       </featureManager>", //
                 "</server>" //
         );
@@ -455,42 +455,16 @@ public class LibertyDiagnosticTest {
         invalid3.setRange(r(7, 25, 7, 35));
         invalid3.setMessage("ERROR: More than one version of platform javaee is included. Only one version of a platform may be specified.");
 
+        Diagnostic invalid5 = new Diagnostic();
+        invalid5.setRange(r(2, 24, 2, 33));
+        invalid5.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+        invalid5.setMessage("ERROR: The feature \"batch-1.0\" does not support platforms[jax, jakartaee-9.1]. This feature only supports [javaee-7.0, javaee-8.0]");
+
         Diagnostic invalid4 = new Diagnostic();
-        invalid4.setRange(r(2, 24, 2, 33));
-        invalid4.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
-        invalid4.setMessage("ERROR: The feature \"batch-1.0\" does not support platforms[jax]");
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, invalid1, invalid2,invalid3,invalid4);
-
-       /* List<Diagnostic> diagnostics = new ArrayList<Diagnostic>();
-        diagnostics.add(invalid1);
-
-        List<String> featuresStartWithJAX = new ArrayList<String>();
-        featuresStartWithJAX.add("jaxb-2.2");
-        //featuresStartWithJAX.add("jaxrs-2.0"); excluded because it matches an existing feature with a different version
-        //featuresStartWithJAX.add("jaxrs-2.1"); excluded because it matches an existing feature
-        featuresStartWithJAX.add("jaxrsClient-2.0");
-        featuresStartWithJAX.add("jaxrsClient-2.1");
-        featuresStartWithJAX.add("jaxws-2.2");
-        //adding versionless features
-        featuresStartWithJAX.add("jaxws");
-        featuresStartWithJAX.add("jaxb");
-        featuresStartWithJAX.add("jaxrsClient");
-        featuresStartWithJAX.add("jaxrs");
-        Collections.sort(featuresStartWithJAX);
-
-        List<CodeAction> codeActions = new ArrayList<CodeAction>();
-        for (String nextFeature: featuresStartWithJAX) {
-            TextEdit texted = te(invalid1.getRange().getStart().getLine(), invalid1.getRange().getStart().getCharacter(),
-                    invalid1.getRange().getEnd().getLine(), invalid1.getRange().getEnd().getCharacter(), nextFeature);
-            CodeAction invalidCodeAction = ca(invalid1, texted);
-
-            codeActions.add(invalidCodeAction);
-        }
-
-        XMLAssert.testCodeActionsFor(serverXML, invalid1, codeActions.get(0), codeActions.get(1),
-                codeActions.get(2), codeActions.get(3), codeActions.get(4), codeActions.get(5), codeActions.get(6), codeActions.get(7));
-
-        */
+        invalid4.setRange(r(8, 25, 8, 38));
+        invalid4.setMessage("ERROR: jakartaee-9.1 conflicts with already included platform(s) [javaee-7.0, javaee-8.0]");
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1, invalid2, invalid3, invalid4, invalid5);
 
     }
 }

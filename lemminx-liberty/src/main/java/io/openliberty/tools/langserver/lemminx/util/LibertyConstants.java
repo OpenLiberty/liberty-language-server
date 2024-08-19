@@ -12,6 +12,8 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx.util;
 
+import java.util.HashMap;
+
 public final class LibertyConstants {
     private LibertyConstants() {
     }
@@ -30,4 +32,15 @@ public final class LibertyConstants {
     public static final String WLP_USER_CONFIG_DIR = "/usr/shared/config/";
     public static final String SERVER_CONFIG_DROPINS_DEFAULTS = "/configDropins/defaults/";
     public static final String SERVER_CONFIG_DROPINS_OVERRIDES = "/configDropins/overrides/";
+
+    // map to load description for features if description is not present in feature.json
+    public static final HashMap<String, String> featureDescriptionMap = new HashMap<>() {{
+        put("javaee-6.0", "Description: This feature combines the Liberty features that support the Java EE 6.0 Full Platform.");
+        put("microProfile-7.0", "Description: This feature combines the Liberty features that support MicroProfile 6.0 for Cloud Native Java.");
+    }};
+
+    public static final HashMap<String, String> conflictingPlatforms = new HashMap<>() {{
+        put("javaee", "jakartaee");
+        put("jakartaee", "javaee");
+    }};
 }

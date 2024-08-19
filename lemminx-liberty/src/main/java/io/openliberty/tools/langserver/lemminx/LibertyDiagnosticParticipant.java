@@ -34,10 +34,12 @@ import io.openliberty.tools.langserver.lemminx.util.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     private static final Logger LOGGER = Logger.getLogger(LibertyDiagnosticParticipant.class.getName());
@@ -134,7 +136,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                         list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
                     } else {
                         String featureNameLower = featureName.toLowerCase();
-                        String featureNameNoVersionLower = featureNameLower.substring(0, featureNameLower.lastIndexOf("-"));
+                        String featureNameNoVersionLower = featureNameLower.contains("-") ? featureNameLower.substring(0, featureNameLower.lastIndexOf("-"))
+                                : featureNameLower;
                         // if this exact feature already exists, or another version of this feature already exists, then show a diagnostic
                         if (includedFeatures.contains(featureNameLower)) {
                             Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
@@ -166,7 +169,10 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                         if (!invalidPlatforms.isEmpty()) {
                             Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
                                     domDocument);
-                            String message = "ERROR: The feature \"" + featureName + "\" does not support platforms" + invalidPlatforms;
+                            String message = "ERROR: The feature \"" + featureName + "\" does not support platforms" + invalidPlatforms
+                                    +". This feature only supports "
+                                    + FeatureService.getInstance()
+                                    .getAllPlatformsForFeature(featureName,libertyVersion,libertyRuntime,requestDelay,domDocument.getDocumentURI());
                             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
                         }
                     }
@@ -328,8 +334,24 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 String message = "ERROR: More than one version of platform " + platformNameNoVersion + " is included. Only one version of a platform may be specified.";
                 list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
             }
+            Set<String> conflictingPlatforms = getConflictingPlatforms(platformNoVersionLower, selectedPlatforms);
+            if (!conflictingPlatforms.isEmpty()) {
+                Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
+                        featureTextNode.getEnd(), domDocument);
+                String message = "ERROR: " + platformName + " conflicts with already included platform(s) " + conflictingPlatforms;
+                list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
+            }
             selectedPlatformsWithoutVersion.add(platformNoVersionLower);
             selectedPlatforms.add(platformNameLowerCase);
         }
+    }
+
+    private static Set<String> getConflictingPlatforms(String platformNoVersionLower, Set<String> selectedPlatforms) {
+        if(LibertyConstants.conflictingPlatforms.containsKey(platformNoVersionLower)){
+            String conflictingPlatformName = LibertyConstants.conflictingPlatforms.get(platformNoVersionLower);
+            return selectedPlatforms.stream()
+                    .filter(p->p.contains(conflictingPlatformName)).collect(Collectors.toSet());
+        }
+        return Collections.emptySet();
     }
 }

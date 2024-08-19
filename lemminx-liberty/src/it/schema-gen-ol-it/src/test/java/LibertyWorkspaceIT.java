@@ -39,7 +39,7 @@ public class LibertyWorkspaceIT {
         testWorkspaceFolders.add(testWorkspace);
         LibertyProjectsManager.getInstance().setWorkspaceFolders(testWorkspaceFolders);
 
-        String schemaFileName = "ol-22.0.0.12.xsd";
+        String schemaFileName = "ol-24.0.0.8.xsd";
         File schemaFile = new File(LibertyUtils.getTempDir(LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlFile.toURI().toString())), schemaFileName);
         String serverGenXSDURI = schemaFile.toPath().toUri().toString().replace("///", "/");
 
@@ -79,8 +79,8 @@ public class LibertyWorkspaceIT {
 
         CompletionItem jaxrsCompletion = c("jaxrs-2.1", "jaxrs-2.1");
 
-        // would be 228 if mpConfig-1.4 was not already specified - this is using ol-22.0.0.12
-        final int TOTAL_ITEMS = 227; // total number of available completion items
+        // would be 337 if mpConfig-1.4 was not already specified - this is using ol-24.0.0.8
+        final int TOTAL_ITEMS = 337; // total number of available completion items
 
         XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, jaxrsCompletion);
         
@@ -89,7 +89,7 @@ public class LibertyWorkspaceIT {
         XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, websocket);
         
         // Verify that a feature list was NOT generated. It should have downloaded the features.json from Maven Central.
-        String featureListName = "featurelist-ol-22.0.0.12.xml";
+        String featureListName = "featurelist-ol-24.0.0.8.xml";
         File featurelistFile = new File(LibertyUtils.getTempDir(LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlFile.toURI().toString())), featureListName);
 
         org.junit.jupiter.api.Assertions.assertFalse(featurelistFile.exists(), "Found unexpected generated featurelist file: "+featureListName);

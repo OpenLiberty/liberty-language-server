@@ -30,9 +30,12 @@ import io.openliberty.tools.langserver.lemminx.util.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class LibertyHoverParticipant implements IHoverParticipant {
     private static final Logger LOGGER = Logger.getLogger(LibertyHoverParticipant.class.getName());
@@ -66,8 +69,41 @@ public class LibertyHoverParticipant implements IHoverParticipant {
             String featureName = request.getNode().getTextContent().trim();
             return getHoverFeatureDescription(featureName, request.getXMLDocument());
         }
+        if (LibertyConstants.PLATFORM_ELEMENT.equals(parentElement.getTagName())) {
+            String platformName = request.getNode().getTextContent().trim();
+            return getHoverPlatformDescription(platformName, request.getXMLDocument());
+        }
 
         return null;
+    }
+
+    /**
+     * get description for platform from the feature json
+     * there will be a feature with same shortname as platform.
+     * @param platformName platform name
+     * @param xmlDocument xml document
+     * @return hover
+     */
+    private Hover getHoverPlatformDescription(String platformName, DOMDocument xmlDocument) {
+        LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(xmlDocument);
+        String libertyVersion = runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
+        String libertyRuntime = runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
+
+        final int requestDelay = SettingsService.getInstance().getRequestDelay();
+        // some feature descriptions are not found in features.json. adding them manually
+        if(LibertyConstants.featureDescriptionMap.containsKey(platformName)){
+            return new Hover(new MarkupContent("plaintext",LibertyConstants.featureDescriptionMap.get(platformName) ));
+        }
+        List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion, libertyRuntime, requestDelay, xmlDocument.getDocumentURI());
+        StringBuilder sb = new StringBuilder();
+        features.stream().filter(feature -> Objects.nonNull(feature.getWlpInformation()))
+                .filter(feature -> feature.getWlpInformation().getShortName().equals(platformName))
+                .forEach(feature -> {
+                    String description = feature.getShortDescription();
+                    sb.append("Description: ");
+                    sb.append(description);
+                });
+        return new Hover(new MarkupContent("plaintext", sb.toString()));
     }
 
     private Hover getFeatureDescription(String featureName, DOMDocument domDocument) {
