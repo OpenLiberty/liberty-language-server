@@ -112,9 +112,10 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
 
         Set<String> featuresWithoutVersions = new HashSet<String>();
+        Set<String> versionlessFeatures = new HashSet<String>();
+        Set<String> versionedFeatures = new HashSet<String>();
         Set<String> selectedPlatforms = new HashSet<String>();
         Set<String> selectedPlatformsWithoutVersion = new HashSet<String>();
-
         // Search for duplicate features
         // or features that do not exist
         List<DOMNode> features = featureManager.getChildren();
@@ -136,8 +137,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                         list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
                     } else {
                         String featureNameLower = featureName.toLowerCase();
-                        String featureNameNoVersionLower = featureNameLower.contains("-") ? featureNameLower.substring(0, featureNameLower.lastIndexOf("-"))
-                                : featureNameLower;
+                        String featureNameNoVersionLower = featureNameLower.contains("-")?featureNameLower.substring(0, featureNameLower.lastIndexOf("-")):featureNameLower;
                         // if this exact feature already exists, or another version of this feature already exists, then show a diagnostic
                         if (includedFeatures.contains(featureNameLower)) {
                             Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
@@ -151,29 +151,65 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                             String message = "ERROR: More than one version of feature " + featureNameNoVersion + " is included. Only one version of a feature may be specified.";
                             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
                         }
+                        if(featureNameLower.equals(featureNameNoVersionLower)){
+                            versionlessFeatures.add(featureName);
+                        }
+                        else {
+                            versionedFeatures.add(featureName);
+                        }
                         includedFeatures.add(featureNameLower);
                         featuresWithoutVersions.add(featureNameNoVersionLower);
                     }
                 }
             }
         }
-        // if any platform is selected, it should be allowed for all features, otherwise throw error
-        if (!selectedPlatforms.isEmpty()) {
-            for (DOMNode featureNode : features) {
-                DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
-                if (LibertyConstants.FEATURE_ELEMENT.equals(featureNode.getLocalName())) {
-                    if (featureTextNode != null && featureTextNode.getTextContent() != null) {
-                        String featureName = featureTextNode.getTextContent().trim();
-                        Set<String> invalidPlatforms = FeatureService.getInstance()
-                                .getInvalidPlatformsForFeature(featureName, selectedPlatforms,libertyVersion,libertyRuntime,requestDelay, domDocument.getDocumentURI());
-                        if (!invalidPlatforms.isEmpty()) {
-                            Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
-                                    domDocument);
-                            String message = "ERROR: The feature \"" + featureName + "\" does not support platforms" + invalidPlatforms
-                                    +". This feature only supports "
-                                    + FeatureService.getInstance()
-                                    .getAllPlatformsForFeature(featureName,libertyVersion,libertyRuntime,requestDelay,domDocument.getDocumentURI());
+        if (!versionlessFeatures.isEmpty()) {
+            // if any platform is selected, it should be allowed for all features, otherwise throw error
+            validateVersionlessFeatures(domDocument, list, selectedPlatforms, features, versionedFeatures, libertyVersion, libertyRuntime, requestDelay);
+        }
+    }
+
+    /**
+     * validate versionless features
+     * 1. If only versionless feature is specified and no platform or no versioned feature is specified , throw error
+     * 2. If versioned features are specified , but there is no common platform for all the versioned features, throw error
+     * @param domDocument xml document
+     * @param list diganostics list
+     * @param selectedPlatforms selected platforms
+     * @param features feature nodes
+     * @param versionedFeatures versioned feature list
+     * @param libertyVersion liberty version
+     * @param libertyRuntime runtime
+     * @param requestDelay request delay
+     */
+    private static void validateVersionlessFeatures(DOMDocument domDocument, List<Diagnostic> list,
+                                                    Set<String> selectedPlatforms, List<DOMNode> features,
+                                                    Set<String> versionedFeatures, String libertyVersion,
+                                                    String libertyRuntime, int requestDelay) {
+        for (DOMNode featureNode : features) {
+            DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
+            if (LibertyConstants.FEATURE_ELEMENT.equals(featureNode.getLocalName())) {
+                if (featureTextNode != null && featureTextNode.getTextContent() != null) {
+                    String featureName = featureTextNode.getTextContent().trim();
+                    String featureNameLower = featureName.toLowerCase();
+                    String featureNameNoVersionLower = featureNameLower;
+                    if (!featureNameLower.contains("-")) {
+                        // versionless feature
+                        if (versionedFeatures.isEmpty() && selectedPlatforms.isEmpty()) {
+                            Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
+                                    featureTextNode.getEnd(), domDocument);
+                            String message = "ERROR: Need to sepcify any platform or at least one versioned feature.";
                             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
+                        } else if (!versionedFeatures.isEmpty() && selectedPlatforms.isEmpty()) {
+                            List<String> commonPlatforms = FeatureService.getInstance()
+                                    .getCommonPlatformsForFeatures(versionedFeatures, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
+                            if (commonPlatforms == null ||
+                                    commonPlatforms.isEmpty()) {
+                                Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
+                                        domDocument);
+                                String message = "ERROR: \"" + featureName + "\" cannot be used since there is no common platform for all versioned features.";
+                                list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
+                            }
                         }
                     }
                 }
@@ -315,14 +351,14 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             String platformNoVersionLower = platformNameLowerCase.contains("-") ? platformNameLowerCase.substring(0, platformNameLowerCase.lastIndexOf("-"))
                     : platformNameLowerCase;
 
-            if (!FeatureService.getInstance().platformExists(platformName,libertyVersion,libertyRuntime,requestDelay,domDocument.getDocumentURI())) {
+            if (!FeatureService.getInstance().platformExists(platformName, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI())) {
                 Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
                         domDocument);
                 String message = "ERROR: The platform \"" + platformName + "\" does not exist.";
                 list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
             }
             // if this exact platform already exists, or another version of this feature already exists, then show a diagnostic
-            if (selectedPlatforms.contains(platformNameLowerCase)) {
+            else if (selectedPlatforms.contains(platformNameLowerCase)) {
                 Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
                         featureTextNode.getEnd(), domDocument);
                 String message = "ERROR: " + platformName + " is already included.";

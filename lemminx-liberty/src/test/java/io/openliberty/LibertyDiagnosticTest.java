@@ -455,16 +455,61 @@ public class LibertyDiagnosticTest {
         invalid3.setRange(r(7, 25, 7, 35));
         invalid3.setMessage("ERROR: More than one version of platform javaee is included. Only one version of a platform may be specified.");
 
-        Diagnostic invalid5 = new Diagnostic();
-        invalid5.setRange(r(2, 24, 2, 33));
-        invalid5.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
-        invalid5.setMessage("ERROR: The feature \"batch-1.0\" does not support platforms[jax, jakartaee-9.1]. This feature only supports [javaee-7.0, javaee-8.0]");
-
         Diagnostic invalid4 = new Diagnostic();
         invalid4.setRange(r(8, 25, 8, 38));
         invalid4.setMessage("ERROR: jakartaee-9.1 conflicts with already included platform(s) [javaee-7.0, javaee-8.0]");
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
-                invalid1, invalid2, invalid3, invalid4, invalid5);
+                invalid1, invalid2, invalid3, invalid4);
+    }
 
+    @Test
+    public void testInvalidPlatformForVersionlessFeatureDiagnostic() throws BadLocationException {
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>servlet</feature>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        Diagnostic invalid1 = new Diagnostic();
+        invalid1.setRange(r(2, 24, 2, 31));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+        invalid1.setMessage("ERROR: Need to sepcify any platform or at least one versioned feature.");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
+
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>servlet</feature>", //
+                "               <feature>acmeCA-2.0</feature>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        invalid1 = new Diagnostic();
+        invalid1.setRange(r(2, 24, 2, 31));
+        invalid1.setMessage("ERROR: \"servlet\" cannot be used since there is no common platform for all versioned features.");
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
+
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>servlet</feature>", //
+                "               <feature>beanValidation-1.1</feature>", //
+                "               <feature>jsonb-2.0</feature>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        invalid1 = new Diagnostic();
+        invalid1.setRange(r(2, 24, 2, 31));
+        invalid1.setMessage("ERROR: \"servlet\" cannot be used since there is no common platform for all versioned features.");
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
     }
 }

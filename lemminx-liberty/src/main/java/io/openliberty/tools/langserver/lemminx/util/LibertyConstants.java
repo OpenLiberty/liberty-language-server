@@ -36,7 +36,7 @@ public final class LibertyConstants {
     // map to load description for features if description is not present in feature.json
     public static final HashMap<String, String> featureDescriptionMap = new HashMap<>() {{
         put("javaee-6.0", "Description: This feature combines the Liberty features that support the Java EE 6.0 Full Platform.");
-        put("microProfile-7.0", "Description: This feature combines the Liberty features that support MicroProfile 6.0 for Cloud Native Java.");
+        put("microProfile-7.0", "Description: This feature combines the Liberty features that support MicroProfile 7.0 for Cloud Native Java.");
     }};
 
     public static final HashMap<String, String> conflictingPlatforms = new HashMap<>() {{

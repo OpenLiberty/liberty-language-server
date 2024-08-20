@@ -566,28 +566,6 @@ public class FeatureService {
                 .anyMatch(platform -> platform.equalsIgnoreCase(platformName));
     }
 
-    /**
-     * get invalid platforms for a selected feature
-     *
-     * @param featureName       feature name
-     * @param selectedPlatforms list of already entered platforms
-     * @param libertyVersion    liberty version
-     * @param libertyRuntime    liberty run time
-     * @param requestDelay      request delay
-     * @param documentURI       document uri
-     * @return set of platforms
-     */
-    public Set<String> getInvalidPlatformsForFeature(String featureName, Set<String> selectedPlatforms, String libertyVersion, String libertyRuntime,
-                                                     int requestDelay, String documentURI) {
-        Set<String> invalidPlatforms = new HashSet<>(selectedPlatforms);
-        List<String> validPlatforms = this.getAllPlatformsForFeature(featureName, libertyVersion, libertyRuntime, requestDelay, documentURI);
-        if (Objects.nonNull(validPlatforms) && !validPlatforms.isEmpty()) {
-            validPlatforms.forEach(invalidPlatforms::remove);
-            return invalidPlatforms;
-        } else {
-            return new HashSet<>();
-        }
-    }
 
     /**
      * return all allowed platforms for a feature
@@ -605,5 +583,28 @@ public class FeatureService {
             return feature.get().getWlpInformation().getPlatforms();
         }
        return Collections.emptyList();
+    }
+
+    /**
+     *
+     * @param featureNames feature list
+     * @param libertyVersion liberty version
+     * @param libertyRuntime liberty runtime
+     * @param requestDelay request delay
+     * @param documentURI document uri
+     * @return
+     */
+    public List<String> getCommonPlatformsForFeatures(Set<String> featureNames, String libertyVersion, String libertyRuntime,
+                                                      int requestDelay, String documentURI) {
+        List<String> commonPlatforms = null;
+        for (String featureName : featureNames) {
+            List<String> platforms = this.getAllPlatformsForFeature(featureName, libertyVersion, libertyRuntime, requestDelay, documentURI);
+            if (commonPlatforms == null) {
+                commonPlatforms = platforms;
+            } else {
+                commonPlatforms.retainAll(platforms);
+            }
+        }
+        return commonPlatforms;
     }
 }
