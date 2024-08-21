@@ -12,7 +12,9 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx.util;
 
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.Map;
 
 public final class LibertyConstants {
     private LibertyConstants() {
@@ -34,13 +36,19 @@ public final class LibertyConstants {
     public static final String SERVER_CONFIG_DROPINS_OVERRIDES = "/configDropins/overrides/";
 
     // map to load description for features if description is not present in feature.json
-    public static final HashMap<String, String> featureDescriptionMap = new HashMap<>() {{
-        put("javaee-6.0", "Description: This feature combines the Liberty features that support the Java EE 6.0 Full Platform.");
-        put("microProfile-7.0", "Description: This feature combines the Liberty features that support MicroProfile 7.0 for Cloud Native Java.");
-    }};
+    public static final Map<String, String> platformDescriptionMap = Collections.unmodifiableMap(new HashMap<>() {{
+        put("javaee", "Description: This platform resolves the Liberty features that support the Java EE %s platform.");
+        put("jakartaee", "Description: This platform resolves the Liberty features that support the Jakarta EE %s platform.");
+        put("microprofile", "Description: This platform resolves the Liberty features that support the MicroProfile %s for Cloud Native Java platform.");
+    }});
 
-    public static final HashMap<String, String> conflictingPlatforms = new HashMap<>() {{
+    public static final Map<String, String> conflictingPlatforms = Collections.unmodifiableMap(new HashMap<>() {{
         put("javaee", "jakartaee");
         put("jakartaee", "javaee");
-    }};
+    }});
+
+    public static final Map<String, String> changedFeatureNameMap = Collections.unmodifiableMap(new HashMap<>() {{
+        put("jsp-", "pages-");
+        put("ejb-", "enterprisebeans-");
+    }});
 }

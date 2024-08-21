@@ -451,15 +451,23 @@ public class LibertyDiagnosticTest {
         invalid2.setRange(r(6, 25, 6, 35));
         invalid2.setMessage("ERROR: javaee-7.0 is already included.");
 
+
         Diagnostic invalid3 = new Diagnostic();
         invalid3.setRange(r(7, 25, 7, 35));
         invalid3.setMessage("ERROR: More than one version of platform javaee is included. Only one version of a platform may be specified.");
 
+        Diagnostic invalid5 = new Diagnostic();
+        invalid5.setRange(r(2, 24, 2, 33));
+        invalid5.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+        invalid5.setMessage("ERROR: \"batch-1.0\" cannot be used since selected platform(s) [javaee-7.0, javaee-8.0, jakartaee-9.1] do not match with supported platform(s) [javaee-7.0, javaee-8.0]");
+
         Diagnostic invalid4 = new Diagnostic();
         invalid4.setRange(r(8, 25, 8, 38));
         invalid4.setMessage("ERROR: jakartaee-9.1 conflicts with already included platform(s) [javaee-7.0, javaee-8.0]");
+
+
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
-                invalid1, invalid2, invalid3, invalid4);
+                invalid1, invalid2, invalid3, invalid4,invalid5);
     }
 
     @Test
@@ -474,7 +482,23 @@ public class LibertyDiagnosticTest {
         Diagnostic invalid1 = new Diagnostic();
         invalid1.setRange(r(2, 24, 2, 31));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
-        invalid1.setMessage("ERROR: Need to sepcify any platform or at least one versioned feature.");
+        invalid1.setMessage("ERROR: Need to specify any platform or at least one versioned feature.");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
+
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>servlet-3.1</feature>", //
+                "               <platform>jakartaee-9.1</platform>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        invalid1 = new Diagnostic();
+        invalid1.setRange(r(2, 24, 2, 35));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+        invalid1.setMessage("ERROR: \"servlet-3.1\" cannot be used since selected platform(s) [jakartaee-9.1] do not match with supported platform(s) [javaee-7.0]");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid1);
@@ -508,6 +532,63 @@ public class LibertyDiagnosticTest {
         invalid1.setRange(r(2, 24, 2, 31));
         invalid1.setMessage("ERROR: \"servlet\" cannot be used since there is no common platform for all versioned features.");
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
+    }
+
+    @Test
+    public void testInvalidPlatformForVersionedFeatureDiagnostic() throws BadLocationException {
+
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>servlet-3.1</feature>", //
+                "               <platform>jakartaee-9.1</platform>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        Diagnostic invalid1 = new Diagnostic();
+        invalid1.setRange(r(2, 24, 2, 35));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+        invalid1.setMessage("ERROR: \"servlet-3.1\" cannot be used since selected platform(s) [jakartaee-9.1] do not match with supported platform(s) [javaee-7.0]");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
+    }
+
+    @Test
+    public void testUnresolvedPlatformForVersionlessFeatureDiagnostic() throws BadLocationException {
+        //jdbc-4.0 only supports javaee-6.0 but servlet only supports javaee-7.0, javaee-8.0,jakartaee-9.1 and jakartaee-10.0
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>servlet</feature>", //
+                "               <feature>jdbc-4.0</feature>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        Diagnostic invalid1 = new Diagnostic();
+        invalid1.setRange(r(2, 24, 2, 31));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+        invalid1.setMessage("ERROR: The \"servlet\" versionless feature cannot be resolved");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
+
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>jsp</feature>", //
+                "               <platform>microProfile-1.2</platform>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+
+        invalid1 = new Diagnostic();
+        invalid1.setRange(r(2, 24, 2, 27));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+        invalid1.setMessage("ERROR: The \"jsp\" versionless feature cannot be resolved");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid1);

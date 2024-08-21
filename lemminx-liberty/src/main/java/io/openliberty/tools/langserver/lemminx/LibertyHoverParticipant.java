@@ -71,7 +71,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
         }
         if (LibertyConstants.PLATFORM_ELEMENT.equals(parentElement.getTagName())) {
             String platformName = request.getNode().getTextContent().trim();
-            return getHoverPlatformDescription(platformName, request.getXMLDocument());
+            return getHoverPlatformDescription(platformName);
         }
 
         return null;
@@ -81,29 +81,18 @@ public class LibertyHoverParticipant implements IHoverParticipant {
      * get description for platform from the feature json
      * there will be a feature with same shortname as platform.
      * @param platformName platform name
-     * @param xmlDocument xml document
      * @return hover
      */
-    private Hover getHoverPlatformDescription(String platformName, DOMDocument xmlDocument) {
-        LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(xmlDocument);
-        String libertyVersion = runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
-        String libertyRuntime = runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
-
-        final int requestDelay = SettingsService.getInstance().getRequestDelay();
-        // some feature descriptions are not found in features.json. adding them manually
-        if(LibertyConstants.featureDescriptionMap.containsKey(platformName)){
-            return new Hover(new MarkupContent("plaintext",LibertyConstants.featureDescriptionMap.get(platformName) ));
+    private Hover getHoverPlatformDescription(String platformName) {
+        String platformNameLowerCase = platformName.toLowerCase();
+        // strip off version number after the - so that we can provide all possible valid versions of a feature for completion
+        String featureNameToCompare = platformNameLowerCase.contains("-") ? platformNameLowerCase.substring(0, platformNameLowerCase.lastIndexOf("-")) : platformNameLowerCase;
+        String version = platformNameLowerCase.contains("-") ? platformNameLowerCase.substring(platformNameLowerCase.lastIndexOf("-") + 1) : "";
+        if (LibertyConstants.platformDescriptionMap.containsKey(featureNameToCompare)) {
+            return new Hover(new MarkupContent("plaintext",
+                    String.format(LibertyConstants.platformDescriptionMap.get(featureNameToCompare), version)));
         }
-        List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion, libertyRuntime, requestDelay, xmlDocument.getDocumentURI());
-        StringBuilder sb = new StringBuilder();
-        features.stream().filter(feature -> Objects.nonNull(feature.getWlpInformation()))
-                .filter(feature -> feature.getWlpInformation().getShortName().equals(platformName))
-                .forEach(feature -> {
-                    String description = feature.getShortDescription();
-                    sb.append("Description: ");
-                    sb.append(description);
-                });
-        return new Hover(new MarkupContent("plaintext", sb.toString()));
+        return null;
     }
 
     private Hover getFeatureDescription(String featureName, DOMDocument domDocument) {

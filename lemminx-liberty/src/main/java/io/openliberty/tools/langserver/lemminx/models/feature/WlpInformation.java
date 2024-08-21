@@ -31,6 +31,7 @@ public class WlpInformation {
     private String mavenCoordinates;
     private String shortName;
     private List<String> platforms;
+    private List<FeatureTolerate> requireFeatureWithTolerates;
 
     public WlpInformation(String shortName) {
         this.shortName = shortName;
@@ -156,5 +157,12 @@ public class WlpInformation {
         this.platforms = platform;
     }
 
+    public List<FeatureTolerate> getRequireFeatureWithTolerates() {
+        return requireFeatureWithTolerates;
+    }
+
+    public void setRequireFeatureWithTolerates(List<FeatureTolerate> requireFeatureWithTolerates) {
+        this.requireFeatureWithTolerates = requireFeatureWithTolerates;
+    }
 }
 

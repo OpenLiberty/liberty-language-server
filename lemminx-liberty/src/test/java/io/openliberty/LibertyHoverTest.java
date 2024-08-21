@@ -84,28 +84,12 @@ public class LibertyHoverTest {
                 String serverXML = String.join(newLine, //
                         "<server description=\"Sample Liberty server\">", //
                         "       <featureManager>", //
-                        "               <platform>j|avaee-7.0</platform>", //
-                        "       </featureManager>", //
-                        "</server>" //
-                );
-                XMLAssert.assertHover(serverXML, serverXMLURI,
-                        "Description: This feature combines the Liberty features that support the Java EE 7.0 Full Platform.",
-                        r(2, 25, 2, 35));
-
-        }
-
-        @Test
-        public void testPlatformHoverForLocal() throws BadLocationException {
-
-                String serverXML = String.join(newLine, //
-                        "<server description=\"Sample Liberty server\">", //
-                        "       <featureManager>", //
                         "               <platform>j|avaee-6.0</platform>", //
                         "       </featureManager>", //
                         "</server>" //
                 );
                 XMLAssert.assertHover(serverXML, serverXMLURI,
-                        "Description: This feature combines the Liberty features that support the Java EE 6.0 Full Platform.",
+                        "Description: This platform resolves the Liberty features that support the Java EE 6.0 platform.",
                         r(2, 25, 2, 35));
 
         }
