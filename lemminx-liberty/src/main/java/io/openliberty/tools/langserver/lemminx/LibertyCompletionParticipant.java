@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2023 IBM Corporation and others.
+* Copyright (c) 2023, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -15,6 +15,8 @@ package io.openliberty.tools.langserver.lemminx;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lemminx.dom.DOMDocument;
@@ -72,6 +74,38 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
                     existingFeatures, featureName, featureMgrNode);
             featureCompletionItems.stream().forEach(item -> response.addCompletionItem(item));
         }
+        if (parentElement.getTagName().equals(LibertyConstants.PLATFORM_ELEMENT)) {
+            buildPlatformCompletionItems(request, response, parentElement);
+        }
+    }
+
+    /**
+     * build completion items for platforms
+     * @param request request
+     * @param response response
+     * @param parentElement parent element xml dom
+     */
+    private static void buildPlatformCompletionItems(ICompletionRequest request, ICompletionResponse response, DOMElement parentElement) {
+        DOMNode platformTextNode = (DOMNode) parentElement.getChildNodes().item(0);
+        String platformName = platformTextNode != null ? platformTextNode.getTextContent() : null;
+        LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(request.getXMLDocument());
+        String libertyVersion =  runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
+        String libertyRuntime =  runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
+
+        final int requestDelay = SettingsService.getInstance().getRequestDelay();
+        //get all platforms
+        Set<String> platforms = FeatureService.getInstance().getAllPlatforms(libertyVersion, libertyRuntime, requestDelay,
+                request.getXMLDocument().getDocumentURI());
+        platforms.stream().filter(it->(Objects.isNull(platformName) || it.contains(platformName)))
+                .forEach(item -> {
+                    Range range = XMLPositionUtility.createRange(parentElement.getStartTagCloseOffset() + 1,
+                            parentElement.getEndTagOpenOffset(), request.getXMLDocument());
+                    Either<TextEdit, InsertReplaceEdit> edit = Either.forLeft(new TextEdit(range, item));
+                    CompletionItem completionItem = new CompletionItem();
+                    completionItem.setLabel(item);
+                    completionItem.setTextEdit(edit);
+                    response.addCompletionItem(completionItem);
+                });
     }
 
     private CompletionItem buildFeatureCompletionItem(Feature feature, DOMElement featureElement,
