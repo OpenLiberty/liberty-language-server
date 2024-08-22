@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import javax.xml.XMLConstants;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -50,38 +51,50 @@ public class XmlReader {
         return hasServerRoot(filePath.toFile());
     }
 
-    public static boolean hasServerRoot(File xmlFile) {
+    private static boolean hasServerRoot(File xmlFile) {
         if (!xmlFile.exists() || xmlFile.length() == 0) {
             return false;
         }
         
         try {
             XMLInputFactory factory = getXmlInputFactory();
-
-            XMLEventReader reader = null;
-
-            try (FileInputStream fis = new FileInputStream(xmlFile)) {
-                reader = factory.createXMLEventReader(fis);
-                while (reader.hasNext()) {
-                    XMLEvent nextEvent = reader.nextEvent();
-                    if (nextEvent.isStartElement()) {
-                        return isServerElement(nextEvent);
-                    }
-                }
-            } catch (XMLStreamException | FileNotFoundException e) {
-                LOGGER.severe("Error received trying to read XML file: " + xmlFile.getAbsolutePath()); 
-            } finally {
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (Exception ignored) {   
-                    }
-                }
-            }            
+            return hasSeverRootValues(factory,xmlFile);
         } catch (Exception e) {
             LOGGER.severe("Unable to access XML file "+ xmlFile.getAbsolutePath());
         }
 
+        return false;
+    }
+
+    private static boolean hasSeverRootValues(XMLInputFactory factory, File xmlFile) {
+        XMLEventReader reader=null;
+        FileInputStream fis = null;
+        try {
+            fis = new FileInputStream(xmlFile);
+
+            reader = factory.createXMLEventReader(fis);
+            while (reader.hasNext()) {
+                XMLEvent nextEvent = reader.nextEvent();
+                if (nextEvent.isStartElement()) {
+                    return isServerElement(nextEvent);
+                }
+            }
+        } catch (XMLStreamException | FileNotFoundException e) {
+            LOGGER.severe("Error received trying to read XML file: " + xmlFile.getAbsolutePath());
+        } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (Exception ignored) {
+                }
+            }
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception ignored) {
+                }
+            }
+        }
         return false;
     }
 
@@ -92,6 +105,10 @@ public class XmlReader {
             factory.setProperty(XMLInputFactory.IS_SUPPORTING_EXTERNAL_ENTITIES, Boolean.FALSE);
             factory.setProperty(XMLInputFactory.SUPPORT_DTD, Boolean.FALSE);
             factory.setProperty(XMLInputFactory.IS_REPLACING_ENTITY_REFERENCES, Boolean.FALSE);
+            // XMLConstants.ACCESS_EXTERNAL_DTD an empty string to deny all access to external references;
+            factory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            // XMLConstants.ACCESS_EXTERNAL_SCHEMA uses an empty string to deny all access to external references;
+            factory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
         } catch (Exception e) {
             LOGGER.warning("Could not set properties on XMLInputFactory.");
         }
@@ -114,10 +131,18 @@ public class XmlReader {
         }
         Map<String, String> returnValues = new HashMap<String, String> ();
 
-        XMLInputFactory factory = XMLInputFactory.newInstance();
+        XMLInputFactory factory = getXmlInputFactory();
+        readElementValues(file, elementNames, factory, returnValues);
+        return returnValues;
+    }
+
+    private static void readElementValues(Path file, Set<String> elementNames, XMLInputFactory factory, Map<String, String> returnValues) {
         XMLEventReader reader = null;
+        FileInputStream fis = null;
         try {
-            reader = factory.createXMLEventReader(new FileInputStream(file.toFile()));
+            fis = new FileInputStream(file.toFile());
+            reader = factory.createXMLEventReader(fis);
+
             while (reader.hasNext()) {
                 XMLEvent event = reader.nextEvent();
                 if (!event.isStartElement()) {
@@ -131,21 +156,25 @@ public class XmlReader {
                         returnValues.put(elementName, value.getData());
                     }
                 }
-            } 
+            }
         } catch (FileNotFoundException e) {
             LOGGER.severe("Unable to access file "+ file.toFile().getName());
         } catch (XMLStreamException e) {
             LOGGER.severe("Error received trying to read XML file " + file.toFile().getName() + " : "+e.getMessage());
         } finally {
+            if (fis != null) {
+                try {
+                    fis.close();
+                } catch (Exception ignored) {
+                }
+            }
             if (reader != null) {
                 try {
                     reader.close();
-                } catch (Exception ignored) {   
+                } catch (Exception ignored) {
                 }
             }
         }
-
-        return returnValues;
     }
 
     protected static String getElementName(XMLEvent event) {
