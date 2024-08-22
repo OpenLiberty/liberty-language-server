@@ -104,8 +104,8 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
                     CompletionItem completionItem = new CompletionItem();
                     completionItem.setLabel(item);
                     completionItem.setTextEdit(edit);
-                    String platformNameNoVersion = item.contains("-") ? item.substring(0, item.lastIndexOf("-"))
-                            : item;
+                    String platformNameNoVersion = item.contains("-") ? item.substring(0, item.lastIndexOf("-")).toLowerCase()
+                            : item.toLowerCase();
                     if (LibertyConstants.platformDescriptionMap.containsKey(platformNameNoVersion)) {
                         String version = item.contains("-") ? item.substring(item.lastIndexOf("-") + 1) : "";
                         completionItem.setDocumentation(String.format(LibertyConstants.platformDescriptionMap.get(platformNameNoVersion),version));
