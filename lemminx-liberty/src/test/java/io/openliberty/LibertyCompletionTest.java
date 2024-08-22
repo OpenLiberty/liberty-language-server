@@ -95,9 +95,46 @@ public class LibertyCompletionTest {
                         "</server>" //
                 );
 
-                final int TOTAL_ITEMS = 23; // total number of available completion items
+                // total number of available completion items
+                // 3 for javaee
+                //3 for jakartaee
+                //15 for microprofile
+                // one for CDATA and one for <-
+                final int TOTAL_ITEMS = 23;
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS);
+
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <platform>java|</platform>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+                CompletionItem javaee6Completeion = c("javaee-6.0", "javaee-6.0");
+                CompletionItem javaee7Completeion = c("javaee-7.0", "javaee-7.0");
+                CompletionItem javaee8Completeion = c("javaee-8.0", "javaee-8.0");
+
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 5,
+                        javaee6Completeion, javaee7Completeion, javaee8Completeion);
+
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <platform>jakarta|</platform>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 5);
+
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <platform>micro|</platform>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 17);
         }
 
 }

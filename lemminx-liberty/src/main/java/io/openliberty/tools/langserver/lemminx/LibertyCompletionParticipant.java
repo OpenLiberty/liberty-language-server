@@ -107,7 +107,8 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
                     String platformNameNoVersion = item.contains("-") ? item.substring(0, item.lastIndexOf("-"))
                             : item;
                     if (LibertyConstants.platformDescriptionMap.containsKey(platformNameNoVersion)) {
-                        completionItem.setDocumentation(LibertyConstants.platformDescriptionMap.get(platformNameNoVersion));
+                        String version = item.contains("-") ? item.substring(item.lastIndexOf("-") + 1) : "";
+                        completionItem.setDocumentation(String.format(LibertyConstants.platformDescriptionMap.get(platformNameNoVersion),version));
                     }
                     response.addCompletionItem(completionItem);
                 });
