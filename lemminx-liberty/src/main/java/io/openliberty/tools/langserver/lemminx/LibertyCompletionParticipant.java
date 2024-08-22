@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2023, 2024 IBM Corporation and others.
+* Copyright (c) 2020, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -74,8 +74,8 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
                     existingFeatures, featureName, featureMgrNode);
             featureCompletionItems.stream().forEach(item -> response.addCompletionItem(item));
         }
-        if (parentElement.getTagName().equals(LibertyConstants.PLATFORM_ELEMENT)) {
-            buildPlatformCompletionItems(request, response, parentElement);
+        else if (parentElement.getTagName().equals(LibertyConstants.PLATFORM_ELEMENT)) {
+            this.buildPlatformCompletionItems(request, response, parentElement);
         }
     }
 
@@ -85,7 +85,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
      * @param response response
      * @param parentElement parent element xml dom
      */
-    private static void buildPlatformCompletionItems(ICompletionRequest request, ICompletionResponse response, DOMElement parentElement) {
+    private void buildPlatformCompletionItems(ICompletionRequest request, ICompletionResponse response, DOMElement parentElement) {
         DOMNode platformTextNode = (DOMNode) parentElement.getChildNodes().item(0);
         String platformName = platformTextNode != null ? platformTextNode.getTextContent() : null;
         LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(request.getXMLDocument());
@@ -104,6 +104,11 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
                     CompletionItem completionItem = new CompletionItem();
                     completionItem.setLabel(item);
                     completionItem.setTextEdit(edit);
+                    String platformNameNoVersion = item.contains("-") ? item.substring(0, item.lastIndexOf("-"))
+                            : item;
+                    if (LibertyConstants.platformDescriptionMap.containsKey(platformNameNoVersion)) {
+                        completionItem.setDocumentation(LibertyConstants.platformDescriptionMap.get(platformNameNoVersion));
+                    }
                     response.addCompletionItem(completionItem);
                 });
     }

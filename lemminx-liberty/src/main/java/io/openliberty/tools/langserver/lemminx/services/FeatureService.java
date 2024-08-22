@@ -270,7 +270,8 @@ public class FeatureService {
         for (String nextFeatureName : featureNamesLowerCase) {
             if (existingFeatures.contains(nextFeatureName)) {
                 // collect feature name minus version number to know which other features to exclude
-                String featureNameMinusVersion = nextFeatureName.substring(0, nextFeatureName.lastIndexOf("-") + 1);
+                String featureNameMinusVersion = nextFeatureName.contains("-") ?
+                        nextFeatureName.substring(0, nextFeatureName.lastIndexOf("-") + 1) : nextFeatureName;
                 featuresWithoutVersionsToExclude.add(featureNameMinusVersion);
             }
         }
@@ -278,11 +279,14 @@ public class FeatureService {
         List<Feature> replacementFeatures = new ArrayList<Feature>();
         String featureNameLowerCase = featureName.toLowerCase();
 
-        for (int i=0; i < featureNamesLowerCase.size(); i++) {
+        for (int i = 0; i < featureNamesLowerCase.size(); i++) {
             String nextFeatureName = featureNamesLowerCase.get(i);
-            if (nextFeatureName.contains(featureNameLowerCase) && (!nextFeatureName.contains("-") || 
-                !featuresWithoutVersionsToExclude.contains(nextFeatureName.substring(0, nextFeatureName.lastIndexOf("-") + 1)))) {
+            if (nextFeatureName.contains(featureNameLowerCase)) {
+                String comparingFeatureName = nextFeatureName.contains("-") ?
+                        nextFeatureName.substring(0, nextFeatureName.lastIndexOf("-") + 1) : nextFeatureName+"-";
+                if (!featuresWithoutVersionsToExclude.contains(comparingFeatureName)) {
                     replacementFeatures.add(features.get(i));
+                }
             }
         }
 
@@ -625,8 +629,8 @@ public class FeatureService {
         Optional<Feature> feature = this.getFeature(featureName, libertyVersion, libertyRuntime, requestDelay, documentURI);
         Set<String> featureNames = new HashSet<>();
         if (feature.isPresent()) {
-            addRequiredFeatureNames(feature.get(), featureNames);
-            addRequireTolerateFeatureNames(feature.get(), featureNames);
+            this.addRequiredFeatureNames(feature.get(), featureNames);
+            this.addRequireTolerateFeatureNames(feature.get(), featureNames);
         }
         return featureNames.stream()
                 .map(f -> getAllPlatformsForFeature(f, libertyVersion, libertyRuntime, requestDelay, documentURI))
@@ -638,7 +642,7 @@ public class FeatureService {
      * @param feature current feature
      * @param featureNames feature name list
      */
-    private static void addRequireTolerateFeatureNames(Feature feature, Set<String> featureNames) {
+    private void addRequireTolerateFeatureNames(Feature feature, Set<String> featureNames) {
         List<FeatureTolerate> featureTolerates = feature.getWlpInformation().getRequireFeatureWithTolerates();
 
         for(FeatureTolerate featureTolerate: featureTolerates) {
@@ -668,7 +672,7 @@ public class FeatureService {
      * @param feature current feature
      * @param requiredFeatureNames required feature name array
      */
-    private static void addRequiredFeatureNames(Feature feature, Set<String> requiredFeatureNames) {
+    private void addRequiredFeatureNames(Feature feature, Set<String> requiredFeatureNames) {
         ArrayList<String> requireFeatures = feature.getWlpInformation().getRequireFeature();
 
         for(String requireFeature: requireFeatures) {

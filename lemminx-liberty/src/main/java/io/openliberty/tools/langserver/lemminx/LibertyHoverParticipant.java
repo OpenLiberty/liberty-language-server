@@ -85,12 +85,12 @@ public class LibertyHoverParticipant implements IHoverParticipant {
      */
     private Hover getHoverPlatformDescription(String platformName) {
         String platformNameLowerCase = platformName.toLowerCase();
-        // strip off version number after the - so that we can provide all possible valid versions of a feature for completion
-        String featureNameToCompare = platformNameLowerCase.contains("-") ? platformNameLowerCase.substring(0, platformNameLowerCase.lastIndexOf("-")) : platformNameLowerCase;
+        // strip off version number after the - so that we can provide all possible valid versions of a platform for completion
+        String platformNameToCompare = platformNameLowerCase.contains("-") ? platformNameLowerCase.substring(0, platformNameLowerCase.lastIndexOf("-")) : platformNameLowerCase;
         String version = platformNameLowerCase.contains("-") ? platformNameLowerCase.substring(platformNameLowerCase.lastIndexOf("-") + 1) : "";
-        if (LibertyConstants.platformDescriptionMap.containsKey(featureNameToCompare)) {
+        if (LibertyConstants.platformDescriptionMap.containsKey(platformNameToCompare)) {
             return new Hover(new MarkupContent("plaintext",
-                    String.format(LibertyConstants.platformDescriptionMap.get(featureNameToCompare), version)));
+                    String.format(LibertyConstants.platformDescriptionMap.get(platformNameToCompare), version)));
         }
         return null;
     }

@@ -83,7 +83,11 @@ public class LibertyCompletionTest {
         }
 
         // Tests the
+<<<<<<< versionless_feature_1.0
+        // availability of platform completion
+=======
         // availability of feature completion
+>>>>>>> versionless_feature_1.0
         @Test
         public void testPlatformCompletionItem() throws BadLocationException {
                 String serverXML = String.join(newLine, //
