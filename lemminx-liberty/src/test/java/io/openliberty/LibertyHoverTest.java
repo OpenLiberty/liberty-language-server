@@ -92,5 +92,27 @@ public class LibertyHoverTest {
                         "Description: This platform resolves the Liberty features that support the Java EE 6.0 platform.",
                         r(2, 25, 2, 35));
 
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <platform>j|akartaee-10.0</platform>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+                XMLAssert.assertHover(serverXML, serverXMLURI,
+                        "Description: This platform resolves the Liberty features that support the Jakarta EE 10.0 platform.",
+                        r(2, 25, 2, 39));
+
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <platform>mi|croProfile-1.2/platform>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+                XMLAssert.assertHover(serverXML, serverXMLURI,
+                        "Description: This platform resolves the Liberty features that support the MicroProfile 1.2/platform> for Cloud Native Java platform.",
+                        r(2, 25, 3, 7));
+
         }
 }

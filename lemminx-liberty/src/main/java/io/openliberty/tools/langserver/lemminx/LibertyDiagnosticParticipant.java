@@ -12,6 +12,7 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx;
 
+import com.google.common.collect.Sets;
 import org.eclipse.lemminx.dom.DOMAttr;
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.dom.DOMNode;
@@ -93,7 +94,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             String nodeName = node.getNodeName();
             if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(nodeName)) {
                 featureManagerPresent = true;
-                validateFeature(domDocument, diagnosticsList, node, includedFeatures);
+                validFeaturesAndPlatforms(domDocument, diagnosticsList, node, includedFeatures);
             } else if (LibertyConstants.INCLUDE_ELEMENT.equals(nodeName)) {
                 validateIncludeLocation(domDocument, diagnosticsList, node);
             } else if (featureGraph.isConfigElement(nodeName)) {    // defaults to false
@@ -103,7 +104,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         validateConfigElements(domDocument, diagnosticsList, tempDiagnosticsList, featureGraph, includedFeatures, featureManagerPresent);
     }
 
-    private void validateFeature(DOMDocument domDocument, List<Diagnostic> list, DOMNode featureManager, Set<String> includedFeatures) {
+    private void validFeaturesAndPlatforms(DOMDocument domDocument, List<Diagnostic> list, DOMNode featureManager, Set<String> includedFeatures) {
 
         LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
         String libertyVersion = runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
@@ -292,7 +293,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      * @param selectedPlatformsWithoutVersion platforms in xml without version
      * @param selectedPlatforms platforms in xml
      */
-    private static void validatePlatform(DOMDocument domDocument, List<Diagnostic> list, DOMNode featureTextNode, Set<String> selectedPlatformsWithoutVersion,
+    private void validatePlatform(DOMDocument domDocument, List<Diagnostic> list, DOMNode featureTextNode, Set<String> selectedPlatformsWithoutVersion,
                                          Set<String> selectedPlatforms) {
         LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
         String libertyVersion = runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
@@ -318,7 +319,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 if (!conflictingPlatforms.isEmpty()) {
                     Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
                             featureTextNode.getEnd(), domDocument);
-                    String message = "ERROR: " + platformName + " conflicts with already included platform(s) " + conflictingPlatforms;
+                    conflictingPlatforms.add(platformName);
+                    String message = "ERROR: The following configured platform versions are in conflict " + conflictingPlatforms;
                     list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
                 }
                 selectedPlatformsWithoutVersion.add(platformNoVersionLower);
@@ -341,7 +343,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      * @param platformName
      * @param platformNoVersionLower
      */
-    private static void checkForPlatformUniqueness(DOMDocument domDocument, List<Diagnostic> list, DOMNode featureTextNode, Set<String> selectedPlatformsWithoutVersion, Set<String> selectedPlatforms, String platformNameLowerCase, String platformName, String platformNoVersionLower) {
+    private void checkForPlatformUniqueness(DOMDocument domDocument, List<Diagnostic> list, DOMNode featureTextNode, Set<String> selectedPlatformsWithoutVersion, Set<String> selectedPlatforms, String platformNameLowerCase, String platformName, String platformNoVersionLower) {
         if (selectedPlatforms.contains(platformNameLowerCase)) {
             Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
                     featureTextNode.getEnd(), domDocument);
@@ -362,7 +364,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      * @param selectedPlatforms
      * @return
      */
-    private static Set<String> getConflictingPlatforms(String platformNoVersionLower, Set<String> selectedPlatforms) {
+    private Set<String> getConflictingPlatforms(String platformNoVersionLower, Set<String> selectedPlatforms) {
         if(LibertyConstants.conflictingPlatforms.containsKey(platformNoVersionLower)){
             String conflictingPlatformName = LibertyConstants.conflictingPlatforms.get(platformNoVersionLower);
             return selectedPlatforms.stream()
@@ -381,7 +383,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      * @param selectedPlatforms
      * @param versionedFeatures
      */
-    private static void checkForPlatFormAndFeature(DOMDocument domDocument, List<Diagnostic> list, Set<String> versionlessFeatures, List<DOMNode> features, Set<String> selectedPlatforms, Set<String> versionedFeatures) {
+    private void checkForPlatFormAndFeature(DOMDocument domDocument, List<Diagnostic> list, Set<String> versionlessFeatures, List<DOMNode> features, Set<String> selectedPlatforms, Set<String> versionedFeatures) {
 
             for (DOMNode featureNode : features) {
                 DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
@@ -389,11 +391,10 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                         && featureTextNode != null && featureTextNode.getTextContent() != null) {
                     String featureName = featureTextNode.getTextContent().trim();
                     String featureNameLower = featureName.toLowerCase();
-                    if (!featureNameLower.contains("-")&& versionlessFeatures.contains(featureName)) {
+                    if (versionlessFeatures.contains(featureName)) {
                         // versionless feature
                         validateVersionLessFeatures(domDocument, list, selectedPlatforms, versionedFeatures, featureTextNode, featureName);
-                    }
-                    else if(featureNameLower.contains("-") && versionedFeatures.contains(featureName)){
+                    } else {
                         validateVersionedFeatures(domDocument, list, selectedPlatforms, versionedFeatures, featureTextNode, featureName);
                     }
                 }
@@ -411,7 +412,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      * @param featureTextNode
      * @param featureName
      */
-    private static void validateVersionedFeatures(DOMDocument domDocument, List<Diagnostic> list, Set<String> selectedPlatforms, Set<String> versionedFeatures, DOMNode featureTextNode, String featureName) {
+    private void validateVersionedFeatures(DOMDocument domDocument, List<Diagnostic> list, Set<String> selectedPlatforms, Set<String> versionedFeatures, DOMNode featureTextNode, String featureName) {
         // if any platform is selected, it should be allowed for all features, otherwise throw error
         LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
         String libertyVersion = runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
@@ -422,7 +423,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         if (commonPlatforms != null && !commonPlatforms.isEmpty() && !commonPlatforms.containsAll(selectedPlatforms)) {
             Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
                     domDocument);
-            String message = "ERROR: \"" + featureName + "\" cannot be used since selected platform(s) " + selectedPlatforms + " do not match with supported platform(s) " + commonPlatforms;
+            commonPlatforms.addAll(selectedPlatforms);
+            String message = "ERROR: The following configured platform versions are in conflict " + commonPlatforms;
             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
         }
     }
@@ -445,7 +447,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      * @param versionLessFeatureTextNode
      * @param featureName
      */
-    private static void validateVersionLessFeatures(DOMDocument domDocument, List<Diagnostic> list, Set<String> selectedPlatforms, Set<String> versionedFeatures,DOMNode versionLessFeatureTextNode, String featureName) {
+    private void validateVersionLessFeatures(DOMDocument domDocument, List<Diagnostic> list, Set<String> selectedPlatforms, Set<String> versionedFeatures,DOMNode versionLessFeatureTextNode, String featureName) {
         LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
         String libertyVersion = runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
         String libertyRuntime = runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
@@ -485,13 +487,13 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      * @param libertyRuntime
      * @param requestDelay
      */
-    private static void checkForVersionlessPlatforms(DOMDocument domDocument, List<Diagnostic> list, Set<String> selectedPlatforms, DOMNode versionLessFeatureTextNode, String featureName, String libertyVersion, String libertyRuntime, int requestDelay) {
+    private void checkForVersionlessPlatforms(DOMDocument domDocument, List<Diagnostic> list, Set<String> selectedPlatforms, DOMNode versionLessFeatureTextNode, String featureName, String libertyVersion, String libertyRuntime, int requestDelay) {
         Set<String> allPlatforrmsForVersionLess = FeatureService.getInstance()
                 .getAllPlatformsForVersionLessFeature(featureName, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
-        if (!allPlatforrmsForVersionLess.containsAll(selectedPlatforms)) {
+        if (Sets.intersection(allPlatforrmsForVersionLess, selectedPlatforms).isEmpty() ){
             Range range = XMLPositionUtility.createRange(versionLessFeatureTextNode.getStart(), versionLessFeatureTextNode.getEnd(),
                     domDocument);
-            String message = "ERROR: The \"" + featureName + "\" versionless feature cannot be resolved";
+            String message = "ERROR: The \"" + featureName + "\" versionless feature cannot be resolved. Specify a platform or a feature with a version to enable resolution.";
             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
         }
     }
@@ -509,7 +511,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      * @param requestDelay
      * @return
      */
-    private static Set<String> checkForCommonPlatforms(DOMDocument domDocument, Set<String> versionedFeatures, String libertyVersion, String libertyRuntime, int requestDelay) {
+    private Set<String> checkForCommonPlatforms(DOMDocument domDocument, Set<String> versionedFeatures, String libertyVersion, String libertyRuntime, int requestDelay) {
         Set<String> commonPlatforms = FeatureService.getInstance()
                 .getCommonPlatformsForFeatures(versionedFeatures, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
 
