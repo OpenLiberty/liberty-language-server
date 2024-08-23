@@ -38,7 +38,7 @@ public class LibertyDiagnosticTest {
     static String newLine = System.lineSeparator();
 
     static File srcResourcesDir = new File("src/test/resources/sample");
-    static File featureList = new File("src/test/resources/featurelist-ol-23.0.0.1-beta.xml");
+    static File featureList = new File("src/test/resources/featurelist-ol-24.0.0.8.xml");
     static String serverXMLURI = new File(srcResourcesDir, "test/server.xml").toURI().toString();
     static String sampleserverXMLURI = new File(srcResourcesDir, "sample-server.xml").toURI().toString();
     static List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
@@ -353,8 +353,7 @@ public class LibertyDiagnosticTest {
         List<String> featuresToAdd = new ArrayList<String>();
         featuresToAdd.add("springBoot-1.5");
         featuresToAdd.add("springBoot-2.0");
-        // commented because featurelist-24.0.0.8.xml does not contain sringboot-3.0
-        //featuresToAdd.add("springBoot-3.0");
+        featuresToAdd.add("springBoot-3.0");
         Collections.sort(featuresToAdd);
 
         List<CodeAction> codeActions = new ArrayList<CodeAction>();
@@ -371,7 +370,7 @@ public class LibertyDiagnosticTest {
         }
 
         XMLAssert.testCodeActionsFor(serverXML, sampleserverXMLURI, config_for_missing_feature, (String) null,
-                codeActions.get(0), codeActions.get(1));
+                codeActions.get(0), codeActions.get(1), codeActions.get(2));
 
     }
 
