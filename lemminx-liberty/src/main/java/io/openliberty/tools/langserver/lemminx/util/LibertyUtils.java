@@ -539,4 +539,23 @@ public class LibertyUtils {
             LOGGER.warning("Unable to watch properties file(s): " + e.getMessage());
         }
     }
+
+    /**
+     * Get version# for a platform or feature
+     * @param item feature/platform name
+     * @return versionNumber
+     */
+    public static String getVersion(String item) {
+        return item.contains("-") ? item.substring(item.lastIndexOf("-") + 1) : "";
+    }
+
+    /**
+     * strip of platform version or feature version
+     * @param stringWithVersion platform name of feature name
+     * @return versionless name
+     */
+    public static String stripVersion(String stringWithVersion) {
+        return stringWithVersion.contains("-") ? stringWithVersion.substring(0, stringWithVersion.lastIndexOf("-"))
+                : stringWithVersion;
+    }
 }
