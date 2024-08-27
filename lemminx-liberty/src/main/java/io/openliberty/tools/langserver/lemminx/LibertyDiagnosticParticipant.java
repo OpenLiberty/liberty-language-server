@@ -456,7 +456,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         if (versionedFeatures.isEmpty() && preferredPlatforms.isEmpty()) {
             Range range = XMLPositionUtility.createRange(versionLessFeatureTextNode.getStart(),
                     versionLessFeatureTextNode.getEnd(), domDocument);
-            String message = "ERROR: Need to specify any platform or at least one versioned feature.";
+                String message = "ERROR: The " + featureName + " versionless feature cannot be resolved. Specify a platform or a feature with a version to enable resolution.";
             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
         } else if (!versionedFeatures.isEmpty() && preferredPlatforms.isEmpty()) {
             Set<String> commonPlatforms = FeatureService.getInstance()
@@ -475,38 +475,33 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
             }
             else{
-                checkForVersionlessPlatforms(domDocument, list, commonPlatforms, versionLessFeatureTextNode, featureName);
+                checkForVersionlessPlatforms(domDocument, list, commonPlatforms, versionLessFeatureTextNode, featureName, false);
             }
         }
         if (!preferredPlatforms.isEmpty()) {
-            checkForVersionlessPlatforms(domDocument, list, preferredPlatforms, versionLessFeatureTextNode, featureName);
+            checkForVersionlessPlatforms(domDocument, list, preferredPlatforms, versionLessFeatureTextNode, featureName,true);
         }
     }
 
-    /**
-     * check all platforms for versionless features
-     * @param domDocument
-     * @param list
-     * @param preferredPlatforms
-     * @param versionLessFeatureTextNode
-     * @param featureName
-     * @param libertyVersion
-     * @param libertyRuntime
-     * @param requestDelay
-     */
+
     private void checkForVersionlessPlatforms(DOMDocument domDocument,
-                                              List<Diagnostic> list, Set<String> preferredPlatforms,
-                                              DOMNode versionLessFeatureTextNode, String featureName) {
+                                              List<Diagnostic> list, Set<String> platformsToCompare,
+                                              DOMNode versionLessFeatureTextNode, String featureName, boolean isPlatformFromXml) {
         LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
         String libertyVersion = runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
         String libertyRuntime = runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
         Set<String> allPlatforrmsForVersionLess = FeatureService.getInstance()
                 .getAllPlatformsForVersionLessFeature(featureName, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
-        if (Sets.intersection(allPlatforrmsForVersionLess, preferredPlatforms).isEmpty() ){
+        if (Sets.intersection(allPlatforrmsForVersionLess, platformsToCompare).isEmpty()) {
+            String message;
+            if (isPlatformFromXml) {
+                message = "ERROR: The \"" + featureName + "\" versionless feature does not have a configured platform.";
+            } else {
+                message = "ERROR: The \"" + featureName + "\" versionless feature configured platforms cannot be resolved with selected versioned features. Specify a platform or a feature with a version to enable resolution.";
+            }
             Range range = XMLPositionUtility.createRange(versionLessFeatureTextNode.getStart(), versionLessFeatureTextNode.getEnd(),
                     domDocument);
-            String message = "ERROR: The \"" + featureName + "\" versionless feature cannot be resolved. Specify a platform or a feature with a version to enable resolution.";
             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
         }
     }

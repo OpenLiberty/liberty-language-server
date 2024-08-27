@@ -271,7 +271,7 @@ public class FeatureService {
             if (existingFeatures.contains(nextFeatureName)) {
                 // collect feature name minus version number to know which other features to exclude
                 String featureNameMinusVersion = nextFeatureName.contains("-") ?
-                        nextFeatureName.substring(0, nextFeatureName.lastIndexOf("-") + 1) : nextFeatureName;
+                        nextFeatureName.substring(0, nextFeatureName.lastIndexOf("-") + 1) : nextFeatureName + "-";
                 featuresWithoutVersionsToExclude.add(featureNameMinusVersion);
             }
         }
@@ -283,7 +283,7 @@ public class FeatureService {
             String nextFeatureName = featureNamesLowerCase.get(i);
             if (nextFeatureName.contains(featureNameLowerCase)) {
                 String comparingFeatureName = nextFeatureName.contains("-") ?
-                        nextFeatureName.substring(0, nextFeatureName.lastIndexOf("-") + 1) : nextFeatureName+"-";
+                        nextFeatureName.substring(0, nextFeatureName.lastIndexOf("-") + 1) : nextFeatureName + "-";
                 if (!featuresWithoutVersionsToExclude.contains(comparingFeatureName)) {
                     replacementFeatures.add(features.get(i));
                 }

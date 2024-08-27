@@ -48,12 +48,11 @@ public final class LibertyConstants {
     }});
 
     public static final Map<String, String> changedFeatureNameMap = Collections.unmodifiableMap(new HashMap<>() {{
-        put("jsp-", "pages-");
         put("jaspic-", "appAuthentication-");
         put("jacc-", "appAuthorization-");
         put("jca-", "connectors-");
         put("jcaInboundSecurity-", "connectorsInboundSecurity-");
-        put("ejb-", "enterprisebeans-");
+        put("ejb-", "enterpriseBeans-");
         put("ejbHome-", "enterpriseBeansHome-");
         put("ejbLite-", "enterpriseBeansLite-");
         put("ejbPersistentTimer-", "enterpriseBeansPersistentTimer-");
@@ -62,15 +61,14 @@ public final class LibertyConstants {
         put("jsf-", "faces-");
         put("javaMail-", "mail-");
         put("jms-", "messaging-");
-        put("jpa-", "enterprisebeans-");
-        put("ejb-", "persistence-");
+        put("jpa-", "persistence-");
         put("jaxrs-", "restfulWS-");
         put("jaxrsClient-", "restfulWSClient-");
+        put("jsp-", "pages-");
         put("jaxb-", "xmlBinding-");
         put("jaxws-", "xmlWS-");
         put("wasJmsServer-", "messagingServer-");
-        put("wasJmsClient-", "enterprisebeans-");
-        put("ejb-", "messagingClient-");
+        put("wasJmsClient-", "messagingClient-");
         put("wasJmsSecurity-", "messagingSecurity-");
     }});
 }

@@ -40,6 +40,7 @@ import io.openliberty.tools.langserver.lemminx.services.ContainerService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
+import org.eclipse.lsp4j.CompletionItem;
 
 public class LibertyUtils {
 
@@ -557,5 +558,20 @@ public class LibertyUtils {
     public static String stripVersion(String stringWithVersion) {
         return stringWithVersion.contains("-") ? stringWithVersion.substring(0, stringWithVersion.lastIndexOf("-"))
                 : stringWithVersion;
+    }
+
+
+    /**
+     * get platform description
+     * @param platformItem platform item
+     * @return description
+     */
+    public static String getPlatformDescription(String platformItem) {
+        String platformNameNoVersion = LibertyUtils.stripVersion(platformItem).toLowerCase();
+        if (LibertyConstants.platformDescriptionMap.containsKey(platformNameNoVersion)) {
+            String version = getVersion(platformItem);
+            return String.format(LibertyConstants.platformDescriptionMap.get(platformNameNoVersion), version);
+        }
+        return null;
     }
 }

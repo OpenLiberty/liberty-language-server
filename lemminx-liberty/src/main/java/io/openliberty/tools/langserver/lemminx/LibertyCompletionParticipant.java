@@ -120,18 +120,14 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
                 request.getXMLDocument().getDocumentURI());
         platforms.stream().filter(it->(Objects.isNull(platformName) || it.contains(platformName)))
                 .filter(p -> !existingPlatforms.contains(LibertyUtils.stripVersion(p).toLowerCase()))
-                .forEach(item -> {
+                .forEach(platformItem -> {
                     Range range = XMLPositionUtility.createRange(parentElement.getStartTagCloseOffset() + 1,
                             parentElement.getEndTagOpenOffset(), request.getXMLDocument());
-                    Either<TextEdit, InsertReplaceEdit> edit = Either.forLeft(new TextEdit(range, item));
+                    Either<TextEdit, InsertReplaceEdit> edit = Either.forLeft(new TextEdit(range, platformItem));
                     CompletionItem completionItem = new CompletionItem();
-                    completionItem.setLabel(item);
+                    completionItem.setLabel(platformItem);
                     completionItem.setTextEdit(edit);
-                    String platformNameNoVersion = LibertyUtils.stripVersion(item).toLowerCase();
-                    if (LibertyConstants.platformDescriptionMap.containsKey(platformNameNoVersion)) {
-                        String version = LibertyUtils.getVersion(item);
-                        completionItem.setDocumentation(String.format(LibertyConstants.platformDescriptionMap.get(platformNameNoVersion),version));
-                    }
+                    completionItem.setDocumentation(LibertyUtils.getPlatformDescription(platformItem));
                     response.addCompletionItem(completionItem);
                 });
     }

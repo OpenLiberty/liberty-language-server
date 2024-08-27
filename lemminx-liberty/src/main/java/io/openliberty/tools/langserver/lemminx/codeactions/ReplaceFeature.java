@@ -73,9 +73,10 @@ public class ReplaceFeature implements ICodeActionParticipant {
                 Collections.sort(replacementFeatureNames); // sort these so they appear in alphabetical order in quick fixes - also helps the test case pass reliably
 
                 for (String nextFeature : replacementFeatureNames) {
-                    String title = "Replace feature with "+nextFeature;
-
-                    codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), nextFeature, document.getTextDocument(), diagnostic));
+                    if (!nextFeature.equals(featureNameToReplace)) {
+                        String title = "Replace feature with " + nextFeature;
+                        codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), nextFeature, document.getTextDocument(), diagnostic));
+                    }
                 }
             }
         } catch (Exception e) {

@@ -478,7 +478,7 @@ public class LibertyDiagnosticTest {
         Diagnostic invalid1 = new Diagnostic();
         invalid1.setRange(r(2, 24, 2, 31));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
-        invalid1.setMessage("ERROR: Need to specify any platform or at least one versioned feature.");
+        invalid1.setMessage("ERROR: The servlet versionless feature cannot be resolved. Specify a platform or a feature with a version to enable resolution.");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid1);
@@ -546,7 +546,7 @@ public class LibertyDiagnosticTest {
         Diagnostic invalid1 = new Diagnostic();
         invalid1.setRange(r(2, 24, 2, 31));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
-        invalid1.setMessage("ERROR: The \"servlet\" versionless feature cannot be resolved. Specify a platform or a feature with a version to enable resolution.");
+        invalid1.setMessage("ERROR: The \"servlet\" versionless feature configured platforms cannot be resolved with selected versioned features. Specify a platform or a feature with a version to enable resolution.");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid1);
@@ -563,7 +563,7 @@ public class LibertyDiagnosticTest {
         invalid1 = new Diagnostic();
         invalid1.setRange(r(2, 24, 2, 27));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
-        invalid1.setMessage("ERROR: The \"jsp\" versionless feature cannot be resolved. Specify a platform or a feature with a version to enable resolution.");
+        invalid1.setMessage("ERROR: The \"jsp\" versionless feature does not have a configured platform.");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid1);
@@ -580,6 +580,25 @@ public class LibertyDiagnosticTest {
         invalid1.setRange(r(2, 24, 2, 31));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
         invalid1.setMessage("ERROR: The \"servlet\" versionless feature cannot be resolved since there are more than one common platform. Specify a platform or a feature with a version to enable resolution.");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
+
+        //  mpConfig-3.0 and mpJwt-2.0 have a single common platform(microProfile-5.0) but servlet feature does not support that
+       serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>servlet</feature>", //
+                "               <feature>mpConfig-3.0</feature>", //
+                "               <feature>mpJwt-2.0</feature>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+
+        invalid1 = new Diagnostic();
+        invalid1.setRange(r(2, 24, 2, 31));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+        invalid1.setMessage("ERROR: The \"servlet\" versionless feature configured platforms cannot be resolved with selected versioned features. Specify a platform or a feature with a version to enable resolution.");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid1);
