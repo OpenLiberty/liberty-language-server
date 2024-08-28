@@ -40,7 +40,6 @@ import io.openliberty.tools.langserver.lemminx.services.ContainerService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
-import org.eclipse.lsp4j.CompletionItem;
 
 public class LibertyUtils {
 
