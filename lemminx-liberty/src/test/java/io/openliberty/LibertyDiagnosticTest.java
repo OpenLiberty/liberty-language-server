@@ -546,7 +546,7 @@ public class LibertyDiagnosticTest {
         Diagnostic invalid1 = new Diagnostic();
         invalid1.setRange(r(2, 24, 2, 31));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
-        invalid1.setMessage("ERROR: The \"servlet\" versionless feature configured platforms cannot be resolved with selected versioned features. Specify a platform or a feature with a version to enable resolution.");
+        invalid1.setMessage("ERROR: The \"servlet\" versionless feature cannot be resolved. Specify a platform or a versioned feature from a supported platform to enable resolution.");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid1);
@@ -598,7 +598,7 @@ public class LibertyDiagnosticTest {
         invalid1 = new Diagnostic();
         invalid1.setRange(r(2, 24, 2, 31));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
-        invalid1.setMessage("ERROR: The \"servlet\" versionless feature configured platforms cannot be resolved with selected versioned features. Specify a platform or a feature with a version to enable resolution.");
+        invalid1.setMessage("ERROR: The \"servlet\" versionless feature cannot be resolved. Specify a platform or a versioned feature from a supported platform to enable resolution.");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid1);

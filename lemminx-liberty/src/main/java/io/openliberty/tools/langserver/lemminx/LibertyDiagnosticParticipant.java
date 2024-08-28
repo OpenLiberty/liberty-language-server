@@ -498,7 +498,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             if (isPlatformFromXml) {
                 message = "ERROR: The \"" + featureName + "\" versionless feature does not have a configured platform.";
             } else {
-                message = "ERROR: The \"" + featureName + "\" versionless feature configured platforms cannot be resolved with selected versioned features. Specify a platform or a feature with a version to enable resolution.";
+                message = "ERROR: The \"" + featureName + "\" versionless feature cannot be resolved. Specify a platform or a versioned feature from a supported platform to enable resolution.";
             }
             Range range = XMLPositionUtility.createRange(versionLessFeatureTextNode.getStart(), versionLessFeatureTextNode.getEnd(),
                     domDocument);
