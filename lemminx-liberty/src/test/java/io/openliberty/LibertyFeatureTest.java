@@ -25,7 +25,7 @@ public class LibertyFeatureTest {
     public void getInstalledFeaturesListTest() throws JAXBException {
         FeatureService fs = FeatureService.getInstance();
         File srcResourcesDir = new File("src/test/resources/sample");
-        File featureListFile = new File(srcResourcesDir.getParentFile(), "featurelist-ol-23.0.0.1-beta.xml");
+        File featureListFile = new File(srcResourcesDir.getParentFile(), "featurelist-ol-24.0.0.8.xml");
         
         // LibertyWorkspace must be initialized
         List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
@@ -47,11 +47,11 @@ public class LibertyFeatureTest {
 
         // Check if config map gets built
         FeatureListGraph fg = libWorkspace.getFeatureListGraph();
-        assertEquals(76, fg.getAllEnabledBy("ssl-1.0").size());
+        assertEquals(97, fg.getAllEnabledBy("ssl-1.0").size());
         assertEquals(1, fg.getConfigElementNode("ssl").getEnabledBy().size());
         assertTrue(fg.getConfigElementNode("ssl").getEnabledBy().contains("ssl-1.0"));
-        assertEquals(77, fg.getAllEnabledBy("ssl").size());
-        assertEquals(235, fg.getAllEnabledBy("library").size());
+        assertEquals(98, fg.getAllEnabledBy("ssl").size());
+        assertEquals(318, fg.getAllEnabledBy("library").size());
         assertTrue(fg.getAllEnabledBy("ltpa").contains("admincenter-1.0"));  // direct enabler
         assertTrue(fg.getAllEnabledBy("ssl").contains("microprofile-5.0"));  // transitive enabler
     }

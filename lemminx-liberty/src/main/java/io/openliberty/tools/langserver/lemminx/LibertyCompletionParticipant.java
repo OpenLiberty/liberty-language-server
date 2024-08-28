@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2023 IBM Corporation and others.
+* Copyright (c) 2020, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -15,6 +15,8 @@ package io.openliberty.tools.langserver.lemminx;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lemminx.dom.DOMDocument;
@@ -71,7 +73,63 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
             List<CompletionItem> featureCompletionItems = buildCompletionItems(parentElement, request.getXMLDocument(),
                     existingFeatures, featureName, featureMgrNode);
             featureCompletionItems.stream().forEach(item -> response.addCompletionItem(item));
+        } else if (parentElement.getTagName().equals(LibertyConstants.PLATFORM_ELEMENT)) {
+            DOMNode platformTextNode = (DOMNode) parentElement.getChildNodes().item(0);
+            String currentPlatformName = platformTextNode != null ? platformTextNode.getTextContent() : "";
+            String currentPlatformNameWithoutVersion = LibertyUtils.stripVersion(currentPlatformName);
+            // collect existing platforms
+            List<String> existingPlatforms = new ArrayList<>();
+            if (parentElement.getParentNode() != null
+                    && parentElement.getParentNode().getNodeName().equals(LibertyConstants.FEATURE_MANAGER_ELEMENT)) {
+                DOMNode featureMgrNode = parentElement.getParentNode();
+                List<DOMNode> features = featureMgrNode.getChildren();
+                for (DOMNode featureNode : features) {
+                    DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
+                    // skip nodes that do not have any text value (ie. comments)
+                    if (featureNode.getNodeName().equals(LibertyConstants.PLATFORM_ELEMENT) && featureTextNode != null) {
+                        String platformName = featureTextNode.getTextContent();
+                        String platformWithoutVersion = LibertyUtils.stripVersion(platformName);
+                        if (!platformWithoutVersion.equalsIgnoreCase(currentPlatformNameWithoutVersion)) {
+                            existingPlatforms.add(platformWithoutVersion.toLowerCase());
+                        }
+                    }
+                }
+            }
+            this.buildPlatformCompletionItems(request, response, parentElement, existingPlatforms);
         }
+    }
+
+    /**
+     * build completion items for platforms
+     *
+     * @param request           request
+     * @param response          response
+     * @param parentElement     parent element xml dom
+     * @param existingPlatforms
+     */
+    private void buildPlatformCompletionItems(ICompletionRequest request, ICompletionResponse response, DOMElement parentElement, List<String> existingPlatforms) {
+        DOMNode platformTextNode = (DOMNode) parentElement.getChildNodes().item(0);
+        String platformName = platformTextNode != null ? platformTextNode.getTextContent() : null;
+        LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(request.getXMLDocument());
+        String libertyVersion =  runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
+        String libertyRuntime =  runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
+
+        final int requestDelay = SettingsService.getInstance().getRequestDelay();
+        //get all platforms
+        Set<String> platforms = FeatureService.getInstance().getAllPlatforms(libertyVersion, libertyRuntime, requestDelay,
+                request.getXMLDocument().getDocumentURI());
+        platforms.stream().filter(it->(Objects.isNull(platformName) || it.contains(platformName)))
+                .filter(p -> !existingPlatforms.contains(LibertyUtils.stripVersion(p).toLowerCase()))
+                .forEach(platformItem -> {
+                    Range range = XMLPositionUtility.createRange(parentElement.getStartTagCloseOffset() + 1,
+                            parentElement.getEndTagOpenOffset(), request.getXMLDocument());
+                    Either<TextEdit, InsertReplaceEdit> edit = Either.forLeft(new TextEdit(range, platformItem));
+                    CompletionItem completionItem = new CompletionItem();
+                    completionItem.setLabel(platformItem);
+                    completionItem.setTextEdit(edit);
+                    completionItem.setDocumentation(LibertyUtils.getPlatformDescription(platformItem));
+                    response.addCompletionItem(completionItem);
+                });
     }
 
     private CompletionItem buildFeatureCompletionItem(Feature feature, DOMElement featureElement,
@@ -107,7 +165,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
             String featureNameLowerCase = featureName.toLowerCase();
 
             // strip off version number after the - so that we can provide all possible valid versions of a feature for completion
-            String featureNameToCompare = featureNameLowerCase.contains("-") ? featureNameLowerCase.substring(0, featureNameLowerCase.lastIndexOf("-")+1) : featureNameLowerCase;
+            String featureNameToCompare = LibertyUtils.stripVersion(featureNameLowerCase);
 
             List<Feature> completionFeatures = FeatureService.getInstance().getFeatureReplacements(featureNameToCompare, featureMgrNode, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
             return getFeatureCompletionItems(featureElement, domDocument, completionFeatures);

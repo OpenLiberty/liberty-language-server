@@ -539,4 +539,38 @@ public class LibertyUtils {
             LOGGER.warning("Unable to watch properties file(s): " + e.getMessage());
         }
     }
+
+    /**
+     * Get version# for a platform or feature
+     * @param item feature/platform name
+     * @return versionNumber
+     */
+    public static String getVersion(String item) {
+        return item.contains("-") ? item.substring(item.lastIndexOf("-") + 1) : "";
+    }
+
+    /**
+     * strip of platform version or feature version
+     * @param stringWithVersion platform name of feature name
+     * @return versionless name
+     */
+    public static String stripVersion(String stringWithVersion) {
+        return stringWithVersion.contains("-") ? stringWithVersion.substring(0, stringWithVersion.lastIndexOf("-"))
+                : stringWithVersion;
+    }
+
+
+    /**
+     * get platform description
+     * @param platformItem platform item
+     * @return description
+     */
+    public static String getPlatformDescription(String platformItem) {
+        String platformNameNoVersion = LibertyUtils.stripVersion(platformItem).toLowerCase();
+        if (LibertyConstants.platformDescriptionMap.containsKey(platformNameNoVersion)) {
+            String version = getVersion(platformItem);
+            return String.format(LibertyConstants.platformDescriptionMap.get(platformNameNoVersion), version);
+        }
+        return null;
+    }
 }

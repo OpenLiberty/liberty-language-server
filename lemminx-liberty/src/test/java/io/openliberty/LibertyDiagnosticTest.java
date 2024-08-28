@@ -38,7 +38,7 @@ public class LibertyDiagnosticTest {
     static String newLine = System.lineSeparator();
 
     static File srcResourcesDir = new File("src/test/resources/sample");
-    static File featureList = new File("src/test/resources/featurelist-ol-23.0.0.1-beta.xml");
+    static File featureList = new File("src/test/resources/featurelist-ol-24.0.0.8.xml");
     static String serverXMLURI = new File(srcResourcesDir, "test/server.xml").toURI().toString();
     static String sampleserverXMLURI = new File(srcResourcesDir, "sample-server.xml").toURI().toString();
     static List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
@@ -132,6 +132,11 @@ public class LibertyDiagnosticTest {
         featuresStartWithJAX.add("jaxrsClient-2.0");
         featuresStartWithJAX.add("jaxrsClient-2.1");
         featuresStartWithJAX.add("jaxws-2.2");
+        //adding versionless features
+        featuresStartWithJAX.add("jaxws");
+        featuresStartWithJAX.add("jaxb");
+        featuresStartWithJAX.add("jaxrsClient");
+        //featuresStartWithJAX.add("jaxrs"); excluded because it matches an existing feature
         Collections.sort(featuresStartWithJAX);
 
         List<CodeAction> codeActions = new ArrayList<CodeAction>();
@@ -143,8 +148,8 @@ public class LibertyDiagnosticTest {
             codeActions.add(invalidCodeAction);
         }
 
-        XMLAssert.testCodeActionsFor(serverXML, invalid1, codeActions.get(0), codeActions.get(1), 
-                                    codeActions.get(2), codeActions.get(3)); 
+        XMLAssert.testCodeActionsFor(serverXML, invalid1, codeActions.get(0), codeActions.get(1),
+                codeActions.get(2), codeActions.get(3), codeActions.get(4), codeActions.get(5), codeActions.get(6));
 
     }
 
@@ -364,8 +369,8 @@ public class LibertyDiagnosticTest {
             codeActions.add(invalidCodeAction);
         }
 
-        XMLAssert.testCodeActionsFor(serverXML, sampleserverXMLURI, config_for_missing_feature, (String) null, 
-                                    codeActions.get(0), codeActions.get(1), codeActions.get(2)); 
+        XMLAssert.testCodeActionsFor(serverXML, sampleserverXMLURI, config_for_missing_feature, (String) null,
+                codeActions.get(0), codeActions.get(1), codeActions.get(2));
 
     }
 
@@ -421,5 +426,218 @@ public class LibertyDiagnosticTest {
                 "</server>"
         );
         XMLAssert.testDiagnosticsFor(serverXML1, null, null, serverXMLURI);
+    }
+
+    @Test
+    public void testInvalidPlatformDiagnostic() throws BadLocationException {
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>batch-1.0</feature>", //
+                "               <platform>jaX</platform>", //
+                "               <platform>javaee-7.0</platform>", //
+                "               <!-- <feature>comment</feature> -->", //
+                "               <platform>javaee-7.0</platform>", //
+                "               <platform>javaee-8.0</platform>", //
+                "               <platform>jakartaee-9.1</platform>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        Diagnostic invalid1 = new Diagnostic();
+        invalid1.setRange(r(3, 25, 3, 28));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+        invalid1.setMessage("ERROR: The platform \"jaX\" does not exist.");
+
+        Diagnostic invalid2 = new Diagnostic();
+        invalid2.setRange(r(6, 25, 6, 35));
+        invalid2.setMessage("ERROR: javaee-7.0 is already included.");
+
+
+        Diagnostic invalid3 = new Diagnostic();
+        invalid3.setRange(r(7, 25, 7, 35));
+        invalid3.setMessage("ERROR: More than one version of platform javaee is included. Only one version of a platform may be specified.");
+
+        Diagnostic invalid4 = new Diagnostic();
+        invalid4.setRange(r(8, 25, 8, 38));
+        invalid4.setMessage("ERROR: The following configured platform versions are in conflict [javaee-7.0, javaee-8.0, jakartaee-9.1]");
+
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1, invalid2, invalid3, invalid4);
+    }
+
+    @Test
+    public void testInvalidPlatformForVersionlessFeatureDiagnostic() throws BadLocationException {
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>servlet</feature>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        Diagnostic invalid1 = new Diagnostic();
+        invalid1.setRange(r(2, 24, 2, 31));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+        invalid1.setMessage("ERROR: The servlet versionless feature cannot be resolved. Specify a platform or a feature with a version to enable resolution.");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
+        // same as example in open liberty pages. error should be thrown because there are multiple platforms in mpConfig-2.0
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>mpConfig-2.0</feature>", //
+                "               <feature>mpMetrics</feature>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        invalid1 = new Diagnostic();
+        invalid1.setRange(r(3, 24, 3, 33));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+        invalid1.setMessage("ERROR: The \"mpMetrics\" versionless feature cannot be resolved since there are more than one common platform. Specify a platform or a feature with a version to enable resolution.");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
+
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>servlet</feature>", //
+                "               <feature>acmeCA-2.0</feature>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        invalid1 = new Diagnostic();
+        invalid1.setRange(r(2, 24, 2, 31));
+        invalid1.setMessage("ERROR: \"servlet\" versionless feature cannot be resolved. The versioned features do not have a platform in common.");
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
+
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>servlet</feature>", //
+                "               <feature>beanValidation-1.1</feature>", //
+                "               <feature>jsonb-2.0</feature>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        invalid1 = new Diagnostic();
+        invalid1.setRange(r(2, 24, 2, 31));
+        invalid1.setMessage("ERROR: \"servlet\" versionless feature cannot be resolved. The versioned features do not have a platform in common.");
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
+    }
+    @Test
+    public void testUnresolvedPlatformForVersionlessFeatureDiagnostic() throws BadLocationException {
+        //jdbc-4.0 only supports javaee-6.0 but servlet only supports javaee-7.0, javaee-8.0,jakartaee-9.1 and jakartaee-10.0
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>servlet</feature>", //
+                "               <feature>jdbc-4.0</feature>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        Diagnostic invalid1 = new Diagnostic();
+        invalid1.setRange(r(2, 24, 2, 31));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+        invalid1.setMessage("ERROR: The \"servlet\" versionless feature cannot be resolved. Specify a platform or a versioned feature from a supported platform to enable resolution.");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
+
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>jsp</feature>", //
+                "               <platform>microProfile-1.2</platform>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+
+        invalid1 = new Diagnostic();
+        invalid1.setRange(r(2, 24, 2, 27));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+        invalid1.setMessage("ERROR: The \"jsp\" versionless feature does not have a configured platform.");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
+
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>servlet</feature>", //
+                "               <feature>jaxws-2.2</feature>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        invalid1 = new Diagnostic();
+        invalid1.setRange(r(2, 24, 2, 31));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+        invalid1.setMessage("ERROR: The \"servlet\" versionless feature cannot be resolved since there are more than one common platform. Specify a platform or a feature with a version to enable resolution.");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
+
+        //  mpConfig-3.0 and mpJwt-2.0 have a single common platform(microProfile-5.0) but servlet feature does not support that
+       serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>servlet</feature>", //
+                "               <feature>mpConfig-3.0</feature>", //
+                "               <feature>mpJwt-2.0</feature>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+
+        invalid1 = new Diagnostic();
+        invalid1.setRange(r(2, 24, 2, 31));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+        invalid1.setMessage("ERROR: The \"servlet\" versionless feature cannot be resolved. Specify a platform or a versioned feature from a supported platform to enable resolution.");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
+    }
+
+    @Test
+    public void testValidPlatformDiagnostic() throws BadLocationException {
+
+
+       String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>servlet</feature>", //
+                "               <platform>jakartaee-9.1</platform>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI);
+
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>servlet</feature>", //
+                "               <feature>jaxws-2.2</feature>", //
+                "               <platform>javaee-7.0</platform>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI);
+
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>servlet</feature>", //
+                "               <feature>mail-2.0</feature>", //
+                "               <feature>jsonb-2.0</feature>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI);
     }
 }

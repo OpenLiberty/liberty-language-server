@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2022 IBM Corporation and others.
+* Copyright (c) 2020, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,6 +13,7 @@
 package io.openliberty.tools.langserver.lemminx.models.feature;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class WlpInformation {
     private String appliesTo;
@@ -29,6 +30,8 @@ public class WlpInformation {
     private String webDisplayPolicy;
     private String mavenCoordinates;
     private String shortName;
+    private List<String> platforms;
+    private List<FeatureTolerate> requireFeatureWithTolerates;
 
     public WlpInformation(String shortName) {
         this.shortName = shortName;
@@ -144,6 +147,22 @@ public class WlpInformation {
 
     public void setShortName(String shortName) {
         this.shortName = shortName;
+    }
+
+    public List<String> getPlatforms() {
+        return platforms;
+    }
+
+    public void setPlatforms(List<String> platform) {
+        this.platforms = platform;
+    }
+
+    public List<FeatureTolerate> getRequireFeatureWithTolerates() {
+        return requireFeatureWithTolerates;
+    }
+
+    public void setRequireFeatureWithTolerates(List<FeatureTolerate> requireFeatureWithTolerates) {
+        this.requireFeatureWithTolerates = requireFeatureWithTolerates;
     }
 }
 

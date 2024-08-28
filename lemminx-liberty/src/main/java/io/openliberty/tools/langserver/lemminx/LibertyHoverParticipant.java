@@ -30,9 +30,12 @@ import io.openliberty.tools.langserver.lemminx.util.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class LibertyHoverParticipant implements IHoverParticipant {
     private static final Logger LOGGER = Logger.getLogger(LibertyHoverParticipant.class.getName());
@@ -66,7 +69,26 @@ public class LibertyHoverParticipant implements IHoverParticipant {
             String featureName = request.getNode().getTextContent().trim();
             return getHoverFeatureDescription(featureName, request.getXMLDocument());
         }
+        if (LibertyConstants.PLATFORM_ELEMENT.equals(parentElement.getTagName())) {
+            String platformName = request.getNode().getTextContent().trim();
+            return getHoverPlatformDescription(platformName);
+        }
 
+        return null;
+    }
+
+    /**
+     * get description for platform from the feature json
+     * there will be a feature with same shortname as platform.
+     *
+     * @param platformName platform name
+     * @return hover
+     */
+    private Hover getHoverPlatformDescription(String platformName) {
+        String description = LibertyUtils.getPlatformDescription(platformName);
+        if (description != null) {
+            return new Hover(new MarkupContent("plaintext", description));
+        }
         return null;
     }
 

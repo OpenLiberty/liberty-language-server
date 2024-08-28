@@ -22,19 +22,23 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import io.openliberty.tools.langserver.lemminx.models.feature.FeatureTolerate;
 import org.eclipse.lemminx.dom.DOMNode;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager.ResourceToDeploy;
 
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
@@ -55,6 +59,7 @@ import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 public class FeatureService {
 
     private static final Logger LOGGER = Logger.getLogger(FeatureService.class.getName());
+    public static final String IO_OPENLIBERTY_INTERNAL_VERSIONLESS = "io.openliberty.internal.versionless.";
 
     // Singleton so that only 1 Feature Service can be initialized and is
     // shared between all Lemminx Language Feature Participants
@@ -65,8 +70,8 @@ public class FeatureService {
 
     // This file is copied to the local .lemminx cache. 
     // This is how we ensure the latest default featurelist xml gets used in each developer environment. 
-    private static final String FEATURELIST_XML_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist-cached-24.0.0.6.xml";
-    private static final String FEATURELIST_XML_CLASSPATH_LOCATION = "/featurelist-cached-24.0.0.6.xml";
+    private static final String FEATURELIST_XML_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist-cached-24.0.0.8.xml";
+    private static final String FEATURELIST_XML_CLASSPATH_LOCATION = "/featurelist-cached-24.0.0.8.xml";
 
     /**
      * FEATURELIST_XML_RESOURCE is the featurelist xml that is located at FEATURELIST_XML_CLASSPATH_LOCATION
@@ -134,7 +139,7 @@ public class FeatureService {
             if (defaultFeatures == null) {
                 // Changing this to contain the version in the file name since the file is copied to the local .lemminx cache. 
                 // This is how we ensure the latest default features json gets used in each developer environment. 
-                InputStream is = getClass().getClassLoader().getResourceAsStream("features-cached-24.0.0.6.json");
+                InputStream is = getClass().getClassLoader().getResourceAsStream("features-cached-24.0.0.8.json");
                 InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
 
                 // Only need the public features
@@ -265,7 +270,8 @@ public class FeatureService {
         for (String nextFeatureName : featureNamesLowerCase) {
             if (existingFeatures.contains(nextFeatureName)) {
                 // collect feature name minus version number to know which other features to exclude
-                String featureNameMinusVersion = nextFeatureName.substring(0, nextFeatureName.lastIndexOf("-") + 1);
+                String featureNameMinusVersion = nextFeatureName.contains("-") ?
+                        nextFeatureName.substring(0, nextFeatureName.lastIndexOf("-") + 1) : nextFeatureName + "-";
                 featuresWithoutVersionsToExclude.add(featureNameMinusVersion);
             }
         }
@@ -273,11 +279,14 @@ public class FeatureService {
         List<Feature> replacementFeatures = new ArrayList<Feature>();
         String featureNameLowerCase = featureName.toLowerCase();
 
-        for (int i=0; i < featureNamesLowerCase.size(); i++) {
+        for (int i = 0; i < featureNamesLowerCase.size(); i++) {
             String nextFeatureName = featureNamesLowerCase.get(i);
-            if (nextFeatureName.contains(featureNameLowerCase) && (!nextFeatureName.contains("-") || 
-                !featuresWithoutVersionsToExclude.contains(nextFeatureName.substring(0, nextFeatureName.lastIndexOf("-") + 1)))) {
+            if (nextFeatureName.contains(featureNameLowerCase)) {
+                String comparingFeatureName = nextFeatureName.contains("-") ?
+                        nextFeatureName.substring(0, nextFeatureName.lastIndexOf("-") + 1) : nextFeatureName + "-";
+                if (!featuresWithoutVersionsToExclude.contains(comparingFeatureName)) {
                     replacementFeatures.add(features.get(i));
+                }
             }
         }
 
@@ -528,5 +537,150 @@ public class FeatureService {
             }
         }
         return installedFeatures;
+    }
+
+    /**
+     * get all platforms for all features from feature json
+     * @param libertyVersion liberty version
+     * @param libertyRuntime runtime
+     * @param requestDelay request delay
+     * @param documentURI document uri link
+     * @return set of unique platforms
+     */
+    public Set<String> getAllPlatforms(String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
+        List<Feature> features = this.getFeatures(libertyVersion, libertyRuntime, requestDelay, documentURI);
+        return features.stream()
+                .map(Feature::getWlpInformation)
+                .filter(Objects::nonNull)
+                .map(WlpInformation::getPlatforms)
+                .filter(Objects::nonNull)
+                .flatMap(List::stream).collect(Collectors.toSet());
+    }
+
+    /**
+     * check platform name exists or not
+     * @param platformName platform name
+     * @param libertyVersion liberty version
+     * @param libertyRuntime liberty runtime
+     * @param requestDelay request delay
+     * @param documentURI xml document uri
+     * @return true or false
+     */
+    public boolean platformExists(String platformName, String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
+        Set<String> platforms = this.getAllPlatforms(libertyVersion, libertyRuntime, requestDelay, documentURI);
+        return platforms.stream()
+                .anyMatch(platform -> platform.equalsIgnoreCase(platformName));
+    }
+
+
+    /**
+     * return all allowed platforms for a feature
+     * @param featureName feature shortname
+     * @param libertyVersion liberty version
+     * @param libertyRuntime runtime
+     * @param requestDelay request delay
+     * @param documentURI document uri
+     * @return set of platforms
+     */
+    public Set<String> getAllPlatformsForFeature(String featureName, String libertyVersion, String libertyRuntime,
+                                                     int requestDelay, String documentURI) {
+        Optional<Feature> feature=this.getFeature(featureName,libertyVersion, libertyRuntime, requestDelay, documentURI);
+        if (feature.isPresent() && feature.get().getWlpInformation().getPlatforms() != null) {
+            return new HashSet<>(feature.get().getWlpInformation().getPlatforms());
+        }
+       return Collections.emptySet();
+    }
+
+    /**
+     * get all common platforms for a list of features
+     * @param featureNames feature list
+     * @param libertyVersion liberty version
+     * @param libertyRuntime liberty runtime
+     * @param requestDelay request delay
+     * @param documentURI document uri
+     * @return platform list
+     */
+    public Set<String> getCommonPlatformsForFeatures(Set<String> featureNames, String libertyVersion, String libertyRuntime,
+                                                      int requestDelay, String documentURI) {
+        Set<String> commonPlatforms = null;
+        for (String featureName : featureNames) {
+            Set<String> platforms = this.getAllPlatformsForFeature(featureName, libertyVersion, libertyRuntime, requestDelay, documentURI);
+            if (commonPlatforms == null) {
+                commonPlatforms = platforms;
+            } else {
+                commonPlatforms.retainAll(platforms);
+            }
+        }
+        return commonPlatforms;
+    }
+
+    /**
+     * get all platforms for a version less feature by
+     *  1) iterating through required features array in feature wlpinformation
+     *  3) iterating through required tolerates feature array in feature wlpinformation
+     * @param featureName    current feature name
+     * @param libertyVersion liberty version
+     * @param libertyRuntime liberty runtime
+     * @param requestDelay   request delay
+     * @param documentURI    xml document
+     * @return platform list
+     */
+    public Set<String> getAllPlatformsForVersionLessFeature(String featureName, String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
+        Optional<Feature> feature = this.getFeature(featureName, libertyVersion, libertyRuntime, requestDelay, documentURI);
+        Set<String> featureNames = new HashSet<>();
+        if (feature.isPresent()) {
+            this.addRequiredFeatureNames(feature.get(), featureNames);
+            this.addRequireTolerateFeatureNames(feature.get(), featureNames);
+        }
+        return featureNames.stream()
+                .map(f -> getAllPlatformsForFeature(f, libertyVersion, libertyRuntime, requestDelay, documentURI))
+                .flatMap(Set::stream).collect(Collectors.toSet());
+    }
+
+    /**
+     * find require to tolerate feature names. find all versions
+     * @param feature current feature
+     * @param featureNames feature name list
+     */
+    private void addRequireTolerateFeatureNames(Feature feature, Set<String> featureNames) {
+        List<FeatureTolerate> featureTolerates = feature.getWlpInformation().getRequireFeatureWithTolerates();
+
+        for(FeatureTolerate featureTolerate: featureTolerates) {
+            String extractedFeatureName = featureTolerate.getFeature().contains(IO_OPENLIBERTY_INTERNAL_VERSIONLESS) ?
+                    featureTolerate.getFeature().substring(
+                            featureTolerate.getFeature()
+                                    .lastIndexOf(IO_OPENLIBERTY_INTERNAL_VERSIONLESS) + IO_OPENLIBERTY_INTERNAL_VERSIONLESS.length())
+                    : featureTolerate.getFeature();
+            String extractedFeatureNameWithoutVersion = extractedFeatureName.contains("-") ?
+                    extractedFeatureName.substring(0,extractedFeatureName.lastIndexOf("-") + 1) :
+                    extractedFeatureName;
+            featureNames.add(extractedFeatureName);
+            if(featureTolerate.getTolerates()!=null && !featureTolerate.getTolerates().isEmpty()){
+                for (String tolerateVersion:featureTolerate.getTolerates()){
+                    featureNames.add(extractedFeatureNameWithoutVersion + tolerateVersion);
+                    // if feature names are changed recently. like ejb-3.2 to enterprisebeans-4.0
+                    if (LibertyConstants.changedFeatureNameMap.containsKey(extractedFeatureNameWithoutVersion)) {
+                        featureNames.add(LibertyConstants.changedFeatureNameMap.get(extractedFeatureNameWithoutVersion) + tolerateVersion);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * add all required feature names
+     * @param feature current feature
+     * @param requiredFeatureNames required feature name array
+     */
+    private void addRequiredFeatureNames(Feature feature, Set<String> requiredFeatureNames) {
+        ArrayList<String> requireFeatures = feature.getWlpInformation().getRequireFeature();
+
+        for(String requireFeature: requireFeatures) {
+            String extractedFeatureName = requireFeature.contains(IO_OPENLIBERTY_INTERNAL_VERSIONLESS) ?
+                    requireFeature.substring(requireFeature.lastIndexOf(IO_OPENLIBERTY_INTERNAL_VERSIONLESS)
+                            + IO_OPENLIBERTY_INTERNAL_VERSIONLESS.length())
+                    : requireFeature;
+            requiredFeatureNames.add(extractedFeatureName);
+        }
     }
 }

@@ -76,10 +76,87 @@ public class LibertyCompletionTest {
                 CompletionItem microProfileCompletion = c("microProfile-2.2", "microProfile-2.2");
 
                 // would be 269 if mpConfig-1.4 was not already specified
-                final int TOTAL_ITEMS = 268; // total number of available completion items
+                final int TOTAL_ITEMS = 337; // total number of available completion items
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, jaxrsCompletion, websocket,
                                 microProfileCompletion);
+        }
+
+        // Tests the
+        // availability of platform completion
+        @Test
+        public void testPlatformCompletionItem() throws BadLocationException {
+                String serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <platform>|</platform>", //
+                        "               <feature>mpConfig-1.4</feature>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+
+                // total number of available completion items
+                // 3 for javaee
+                //3 for jakartaee
+                //15 for microprofile
+                // one for CDATA and one for <-
+                final int TOTAL_ITEMS = 23;
+
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS);
+
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <platform>java|</platform>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+                CompletionItem javaee6Completion = c("javaee-6.0", "javaee-6.0");
+                CompletionItem javaee7Completion = c("javaee-7.0", "javaee-7.0");
+                CompletionItem javaee8Completion = c("javaee-8.0", "javaee-8.0");
+
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 5,
+                        javaee6Completion, javaee7Completion, javaee8Completion);
+
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <platform>jakarta|</platform>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 5);
+
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <platform>micro|</platform>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 17);
+
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <platform>javaee-8.0</platform>", //
+                        "               <platform>ja|</platform>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+                //here result should be 5 because it should show only jakartaee related completion as javaee is already added
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 5);
+
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <platform>microProfile-6.0</platform>", //
+                        "               <platform>|</platform>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+                //here result should be 8 because it should show only jakartaee and javaee related completion as microprofile is already added
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 8);
         }
 
 }
