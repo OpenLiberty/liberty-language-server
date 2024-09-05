@@ -634,7 +634,7 @@ public class FeatureService {
         }
         return featureNames.stream()
                 .map(f -> getAllPlatformsForFeature(f, libertyVersion, libertyRuntime, requestDelay, documentURI))
-                .flatMap(Set::stream).collect(Collectors.toSet());
+                .flatMap(Set::stream).map(String::toLowerCase).collect(Collectors.toSet());
     }
 
     /**

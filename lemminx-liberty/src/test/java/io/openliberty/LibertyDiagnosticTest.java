@@ -651,5 +651,18 @@ public class LibertyDiagnosticTest {
         );
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI);
+
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>servlet</feature>", //
+                "               <feature>jpa</feature>", //
+                "               <feature>jaxrs</feature>", //
+                "               <platform>jakartaee-9.1</platform>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI);
     }
 }
