@@ -344,7 +344,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                     list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
                 }
                 preferredPlatformsWithoutVersion.add(platformNoVersionLower);
-                preferredPlatforms.add(platformNameLowerCase);
+                preferredPlatforms.add(platformName);
 
             }
         }
