@@ -30,7 +30,7 @@ public class LibertyCompletionTest {
                                 "<webApplication location=\"\"></webApplication>");
                 CompletionItem httpEndpointCompletion = c("httpEndpoint", "<httpEndpoint></httpEndpoint>");
 
-                final int TOTAL_ITEMS = 171; // total number of available completion items
+                final int TOTAL_ITEMS = 172; // total number of available completion items
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, applicationManagerCompletion,
                                 webApplicationCompletion, httpEndpointCompletion);
