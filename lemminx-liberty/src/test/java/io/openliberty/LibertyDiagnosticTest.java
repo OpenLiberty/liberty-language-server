@@ -665,4 +665,26 @@ public class LibertyDiagnosticTest {
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI);
     }
+
+    @Test
+    public void testConfigElementVersionLess() throws JAXBException {
+        assertTrue(featureList.exists());
+        FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), libWorkspace, featureList);
+        String serverXML1 = String.join(newLine,
+                "<server description=\"Sample Liberty server\">",
+                "   <featureManager>",
+                "       <feature>servlet</feature>",
+                "       <platform>jakartaee-9.1</platform>",
+                "   </featureManager>",
+                "   <webApplication contextRoot=\"/app-name\" location=\"app-name.war\" />",
+                "   <httpEndpoint id=\"defaultHttpEndpoint\" httpPort=\"9080\" httpsPort=\"9443\"/>",
+                "   <ssl id=\"defaultSSLConfig\" trustDefaultCerts=\"true\" />",
+                "</server>"
+        );
+        Diagnostic configForMissingFeature = new Diagnostic();
+        configForMissingFeature.setRange(r(7, 3, 7, 57));
+        configForMissingFeature.setCode(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE);
+        configForMissingFeature.setMessage(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_MESSAGE);
+        XMLAssert.testDiagnosticsFor(serverXML1, null, null, serverXMLURI,configForMissingFeature);
+    }
 }
