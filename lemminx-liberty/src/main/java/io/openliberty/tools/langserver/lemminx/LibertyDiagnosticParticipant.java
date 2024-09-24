@@ -292,13 +292,28 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         }
         for (Diagnostic tempDiagnostic : tempDiagnosticsList) {
             String configElement = tempDiagnostic.getSource();
-            Set<String> includedFeaturesCopy = new HashSet<String>(includedFeatures);
             Set<String> compatibleFeaturesList = featureGraph.getAllEnabledBy(configElement);
-            includedFeaturesCopy.retainAll(compatibleFeaturesList);
+            Set<String> includedFeaturesCopy = getCompatibleFeatures(includedFeatures, compatibleFeaturesList);
             if (includedFeaturesCopy.isEmpty()) {
                 diagnosticsList.add(tempDiagnostic);
             }
         }
+    }
+
+    /**
+     * get compatible features for both versioned and versionless features
+     *
+     * @param includedFeatures       ll selected features
+     * @param compatibleFeaturesList enabled by feature list
+     * @return any compitable feature list
+     */
+    private Set<String> getCompatibleFeatures(Set<String> includedFeatures, Set<String> compatibleFeaturesList) {
+        Set<String> versionLessCompatibleFeatureList = compatibleFeaturesList.stream()
+                .map(f -> LibertyUtils.stripVersion(f))
+                .collect(Collectors.toSet());
+        return includedFeatures.stream().filter(included ->
+                compatibleFeaturesList.contains(included) || versionLessCompatibleFeatureList.contains(included)
+        ).collect(Collectors.toSet());
     }
 
     /**
