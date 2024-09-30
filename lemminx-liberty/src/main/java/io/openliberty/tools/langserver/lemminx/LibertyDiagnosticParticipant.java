@@ -38,9 +38,13 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
+
+import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.changedFeatureNameDiagMessage;
 
 public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     private static final Logger LOGGER = Logger.getLogger(LibertyDiagnosticParticipant.class.getName());
@@ -163,14 +167,31 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      */
     private void checkForFeatureUniqueness(DOMDocument domDocument, List<Diagnostic> list, Set<String> includedFeatures, DOMNode featureTextNode, Set<String> versionedFeatures, Set<String> versionlessFeatures, Set<String> featuresWithoutVersions, String featureName) {
         String featureNameLower = featureName.toLowerCase();
-        String featureNameNoVersionLower=featureNameLower;
+        String featureNameNoVersionLower;
         if(featureNameLower.contains("-")){
             featureNameNoVersionLower = featureNameLower.substring(0,
                     featureNameLower.lastIndexOf("-"));
             versionedFeatures.add(featureName);
         }else{
+            featureNameNoVersionLower = featureNameLower;
             versionlessFeatures.add(featureName);
         }
+        String featureNameNoVersion = LibertyUtils.stripVersion(featureName);
+        Map<String, String> changedFeatureNameMapLower = LibertyConstants.changedFeatureNameMap.entrySet().parallelStream().collect(
+                Collectors.toMap(entry -> entry.getKey().toLowerCase(),
+                        entry -> entry.getValue().toLowerCase()));
+        Map<String, String> changedFeatureNameMapLowerReversed =
+                changedFeatureNameMapLower.entrySet()
+                        .stream()
+                        .collect(Collectors.toMap(Map.Entry::getValue, Map.Entry::getKey));
+        Set<String> featuresWithOldNames = featuresWithoutVersions.stream().map(
+                        v -> changedFeatureNameMapLower.get(v + "-"))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        Set<String> featuresWithChangedNames = featuresWithoutVersions.stream().map(
+                        v -> changedFeatureNameMapLowerReversed.get(v + "-"))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
         // if this exact feature already exists, or another version of this feature already exists, then show a diagnostic
         if (includedFeatures.contains(featureNameLower)) {
             Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
@@ -180,8 +201,24 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         } else if (featuresWithoutVersions.contains(featureNameNoVersionLower)) {
             Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
                     featureTextNode.getEnd(), domDocument);
-            String featureNameNoVersion = LibertyUtils.stripVersion(featureName);
             String message = "ERROR: More than one version of feature " + featureNameNoVersion + " is included. Only one version of a feature may be specified.";
+            list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
+        } else if (featuresWithOldNames.contains(featureNameNoVersionLower + "-")) {
+            String otherFeatureName = getOtherFeatureName(includedFeatures, changedFeatureNameMapLowerReversed, featureNameNoVersionLower);
+            //check for features whose name is changed such as jsp is changed to pages
+            Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
+                    featureTextNode.getEnd(), domDocument);
+            String message = String.format(changedFeatureNameDiagMessage, featureName, otherFeatureName,
+                    LibertyUtils.stripVersion(otherFeatureName),
+                    LibertyUtils.stripVersion(featureName));
+            list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
+        } else if (featuresWithChangedNames.contains(featureNameNoVersionLower + "-")) {
+            String otherFeatureName = getOtherFeatureName(includedFeatures, changedFeatureNameMapLower, featureNameNoVersionLower);
+            Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
+                    featureTextNode.getEnd(), domDocument);
+            String message = String.format(changedFeatureNameDiagMessage, featureName, otherFeatureName,
+                    LibertyUtils.stripVersion(featureName),
+                    LibertyUtils.stripVersion(otherFeatureName));
             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
         }
         includedFeatures.add(featureNameLower);
@@ -519,5 +556,21 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                     domDocument);
             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
         }
+    }
+
+    /**
+     * Get conflicting featurename for any feature
+     * @param includedFeatures
+     * @param changedFeatureNameMap
+     * @param featureNameNoVersionLower
+     * @return
+     */
+    private static String getOtherFeatureName(Set<String> includedFeatures, Map<String, String> changedFeatureNameMapLowerReversed, String featureNameNoVersionLower) {
+        String otherFeatureNameWithoutVersion = changedFeatureNameMapLowerReversed.get(featureNameNoVersionLower + "-");
+        String otherFeatureName = includedFeatures
+                .stream()
+                .filter(f -> f.toLowerCase().contains(LibertyUtils.stripVersion(otherFeatureNameWithoutVersion)))
+                .findFirst().orElse(null);
+        return otherFeatureName;
     }
 }

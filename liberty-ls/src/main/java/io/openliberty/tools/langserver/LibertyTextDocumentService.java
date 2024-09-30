@@ -82,6 +82,9 @@ public class LibertyTextDocumentService implements TextDocumentService {
         LibertyTextDocument document = documents.onDidOpenTextDocument(params);
         String uri = document.getUri();
         validate(Arrays.asList(uri));
+        if (uri == null) {
+            LOGGER.severe("Liberty text document URI is null for " + params);
+        }
         new DiagnosticRunner(libertyLanguageServer).compute(params);
     }
 
@@ -89,6 +92,9 @@ public class LibertyTextDocumentService implements TextDocumentService {
     public void didChange(DidChangeTextDocumentParams params) {
         LibertyTextDocument document = documents.onDidChangeTextDocument(params);
         String uri = document.getUri();
+        if (uri == null) {
+            LOGGER.severe("Liberty text document URI is null for " + params);
+        }
         validate(Arrays.asList(uri));
         new DiagnosticRunner(libertyLanguageServer).compute(params);
     }
@@ -97,6 +103,9 @@ public class LibertyTextDocumentService implements TextDocumentService {
     public void didClose(DidCloseTextDocumentParams params) {
         documents.onDidCloseTextDocument(params);
         String uri = params.getTextDocument().getUri();
+        if (uri == null) {
+            LOGGER.severe("Liberty text document URI is null for " + params);
+        }
         libertyLanguageServer.getLanguageClient()
             .publishDiagnostics(new PublishDiagnosticsParams(uri, new ArrayList<Diagnostic>()));
     }
@@ -117,8 +126,16 @@ public class LibertyTextDocumentService implements TextDocumentService {
     @Override
     public CompletableFuture<Hover> hover(HoverParams hoverParams) {
         String uri = hoverParams.getTextDocument().getUri();
+        if (uri == null) {
+            LOGGER.severe("Liberty text document URI is null for " + hoverParams);
+        }
         LibertyTextDocument textDocumentItem = documents.get(uri);
-        return new LibertyPropertiesHoverProvider(textDocumentItem).getHover(hoverParams.getPosition());
+        if (textDocumentItem != null) {
+            return new LibertyPropertiesHoverProvider(textDocumentItem).getHover(hoverParams.getPosition());
+        } else {
+            LOGGER.severe("The document with uri " + uri + " has not been found in opened documents. Cannot provide hover.");
+            return CompletableFuture.completedFuture(new Hover());
+        }
     }
 
     @Override

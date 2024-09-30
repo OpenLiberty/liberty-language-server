@@ -687,4 +687,51 @@ public class LibertyDiagnosticTest {
         configForMissingFeature.setMessage(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_MESSAGE);
         XMLAssert.testDiagnosticsFor(serverXML1, null, null, serverXMLURI,configForMissingFeature);
     }
+
+    @Test
+    public void testUniquenessForNameChangedFeatureDiagnostic() throws BadLocationException {
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>jms-2.0</feature>", //
+                "               <feature>messaging-3.0</feature>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        Diagnostic invalid = new Diagnostic();
+        invalid.setRange(r(3, 24, 3, 37));
+        invalid.setMessage("ERROR: The messaging-3.0 feature cannot be configured with the jms-2.0 feature because they are two different versions of the same feature. The feature name changed from jms to messaging for Jakarta EE. Remove one of the features.");
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid);
+
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>messaging-3.0</feature>", //
+                "               <feature>jms-2.0</feature>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        invalid = new Diagnostic();
+        invalid.setRange(r(3, 24, 3, 31));
+        invalid.setMessage("ERROR: The jms-2.0 feature cannot be configured with the messaging-3.0 feature because they are two different versions of the same feature. The feature name changed from jms to messaging for Jakarta EE. Remove one of the features.");
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid);
+
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <platform>javaee-7.0</platform>", //
+                "               <feature>enterpriseBeans</feature>", //
+                "               <feature>ejb</feature>", //
+                "       </featureManager>", //
+
+                "</server>" //
+        );
+        invalid = new Diagnostic();
+        invalid.setRange(r(4, 24, 4, 27));
+        invalid.setMessage("ERROR: The ejb feature cannot be configured with the enterprisebeans feature because they are two different versions of the same feature. The feature name changed from ejb to enterprisebeans for Jakarta EE. Remove one of the features.");
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid);
+    }
 }
