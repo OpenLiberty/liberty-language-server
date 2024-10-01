@@ -730,7 +730,7 @@ public class LibertyDiagnosticTest {
         );
         invalid = new Diagnostic();
         invalid.setRange(r(4, 24, 4, 31));
-        invalid.setMessage("ERROR: The ejb-3.2 feature cannot be configured with the enterprisebeans-4.0 feature because they are two different versions of the same feature. The feature name changed from ejb to enterprisebeans for Jakarta EE. Remove one of the features.");
+        invalid.setMessage("ERROR: The ejb-3.2 feature cannot be configured with the enterpriseBeans-4.0 feature because they are two different versions of the same feature. The feature name changed from ejb to enterpriseBeans for Jakarta EE. Remove one of the features.");
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid);
 
@@ -746,7 +746,7 @@ public class LibertyDiagnosticTest {
         );
         invalid = new Diagnostic();
         invalid.setRange(r(4, 24, 4, 27));
-        invalid.setMessage("ERROR: The ejb feature cannot be configured with the enterprisebeans feature because they are two different versions of the same feature. The feature name changed from ejb to enterprisebeans for Jakarta EE. Remove one of the features.");
+        invalid.setMessage("ERROR: The ejb feature cannot be configured with the enterpriseBeans feature because they are two different versions of the same feature. The feature name changed from ejb to enterpriseBeans for Jakarta EE. Remove one of the features.");
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid);
     }

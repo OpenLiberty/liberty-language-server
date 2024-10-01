@@ -121,6 +121,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         Set<String> versionedFeatures = new HashSet<String>();
         Set<String> preferredPlatforms = new HashSet<String>();
         Set<String> preferredPlatformsWithoutVersion = new HashSet<String>();
+        Set<String> featureList = new HashSet<String>();
         // Search for duplicate features
         // or features that do not exist
         List<DOMNode> features = featureManager.getChildren();
@@ -130,13 +131,13 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             if (LibertyConstants.PLATFORM_ELEMENT.equals(featureNode.getLocalName())) {
                 validatePlatform(domDocument, list, featureTextNode, preferredPlatformsWithoutVersion, preferredPlatforms);
             } else {
-                validateFeature(domDocument, list, includedFeatures, featureTextNode, libertyVersion, libertyRuntime, requestDelay, versionedFeatures, versionlessFeatures, featuresWithoutVersions);
+                validateFeature(domDocument, list, includedFeatures, featureTextNode, libertyVersion, libertyRuntime, requestDelay, versionedFeatures, versionlessFeatures, featuresWithoutVersions, featureList);
             }
         }
         checkForPlatFormAndFeature(domDocument, list, versionlessFeatures, features, preferredPlatforms, versionedFeatures);
     }
 
-    private void validateFeature(DOMDocument domDocument, List<Diagnostic> list, Set<String> includedFeatures, DOMNode featureTextNode, String libertyVersion, String libertyRuntime, int requestDelay, Set<String> versionedFeatures, Set<String> versionlessFeatures, Set<String> featuresWithoutVersions) {
+    private void validateFeature(DOMDocument domDocument, List<Diagnostic> list, Set<String> includedFeatures, DOMNode featureTextNode, String libertyVersion, String libertyRuntime, int requestDelay, Set<String> versionedFeatures, Set<String> versionlessFeatures, Set<String> featuresWithoutVersions, Set<String> featureList) {
         // skip nodes that do not have any text value (ie. comments)
         if (featureTextNode != null && featureTextNode.getTextContent() != null) {
             String featureName = featureTextNode.getTextContent().trim();
@@ -148,7 +149,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 String message = "ERROR: The feature \"" + featureName + "\" does not exist.";
                 list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
             } else {
-                checkForFeatureUniqueness(domDocument, list, includedFeatures, featureTextNode, versionedFeatures, versionlessFeatures, featuresWithoutVersions, featureName);
+                checkForFeatureUniqueness(domDocument, list, includedFeatures, featureTextNode, versionedFeatures, versionlessFeatures, featuresWithoutVersions, featureName, featureList);
             }
         }
     }
@@ -156,6 +157,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     /**
      * check whether feature name is unique
      * throw error if another version of same feature exists as well
+     *
      * @param domDocument
      * @param list
      * @param includedFeatures
@@ -164,8 +166,9 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      * @param versionlessFeatures
      * @param featuresWithoutVersions
      * @param featureName
+     * @param featureList
      */
-    private void checkForFeatureUniqueness(DOMDocument domDocument, List<Diagnostic> list, Set<String> includedFeatures, DOMNode featureTextNode, Set<String> versionedFeatures, Set<String> versionlessFeatures, Set<String> featuresWithoutVersions, String featureName) {
+    private void checkForFeatureUniqueness(DOMDocument domDocument, List<Diagnostic> list, Set<String> includedFeatures, DOMNode featureTextNode, Set<String> versionedFeatures, Set<String> versionlessFeatures, Set<String> featuresWithoutVersions, String featureName, Set<String> featureList) {
         String featureNameLower = featureName.toLowerCase();
         String featureNameNoVersionLower;
         if(featureNameLower.contains("-")){
@@ -204,7 +207,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             String message = "ERROR: More than one version of feature " + featureNameNoVersion + " is included. Only one version of a feature may be specified.";
             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
         } else if (featuresWithOldNames.contains(featureNameNoVersionLower + "-")) {
-            String otherFeatureName = getOtherFeatureName(includedFeatures, changedFeatureNameMapLowerReversed, featureNameNoVersionLower);
+            String otherFeatureName = getOtherFeatureName(featureList, changedFeatureNameMapLowerReversed, featureNameNoVersionLower);
             //check for features whose name is changed such as jsp is changed to pages
             Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
                     featureTextNode.getEnd(), domDocument);
@@ -213,7 +216,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                     LibertyUtils.stripVersion(featureName));
             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
         } else if (featuresWithChangedNames.contains(featureNameNoVersionLower + "-")) {
-            String otherFeatureName = getOtherFeatureName(includedFeatures, changedFeatureNameMapLower, featureNameNoVersionLower);
+            String otherFeatureName = getOtherFeatureName(featureList, changedFeatureNameMapLower, featureNameNoVersionLower);
             Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
                     featureTextNode.getEnd(), domDocument);
             String message = String.format(changedFeatureNameDiagMessage, featureName, otherFeatureName,
@@ -222,6 +225,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
         }
         includedFeatures.add(featureNameLower);
+        featureList.add(featureName);
         featuresWithoutVersions.add(featureNameNoVersionLower);
     }
 
