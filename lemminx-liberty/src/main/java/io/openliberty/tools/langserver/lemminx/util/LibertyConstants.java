@@ -71,4 +71,7 @@ public final class LibertyConstants {
         put("wasJmsClient-", "messagingClient-");
         put("wasJmsSecurity-", "messagingSecurity-");
     }});
+
+    public static String changedFeatureNameDiagMessage="ERROR: The %s feature cannot be configured with the %s feature because they are two different versions of the same feature. " +
+            "The feature name changed from %s to %s for Jakarta EE. Remove one of the features.";
 }
