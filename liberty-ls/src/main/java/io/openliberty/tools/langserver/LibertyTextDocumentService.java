@@ -29,35 +29,17 @@ import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import org.eclipse.lsp4j.CodeAction;
-import org.eclipse.lsp4j.CodeActionParams;
-import org.eclipse.lsp4j.CodeLens;
-import org.eclipse.lsp4j.CodeLensParams;
-import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.CompletionParams;
-import org.eclipse.lsp4j.DefinitionParams;
 import org.eclipse.lsp4j.Diagnostic;
-import org.eclipse.lsp4j.DocumentFormattingParams;
-import org.eclipse.lsp4j.DocumentHighlight;
-import org.eclipse.lsp4j.DocumentHighlightParams;
-import org.eclipse.lsp4j.DocumentRangeFormattingParams;
-import org.eclipse.lsp4j.DocumentSymbol;
-import org.eclipse.lsp4j.DocumentSymbolParams;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.HoverParams;
-import org.eclipse.lsp4j.Location;
-import org.eclipse.lsp4j.LocationLink;
 import org.eclipse.lsp4j.PublishDiagnosticsParams;
-import org.eclipse.lsp4j.SymbolInformation;
-import org.eclipse.lsp4j.TextDocumentItem;
-import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 import io.openliberty.tools.langserver.completion.LibertyPropertiesCompletionProvider;
 import io.openliberty.tools.langserver.diagnostic.DiagnosticRunner;
-import io.openliberty.tools.langserver.diagnostic.LibertyPropertiesDiagnosticService;
 import io.openliberty.tools.langserver.hover.LibertyPropertiesHoverProvider;
 
 public class LibertyTextDocumentService implements TextDocumentService {
@@ -81,10 +63,10 @@ public class LibertyTextDocumentService implements TextDocumentService {
     public void didOpen(DidOpenTextDocumentParams params) {
         LibertyTextDocument document = documents.onDidOpenTextDocument(params);
         String uri = document.getUri();
-        validate(Arrays.asList(uri));
         if (uri == null) {
             LOGGER.severe("Liberty text document URI is null for " + params);
         }
+        validate(Arrays.asList(uri));
         new DiagnosticRunner(libertyLanguageServer).compute(params);
     }
 
