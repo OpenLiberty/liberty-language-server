@@ -1,9 +1,5 @@
 package io.openliberty.tools.langserver.xml;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
@@ -11,10 +7,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import org.junit.Test;
 
 import io.openliberty.tools.langserver.LibertyConfigFileManager;
 import io.openliberty.tools.langserver.utils.XmlReader;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class XmlReaderTest {
     File resourcesDir = new File("src/test/resources");
@@ -27,7 +27,7 @@ public class XmlReaderTest {
                 LibertyConfigFileManager.CUSTOM_SERVER_ENV_XML_TAG);
 
         assertNotNull(tagValues);
-        assertEquals("Did not find custom config files", 2, tagValues.size());
+        assertEquals(2, tagValues.size(),"Did not find custom config files");
         
         Set<String> elementNames = new HashSet<String> ();
         elementNames.add("configFile");
@@ -35,15 +35,15 @@ public class XmlReaderTest {
         elementNames.add(LibertyConfigFileManager.CUSTOM_SERVER_ENV_XML_TAG);
 
         Map<String, String> values = XmlReader.getElementValues(lpcXml, elementNames);
-        assertTrue("Did not find expected number of elements in liberty-plugin-config.xml file. Expected 3, found "+values.size(), values.size() == 3);
+        assertTrue(values.size() == 3,"Did not find expected number of elements in liberty-plugin-config.xml file. Expected 3, found "+values.size());
 
-        assertTrue("Expected configFile element not found", values.containsKey("configFile"));
-        assertTrue("Expected configFile value not found. Value found: "+values.get("configFile"), values.get("configFile").equals("/user/sample-project/src/main/liberty/config/server.xml"));
+        assertTrue(values.containsKey("configFile"),"Expected configFile element not found");
+        assertTrue(values.get("configFile").equals("/user/sample-project/src/main/liberty/config/server.xml"),"Expected configFile value not found. Value found: "+values.get("configFile"));
 
-        assertTrue("Expected bootstrapPropertiesFile element not found", values.containsKey(LibertyConfigFileManager.CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG));
-        assertTrue("Expected bootstrapPropertiesFile value not found. Value found: "+values.get(LibertyConfigFileManager.CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG), values.get("bootstrapPropertiesFile").equals("/user/sample-project/src/main/liberty/config/custombootstrapprops.properties"));
+        assertTrue(values.containsKey(LibertyConfigFileManager.CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG),"Expected bootstrapPropertiesFile element not found");
+        assertTrue(values.get("bootstrapPropertiesFile").equals("/user/sample-project/src/main/liberty/config/custombootstrapprops.properties"),"Expected bootstrapPropertiesFile value not found. Value found: "+values.get(LibertyConfigFileManager.CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG));
 
-        assertTrue("Expected serverEnvFile element not found", values.containsKey(LibertyConfigFileManager.CUSTOM_SERVER_ENV_XML_TAG));
-        assertTrue("Expected serverEnvFile value not found. Value found: "+values.get(LibertyConfigFileManager.CUSTOM_SERVER_ENV_XML_TAG), values.get(LibertyConfigFileManager.CUSTOM_SERVER_ENV_XML_TAG).equals("/user/sample-project/src/main/liberty/config/customserverenv.env"));
+        assertTrue(values.containsKey(LibertyConfigFileManager.CUSTOM_SERVER_ENV_XML_TAG), "Expected serverEnvFile element not found");
+        assertTrue(values.get(LibertyConfigFileManager.CUSTOM_SERVER_ENV_XML_TAG).equals("/user/sample-project/src/main/liberty/config/customserverenv.env"), "Expected serverEnvFile value not found. Value found: "+values.get(LibertyConfigFileManager.CUSTOM_SERVER_ENV_XML_TAG));
     }
 }

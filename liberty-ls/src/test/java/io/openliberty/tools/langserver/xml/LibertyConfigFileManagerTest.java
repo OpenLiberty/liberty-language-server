@@ -1,15 +1,16 @@
 package io.openliberty.tools.langserver.xml;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.lsp4j.WorkspaceFolder;
-import org.junit.Test;
 
 import io.openliberty.tools.langserver.LibertyConfigFileManager;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class LibertyConfigFileManagerTest {
     File resourcesDir = new File("src/test/resources");
