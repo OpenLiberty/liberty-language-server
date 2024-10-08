@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionItemKind;
 import org.eclipse.lsp4j.Hover;
+import org.eclipse.lsp4j.InsertReplaceEdit;
 import org.eclipse.lsp4j.MarkupContent;
 import org.eclipse.lsp4j.MarkupKind;
 import org.eclipse.lsp4j.Position;
@@ -24,6 +25,8 @@ import org.eclipse.lsp4j.Range;
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 import io.openliberty.tools.langserver.utils.Messages;
 import io.openliberty.tools.langserver.utils.ServerPropertyValues;
+import org.eclipse.lsp4j.TextEdit;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 public class PropertiesKeyInstance {
 
@@ -61,7 +64,17 @@ public class PropertiesKeyInstance {
 
     public CompletableFuture<List<CompletionItem>> getCompletions(String enteredText, Position position) {
         List<String> matches = Messages.getMatchingKeys(enteredText, textDocumentItem);
-        List<CompletionItem> results = matches.stream().map(s -> new CompletionItem(s)).collect(Collectors.toList());
+        List<CompletionItem> results = matches.stream().map(s ->{
+            int line = position.getLine();
+            Position rangeStart = new Position(line, 0);
+            Position rangeEnd = new Position(line, s.length());
+            Range range = new Range(rangeStart, rangeEnd);
+            Either<TextEdit, InsertReplaceEdit> edit = Either.forLeft(new TextEdit(range, s));
+            CompletionItem completionItem=new CompletionItem();
+            completionItem.setTextEdit(edit);
+            completionItem.setLabel(s);
+            return completionItem;
+        }).toList();
         // set hover description as the 'detail' on the CompletionItem
         setDetailsOnCompletionItems(results, null, false);
         return CompletableFuture.completedFuture(results);
