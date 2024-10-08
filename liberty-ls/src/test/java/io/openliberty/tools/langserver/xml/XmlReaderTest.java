@@ -20,7 +20,7 @@ public class XmlReaderTest {
     File resourcesDir = new File("src/test/resources");
 
     @Test
-    public void readLibertyPluginConfigXml() throws IOException {
+    public void testReadLibertyPluginConfigXml() throws IOException {
         File lpcXml = new File(resourcesDir, "xml/unix/liberty-plugin-config.xml");
         Map<String, String> tagValues = XmlReader.readTagsFromXml(lpcXml.toURI().toString(), 
                 LibertyConfigFileManager.CUSTOM_BOOTSTRAP_PROPERTIES_XML_TAG, 

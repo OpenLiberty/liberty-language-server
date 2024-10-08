@@ -28,7 +28,7 @@ public class LibertyConfigFileManagerTest {
     public final String ANOTHER_BOOTSTRAP = "file:/user/sample-project/src/main/another.properties";
 
     @Test
-    public void processConfigXml() throws IOException {
+    public void testProcessConfigXml() throws IOException {
         if (File.separator.equals("/")) {
             File lpcXml = new File(resourcesDir, "xml/unix/liberty-plugin-config.xml");
 
@@ -41,7 +41,7 @@ public class LibertyConfigFileManagerTest {
     }
 
     @Test
-    public void processWindowsConfigXml() throws IOException {
+    public void testTrocessWindowsConfigXml() throws IOException {
         if (!File.separator.equals("/")) {
             File lpcXml = new File(resourcesDir, "xml/windows/liberty-plugin-config.xml");
 
@@ -54,7 +54,7 @@ public class LibertyConfigFileManagerTest {
     }
 
     @Test
-    public void initCustomConfigTest() {
+    public void testInitCustomConfigTest() {
         assertFalse(LibertyConfigFileManager.isBootstrapPropertiesFile(ANOTHER_BOOTSTRAP));
         if (File.separator.equals("/")) {
             WorkspaceFolder folder = new WorkspaceFolder(resourcesDir2.toURI().toString());
