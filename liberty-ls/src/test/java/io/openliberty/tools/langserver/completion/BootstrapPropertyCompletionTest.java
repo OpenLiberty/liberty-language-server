@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -9,7 +9,8 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.completion;
 
-import static org.junit.Assert.assertEquals;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -22,10 +23,10 @@ import org.eclipse.lsp4j.CompletionList;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.TextDocumentItem;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
-import org.junit.Test;
 
 import io.openliberty.tools.langserver.LibertyLanguageServer;
 import io.openliberty.tools.langserver.utils.ServerPropertyValues;
+import org.junit.jupiter.api.Test;
 
 public class BootstrapPropertyCompletionTest extends AbstractCompletionTest {
     @Test

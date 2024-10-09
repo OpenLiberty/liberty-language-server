@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -9,7 +9,8 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver;
 
-import static org.junit.Assert.assertTrue;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -41,7 +42,7 @@ import org.eclipse.lsp4j.WorkspaceFolder;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.TextDocumentService;
-import org.junit.AfterClass;
+import org.junit.jupiter.api.AfterAll;
 
 public class AbstractLibertyLanguageServerTest {
     protected static final String DUMMY_URI = "dummyUri";
@@ -53,7 +54,7 @@ public class AbstractLibertyLanguageServerTest {
         super();
     }
 
-    @AfterClass
+    @AfterAll
     public static void tearDown() {
         if (libertyLanguageServer != null) {
             libertyLanguageServer.shutdown();

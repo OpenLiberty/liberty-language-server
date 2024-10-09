@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022, 2023 IBM Corporation and others.
+* Copyright (c) 2022, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -10,10 +10,10 @@
 package io.openliberty.tools.langserver.diagnostic;
 
 import static org.awaitility.Awaitility.await;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -67,9 +67,9 @@ public class AbstractDiagnosticTest extends AbstractLibertyLanguageServerTest {
 
         for (Diagnostic diag: diags) {
             boolean found = expectedDiagnosticRanges.remove(diag.getRange());
-            assertTrue("Found diagnostic which the test did not account for: \"" + diag.getMessage() + "\" at " + diag.getRange(), found);
+            assertTrue(found, "Found diagnostic which the test did not account for: \"" + diag.getMessage() + "\" at " + diag.getRange());
         }
-        assertEquals("Did not find all the expected diagnostics. These expected ranges were not found: " + expectedDiagnosticRanges.toString(), 0, expectedDiagnosticRanges.size());
+        assertEquals(0, expectedDiagnosticRanges.size(),"Did not find all the expected diagnostics. These expected ranges were not found: " + expectedDiagnosticRanges.toString());
     }
 
     protected void checkDiagnosticsContainsMessages(String... messages) {
@@ -77,11 +77,11 @@ public class AbstractDiagnosticTest extends AbstractLibertyLanguageServerTest {
         List<String> expectedMessages = new LinkedList<String>(Arrays.asList(messages));
 
         for (Diagnostic diag : diags) {
-            assertFalse("Diagnostic message is unexpectedly empty.", diag.getMessage().isEmpty());
-            assertTrue("Diagnostic severity not set to Error as expected.", diag.getSeverity() == DiagnosticSeverity.Error);
+            assertFalse(diag.getMessage().isEmpty(),"Diagnostic message is unexpectedly empty.");
+            assertTrue(diag.getSeverity() == DiagnosticSeverity.Error, "Diagnostic severity not set to Error as expected.");
             expectedMessages.remove(diag.getMessage());
         }
-        assertEquals("Did not find all the expected diagnostic messages. These messages were not found: " + expectedMessages.toString(), 0, expectedMessages.size());
+        assertEquals(0, expectedMessages.size(),"Did not find all the expected diagnostic messages. These messages were not found: " + expectedMessages.toString());
     }
 
     private ConditionFactory createAwait() {

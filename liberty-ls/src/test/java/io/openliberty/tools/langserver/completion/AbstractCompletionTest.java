@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -8,9 +8,6 @@
 * SPDX-License-Identifier: EPL-2.0
 *******************************************************************************/
 package io.openliberty.tools.langserver.completion;
-
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertNotNull;
 
 import java.io.File;
 import java.util.Arrays;
@@ -22,6 +19,9 @@ import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionItemKind;
 
 import io.openliberty.tools.langserver.AbstractLibertyLanguageServerTest;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AbstractCompletionTest extends AbstractLibertyLanguageServerTest {
 
@@ -67,22 +67,22 @@ public class AbstractCompletionTest extends AbstractLibertyLanguageServerTest {
                 found = true;
                 String nextItemDetail = nextItem.getDocumentation().getRight().getValue();
                 assertNotNull(nextItemDetail);
-                assertTrue("The CompletionItem actual detail: "+nextItemDetail+" did not match expected: "+detail, nextItemDetail.equals(detail));
+                assertTrue(nextItemDetail.equals(detail), "The CompletionItem actual detail: "+nextItemDetail+" did not match expected: "+detail);
 
                 CompletionItemKind kind = nextItem.getKind();
-                assertTrue("Unexpected CompletionItemKind: "+kind+" expected: "+CompletionItemKind.Text, kind == CompletionItemKind.Text);
+                assertTrue(kind == CompletionItemKind.Text, "Unexpected CompletionItemKind: "+kind+" expected: "+CompletionItemKind.Text);
             } else {
                 if (nextItem.getLabel().equals(key)) {
                     String nextItemDetail = nextItem.getDocumentation().getRight().getValue();
                     assertNotNull(nextItemDetail);
-                    assertTrue("The CompletionItem actual detail: "+nextItemDetail+" did not match expected: "+detail, nextItemDetail.equals(detail));
+                    assertTrue(nextItemDetail.equals(detail), "The CompletionItem actual detail: "+nextItemDetail+" did not match expected: "+detail);
                     found = true;
                 } else {
                     assertNotNull(nextItem.getDocumentation().getRight().getValue());
                 }
 
                 CompletionItemKind kind = nextItem.getKind();
-                assertTrue("Unexpected CompletionItemKind: "+kind+" expected: "+CompletionItemKind.Property, kind == CompletionItemKind.Property);
+                assertTrue(kind == CompletionItemKind.Property, "Unexpected CompletionItemKind: "+kind+" expected: "+CompletionItemKind.Property);
             }
         }
         assertTrue(found);

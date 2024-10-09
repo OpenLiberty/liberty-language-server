@@ -1,15 +1,16 @@
 package io.openliberty.tools.langserver.xml;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.eclipse.lsp4j.WorkspaceFolder;
-import org.junit.Test;
 
 import io.openliberty.tools.langserver.LibertyConfigFileManager;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class LibertyConfigFileManagerTest {
     File resourcesDir = new File("src/test/resources");
@@ -27,7 +28,7 @@ public class LibertyConfigFileManagerTest {
     public final String ANOTHER_BOOTSTRAP = "file:/user/sample-project/src/main/another.properties";
 
     @Test
-    public void processConfigXml() throws IOException {
+    public void testProcessConfigXml() throws IOException {
         if (File.separator.equals("/")) {
             File lpcXml = new File(resourcesDir, "xml/unix/liberty-plugin-config.xml");
 
@@ -40,7 +41,7 @@ public class LibertyConfigFileManagerTest {
     }
 
     @Test
-    public void processWindowsConfigXml() throws IOException {
+    public void testTrocessWindowsConfigXml() throws IOException {
         if (!File.separator.equals("/")) {
             File lpcXml = new File(resourcesDir, "xml/windows/liberty-plugin-config.xml");
 
@@ -53,7 +54,7 @@ public class LibertyConfigFileManagerTest {
     }
 
     @Test
-    public void initCustomConfigTest() {
+    public void testInitCustomConfigTest() {
         assertFalse(LibertyConfigFileManager.isBootstrapPropertiesFile(ANOTHER_BOOTSTRAP));
         if (File.separator.equals("/")) {
             WorkspaceFolder folder = new WorkspaceFolder(resourcesDir2.toURI().toString());

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -9,7 +9,8 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.hover;
 
-import static org.junit.Assert.assertEquals;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
 import java.net.URISyntaxException;
@@ -18,9 +19,9 @@ import java.util.concurrent.ExecutionException;
 
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.TextDocumentItem;
-import org.junit.Test;
 
 import io.openliberty.tools.langserver.LibertyLanguageServer;
+import org.junit.jupiter.api.Test;
 
 public class BootstrapPropertyHoverTest extends AbstractHoverTest {
     
