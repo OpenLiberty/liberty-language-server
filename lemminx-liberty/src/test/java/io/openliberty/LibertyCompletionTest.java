@@ -75,8 +75,8 @@ public class LibertyCompletionTest {
                 CompletionItem websocket = c("websocket-1.1", "websocket-1.1");
                 CompletionItem microProfileCompletion = c("microProfile-2.2", "microProfile-2.2");
 
-                // would be 344 based on 24.0.0.9
-                final int TOTAL_ITEMS = 344; // total number of available completion items
+                // would be 348 based on 24.0.0.10
+                final int TOTAL_ITEMS = 348; // total number of available completion items
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, jaxrsCompletion, websocket,
                                 microProfileCompletion);
@@ -98,9 +98,9 @@ public class LibertyCompletionTest {
                 // total number of available completion items
                 // 3 for javaee
                 //3 for jakartaee
-                //15 for microprofile
+                //16 for microprofile
                 // one for CDATA and one for <-
-                final int TOTAL_ITEMS = 23;
+                final int TOTAL_ITEMS = 24;
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS);
 
@@ -134,7 +134,7 @@ public class LibertyCompletionTest {
                         "       </featureManager>", //
                         "</server>" //
                 );
-                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 17);
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 18);
 
                 serverXML = String.join(newLine, //
                         "<server description=\"Sample Liberty server\">", //

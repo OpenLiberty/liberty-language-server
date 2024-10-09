@@ -25,7 +25,7 @@ public class LibertyFeatureTest {
     public void getInstalledFeaturesListTest() throws JAXBException {
         FeatureService fs = FeatureService.getInstance();
         File srcResourcesDir = new File("src/test/resources/sample");
-        File featureListFile = new File(srcResourcesDir.getParentFile(), "featurelist-ol-24.0.0.9.xml");
+        File featureListFile = new File(srcResourcesDir.getParentFile(), "featurelist-ol-24.0.0.10.xml");
         
         // LibertyWorkspace must be initialized
         List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
@@ -51,7 +51,7 @@ public class LibertyFeatureTest {
         assertEquals(1, fg.getConfigElementNode("ssl").getEnabledBy().size());
         assertTrue(fg.getConfigElementNode("ssl").getEnabledBy().contains("ssl-1.0"));
         assertEquals(91, fg.getAllEnabledBy("ssl").size());
-        assertEquals(285, fg.getAllEnabledBy("library").size());
+        assertEquals(288, fg.getAllEnabledBy("library").size());
         assertTrue(fg.getAllEnabledBy("ltpa").contains("admincenter-1.0"));  // direct enabler
         assertTrue(fg.getAllEnabledBy("ssl").contains("microprofile-5.0"));  // transitive enabler
     }
