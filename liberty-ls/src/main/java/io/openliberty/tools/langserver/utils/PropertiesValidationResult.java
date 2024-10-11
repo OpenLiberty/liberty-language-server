@@ -67,7 +67,7 @@ public class PropertiesValidationResult {
         
         // check whitespace around equal sign (=)
         if (LibertyConfigFileManager.isServerEnvFile(textDocumentItem)) {
-            if (property.endsWith(" ") || value.startsWith(" ")) {
+            if ((property != null && property.endsWith(" ")) || (value != null && value.startsWith(" "))) {
                 startChar = property.trim().length();
                 endChar = entry.getLineContent().length() - value.trim().length();
                 hasErrors = true;

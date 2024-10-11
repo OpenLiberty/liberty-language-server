@@ -49,9 +49,11 @@ public class LibertyPropertiesDiagnosticService  {
             int lineNumber = 0;
             try {
                 while ((line=br.readLine()) != null) {
-                    PropertiesValidationResult validationResult = PropertiesValidationResult.validateServerProperty(line, openedDocument, lineNumber);
-                    if (validationResult.hasErrors()) {
-                        errors.put(line, validationResult);
+                    if(!line.isBlank()) {
+                        PropertiesValidationResult validationResult = PropertiesValidationResult.validateServerProperty(line, openedDocument, lineNumber);
+                        if (validationResult.hasErrors()) {
+                            errors.put(line, validationResult);
+                        }
                     }
                     lineNumber++;
                 }

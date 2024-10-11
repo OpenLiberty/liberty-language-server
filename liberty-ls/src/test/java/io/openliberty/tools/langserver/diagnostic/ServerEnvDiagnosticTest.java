@@ -27,7 +27,7 @@ public class ServerEnvDiagnosticTest extends AbstractDiagnosticTest {
             // Checking invalid whitespace before equal sign: WLP_DEBUG_REMOTE =n
             createRange(4,16,18),
             // Checking invalid whitespace after equal sign: WLP_LOGGING_MESSAGE_FORMAT= SIMPLE
-            createRange(5,26,28)  
+            createRange(7,26,28)
         );
         checkDiagnosticsContainsMessages(
             "The value `asdf` is not valid for the variable `WLP_LOGGING_CONSOLE_FORMAT`.",
