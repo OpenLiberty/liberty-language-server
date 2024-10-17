@@ -434,7 +434,7 @@ public class LibertyDiagnosticTest {
                 "<server description=\"Sample Liberty server\">", //
                 "       <featureManager>", //
                 "               <feature>batch-1.0</feature>", //
-                "               <platform>jaX</platform>", //
+                "               <platform>javaee</platform>", //
                 "               <platform>javaee-7.0</platform>", //
                 "               <!-- <feature>comment</feature> -->", //
                 "               <platform>javaee-7.0</platform>", //
@@ -444,9 +444,9 @@ public class LibertyDiagnosticTest {
                 "</server>" //
         );
         Diagnostic invalid1 = new Diagnostic();
-        invalid1.setRange(r(3, 25, 3, 28));
-        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
-        invalid1.setMessage("ERROR: The platform \"jaX\" does not exist.");
+        invalid1.setRange(r(3, 25, 3, 31));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_PLATFORM_CODE);
+        invalid1.setMessage("ERROR: The platform \"javaee\" does not exist.");
 
         Diagnostic invalid2 = new Diagnostic();
         invalid2.setRange(r(6, 25, 6, 35));
@@ -464,6 +464,25 @@ public class LibertyDiagnosticTest {
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid1, invalid2, invalid3, invalid4);
+        //expecting code action to show all javaee platforms
+        List<String> featuresStartWithJavaEE = new ArrayList<>();
+        featuresStartWithJavaEE.add("javaee-6.0");
+        featuresStartWithJavaEE.add("javaee-7.0");
+        featuresStartWithJavaEE.add("javaee-8.0");
+        Collections.sort(featuresStartWithJavaEE);
+
+        List<CodeAction> codeActions = new ArrayList<>();
+        for (String nextFeature: featuresStartWithJavaEE) {
+            TextEdit texted = te(invalid1.getRange().getStart().getLine(), invalid1.getRange().getStart().getCharacter(),
+                    invalid1.getRange().getEnd().getLine(), invalid1.getRange().getEnd().getCharacter(), nextFeature);
+            CodeAction invalidCodeAction = ca(invalid1, texted);
+
+            codeActions.add(invalidCodeAction);
+        }
+
+        XMLAssert.testCodeActionsFor(serverXML, invalid1, codeActions.get(0), codeActions.get(1),
+                codeActions.get(2));
+
     }
 
     @Test

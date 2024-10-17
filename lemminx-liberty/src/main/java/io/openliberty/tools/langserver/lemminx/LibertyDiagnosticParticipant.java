@@ -70,7 +70,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     public static final String Is_DIR_NOT_FILE_CODE = "is_dir_not_file";
 
     public static final String INCORRECT_FEATURE_CODE = "incorrect_feature";
-    
+    public static final String INCORRECT_PLATFORM_CODE = "incorrect_platform";
+
     @Override
     public void doDiagnostics(DOMDocument domDocument, List<Diagnostic> diagnostics,
             XMLValidationSettings validationSettings, CancelChecker cancelChecker) {
@@ -386,7 +387,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
                         domDocument);
                 String message = "ERROR: The platform \"" + platformName + "\" does not exist.";
-                list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
+                list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_PLATFORM_CODE));
             }
             // if this exact platform already exists, or another version of this feature already exists, then show a diagnostic
             else {
