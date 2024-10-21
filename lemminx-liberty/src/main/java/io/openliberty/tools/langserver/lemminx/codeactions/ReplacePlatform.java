@@ -61,12 +61,9 @@ public class ReplacePlatform implements ICodeActionParticipant {
                 List<String> replacementPlatformsWithoutConflicts = getReplacementPlatformsWithoutConflicts(replacementPlatforms, existingPlatforms);
                 // filter with entered word
                 List<String> filteredPlatforms = replacementPlatformsWithoutConflicts.stream().
-                        filter(it -> it.toLowerCase().startsWith(platformNameToReplace.toLowerCase()))
+                        filter(it -> it.toLowerCase().contains(platformNameToReplace.toLowerCase()))
                         .toList();
-                // if no matching platform is found, show all platforms as quick fix actions
-                List<String> selectedPlatforms = filteredPlatforms.isEmpty() ? new ArrayList<>(replacementPlatformsWithoutConflicts) : filteredPlatforms;
-
-                for (String nextPlatform : selectedPlatforms) {
+                for (String nextPlatform : filteredPlatforms) {
                     if (!nextPlatform.equals(platformNameToReplace)) {
                         String title = "Replace platform with " + nextPlatform;
                         codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), nextPlatform, document.getTextDocument(), diagnostic));
@@ -109,7 +106,7 @@ public class ReplacePlatform implements ICodeActionParticipant {
                     Optional<String> conflictingPlatform = existingPlatforms.stream().filter(
                             existingPlatform -> {
                                 String conflictingPlatformName = LibertyConstants.conflictingPlatforms.get(pWithoutVersion);
-                                return conflictingPlatformName != null && existingPlatform.startsWith(conflictingPlatformName);
+                                return conflictingPlatformName != null && existingPlatform.contains(conflictingPlatformName);
                             }
                     ).findFirst();
                     if(conflictingPlatform.isEmpty()){
