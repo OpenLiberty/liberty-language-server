@@ -17,6 +17,7 @@ import io.openliberty.tools.langserver.lemminx.LibertyExtension;
 import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
+import io.openliberty.tools.langserver.lemminx.util.LibertyConstants;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 import org.eclipse.lemminx.commons.CodeActionFactory;
 import org.eclipse.lemminx.dom.DOMDocument;
@@ -29,9 +30,9 @@ import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class ReplacePlatform implements ICodeActionParticipant {
     private static final Logger LOGGER = Logger.getLogger(LibertyExtension.class.getName());
@@ -53,14 +54,19 @@ public class ReplacePlatform implements ICodeActionParticipant {
             if (replacePlatformName) {
                 LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(document);
                 Set<String> allPlatforms = getAllPlatforms(runtimeInfo, document);
-
-                List<String> filteredPlatforms = allPlatforms.stream().
-                        filter(it -> it.contains(platformNameToReplace))
-                        .collect(Collectors.toList());
+                List<String> existingPlatforms = FeatureService.getInstance().collectExistingPlatforms(document, platformNameToReplace);
+                List<String> replacementPlatforms = getReplacementPlatforms(document,
+                        platformNameToReplace, allPlatforms, existingPlatforms);
+                // check for conflicting platforms for already existing platforms. remove them from quick fix items
+                List<String> replacementPlatformsWithoutConflicts = getReplacementPlatformsWithoutConflicts(replacementPlatforms, existingPlatforms);
+                // filter with entered word
+                List<String> filteredPlatforms = replacementPlatformsWithoutConflicts.stream().
+                        filter(it -> it.toLowerCase().startsWith(platformNameToReplace.toLowerCase()))
+                        .toList();
                 // if no matching platform is found, show all platforms as quick fix actions
-                List<String> replacementPlatforms = filteredPlatforms.isEmpty() ? new ArrayList<>(allPlatforms) : filteredPlatforms;
-                replacementPlatforms.sort(Comparator.naturalOrder());
-                for (String nextPlatform : replacementPlatforms) {
+                List<String> selectedPlatforms = filteredPlatforms.isEmpty() ? new ArrayList<>(replacementPlatformsWithoutConflicts) : filteredPlatforms;
+
+                for (String nextPlatform : selectedPlatforms) {
                     if (!nextPlatform.equals(platformNameToReplace)) {
                         String title = "Replace platform with " + nextPlatform;
                         codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), nextPlatform, document.getTextDocument(), diagnostic));
@@ -71,6 +77,47 @@ public class ReplacePlatform implements ICodeActionParticipant {
             // BadLocationException not expected
             LOGGER.warning("Could not generate code action for replace platform: " + e);
         }
+    }
+
+    /**
+     * get list of existing platforms to exclude from list of possible replacements
+     * also exclude any platform with a different version that matches an existing platform
+     * @param document DOM document
+     * @param platformNameToReplace platform for replacing
+     * @param allPlatforms all platforms
+     * @return replacement platforms
+     */
+    private static List<String> getReplacementPlatforms(DOMDocument document, String platformNameToReplace, Set<String> allPlatforms, List<String> existingPlatforms) {
+        List<String> existingPlatformsWithoutVersion = existingPlatforms.stream().map(p->LibertyUtils.stripVersion(p).toLowerCase()).toList();
+        return allPlatforms.stream().filter(
+                p -> !existingPlatformsWithoutVersion.contains(LibertyUtils.stripVersion(p))
+        ).sorted(Comparator.naturalOrder()).toList();
+    }
+
+    /**
+     * find and remove conflicting platforms
+     * @param replacementPlatforms replacement platform  list
+     * @param existingPlatforms existing platforms in doc
+     * @return non-conflicting platforms
+     */
+    private static List<String> getReplacementPlatformsWithoutConflicts(List<String> replacementPlatforms, List<String> existingPlatforms) {
+        List<String> replacementPlatformsWithoutConflicts=new ArrayList<>();
+        replacementPlatforms.forEach(
+                p->{
+                    String pWithoutVersion = LibertyUtils.stripVersion(p);
+
+                    Optional<String> conflictingPlatform = existingPlatforms.stream().filter(
+                            existingPlatform -> {
+                                String conflictingPlatformName = LibertyConstants.conflictingPlatforms.get(pWithoutVersion);
+                                return conflictingPlatformName != null && existingPlatform.startsWith(conflictingPlatformName);
+                            }
+                    ).findFirst();
+                    if(conflictingPlatform.isEmpty()){
+                        replacementPlatformsWithoutConflicts.add(p);
+                    }
+                }
+        );
+        return replacementPlatformsWithoutConflicts;
     }
 
     private static Set<String> getAllPlatforms(LibertyRuntime runtimeInfo, DOMDocument document) {

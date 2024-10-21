@@ -186,7 +186,7 @@ public class LibertyDiagnosticTest {
                 "    <include location=\"/testDir.xml\"/>", //
                 "</server>"
         );
-        
+
         // Diagnostic location1 = new Diagnostic();
         File serverXMLFile = new File("src/test/resources/server.xml");
         assertFalse(serverXMLFile.exists());
@@ -231,7 +231,7 @@ public class LibertyDiagnosticTest {
         fileIsDir.setCode("is_dir_not_file");
         fileIsDir.setMessage("Path specified a file, but resource exists as a directory. Please add a trailing slash.");
 
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), 
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(),
                 not_xml, multi_liner, not_optional, missing_xml, optional_not_defined, missing_xml2,
                 dirIsFile, fileIsDir);
 
@@ -247,7 +247,7 @@ public class LibertyDiagnosticTest {
         CodeAction fileIsDirCodeAction = ca(fileIsDir, fileIsDirTextEdit);
 
 
-        XMLAssert.testCodeActionsFor(serverXML, dirIsFile, dirIsFileCodeAction); 
+        XMLAssert.testCodeActionsFor(serverXML, dirIsFile, dirIsFileCodeAction);
 
         XMLAssert.testCodeActionsFor(serverXML, fileIsDir, fileIsDirCodeAction);
     }
@@ -268,7 +268,7 @@ public class LibertyDiagnosticTest {
                 "    <include location=\"\\testDir.xml\"/>", //
                 "</server>"
         );
-        
+
         // Diagnostic location1 = new Diagnostic();
         File serverXMLFile = new File("src/test/resources/server.xml");
         assertFalse(serverXMLFile.exists());
@@ -285,7 +285,7 @@ public class LibertyDiagnosticTest {
         fileIsDir.setCode("is_dir_not_file");
         fileIsDir.setMessage("Path specified a file, but resource exists as a directory. Please add a trailing slash.");
 
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(), 
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLFile.toURI().toString(),
                 dirIsFile, fileIsDir);
 
         String fixedFilePath = "location=\"\\empty_server.xml\"";
@@ -298,7 +298,7 @@ public class LibertyDiagnosticTest {
                             fileIsDir.getRange().getEnd().getLine(), fileIsDir.getRange().getEnd().getCharacter(), fixedDirPath);
         CodeAction fileIsDirCodeAction = ca(fileIsDir, fileIsDirTextEdit);
 
-        XMLAssert.testCodeActionsFor(serverXML, dirIsFile, dirIsFileCodeAction); 
+        XMLAssert.testCodeActionsFor(serverXML, dirIsFile, dirIsFileCodeAction);
 
         XMLAssert.testCodeActionsFor(serverXML, fileIsDir, fileIsDirCodeAction);
     }
@@ -307,7 +307,7 @@ public class LibertyDiagnosticTest {
     public void testConfigElementMissingFeatureManager() throws JAXBException {
         assertTrue(featureList.exists());
         FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), libWorkspace, featureList);
-        
+
         String serverXml = "<server><ssl id=\"\"/></server>";
         // Temporarily disabling config element diagnostics if featureManager element is missing (until issue 230 is addressed)
         // Diagnostic config_for_missing_feature = new Diagnostic();
@@ -364,7 +364,7 @@ public class LibertyDiagnosticTest {
 
             TextDocumentEdit textDoc = tde(sampleserverXMLURI, 0, texted);
             WorkspaceEdit workspaceEdit = new WorkspaceEdit(Collections.singletonList(Either.forLeft(textDoc)));
-            
+
             invalidCodeAction.setEdit(workspaceEdit);
             codeActions.add(invalidCodeAction);
         }
@@ -434,7 +434,7 @@ public class LibertyDiagnosticTest {
                 "<server description=\"Sample Liberty server\">", //
                 "       <featureManager>", //
                 "               <feature>batch-1.0</feature>", //
-                "               <platform>javaee</platform>", //
+                "               <platform>jaX</platform>", //
                 "               <platform>javaee-7.0</platform>", //
                 "               <!-- <feature>comment</feature> -->", //
                 "               <platform>javaee-7.0</platform>", //
@@ -444,9 +444,9 @@ public class LibertyDiagnosticTest {
                 "</server>" //
         );
         Diagnostic invalid1 = new Diagnostic();
-        invalid1.setRange(r(3, 25, 3, 31));
+        invalid1.setRange(r(3, 25, 3, 28));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_PLATFORM_CODE);
-        invalid1.setMessage("ERROR: The platform \"javaee\" does not exist.");
+        invalid1.setMessage("ERROR: The platform \"jaX\" does not exist.");
 
         Diagnostic invalid2 = new Diagnostic();
         invalid2.setRange(r(6, 25, 6, 35));
@@ -464,25 +464,6 @@ public class LibertyDiagnosticTest {
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid1, invalid2, invalid3, invalid4);
-        //expecting code action to show all javaee platforms
-        List<String> featuresStartWithJavaEE = new ArrayList<>();
-        featuresStartWithJavaEE.add("javaee-6.0");
-        featuresStartWithJavaEE.add("javaee-7.0");
-        featuresStartWithJavaEE.add("javaee-8.0");
-        Collections.sort(featuresStartWithJavaEE);
-
-        List<CodeAction> codeActions = new ArrayList<>();
-        for (String nextFeature: featuresStartWithJavaEE) {
-            TextEdit texted = te(invalid1.getRange().getStart().getLine(), invalid1.getRange().getStart().getCharacter(),
-                    invalid1.getRange().getEnd().getLine(), invalid1.getRange().getEnd().getCharacter(), nextFeature);
-            CodeAction invalidCodeAction = ca(invalid1, texted);
-
-            codeActions.add(invalidCodeAction);
-        }
-
-        XMLAssert.testCodeActionsFor(serverXML, invalid1, codeActions.get(0), codeActions.get(1),
-                codeActions.get(2));
-
     }
 
     @Test
@@ -768,5 +749,99 @@ public class LibertyDiagnosticTest {
         invalid.setMessage("ERROR: The ejb feature cannot be configured with the enterpriseBeans feature because they are two different versions of the same feature. The feature name changed from ejb to enterpriseBeans for Jakarta EE. Remove one of the features.");
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid);
+    }
+
+    @Test
+    public void testInvalidPlatformDiagnosticWithCodeCompletion() throws BadLocationException {
+
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <platform>javaEE</platform>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        Diagnostic invalid1 = new Diagnostic();
+        invalid1.setRange(r(2, 25, 2, 31));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_PLATFORM_CODE);
+        invalid1.setMessage("ERROR: The platform \"javaEE\" does not exist.");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
+        //expecting code action to show all javaee platforms ignoring input case
+        List<String> featuresStartWithJavaEE = new ArrayList<>();
+        featuresStartWithJavaEE.add("javaee-6.0");
+        featuresStartWithJavaEE.add("javaee-7.0");
+        featuresStartWithJavaEE.add("javaee-8.0");
+        Collections.sort(featuresStartWithJavaEE);
+
+        List<CodeAction> codeActions = new ArrayList<>();
+        for (String nextFeature : featuresStartWithJavaEE) {
+            TextEdit texted = te(invalid1.getRange().getStart().getLine(), invalid1.getRange().getStart().getCharacter(),
+                    invalid1.getRange().getEnd().getLine(), invalid1.getRange().getEnd().getCharacter(), nextFeature);
+            CodeAction invalidCodeAction = ca(invalid1, texted);
+
+            codeActions.add(invalidCodeAction);
+        }
+
+        XMLAssert.testCodeActionsFor(serverXML, invalid1, codeActions.get(0), codeActions.get(1),
+                codeActions.get(2));
+
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>batch-1.0</feature>", //
+                "               <platform>ja</platform>", //
+                "               <platform>javaee-7.0</platform>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        invalid1 = new Diagnostic();
+        invalid1.setRange(r(3, 25, 3, 27));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_PLATFORM_CODE);
+        invalid1.setMessage("ERROR: The platform \"ja\" does not exist.");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
+        //  expecting code action to show all microprofile platforms only since
+        //      1. javaee is already included
+        //      2. jakartaee is conflicting with javaee platforms
+        List<String> microProfilePlatforms = new ArrayList<>();
+        microProfilePlatforms.add("microProfile-1.0");
+        microProfilePlatforms.add("microProfile-1.2");
+        microProfilePlatforms.add("microProfile-1.3");
+        microProfilePlatforms.add("microProfile-1.4");
+        microProfilePlatforms.add("microProfile-2.0");
+        microProfilePlatforms.add("microProfile-2.1");
+        microProfilePlatforms.add("microProfile-2.2");
+        microProfilePlatforms.add("microProfile-3.0");
+        microProfilePlatforms.add("microProfile-3.2");
+        microProfilePlatforms.add("microProfile-3.3");
+        microProfilePlatforms.add("microProfile-4.0");
+        microProfilePlatforms.add("microProfile-4.1");
+        microProfilePlatforms.add("microProfile-5.0");
+        microProfilePlatforms.add("microProfile-6.0");
+        microProfilePlatforms.add("microProfile-6.1");
+        microProfilePlatforms.add("microProfile-7.0");
+        Collections.sort(microProfilePlatforms);
+
+        codeActions = new ArrayList<>();
+        for (String nextFeature : microProfilePlatforms) {
+            TextEdit texted = te(invalid1.getRange().getStart().getLine(), invalid1.getRange().getStart().getCharacter(),
+                    invalid1.getRange().getEnd().getLine(), invalid1.getRange().getEnd().getCharacter(), nextFeature);
+            CodeAction invalidCodeAction = ca(invalid1, texted);
+
+            codeActions.add(invalidCodeAction);
+        }
+
+        XMLAssert.testCodeActionsFor(serverXML, invalid1, codeActions.get(0),
+                codeActions.get(1), codeActions.get(2),
+                codeActions.get(3), codeActions.get(4),
+                codeActions.get(5), codeActions.get(6),
+                codeActions.get(7), codeActions.get(8),
+                codeActions.get(9), codeActions.get(10),
+                codeActions.get(11), codeActions.get(12),
+                codeActions.get(13), codeActions.get(14),
+                codeActions.get(15));
     }
 }

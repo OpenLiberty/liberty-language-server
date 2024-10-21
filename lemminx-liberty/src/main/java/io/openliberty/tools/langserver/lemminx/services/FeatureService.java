@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import io.openliberty.tools.langserver.lemminx.models.feature.FeatureTolerate;
+import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.dom.DOMNode;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager.ResourceToDeploy;
@@ -682,5 +683,41 @@ public class FeatureService {
                     : requireFeature;
             requiredFeatureNames.add(extractedFeatureName);
         }
+    }
+    /**
+     * Returns the platform names specified in the featureManager element in lower case,
+     * excluding the currentPlatformName if specified.
+     * @param document DOM document
+     * @param currentPlatformName current platform name
+     * @return all platforms in document
+     */
+    public List<String> collectExistingPlatforms(DOMDocument document, String currentPlatformName) {
+        List<String> includedPlatforms = new ArrayList<>();
+        List<DOMNode> nodes = document.getDocumentElement().getChildren();
+        DOMNode featureManager = null;
+
+        for (DOMNode node : nodes) {
+            if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(node.getNodeName())) {
+                featureManager = node;
+                break;
+            }
+        }
+        if (featureManager == null) {
+            return includedPlatforms;
+        }
+
+        List<DOMNode> platforms = featureManager.getChildren();
+        for (DOMNode platformNode : platforms) {
+            DOMNode platformTextNode = (DOMNode) platformNode.getChildNodes().item(0);
+            // skip nodes that do not have any text value (ie. comments)
+            if (platformNode.getNodeName().equals(LibertyConstants.PLATFORM_ELEMENT) && platformTextNode != null) {
+                String platformName = platformTextNode.getTextContent();
+                String platformNameLowerCase = platformName.toLowerCase();
+                if ((!platformNameLowerCase.equalsIgnoreCase(currentPlatformName))) {
+                    includedPlatforms.add(platformNameLowerCase);
+                }
+            }
+        }
+        return includedPlatforms;
     }
 }
