@@ -827,8 +827,7 @@ public class LibertyDiagnosticTest {
                 invalid1);
 
         //  expecting code action to show only microprofile platforms since
-        //      1. javaee is already included
-        //      2. jakartaee is conflicting with javaee platforms
+        //      1. user has entered "microP"
         List<String> microProfilePlatforms = new ArrayList<>();
         microProfilePlatforms.add("microProfile-1.0");
         microProfilePlatforms.add("microProfile-1.2");
