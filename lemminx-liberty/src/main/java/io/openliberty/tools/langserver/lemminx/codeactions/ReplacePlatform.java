@@ -55,8 +55,8 @@ public class ReplacePlatform implements ICodeActionParticipant {
                 LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(document);
                 Set<String> allPlatforms = getAllPlatforms(runtimeInfo, document);
                 List<String> existingPlatforms = FeatureService.getInstance().collectExistingPlatforms(document, platformNameToReplace);
-                List<String> replacementPlatforms = getReplacementPlatforms(document,
-                        platformNameToReplace, allPlatforms, existingPlatforms);
+                List<String> replacementPlatforms = getReplacementPlatforms(
+                        allPlatforms, existingPlatforms);
                 // check for conflicting platforms for already existing platforms. remove them from quick fix items
                 List<String> replacementPlatformsWithoutConflicts = getReplacementPlatformsWithoutConflicts(replacementPlatforms, existingPlatforms);
                 // filter with entered word
@@ -79,15 +79,13 @@ public class ReplacePlatform implements ICodeActionParticipant {
     /**
      * get list of existing platforms to exclude from list of possible replacements
      * also exclude any platform with a different version that matches an existing platform
-     * @param document DOM document
-     * @param platformNameToReplace platform for replacing
      * @param allPlatforms all platforms
      * @return replacement platforms
      */
-    private static List<String> getReplacementPlatforms(DOMDocument document, String platformNameToReplace, Set<String> allPlatforms, List<String> existingPlatforms) {
-        List<String> existingPlatformsWithoutVersion = existingPlatforms.stream().map(p->LibertyUtils.stripVersion(p).toLowerCase()).toList();
+    private static List<String> getReplacementPlatforms(Set<String> allPlatforms, List<String> existingPlatforms) {
+        List<String> existingPlatformsWithoutVersionLowerCase = existingPlatforms.stream().map(p->LibertyUtils.stripVersion(p).toLowerCase()).toList();
         return allPlatforms.stream().filter(
-                p -> !existingPlatformsWithoutVersion.contains(LibertyUtils.stripVersion(p))
+                p -> !existingPlatformsWithoutVersionLowerCase.contains(LibertyUtils.stripVersion(p.toLowerCase()))
         ).sorted(Comparator.naturalOrder()).toList();
     }
 
@@ -101,12 +99,12 @@ public class ReplacePlatform implements ICodeActionParticipant {
         List<String> replacementPlatformsWithoutConflicts=new ArrayList<>();
         replacementPlatforms.forEach(
                 p->{
-                    String pWithoutVersion = LibertyUtils.stripVersion(p);
+                    String pWithoutVersion = LibertyUtils.stripVersion(p.toLowerCase());
 
                     Optional<String> conflictingPlatform = existingPlatforms.stream().filter(
                             existingPlatform -> {
                                 String conflictingPlatformName = LibertyConstants.conflictingPlatforms.get(pWithoutVersion);
-                                return conflictingPlatformName != null && existingPlatform.contains(conflictingPlatformName);
+                                return conflictingPlatformName != null && existingPlatform.toLowerCase().contains(conflictingPlatformName);
                             }
                     ).findFirst();
                     if(conflictingPlatform.isEmpty()){

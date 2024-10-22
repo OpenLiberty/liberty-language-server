@@ -803,10 +803,62 @@ public class LibertyDiagnosticTest {
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid1);
+
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>batch-1.0</feature>", //
+                "               <platform>miCroP</platform>", //
+                "               <platform>javaee-7.0</platform>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        invalid1 = new Diagnostic();
+        invalid1.setRange(r(3, 25, 3, 31));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_PLATFORM_CODE);
+        invalid1.setMessage("ERROR: The platform \"miCroP\" does not exist.");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                invalid1);
         //  expecting code action to show no platforms since
         //      1. javaee is already included
         //      2. jakartaee is conflicting with javaee platforms
+        List<String> microProfilePlatforms = new ArrayList<>();
+        microProfilePlatforms.add("microProfile-1.0");
+        microProfilePlatforms.add("microProfile-1.2");
+        microProfilePlatforms.add("microProfile-1.3");
+        microProfilePlatforms.add("microProfile-1.4");
+        microProfilePlatforms.add("microProfile-2.0");
+        microProfilePlatforms.add("microProfile-2.1");
+        microProfilePlatforms.add("microProfile-2.2");
+        microProfilePlatforms.add("microProfile-3.0");
+        microProfilePlatforms.add("microProfile-3.2");
+        microProfilePlatforms.add("microProfile-3.3");
+        microProfilePlatforms.add("microProfile-4.0");
+        microProfilePlatforms.add("microProfile-4.1");
+        microProfilePlatforms.add("microProfile-5.0");
+        microProfilePlatforms.add("microProfile-6.0");
+        microProfilePlatforms.add("microProfile-6.1");
+        microProfilePlatforms.add("microProfile-7.0");
+        Collections.sort(microProfilePlatforms);
 
-        XMLAssert.testCodeActionsFor(serverXML, invalid1);
+        codeActions = new ArrayList<>();
+        for (String nextFeature : microProfilePlatforms) {
+            TextEdit texted = te(invalid1.getRange().getStart().getLine(), invalid1.getRange().getStart().getCharacter(),
+                    invalid1.getRange().getEnd().getLine(), invalid1.getRange().getEnd().getCharacter(), nextFeature);
+            CodeAction invalidCodeAction = ca(invalid1, texted);
+
+            codeActions.add(invalidCodeAction);
+        }
+
+        XMLAssert.testCodeActionsFor(serverXML, invalid1, codeActions.get(0),
+                codeActions.get(1), codeActions.get(2),
+                codeActions.get(3), codeActions.get(4),
+                codeActions.get(5), codeActions.get(6),
+                codeActions.get(7), codeActions.get(8),
+                codeActions.get(9), codeActions.get(10),
+                codeActions.get(11), codeActions.get(12),
+                codeActions.get(13), codeActions.get(14),
+                codeActions.get(15));
     }
 }
