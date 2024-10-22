@@ -803,7 +803,7 @@ public class LibertyDiagnosticTest {
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid1);
-
+        XMLAssert.testCodeActionsFor(serverXML, invalid1);
         serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
                 "       <featureManager>", //
@@ -820,7 +820,7 @@ public class LibertyDiagnosticTest {
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid1);
-        //  expecting code action to show no platforms since
+        //  expecting code action to show only microprofile platforms since
         //      1. javaee is already included
         //      2. jakartaee is conflicting with javaee platforms
         List<String> microProfilePlatforms = new ArrayList<>();
