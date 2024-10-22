@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022, 2023 IBM Corporation and others.
+* Copyright (c) 2022, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import io.openliberty.tools.langserver.lemminx.codeactions.ReplacePlatform;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionParticipant;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionRequest;
 import org.eclipse.lsp4j.CodeAction;
@@ -58,6 +59,7 @@ public class LibertyCodeActionParticipant implements ICodeActionParticipant {
             codeActionParticipants.put(LibertyDiagnosticParticipant.NOT_OPTIONAL_CODE, new EditAttribute());
             codeActionParticipants.put(LibertyDiagnosticParticipant.IMPLICIT_NOT_OPTIONAL_CODE, new AddAttribute());
             codeActionParticipants.put(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE, new ReplaceFeature());
+            codeActionParticipants.put(LibertyDiagnosticParticipant.INCORRECT_PLATFORM_CODE, new ReplacePlatform());
             codeActionParticipants.put(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE, new AddFeature());
             codeActionParticipants.put(LibertyDiagnosticParticipant.IS_FILE_NOT_DIR_CODE, new RemoveTrailingSlash());
             codeActionParticipants.put(LibertyDiagnosticParticipant.Is_DIR_NOT_FILE_CODE, new AddTrailingSlash());
