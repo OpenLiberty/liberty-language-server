@@ -165,7 +165,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
             String featureNameLowerCase = featureName.toLowerCase();
 
             // strip off version number after the - so that we can provide all possible valid versions of a feature for completion
-            String featureNameToCompare = LibertyUtils.stripVersion(featureNameLowerCase);
+            String featureNameToCompare = featureNameLowerCase.contains("-") ? featureNameLowerCase.substring(0, featureNameLowerCase.lastIndexOf("-")+1) : featureNameLowerCase;
 
             List<Feature> completionFeatures = FeatureService.getInstance().getFeatureReplacements(featureNameToCompare, featureMgrNode, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
             return getFeatureCompletionItems(featureElement, domDocument, completionFeatures);
