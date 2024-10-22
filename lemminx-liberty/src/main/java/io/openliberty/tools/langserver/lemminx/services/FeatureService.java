@@ -299,7 +299,7 @@ public class FeatureService {
      */
     public List<String> collectExistingFeatures(DOMNode featureManager, String currentFeatureName) {
         List<String> includedFeatures = new ArrayList<>();
-
+        boolean alreadyIgnoredOnce = false;
         if (featureManager == null) {
             return includedFeatures;
         }
@@ -311,7 +311,10 @@ public class FeatureService {
             if (featureNode.getNodeName().equals(LibertyConstants.FEATURE_ELEMENT) && featureTextNode != null) {
                 String featureName = featureTextNode.getTextContent();
                 String featureNameLowerCase = featureName.toLowerCase();
-                if (currentFeatureName == null || (currentFeatureName != null && !featureNameLowerCase.equalsIgnoreCase(currentFeatureName))) {
+                // if same feature is repeated, ignore it first time, but add for second time onwards
+                if (featureNameLowerCase.equalsIgnoreCase(currentFeatureName) && !alreadyIgnoredOnce) {
+                    alreadyIgnoredOnce = true;
+                } else {
                     includedFeatures.add(featureNameLowerCase);
                 }
             }
