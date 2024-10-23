@@ -159,4 +159,69 @@ public class LibertyCompletionTest {
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 8);
         }
 
+        // Tests the feature completion for same feature repetition
+        @Test
+        public void testFeatureRepetitionCompletionItem() throws BadLocationException {
+                String serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <feature>servlet</feature>", //
+                        "               <feature>servlet|</feature>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+
+                // total number of available completion items
+                // 1 for sipServlet-1.1
+                // one for CDATA and one for <-
+                CompletionItem sipServletCompletionItem = c("sipServlet-1.1", "sipServlet-1.1");
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 3, sipServletCompletionItem);
+
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <feature>servlet-|</feature>", //
+                        "               <feature>servlet</feature>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+
+                // total number of available completion items
+                // 1 for sipServlet-1.1
+                // one for CDATA and one for <-
+                sipServletCompletionItem = c("sipServlet-1.1", "sipServlet-1.1");
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 3, sipServletCompletionItem);
+
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <feature>servlet-3.1</feature>", //
+                        "               <feature>servlet|</feature>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+
+                // total number of available completion items
+                // 1 for sipServlet-1.1
+                // one for CDATA and one for <-
+                sipServletCompletionItem = c("sipServlet-1.1", "sipServlet-1.1");
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 3, sipServletCompletionItem);
+
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <feature>servlet-</feature>", //
+                        "               <feature>servlet</feature>", //
+                        "               <feature>servlet|</feature>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+
+                // total number of available completion items
+                // 1 for sipServlet-1.1
+                // one for CDATA and one for <-
+                sipServletCompletionItem = c("sipServlet-1.1", "sipServlet-1.1");
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 3, sipServletCompletionItem);
+        }
+
 }
