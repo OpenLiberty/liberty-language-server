@@ -157,7 +157,7 @@ public class LibertyCompletionTest {
                         "</server>" //
                 );
                 //here result should be 2 because it should show only one for CDATA and one for <-
-                // since ja is entered and javaee-8.0 is included, jakartaee should not be shown because its conflicting with javaee
+                // since ja is entered and jakartaee-8.0 is included, javaee should not be shown because its conflicting with jakartaee
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 2);
 
                 serverXML = String.join(newLine, //
@@ -181,7 +181,7 @@ public class LibertyCompletionTest {
                         "</server>" //
                 );
                 //here result should be 2 because it should show only one for CDATA and one for <-
-                // since ja is entered and javaee-8.0 is included, jakartaee should not be shown because its conflicting with javaee
+                // since jakartaee is entered and jakartaee-9.0 is included, javaee should not be shown because its conflicting with jakartaee
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 2);
 
                 // repeating same platform to see for any issues
@@ -195,7 +195,7 @@ public class LibertyCompletionTest {
                         "</server>" //
                 );
                 //here result should be 2 because it should show only one for CDATA and one for <-
-                // since ja is entered and javaee-8.0 is included, jakartaee should not be shown because its conflicting with javaee
+                // since jakartaee is entered and jakartaee-9.0 is included, javaee should not be shown because its conflicting with jakartaee
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 2);
         }
 
