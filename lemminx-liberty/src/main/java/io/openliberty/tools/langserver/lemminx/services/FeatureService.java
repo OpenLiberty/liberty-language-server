@@ -697,6 +697,7 @@ public class FeatureService {
     public List<String> collectExistingPlatforms(DOMDocument document, String currentPlatformName) {
         List<String> includedPlatforms = new ArrayList<>();
         List<DOMNode> nodes = document.getDocumentElement().getChildren();
+        boolean alreadyIgnoredOnce = false;
         DOMNode featureManager = null;
 
         for (DOMNode node : nodes) {
@@ -716,7 +717,9 @@ public class FeatureService {
             if (platformNode.getNodeName().equals(LibertyConstants.PLATFORM_ELEMENT) && platformTextNode != null) {
                 String platformName = platformTextNode.getTextContent();
                 String platformNameLowerCase = platformName.toLowerCase();
-                if ((!platformNameLowerCase.equalsIgnoreCase(currentPlatformName))) {
+                if (platformNameLowerCase.equalsIgnoreCase(currentPlatformName) && !alreadyIgnoredOnce) {
+                    alreadyIgnoredOnce = true;
+                } else {
                     includedPlatforms.add(platformNameLowerCase);
                 }
             }

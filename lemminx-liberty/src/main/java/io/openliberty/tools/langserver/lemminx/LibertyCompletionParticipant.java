@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lemminx.dom.DOMDocument;
@@ -78,24 +79,10 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
             String currentPlatformName = platformTextNode != null ? platformTextNode.getTextContent() : "";
             String currentPlatformNameWithoutVersion = LibertyUtils.stripVersion(currentPlatformName);
             // collect existing platforms
-            List<String> existingPlatforms = new ArrayList<>();
-            if (parentElement.getParentNode() != null
-                    && parentElement.getParentNode().getNodeName().equals(LibertyConstants.FEATURE_MANAGER_ELEMENT)) {
-                DOMNode featureMgrNode = parentElement.getParentNode();
-                List<DOMNode> features = featureMgrNode.getChildren();
-                for (DOMNode featureNode : features) {
-                    DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
-                    // skip nodes that do not have any text value (ie. comments)
-                    if (featureNode.getNodeName().equals(LibertyConstants.PLATFORM_ELEMENT) && featureTextNode != null) {
-                        String platformName = featureTextNode.getTextContent();
-                        String platformWithoutVersion = LibertyUtils.stripVersion(platformName);
-                        if (!platformWithoutVersion.equalsIgnoreCase(currentPlatformNameWithoutVersion)) {
-                            existingPlatforms.add(platformWithoutVersion.toLowerCase());
-                        }
-                    }
-                }
-            }
-            this.buildPlatformCompletionItems(request, response, parentElement, existingPlatforms);
+            List<String> existingPlatforms = FeatureService.getInstance()
+                    .collectExistingPlatforms(request.getXMLDocument(),currentPlatformNameWithoutVersion);
+            List<String> existingPlatformsWithoutVersion = existingPlatforms.stream().map(LibertyUtils::stripVersion).collect(Collectors.toList());
+            this.buildPlatformCompletionItems(request, response, parentElement, existingPlatformsWithoutVersion);
         }
     }
 
@@ -120,6 +107,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
                 request.getXMLDocument().getDocumentURI());
         platforms.stream().filter(it->(Objects.isNull(platformName) || it.contains(platformName)))
                 .filter(p -> !existingPlatforms.contains(LibertyUtils.stripVersion(p).toLowerCase()))
+                .filter(p -> !existingPlatforms.contains(LibertyConstants.conflictingPlatforms.get(LibertyUtils.stripVersion(p).toLowerCase())))
                 .forEach(platformItem -> {
                     Range range = XMLPositionUtility.createRange(parentElement.getStartTagCloseOffset() + 1,
                             parentElement.getEndTagOpenOffset(), request.getXMLDocument());
