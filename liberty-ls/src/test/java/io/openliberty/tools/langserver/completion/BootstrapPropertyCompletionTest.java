@@ -101,6 +101,22 @@ public class BootstrapPropertyCompletionTest extends AbstractCompletionTest {
         checkCompletionsContainAllStrings(completionItems, "binaryLogging-1.0");
     }
 
+    @Test
+    public void testValueCompletionForTraceLoggingFormatWithValidUserInput() throws Exception {
+        CompletableFuture<Either<List<CompletionItem>, CompletionList>> completions = getCompletion("com.ibm.ws.logging.trace.format=    CE    ", new Position(0, 41));
+        List<CompletionItem> completionItems = completions.get().getLeft();
+        assertEquals(2, completionItems.size());
+
+        checkCompletionsContainAllStrings(completionItems, "ENHANCED", "ADVANCED");
+    }
+
+    @Test
+    public void testValueCompletionLogProviderUserEnteredInvalidValue() throws Exception {
+        CompletableFuture<Either<List<CompletionItem>, CompletionList>> completions = getCompletion("websphere.log.provider=bb", new Position(0, 24));
+        List<CompletionItem> completionItems = completions.get().getLeft();
+        assertEquals(0, completionItems.size());
+    }
+
     protected CompletableFuture<Either<List<CompletionItem>, CompletionList>> getCompletion(String enteredText, Position position) throws URISyntaxException, InterruptedException, ExecutionException {
         String filename = "bootstrap.properties";
         File file = new File(resourcesDir, filename);

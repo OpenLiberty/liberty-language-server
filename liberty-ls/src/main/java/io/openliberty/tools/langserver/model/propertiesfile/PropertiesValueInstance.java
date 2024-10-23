@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -41,8 +41,8 @@ public class PropertiesValueInstance {
         return CompletableFuture.completedFuture(hover);
     }
 
-    public CompletableFuture<List<CompletionItem>> getCompletions(Position position) {
-        return CompletableFuture.completedFuture(key.getValidValues());
+    public CompletableFuture<List<CompletionItem>> getCompletions(String enteredValue, Position position) {
+        return CompletableFuture.completedFuture(key.getValidValues(enteredValue, position));
     }
 
     @Override
