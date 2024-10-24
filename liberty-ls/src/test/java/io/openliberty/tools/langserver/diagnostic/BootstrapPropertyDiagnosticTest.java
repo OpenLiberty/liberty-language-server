@@ -14,7 +14,7 @@ import org.junit.Test;
 public class BootstrapPropertyDiagnosticTest extends AbstractDiagnosticTest {
     @Test
     public void testBootstrapProperties() throws Exception {
-        testDiagnostic("bootstrap.properties", 7);
+        testDiagnostic("bootstrap.properties", 8);
         checkDiagnosticsContainsAllRanges(
             // Checking invalid value: com.ibm.ws.logging.console.format=DEVd
             createRange(0, 34, 38),
@@ -29,7 +29,9 @@ public class BootstrapPropertyDiagnosticTest extends AbstractDiagnosticTest {
             // Checking invalid boolean: com.ibm.ws.logging.copy.system.streams=yes
             createRange(7, 39, 42),
             // Checking invalid package list: org.osgi.framework.bootdelegation=com.ibm.websphere,com.
-            createRange(8, 34, 56)
+            createRange(8, 34, 56),
+            // Checking invalid value: com.ibm.ws.logging.console.format=DEVd
+            createRange(10, 34, 38)
         );
         checkDiagnosticsContainsMessages(
             "The value `DEVd` is not valid for the property `com.ibm.ws.logging.console.format`.",
@@ -38,7 +40,8 @@ public class BootstrapPropertyDiagnosticTest extends AbstractDiagnosticTest {
             "The value `0` is not within the valid range `[1..65535]` for the property `default.http.port`.",
             "The value `2147483648` is not within the valid range `[0..2147483647]` for the property `com.ibm.hpel.log.purgeMaxSize`.",
             "The value `yes` is not valid for the property `com.ibm.ws.logging.copy.system.streams`.",
-            "This value must be a comma-delimited list of Java packages."
+            "This value must be a comma-delimited list of Java packages.",
+            "The value `DEVd` is not valid for the property `com.ibm.ws.logging.console.format`."
         );
     }
 }

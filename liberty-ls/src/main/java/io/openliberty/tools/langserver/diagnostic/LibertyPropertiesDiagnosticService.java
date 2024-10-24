@@ -53,7 +53,7 @@ public class LibertyPropertiesDiagnosticService  {
                     if(!line.isBlank()) {
                         PropertiesValidationResult validationResult = PropertiesValidationResult.validateServerProperty(line, openedDocument, lineNumber);
                         if (validationResult.hasErrors()) {
-                            errors.put(line, validationResult);
+                            errors.put(line + "_" + lineNumber, validationResult);
                         }
                     }
                     lineNumber++;
@@ -70,6 +70,7 @@ public class LibertyPropertiesDiagnosticService  {
         for (Map.Entry<String, PropertiesValidationResult> errorEntry : propertiesErrors.entrySet()) {
             PropertiesValidationResult validationResult = errorEntry.getValue();
             String lineContentInError = errorEntry.getKey();
+            lineContentInError = lineContentInError.contains("_") ? lineContentInError.substring(0, lineContentInError.lastIndexOf("_")) : lineContentInError;
             List<Diagnostic> invalidValueDiagnostics = computeInvalidValuesDiagnostic(validationResult, lineContentInError);
             lspDiagnostics.addAll(invalidValueDiagnostics);
         }
