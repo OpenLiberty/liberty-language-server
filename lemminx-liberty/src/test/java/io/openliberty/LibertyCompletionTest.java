@@ -144,8 +144,21 @@ public class LibertyCompletionTest {
                         "       </featureManager>", //
                         "</server>" //
                 );
-                //here result should be 5 because it should show only jakartaee related completion as javaee is already added
-                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 5);
+                //here result should be 2 because it should show only one for CDATA and one for <-
+                // since ja is entered and javaee-8.0 is included, jakartaee should not be shown because its conflicting with javaee
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 2);
+
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <platform>jakartaee-9.0</platform>", //
+                        "               <platform>ja|</platform>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+                //here result should be 2 because it should show only one for CDATA and one for <-
+                // since ja is entered and jakartaee-8.0 is included, javaee should not be shown because its conflicting with jakartaee
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 2);
 
                 serverXML = String.join(newLine, //
                         "<server description=\"Sample Liberty server\">", //
@@ -157,6 +170,33 @@ public class LibertyCompletionTest {
                 );
                 //here result should be 8 because it should show only jakartaee and javaee related completion as microprofile is already added
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 8);
+
+                // repeating same platform to see for any issues
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <platform>jakartaee-9.0</platform>", //
+                        "               <platform>jakartaee|</platform>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+                //here result should be 2 because it should show only one for CDATA and one for <-
+                // since jakartaee is entered and jakartaee-9.0 is included, javaee should not be shown because its conflicting with jakartaee
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 2);
+
+                // repeating same platform to see for any issues
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <platform>jakartaee-9.0</platform>", //
+                        "               <platform>jakartaee-9.0</platform>", //
+                        "               <platform>jakartaee|</platform>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+                //here result should be 2 because it should show only one for CDATA and one for <-
+                // since jakartaee is entered and jakartaee-9.0 is included, javaee should not be shown because its conflicting with jakartaee
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 2);
         }
 
         // Tests the feature completion for same feature repetition

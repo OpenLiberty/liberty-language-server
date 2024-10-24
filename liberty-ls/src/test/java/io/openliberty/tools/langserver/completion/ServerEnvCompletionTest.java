@@ -118,6 +118,37 @@ public class ServerEnvCompletionTest extends AbstractCompletionTest {
         checkCompletionsContainAllStrings(completionItems, ServerPropertyValues.BOOLEAN_VALUES_DEFAULT_TRUE);
     }
 
+    @Test
+    public void testValueCompletionForConsoleLoggingFormatForUserEnteredKey() throws Exception {
+        // also testing user entered value with trailing spaces. spaces are trimmed in code
+        CompletableFuture<Either<List<CompletionItem>, CompletionList>> completions = getCompletion("WLP_LOGGING_CONSOLE_FORMAT=    S", new Position(0, 28));
+        List<CompletionItem> completionItems = completions.get().getLeft();
+        assertEquals(3, completionItems.size());
+
+        checkCompletionsContainAllStrings(completionItems,  "SIMPLE", "JSON", "TBASIC");
+
+        checkCompletionContainsDetail(completionItems, null, "This setting specifies the required format for the console. Valid values are `dev`, `simple`, or `json` format. By default, consoleFormat is set to `dev`.");
+    }
+
+    @Test
+    public void testValueCompletionForConsoleLoggingFormatForUserEnteredInvalidKey() throws Exception {
+        CompletableFuture<Either<List<CompletionItem>, CompletionList>> completions = getCompletion("WLP_LOGGING_CONSOLE_FORMAT=Asd", new Position(0, 30));
+        List<CompletionItem> completionItems = completions.get().getLeft();
+        assertEquals(0, completionItems.size());
+    }
+
+    @Test
+    public void testValueCompletionForYesNoWhenUserEnteredY() throws Exception {
+        //providing input in UPPERCASE to verify code is working case insensitive
+        //also checking ending spaces
+        CompletableFuture<Either<List<CompletionItem>, CompletionList>> completions = getCompletion("WLP_DEBUG_SUSPEND=Y   ", new Position(0, 21));
+        List<CompletionItem> completionItems = completions.get().getLeft();
+        assertEquals(1, completionItems.size());
+
+        checkCompletionsContainAllStrings(completionItems, "y");
+
+    }
+
     protected CompletableFuture<Either<List<CompletionItem>, CompletionList>> getCompletion(String enteredText, Position position) throws URISyntaxException, InterruptedException, ExecutionException, IOException {
         String filename = "server.env";
         File file = new File(resourcesDir, filename);

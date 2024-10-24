@@ -108,9 +108,21 @@ public class PropertiesKeyInstance {
         }
     }
 
-    public List<CompletionItem> getValidValues() {
+    public List<CompletionItem> getValidValues(String enteredValue, Position position) {
         List<String> values = ServerPropertyValues.getValidValues(textDocumentItem, propertyKey);
-        List<CompletionItem> results = values.stream().map(s -> new CompletionItem(s)).collect(Collectors.toList());
+        List<CompletionItem> results = values.stream()
+                .filter(s -> s.toLowerCase().contains(enteredValue.trim().toLowerCase()))
+                .map(s -> {
+                    int line = position.getLine();
+                    Position rangeStart = new Position(line, getEndPosition() + 2);
+                    Position rangeEnd = new Position(line, getEndPosition() + 2 + s.length());
+                    Range range = new Range(rangeStart, rangeEnd);
+                    Either<TextEdit, InsertReplaceEdit> edit = Either.forLeft(new TextEdit(range, s));
+                    CompletionItem completionItem = new CompletionItem();
+                    completionItem.setTextEdit(edit);
+                    completionItem.setLabel(s);
+                    return completionItem;
+                }).toList();
         // Preselect the default.
         // This uses the first item in the List as default. 
         // (Check ServerPropertyValues.java) Currently sorted to have confirmed/sensible values as default.

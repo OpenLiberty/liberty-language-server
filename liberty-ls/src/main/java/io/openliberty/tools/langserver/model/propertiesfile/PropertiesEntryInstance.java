@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022, 2023 IBM Corporation and others.
+* Copyright (c) 2022, 2024 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -102,7 +102,7 @@ public class PropertiesEntryInstance {
     public CompletableFuture<List<CompletionItem>> getCompletions(Position position) {
         if (!isComment) {
             if (propertyValueInstance.toString() != null && !isOnEntryKey(position)) {
-                return propertyValueInstance.getCompletions(position);
+                return propertyValueInstance.getCompletions(propertyValueInstance.toString(), position);
             } 
             return propertyKeyInstance.getCompletions(this.getKey(), position);
         }
