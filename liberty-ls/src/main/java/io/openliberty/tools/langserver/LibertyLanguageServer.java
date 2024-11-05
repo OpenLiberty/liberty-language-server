@@ -21,6 +21,7 @@ import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.InitializeResult;
 import org.eclipse.lsp4j.InitializedParams;
 import org.eclipse.lsp4j.ServerCapabilities;
+import org.eclipse.lsp4j.SetTraceParams;
 import org.eclipse.lsp4j.TextDocumentSyncKind;
 import org.eclipse.lsp4j.services.LanguageClient;
 import org.eclipse.lsp4j.services.LanguageClientAware;
@@ -122,5 +123,12 @@ public class LibertyLanguageServer extends AbstractLanguageServer implements Pro
 
     public void setLanguageClient(LanguageClient languageClient) {
         this.languageClient = languageClient;
+    }
+
+    @Override
+    public void setTrace(SetTraceParams params) {
+        LOGGER.warning("setTrace Reached");
+        // to avoid having UnsupportedOperationException, the method is implemented
+        // FIXME : implement the behavior of this method.
     }
 }
