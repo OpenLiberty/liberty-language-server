@@ -127,7 +127,7 @@ public class LibertyLanguageServer extends AbstractLanguageServer implements Pro
 
     @Override
     public void setTrace(SetTraceParams params) {
-        // to avoid exception in vscode, the method is implemented
+        // to avoid having UnsupportedOperationException, the method is implemented
         // FIXME : implement the behavior of this method.
     }
 }
