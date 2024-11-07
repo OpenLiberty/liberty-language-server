@@ -38,7 +38,7 @@ public class LibertyDiagnosticTest {
     static String newLine = System.lineSeparator();
 
     static File srcResourcesDir = new File("src/test/resources/sample");
-    static File featureList = new File("src/test/resources/featurelist-ol-24.0.0.10.xml");
+    static File featureList = new File("src/test/resources/featurelist-ol-24.0.0.11.xml");
     static String serverXMLURI = new File(srcResourcesDir, "test/server.xml").toURI().toString();
     static String sampleserverXMLURI = new File(srcResourcesDir, "sample-server.xml").toURI().toString();
     static List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();

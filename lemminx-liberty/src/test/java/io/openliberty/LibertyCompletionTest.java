@@ -75,7 +75,7 @@ public class LibertyCompletionTest {
                 CompletionItem websocket = c("websocket-1.1", "websocket-1.1");
                 CompletionItem microProfileCompletion = c("microProfile-2.2", "microProfile-2.2");
 
-                // would be 348 based on 24.0.0.10
+                // would be 348 based on 24.0.0.11
                 final int TOTAL_ITEMS = 348; // total number of available completion items
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, jaxrsCompletion, websocket,
