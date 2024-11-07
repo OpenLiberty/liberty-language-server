@@ -74,7 +74,7 @@ public class LibertyHoverTest {
 
                 XMLAssert.assertHover(serverXML, serverXMLURI, "Defines how the server loads features." + //
                                 System.lineSeparator() + System.lineSeparator() + //
-                                "Source: [server-cached-24.0.0.10.xsd](" + serverXSDURI + ")", //
+                                "Source: [server-cached-24.0.0.11.xsd](" + serverXSDURI + ")", //
                                 r(1, 8, 1, 22));
         }
 
