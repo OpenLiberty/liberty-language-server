@@ -79,7 +79,7 @@ public class LibertyWorkspaceIT {
 
         CompletionItem jaxrsCompletion = c("jaxrs-2.1", "jaxrs-2.1");
 
-        // would be 348 if mpConfig-1.4 was not already specified - this is using ol-24.0.0.10
+        // would be 348 if mpConfig-1.4 was not already specified - this is using ol-24.0.0.11
         final int TOTAL_ITEMS = 348; // total number of available completion items
 
         XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, jaxrsCompletion);

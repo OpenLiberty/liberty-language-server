@@ -140,7 +140,7 @@ public class FeatureService {
             if (defaultFeatures == null) {
                 // Changing this to contain the version in the file name since the file is copied to the local .lemminx cache. 
                 // This is how we ensure the latest default features json gets used in each developer environment. 
-                InputStream is = getClass().getClassLoader().getResourceAsStream("features-cached-24.0.0.10.json");
+                InputStream is = getClass().getClassLoader().getResourceAsStream("features-cached-24.0.0.11.json");
                 InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
 
                 // Only need the public features

@@ -25,7 +25,7 @@ public class LibertyFeatureTest {
     public void getInstalledFeaturesListTest() throws JAXBException {
         FeatureService fs = FeatureService.getInstance();
         File srcResourcesDir = new File("src/test/resources/sample");
-        File featureListFile = new File(srcResourcesDir.getParentFile(), "featurelist-ol-24.0.0.10.xml");
+        File featureListFile = new File(srcResourcesDir.getParentFile(), "featurelist-ol-24.0.0.11.xml");
         
         // LibertyWorkspace must be initialized
         List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
