@@ -12,8 +12,20 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx.services;
 
+import io.openliberty.tools.common.plugins.config.ServerConfigDocument;
+import io.openliberty.tools.langserver.lemminx.util.CommonLogger;
+import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 import org.eclipse.lemminx.utils.JSONUtility;
 import io.openliberty.tools.langserver.lemminx.models.settings.*;
+
+import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Collection;
+import java.util.Properties;
+import java.util.logging.Logger;
+
+import static io.openliberty.tools.langserver.lemminx.util.LibertyUtils.findFileInWorkspace;
 
 public class SettingsService {
 
@@ -28,12 +40,13 @@ public class SettingsService {
 
     // default request delay is 10 seconds
     private static int DEFAULT_REQUEST_DELAY = 10;
+    private static final Logger LOGGER = Logger.getLogger(SettingsService.class.getName());
 
     private SettingsService() {
     }
 
     private LibertySettings settings;
-
+    private Properties variables;
     /**
      * Takes the xml settings object and parses out the Liberty Settings
      * @param xmlSettings - All xml settings provided by the client
@@ -64,4 +77,49 @@ public class SettingsService {
         return DEFAULT_REQUEST_DELAY;
     }
 
+    /**
+     * populate all variables for all available workspace folders
+     *
+     * @param workspaceFolders workspace folders
+     */
+    public void populateAllVariables(Collection<LibertyWorkspace> workspaceFolders) {
+        variables = new Properties();
+        for (LibertyWorkspace workspace : workspaceFolders) {
+            readVariables(workspace);
+        }
+    }
+
+    /**
+     * read all variables from workspace directories
+     *
+     * @param workspace workspace
+     */
+    private void readVariables(LibertyWorkspace workspace) {
+        Path pluginConfigFilePath = findFileInWorkspace(workspace, Paths.get("liberty-plugin-config.xml"));
+        if (pluginConfigFilePath != null) {
+            File installDirectory = LibertyUtils.getFileFromLibertyPluginXml(pluginConfigFilePath, "installDirectory");
+            File serverDirectory = LibertyUtils.getFileFromLibertyPluginXml(pluginConfigFilePath, "serverDirectory");
+            File userDirectory = LibertyUtils.getFileFromLibertyPluginXml(pluginConfigFilePath, "userDirectory");
+            if (serverDirectory != null && installDirectory != null && userDirectory != null) {
+                try {
+                    ServerConfigDocument serverConfigDocument = new ServerConfigDocument(
+                            new CommonLogger(LOGGER), installDirectory, userDirectory, serverDirectory);
+                    variables.putAll(serverConfigDocument.getProperties());
+                } catch (Exception e) {
+                    LOGGER.warning("The properties for directories could not be initialized because an error occurred when accessing the directories.");
+                    LOGGER.info("Exception received: " + e.getMessage());
+                }
+            }
+        } else {
+            LOGGER.warning("Could not find liberty-plugin-config.xml in workspace. Variable processing cannot be performed");
+        }
+    }
+
+    public Properties getVariables() {
+        return variables;
+    }
+
+    public void setVariables(Properties variables) {
+        this.variables=variables;
+    }
 }

@@ -69,6 +69,13 @@ public class LibertyExtension implements IXMLExtension {
 
         documentLinkParticipant = new LibertyDocumentLinkParticipant();
         xmlExtensionsRegistry.registerDocumentLinkParticipant(documentLinkParticipant);
+
+        try {
+            SettingsService.getInstance()
+                    .populateAllVariables(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -94,6 +101,15 @@ public class LibertyExtension implements IXMLExtension {
             Object xmlSettings = saveContext.getSettings();
             SettingsService.getInstance().updateLibertySettings(xmlSettings);
             LOGGER.info("Liberty XML settings updated");
+        }
+        if (saveContext.getType() == SaveContextType.DOCUMENT) {
+            try {
+                SettingsService.getInstance()
+                        .populateAllVariables(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders());
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            LOGGER.info("Liberty XML variables updated");
         }
     }
 }

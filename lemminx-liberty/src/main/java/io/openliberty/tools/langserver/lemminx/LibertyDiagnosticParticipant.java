@@ -13,6 +13,7 @@
 package io.openliberty.tools.langserver.lemminx;
 
 import com.google.common.collect.Sets;
+import com.google.gson.JsonPrimitive;
 import org.eclipse.lemminx.dom.DOMAttr;
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.dom.DOMNode;
@@ -40,8 +41,11 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.changedFeatureNameDiagMessage;
@@ -71,6 +75,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
 
     public static final String INCORRECT_FEATURE_CODE = "incorrect_feature";
     public static final String INCORRECT_PLATFORM_CODE = "incorrect_platform";
+    public static final String INCORRECT_VARIABLE_CODE = "incorrect_variable";
 
     @Override
     public void doDiagnostics(DOMDocument domDocument, List<Diagnostic> diagnostics,
@@ -107,7 +112,29 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             }
         }
         validateConfigElements(domDocument, diagnosticsList, tempDiagnosticsList, featureGraph, includedFeatures, featureManagerPresent);
+        validateVariables(domDocument,diagnosticsList);
     }
+
+    private void validateVariables(DOMDocument domDocument, List<Diagnostic> diagnosticsList) {
+        String docContent = domDocument.getTextDocument().getText();
+        List<String> variables = LibertyUtils.getVariablesFromTextContent(docContent);
+        Properties variablesMap = SettingsService.getInstance().getVariables();
+        for (String variable : variables) {
+            if (!variablesMap.containsKey(variable)) {
+                String variableInDoc = String.format("${%s}", variable);
+                Range range = XMLPositionUtility.createRange(docContent.indexOf(variableInDoc),
+                        docContent.indexOf(variableInDoc) + variableInDoc.length(),
+                        domDocument);
+                String message = "ERROR: The variable \"" + variable + "\" does not exist";
+
+                Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_VARIABLE_CODE);
+                diag.setData(variable);
+                diagnosticsList.add(diag);
+            }
+        }
+    }
+
+
 
     private void validateFeaturesAndPlatforms(DOMDocument domDocument, List<Diagnostic> list, DOMNode featureManager, Set<String> includedFeatures) {
 

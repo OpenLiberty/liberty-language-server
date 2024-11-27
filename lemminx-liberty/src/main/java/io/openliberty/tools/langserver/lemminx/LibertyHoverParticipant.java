@@ -31,11 +31,10 @@ import io.openliberty.tools.langserver.lemminx.util.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class LibertyHoverParticipant implements IHoverParticipant {
     private static final Logger LOGGER = Logger.getLogger(LibertyHoverParticipant.class.getName());
@@ -47,6 +46,14 @@ public class LibertyHoverParticipant implements IHoverParticipant {
 
     @Override
     public Hover onAttributeValue(IHoverRequest request, CancelChecker cancelChecker) {
+        List<String> variables = LibertyUtils.getVariablesFromTextContent(request.getNode().getTextContent());
+        if(variables.size() == 1){
+            Properties variableMap = SettingsService.getInstance().getVariables();
+
+            if(variableMap.containsKey(variables.get(0))) {
+                return new Hover(new MarkupContent("plaintext", variableMap.get(variables.get(0)).toString()));
+            }
+        }
         return null;
     }
 

@@ -573,4 +573,48 @@ public class LibertyUtils {
         }
         return null;
     }
+
+    /*
+     * First search for liberty-plugin-config.xml to determine the installation location for Liberty in which to find the properties files.
+     * If not found, simply look for the properties files in the local libertyWorkspace. In either case, first look for WebSphereApplicatonServer.properties
+     * which is only present for WebSphere Liberty. If not found, then look for openliberty.properties which is present in both WebSphere Liberty and Open Liberty,
+     * but whose productId is only correct for Open Liberty.
+     *
+     * @param libertyWorkspace
+     * @return Path to the properties file to use, or null if not found
+     */
+    public static File getFileFromLibertyPluginXml(Path pluginConfigFilePath, String elementName) {
+         String elementValue = XmlReader.getElementValue(pluginConfigFilePath, elementName);
+            if (elementValue != null) {
+                Path elementDir = Paths.get(elementValue);
+                if (elementDir.toFile().exists()) {
+                    return elementDir.toFile();
+                }
+                else {
+                    LOGGER.warning("Path specified for %s in liberty-plugin-config.xml does not exist".formatted(elementName));
+                }
+            }
+            else {
+                LOGGER.warning("Xml Node for %s in does not exist liberty-plugin-config.xml ".formatted(elementName));
+            }
+        return null;
+    }
+
+    public static List<String> getVariablesFromTextContent(String docContent) {
+        List<String> variables = new ArrayList<>();
+        //considering ${var} pattern for variable.  do we have other representation for variable?
+        String regex = "\\$\\{(.*?)\\}";
+        // Compile the Regex.
+        Pattern p = Pattern.compile(regex);
+        // Find match between given string
+        // and regular expression
+        // using Pattern.matcher()
+        Matcher m = p.matcher(docContent);
+        // Get the subsequence
+        // using find() method
+        while (m.find()) {
+            variables.add(m.group(1));
+        }
+        return variables;
+    }
 }

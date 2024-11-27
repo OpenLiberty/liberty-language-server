@@ -1,14 +1,17 @@
 package io.openliberty;
 
+import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticSeverity;
 import org.eclipse.lsp4j.TextDocumentEdit;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.WorkspaceFolder;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,6 +22,11 @@ import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import jakarta.xml.bind.JAXBException;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.eclipse.lemminx.XMLAssert.r;
 import static org.eclipse.lemminx.XMLAssert.ca;
@@ -26,14 +34,22 @@ import static org.eclipse.lemminx.XMLAssert.te;
 import static org.eclipse.lemminx.XMLAssert.tde;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Collections;
+import java.util.Map;
+import java.util.Properties;
 
+@ExtendWith(MockitoExtension.class)
 public class LibertyDiagnosticTest {
+
+    @Mock
+    SettingsService settingsService;
 
     static String newLine = System.lineSeparator();
 
@@ -44,6 +60,7 @@ public class LibertyDiagnosticTest {
     static List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
     LibertyProjectsManager libPM;
     LibertyWorkspace libWorkspace;
+    MockedStatic settings;
 
     @BeforeEach
     public void setupWorkspace() {
@@ -51,6 +68,13 @@ public class LibertyDiagnosticTest {
         libPM = LibertyProjectsManager.getInstance();
         libPM.setWorkspaceFolders(initList);
         libWorkspace = libPM.getLibertyWorkspaceFolders().iterator().next();
+        settings= Mockito.mockStatic(SettingsService.class);
+        settings.when(SettingsService::getInstance).thenReturn(settingsService);
+    }
+
+    @AfterEach
+    public void cleanup(){
+        settings.close();
     }
 
     @Test
@@ -866,4 +890,80 @@ public class LibertyDiagnosticTest {
                 codeActions.get(13), codeActions.get(14),
                 codeActions.get(15));
     }
+
+    @Test
+    public void testInvalidVariableDiagnostic() {
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "                <platform>javaee-6.0</platform>", //
+                "                <feature>acmeCA-2.0</feature>", //
+                "       </featureManager>", //
+                " <httpEndpoint host=\"*\" httpPort=\"${default.http.port}\"\n",//
+                "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
+                "</server>" //
+        );
+        Map<String,String> propsMap=new HashMap<>();
+        propsMap.put("default.http.port","9080");
+        Properties props = new Properties();
+        props.putAll(propsMap);
+        when(settingsService.getVariables()).thenReturn(props);
+        Diagnostic dup1 = new Diagnostic();
+        dup1.setRange(r(7, 29, 7, 50));
+        dup1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
+        dup1.setSource("liberty-lemminx");
+        dup1.setSeverity(DiagnosticSeverity.Error);
+        dup1.setMessage("ERROR: The variable \"default.https.port\" does not exist");
+        dup1.setData("default.https.port");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false,dup1);
+    }
+
+    @Test
+    public void testInvalidVariableDiagnosticWithCodeAction() throws BadLocationException {
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "                <platform>javaee-6.0</platform>", //
+                "                <feature>acmeCA-2.0</feature>", //
+                "       </featureManager>", //
+                " <httpEndpoint host=\"*\" httpPort=\"${default.http.port}\"\n",//
+                "                  httpsPort=\"${default.https}\" id=\"defaultHttpEndpoint\"/>",//
+                "</server>" //
+        );
+        Map<String,String> propsMap=new HashMap<>();
+        propsMap.put("default.http.port","9080");
+        propsMap.put("default.https.port","9443");
+        Properties props = new Properties();
+        props.putAll(propsMap);
+
+        when(settingsService.getVariables()).thenReturn(props);
+        Diagnostic invalid1 = new Diagnostic();
+        invalid1.setRange(r(7, 29, 7, 45));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
+        invalid1.setMessage("ERROR: The variable \"default.https\" does not exist");
+        invalid1.setData("default.https");
+        invalid1.setSource("liberty-lemminx");
+        invalid1.setSeverity(DiagnosticSeverity.Error);
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false,invalid1);
+
+        //  expecting code action to show only default.https.port
+        //      1. user has entered "default.https"
+        List<String> variables = new ArrayList<>();
+        variables.add("default.https.port");
+
+
+        List<CodeAction> codeActions = new ArrayList<>();
+        for (String nextVar : variables) {
+            String variableInDoc = String.format("${%s}", nextVar);
+            TextEdit texted = te(invalid1.getRange().getStart().getLine(), invalid1.getRange().getStart().getCharacter(),
+                    invalid1.getRange().getEnd().getLine(), invalid1.getRange().getEnd().getCharacter(), variableInDoc);
+            CodeAction invalidCodeAction = ca(invalid1, texted);
+            codeActions.add(invalidCodeAction);
+        }
+
+        XMLAssert.testCodeActionsFor(serverXML, invalid1, codeActions.get(0));
+    }
+
 }
