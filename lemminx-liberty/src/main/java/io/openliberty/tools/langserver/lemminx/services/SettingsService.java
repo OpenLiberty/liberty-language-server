@@ -103,7 +103,8 @@ public class SettingsService {
             if (serverDirectory != null && installDirectory != null && userDirectory != null) {
                 try {
                     ServerConfigDocument serverConfigDocument = new ServerConfigDocument(
-                            new CommonLogger(LOGGER), installDirectory, userDirectory, serverDirectory);
+                            new CommonLogger(LOGGER), null, installDirectory, userDirectory, serverDirectory);
+                    variables.putAll(serverConfigDocument.getDefaultProperties());
                     variables.putAll(serverConfigDocument.getProperties());
                 } catch (Exception e) {
                     LOGGER.warning("The properties for directories could not be initialized because an error occurred when accessing the directories.");

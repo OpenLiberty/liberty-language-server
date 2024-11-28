@@ -574,14 +574,12 @@ public class LibertyUtils {
         return null;
     }
 
-    /*
-     * First search for liberty-plugin-config.xml to determine the installation location for Liberty in which to find the properties files.
-     * If not found, simply look for the properties files in the local libertyWorkspace. In either case, first look for WebSphereApplicatonServer.properties
-     * which is only present for WebSphere Liberty. If not found, then look for openliberty.properties which is present in both WebSphere Liberty and Open Liberty,
-     * but whose productId is only correct for Open Liberty.
-     *
-     * @param libertyWorkspace
-     * @return Path to the properties file to use, or null if not found
+    /**
+     * get path for an element from the plugin config location xml file
+     * we will validate the file exists as well
+     * @param pluginConfigFilePath
+     * @param elementName
+     * @return the properties file to use, or null if not found
      */
     public static File getFileFromLibertyPluginXml(Path pluginConfigFilePath, String elementName) {
          String elementValue = XmlReader.getElementValue(pluginConfigFilePath, elementName);
@@ -600,6 +598,11 @@ public class LibertyUtils {
         return null;
     }
 
+    /**
+     * read variables from text content
+     * @param docContent text content
+     * @return list of variables
+     */
     public static List<String> getVariablesFromTextContent(String docContent) {
         List<String> variables = new ArrayList<>();
         //considering ${var} pattern for variable.  do we have other representation for variable?
