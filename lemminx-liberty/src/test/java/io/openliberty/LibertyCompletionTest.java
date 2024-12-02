@@ -1,16 +1,46 @@
 package io.openliberty;
 
+import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lsp4j.CompletionItem;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Properties;
 
 import static org.eclipse.lemminx.XMLAssert.*;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 public class LibertyCompletionTest {
 
+        @Mock
+        SettingsService settingsService;
+
+        MockedStatic settings;
         static String newLine = System.lineSeparator();
         static String serverXMLURI = "test/server.xml";
+
+        @BeforeEach
+        public void setup(){
+                settings= Mockito.mockStatic(SettingsService.class);
+                settings.when(SettingsService::getInstance).thenReturn(settingsService);
+        }
+
+        @AfterEach
+        public void cleanup(){
+                settings.close();
+        }
+
 
         // Tests the availability of completion of XML elements provided by the
         // server.xsd file
@@ -262,6 +292,79 @@ public class LibertyCompletionTest {
                 // one for CDATA and one for <-
                 sipServletCompletionItem = c("sipServlet-1.1", "sipServlet-1.1");
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 3, sipServletCompletionItem);
+        }
+
+        // Tests the
+        // availability of feature completion
+        @Test
+        public void testVariableCompletionItem() throws BadLocationException {
+                String serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "                <platform>javaee-6.0</platform>", //
+                        "                <feature>acmeCA-2.0</feature>", //
+                        "       </featureManager>", //
+                        " <httpEndpoint host=\"*\" httpPort=\"de|\"\n",//
+                        "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
+                        "</server>" //
+                );
+                Map<String,String> propsMap=new HashMap<>();
+                propsMap.put("default.http.port","9080");
+                propsMap.put("default.https.port","9443");
+                propsMap.put("testVar","false");
+                propsMap.put("testVar2","true");
+                Properties props = new Properties();
+                props.putAll(propsMap);
+
+                when(settingsService.getVariables()).thenReturn(props);
+                CompletionItem httpCompletion = c("default.http.port", "${default.http.port}");
+                CompletionItem httpsCompletion = c("default.https.port", "${default.https.port}");
+                final int TOTAL_ITEMS = 2; // total number of available completion items
+
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, httpCompletion,
+                        httpsCompletion);
+
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "                <platform>javaee-6.0</platform>", //
+                        "                <feature>acmeCA-2.0</feature>", //
+                        "       </featureManager>", //
+                        " <httpEndpoint host=\"*\" httpPort=\"kkpp|\"\n",//
+                        "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
+                        "</server>" //
+                );
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 0);
+        }
+
+        @Test
+        public void testVariableCompletionItemWithDefaultXsdValues() throws BadLocationException {
+                String serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "                <platform>javaee-6.0</platform>", //
+                        "                <feature>acmeCA-2.0</feature>", //
+                        "       </featureManager>", //
+                        " <applicationManager autoExpand=\"f|\"/>",//
+                        "</server>" //
+                );
+                Map<String,String> propsMap=new HashMap<>();
+                propsMap.put("default.http.port","9080");
+                propsMap.put("default.https.port","9443");
+                propsMap.put("testVar","false");
+                propsMap.put("testVar2","true");
+                Properties props = new Properties();
+                props.putAll(propsMap);
+
+                when(settingsService.getVariables()).thenReturn(props);
+                CompletionItem httpCompletion = c("default.http.port", "${default.http.port}");
+                CompletionItem httpsCompletion = c("default.https.port", "${default.https.port}");
+                final int TOTAL_ITEMS = 4; // total number of available completion items
+                // variables values -> default.http.port, default.https.port
+                // default schema provided value, this is not being filtered -> true, false
+
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, httpCompletion,
+                        httpsCompletion);
         }
 
 }
