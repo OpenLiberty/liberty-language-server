@@ -45,7 +45,7 @@ jobs:
           java-version: 17
       - name: Build ci common
         working-directory: ci.common
-        run: ./mvnw clean package -ntp -DskipTests
+        run: ./mvnw -V clean install --batch-mode --no-transfer-progress --errors -DtrimStackTrace=false -DskipTests
       - name: Build Lemminx Liberty
         working-directory: ./lemminx-liberty
         run: ./mvnw clean package -ntp -DskipTests
