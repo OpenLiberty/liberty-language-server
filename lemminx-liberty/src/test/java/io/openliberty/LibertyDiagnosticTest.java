@@ -985,7 +985,7 @@ public class LibertyDiagnosticTest {
         );
         when(settingsService.getVariablesForServerXml(any())).thenReturn(new Properties());
         Diagnostic dup1 = new Diagnostic();
-        dup1.setRange(r(0, 0, 8, 9));
+        dup1.setRange(r(0, 0, 0, 43));
         dup1.setMessage("ERROR: Dev mode is not started for current liberty workspace. Please start Dev mode to enable variable processing.");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,

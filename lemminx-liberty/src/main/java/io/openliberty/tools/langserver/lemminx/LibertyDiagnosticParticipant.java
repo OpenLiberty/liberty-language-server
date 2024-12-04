@@ -16,6 +16,7 @@ import com.google.common.collect.Sets;
 import com.google.gson.JsonPrimitive;
 import org.eclipse.lemminx.dom.DOMAttr;
 import org.eclipse.lemminx.dom.DOMDocument;
+import org.eclipse.lemminx.dom.DOMElement;
 import org.eclipse.lemminx.dom.DOMNode;
 import org.eclipse.lemminx.extensions.contentmodel.settings.XMLValidationSettings;
 import org.eclipse.lemminx.services.extensions.diagnostics.IDiagnosticsParticipant;
@@ -122,7 +123,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         Properties variablesMap = SettingsService.getInstance().getVariablesForServerXml(domDocument.getDocumentURI());
         if (variablesMap.isEmpty() && !variables.isEmpty()) {
             String message = "ERROR: Dev mode is not started for current liberty workspace. Please start Dev mode to enable variable processing.";
-            Range range = XMLPositionUtility.createRange(domDocument.getDocumentElement().getStart(), domDocument.getDocumentElement().getEnd(),
+            Range range = XMLPositionUtility.createRange(domDocument.getDocumentElement().getStartTagOpenOffset(), domDocument.getDocumentElement().getStartTagCloseOffset(),
                     domDocument);
             Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE);
             diagnosticsList.add(diag);
