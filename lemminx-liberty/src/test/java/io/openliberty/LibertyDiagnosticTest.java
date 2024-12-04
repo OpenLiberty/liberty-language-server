@@ -34,6 +34,7 @@ import static org.eclipse.lemminx.XMLAssert.te;
 import static org.eclipse.lemminx.XMLAssert.tde;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
@@ -903,11 +904,11 @@ public class LibertyDiagnosticTest {
                 "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
                 "</server>" //
         );
-        Map<String,String> propsMap=new HashMap<>();
-        propsMap.put("default.http.port","9080");
+        Map<String, String> propsMap = new HashMap<>();
+        propsMap.put("default.http.port", "9080");
         Properties props = new Properties();
         props.putAll(propsMap);
-        when(settingsService.getVariables()).thenReturn(props);
+        when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
         Diagnostic dup1 = new Diagnostic();
         dup1.setRange(r(7, 29, 7, 50));
         dup1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
@@ -916,7 +917,7 @@ public class LibertyDiagnosticTest {
         dup1.setMessage("ERROR: The variable \"default.https.port\" does not exist");
         dup1.setData("default.https.port");
 
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false,dup1);
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, dup1);
     }
 
     @Test
@@ -931,13 +932,12 @@ public class LibertyDiagnosticTest {
                 "                  httpsPort=\"${default.https}\" id=\"defaultHttpEndpoint\"/>",//
                 "</server>" //
         );
-        Map<String,String> propsMap=new HashMap<>();
-        propsMap.put("default.http.port","9080");
-        propsMap.put("default.https.port","9443");
+        Map<String, String> propsMap = new HashMap<>();
+        propsMap.put("default.http.port", "9080");
+        propsMap.put("default.https.port", "9443");
         Properties props = new Properties();
         props.putAll(propsMap);
-
-        when(settingsService.getVariables()).thenReturn(props);
+        when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
         Diagnostic invalid1 = new Diagnostic();
         invalid1.setRange(r(7, 29, 7, 45));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
@@ -946,7 +946,7 @@ public class LibertyDiagnosticTest {
         invalid1.setSource("liberty-lemminx");
         invalid1.setSeverity(DiagnosticSeverity.Error);
 
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false,invalid1);
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, invalid1);
 
         //  expecting code action to show only default.https.port
         //      1. user has entered "default.https"
@@ -961,9 +961,34 @@ public class LibertyDiagnosticTest {
                     invalid1.getRange().getEnd().getLine(), invalid1.getRange().getEnd().getCharacter(), variableInDoc);
             CodeAction invalidCodeAction = ca(invalid1, texted);
             codeActions.add(invalidCodeAction);
+            invalidCodeAction.getEdit()
+                    .getDocumentChanges()
+                    .get(0).getLeft().getTextDocument()
+                    .setUri(serverXMLURI);
         }
 
-        XMLAssert.testCodeActionsFor(serverXML, invalid1, codeActions.get(0));
+        XMLAssert.testCodeActionsFor(serverXML, serverXMLURI, invalid1, codeActions.get(0));
     }
 
+
+    @Test
+    public void testNoVariableMappedDiagnostic() {
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "                <platform>javaee-6.0</platform>", //
+                "                <feature>acmeCA-2.0</feature>", //
+                "       </featureManager>", //
+                " <httpEndpoint host=\"*\" httpPort=\"${default.http.port}\"\n",//
+                "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
+                "</server>" //
+        );
+        when(settingsService.getVariablesForServerXml(any())).thenReturn(new Properties());
+        Diagnostic dup1 = new Diagnostic();
+        dup1.setRange(r(0, 0, 8, 9));
+        dup1.setMessage("ERROR: Dev mode is not started for current liberty workspace. Please start Dev mode to enable variable processing.");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
+                dup1);
+    }
 }

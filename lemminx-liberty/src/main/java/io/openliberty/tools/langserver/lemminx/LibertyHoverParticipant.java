@@ -45,12 +45,14 @@ public class LibertyHoverParticipant implements IHoverParticipant {
     }
 
     @Override
-    public Hover onAttributeValue(IHoverRequest request, CancelChecker cancelChecker) {List<String> variables = LibertyUtils.getVariablesFromTextContent(request.getNode().getTextContent());
-        if(variables.size() == 1){
-            Properties variableMap = SettingsService.getInstance().getVariables();
-
-            if(variableMap.containsKey(variables.get(0))) {
-                return new Hover(new MarkupContent("plaintext", variableMap.get(variables.get(0)).toString()));
+    public Hover onAttributeValue(IHoverRequest request, CancelChecker cancelChecker) {
+        List<String> variables = LibertyUtils.getVariablesFromTextContent(request.getNode().getTextContent());
+        if (variables.size() == 1) {
+            Properties variableMap = SettingsService.getInstance()
+                    .getVariablesForServerXml(request.getXMLDocument()
+                            .getDocumentURI());
+            if (variableMap.containsKey(variables.get(0))) {
+                return new Hover(new MarkupContent("plaintext", String.format("Current value is %s", variableMap.get(variables.get(0)))));
             }
         }
         return null;

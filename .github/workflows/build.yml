@@ -35,9 +35,8 @@ jobs:
       - name: Checkout ci.common
         uses: actions/checkout@v3
         with:
-          repository: arunvenmany-ibm/ci.common
+          repository: OpenLiberty/ci.common
           path: ci.common
-          ref: varProcessing_lcls
       - name: Set up Java
         uses: actions/setup-java@v3
         with:

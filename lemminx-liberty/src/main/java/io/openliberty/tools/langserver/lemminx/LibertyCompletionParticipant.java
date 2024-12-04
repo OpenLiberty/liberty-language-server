@@ -50,7 +50,9 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
     public void onAttributeValue(String valuePrefix, ICompletionRequest request, ICompletionResponse response, CancelChecker cancelChecker) throws Exception {
         if (!LibertyUtils.isConfigXMLFile(request.getXMLDocument()))
             return;
-        Properties variableProps = SettingsService.getInstance().getVariables();
+        Properties variableProps = SettingsService.getInstance()
+                .getVariablesForServerXml(request.getXMLDocument()
+                        .getDocumentURI());
         String variableName = valuePrefix.replace("$", "")
                 .replace("{", "")
                 .replace("}", "");

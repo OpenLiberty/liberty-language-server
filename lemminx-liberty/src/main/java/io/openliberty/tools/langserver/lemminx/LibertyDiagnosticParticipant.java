@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -118,7 +119,15 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     private void validateVariables(DOMDocument domDocument, List<Diagnostic> diagnosticsList) {
         String docContent = domDocument.getTextDocument().getText();
         List<String> variables = LibertyUtils.getVariablesFromTextContent(docContent);
-        Properties variablesMap = SettingsService.getInstance().getVariables();
+        Properties variablesMap = SettingsService.getInstance().getVariablesForServerXml(domDocument.getDocumentURI());
+        if (variablesMap.isEmpty() && !variables.isEmpty()) {
+            String message = "ERROR: Dev mode is not started for current liberty workspace. Please start Dev mode to enable variable processing.";
+            Range range = XMLPositionUtility.createRange(domDocument.getDocumentElement().getStart(), domDocument.getDocumentElement().getEnd(),
+                    domDocument);
+            Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE);
+            diagnosticsList.add(diag);
+            return;
+        }
         for (String variable : variables) {
             if (!variablesMap.containsKey(variable)) {
                 String variableInDoc = String.format("${%s}", variable);

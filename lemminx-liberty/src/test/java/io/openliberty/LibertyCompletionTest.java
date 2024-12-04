@@ -13,11 +13,13 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
 import static org.eclipse.lemminx.XMLAssert.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -28,11 +30,12 @@ public class LibertyCompletionTest {
 
         MockedStatic settings;
         static String newLine = System.lineSeparator();
-        static String serverXMLURI = "test/server.xml";
+        static File srcResourcesDir = new File("src/test/resources/sample");
+        static String serverXMLURI = new File(srcResourcesDir, "test/server.xml").toURI().toString();
 
         @BeforeEach
         public void setup(){
-                settings= Mockito.mockStatic(SettingsService.class);
+                settings = Mockito.mockStatic(SettingsService.class);
                 settings.when(SettingsService::getInstance).thenReturn(settingsService);
         }
 
@@ -40,7 +43,6 @@ public class LibertyCompletionTest {
         public void cleanup(){
                 settings.close();
         }
-
 
         // Tests the availability of completion of XML elements provided by the
         // server.xsd file
@@ -295,7 +297,7 @@ public class LibertyCompletionTest {
         }
 
         // Tests the
-        // availability of feature completion
+        // availability of variable completion
         @Test
         public void testVariableCompletionItem() throws BadLocationException {
                 String serverXML = String.join(newLine, //
@@ -316,7 +318,7 @@ public class LibertyCompletionTest {
                 Properties props = new Properties();
                 props.putAll(propsMap);
 
-                when(settingsService.getVariables()).thenReturn(props);
+                when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
                 CompletionItem httpCompletion = c("default.http.port", "${default.http.port}");
                 CompletionItem httpsCompletion = c("default.https.port", "${default.https.port}");
                 final int TOTAL_ITEMS = 2; // total number of available completion items
@@ -356,13 +358,14 @@ public class LibertyCompletionTest {
                 Properties props = new Properties();
                 props.putAll(propsMap);
 
-                when(settingsService.getVariables()).thenReturn(props);
+                Map<String,Properties> variables=new HashMap<>();
+                variables.put(srcResourcesDir.toURI().toString(),props);
+                when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
                 CompletionItem httpCompletion = c("default.http.port", "${default.http.port}");
                 CompletionItem httpsCompletion = c("default.https.port", "${default.https.port}");
                 final int TOTAL_ITEMS = 4; // total number of available completion items
                 // variables values -> default.http.port, default.https.port
                 // default schema provided value, this is not being filtered -> true, false
-
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, httpCompletion,
                         httpsCompletion);
         }

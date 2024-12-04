@@ -51,7 +51,7 @@ public class ReplaceVariable implements ICodeActionParticipant {
             final boolean replaceVariable = invalidVariable != null && !invalidVariable.isBlank();
 
             if (replaceVariable) {
-                Properties existingVariables = SettingsService.getInstance().getVariables();
+                Properties existingVariables=SettingsService.getInstance().getVariablesForServerXml(document.getDocumentURI());
                 // filter with entered word -> may not be required
                 String finalInvalidVariable = invalidVariable;
                 Set<Map.Entry<Object, Object>> filteredVariables = existingVariables
@@ -60,7 +60,7 @@ public class ReplaceVariable implements ICodeActionParticipant {
                                         .contains(finalInvalidVariable.toLowerCase()))
                         .collect(Collectors.toSet());
                 for (Map.Entry<Object, Object> nextVariable : filteredVariables) {
-                    String title = "Replace Variable with " + nextVariable.getKey() + " with value = " + nextVariable.getValue();
+                    String title = "Replace Variable with " + nextVariable.getKey();
                     String variableInDoc = String.format("${%s}", nextVariable.getKey().toString());
                     codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), variableInDoc, document.getTextDocument(), diagnostic));
                 }

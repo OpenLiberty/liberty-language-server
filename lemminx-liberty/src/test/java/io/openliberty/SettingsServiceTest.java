@@ -1,8 +1,10 @@
 package io.openliberty;
 
+import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
+import org.eclipse.lsp4j.WorkspaceFolder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,15 +25,22 @@ import static org.mockito.ArgumentMatchers.eq;
 
 public class SettingsServiceTest {
     File resourcesDir = new File("src/test/resources/serverConfig");
+    File resourcesLibertyDir = new File("src/test/resources/serverConfig", "liberty");
     File serverDir = new File("src/test/resources/serverConfig/liberty/wlp/usr/servers/defaultServer");
     File installDir = new File("src/test/resources/serverConfig/liberty/wlp");
     File userDir = new File("src/test/resources/serverConfig/liberty/wlp/usr");
 
     MockedStatic libertyUtils;
+    static List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
+    LibertyProjectsManager libPM;
+    LibertyWorkspace libWorkspace;
 
     @BeforeEach
     public void setupWorkspace() {
-
+        initList.add(new WorkspaceFolder(resourcesDir.toURI().toString()));
+        libPM = LibertyProjectsManager.getInstance();
+        libPM.setWorkspaceFolders(initList);
+        libWorkspace = libPM.getLibertyWorkspaceFolders().iterator().next();
         libertyUtils = Mockito.mockStatic(LibertyUtils.class);
         libertyUtils.when(() -> LibertyUtils.findFileInWorkspace(any(), any()))
                 .thenReturn(Path.of(resourcesDir.getPath()));
@@ -51,9 +60,10 @@ public class SettingsServiceTest {
     @Test
     public void testPopulateAllVariables() throws IOException {
         List<LibertyWorkspace> initList = new ArrayList<>();
-        initList.add(new LibertyWorkspace(resourcesDir.toURI().toString()));
+        initList.add(new LibertyWorkspace(resourcesLibertyDir.toURI().toString()));
         SettingsService.getInstance().populateAllVariables(initList);
-        Properties variables = SettingsService.getInstance().getVariables();
+        Properties variables = SettingsService.getInstance().getVariablesForServerXml(resourcesLibertyDir.toURI().toString());
+
         assertNotNull(variables);
         // bootstrap.properties.override added in server.env and bootstrap.properties
         // bootstrap.properties gets highest priority

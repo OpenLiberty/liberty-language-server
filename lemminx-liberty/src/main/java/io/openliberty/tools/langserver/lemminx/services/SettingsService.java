@@ -22,6 +22,8 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
 
@@ -46,7 +48,8 @@ public class SettingsService {
     }
 
     private LibertySettings settings;
-    private Properties variables;
+
+    private Map<String,Properties> variables;
     /**
      * Takes the xml settings object and parses out the Liberty Settings
      * @param xmlSettings - All xml settings provided by the client
@@ -83,9 +86,9 @@ public class SettingsService {
      * @param workspaceFolders workspace folders
      */
     public void populateAllVariables(Collection<LibertyWorkspace> workspaceFolders) {
-        variables = new Properties();
+        variables = new HashMap<>();
         for (LibertyWorkspace workspace : workspaceFolders) {
-            readVariables(workspace);
+            populateVariablesForWorkspace(workspace);
         }
     }
 
@@ -94,7 +97,8 @@ public class SettingsService {
      *
      * @param workspace workspace
      */
-    private void readVariables(LibertyWorkspace workspace) {
+    private void populateVariablesForWorkspace(LibertyWorkspace workspace) {
+        Properties variablesForWorkspace = new Properties();
         Path pluginConfigFilePath = findFileInWorkspace(workspace, Paths.get("liberty-plugin-config.xml"));
         if (pluginConfigFilePath != null) {
             File installDirectory = LibertyUtils.getFileFromLibertyPluginXml(pluginConfigFilePath, "installDirectory");
@@ -104,8 +108,8 @@ public class SettingsService {
                 try {
                     ServerConfigDocument serverConfigDocument = new ServerConfigDocument(
                             new CommonLogger(LOGGER), null, installDirectory, userDirectory, serverDirectory);
-                    variables.putAll(serverConfigDocument.getDefaultProperties());
-                    variables.putAll(serverConfigDocument.getProperties());
+                    variablesForWorkspace.putAll(serverConfigDocument.getDefaultProperties());
+                    variablesForWorkspace.putAll(serverConfigDocument.getProperties());
                 } catch (Exception e) {
                     LOGGER.warning("The properties for directories could not be initialized because an error occurred when accessing the directories.");
                     LOGGER.info("Exception received: " + e.getMessage());
@@ -114,13 +118,21 @@ public class SettingsService {
         } else {
             LOGGER.warning("Could not find liberty-plugin-config.xml in workspace. Variable processing cannot be performed");
         }
+        variables.put(workspace.getWorkspaceString(), variablesForWorkspace);
     }
 
-    public Properties getVariables() {
-        return variables;
-    }
-
-    public void setVariables(Properties variables) {
-        this.variables=variables;
+    /**
+     * Get variables list for a workspace server xml file
+     *
+     * @param serverXmlURI serverXmlURI
+     * @return variables
+     */
+    public Properties getVariablesForServerXml(String serverXmlURI) {
+        LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlURI);
+        Properties variableProps = new Properties();
+        if (workspace != null && variables.containsKey(workspace.getWorkspaceString())) {
+            variableProps = variables.get(workspace.getWorkspaceString());
+        }
+        return variableProps;
     }
 }
