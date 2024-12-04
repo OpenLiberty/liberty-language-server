@@ -319,8 +319,8 @@ public class LibertyCompletionTest {
                 props.putAll(propsMap);
 
                 when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
-                CompletionItem httpCompletion = c("default.http.port", "${default.http.port}");
-                CompletionItem httpsCompletion = c("default.https.port", "${default.https.port}");
+                CompletionItem httpCompletion = c("${default.http.port}", "${default.http.port}");
+                CompletionItem httpsCompletion = c("${default.https.port}", "${default.https.port}");
                 final int TOTAL_ITEMS = 2; // total number of available completion items
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, httpCompletion,
@@ -361,8 +361,8 @@ public class LibertyCompletionTest {
                 Map<String,Properties> variables=new HashMap<>();
                 variables.put(srcResourcesDir.toURI().toString(),props);
                 when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
-                CompletionItem httpCompletion = c("default.http.port", "${default.http.port}");
-                CompletionItem httpsCompletion = c("default.https.port", "${default.https.port}");
+                CompletionItem httpCompletion = c("${default.http.port}", "${default.http.port}");
+                CompletionItem httpsCompletion = c("${default.https.port}", "${default.https.port}");
                 final int TOTAL_ITEMS = 4; // total number of available completion items
                 // variables values -> default.http.port, default.https.port
                 // default schema provided value, this is not being filtered -> true, false

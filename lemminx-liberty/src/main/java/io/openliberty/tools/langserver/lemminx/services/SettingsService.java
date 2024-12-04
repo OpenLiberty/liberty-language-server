@@ -97,7 +97,7 @@ public class SettingsService {
      *
      * @param workspace workspace
      */
-    private void populateVariablesForWorkspace(LibertyWorkspace workspace) {
+    public void populateVariablesForWorkspace(LibertyWorkspace workspace) {
         Properties variablesForWorkspace = new Properties();
         Path pluginConfigFilePath = findFileInWorkspace(workspace, Paths.get("liberty-plugin-config.xml"));
         if (pluginConfigFilePath != null) {

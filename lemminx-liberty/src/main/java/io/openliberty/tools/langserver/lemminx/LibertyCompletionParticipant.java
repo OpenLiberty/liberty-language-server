@@ -63,7 +63,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
                     Either<TextEdit, InsertReplaceEdit> edit = Either.forLeft(new
                             TextEdit(request.getReplaceRange(), varValue));
                     CompletionItem completionItem = new CompletionItem();
-                    completionItem.setLabel(variableProp.getKey().toString());
+                    completionItem.setLabel(varValue);
                     completionItem.setTextEdit(edit);
                     completionItem.setFilterText(variableProp.getKey().toString());
                     completionItem.setKind(CompletionItemKind.Value);
