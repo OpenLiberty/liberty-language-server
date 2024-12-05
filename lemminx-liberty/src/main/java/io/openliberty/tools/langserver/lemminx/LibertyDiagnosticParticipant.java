@@ -13,10 +13,9 @@
 package io.openliberty.tools.langserver.lemminx;
 
 import com.google.common.collect.Sets;
-import com.google.gson.JsonPrimitive;
+import io.openliberty.tools.langserver.lemminx.models.feature.VariableLoc;
 import org.eclipse.lemminx.dom.DOMAttr;
 import org.eclipse.lemminx.dom.DOMDocument;
-import org.eclipse.lemminx.dom.DOMElement;
 import org.eclipse.lemminx.dom.DOMNode;
 import org.eclipse.lemminx.extensions.contentmodel.settings.XMLValidationSettings;
 import org.eclipse.lemminx.services.extensions.diagnostics.IDiagnosticsParticipant;
@@ -38,7 +37,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -46,8 +44,6 @@ import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.changedFeatureNameDiagMessage;
@@ -119,26 +115,26 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
 
     private void validateVariables(DOMDocument domDocument, List<Diagnostic> diagnosticsList) {
         String docContent = domDocument.getTextDocument().getText();
-        List<String> variables = LibertyUtils.getVariablesFromTextContent(docContent);
+        List<VariableLoc> variables = LibertyUtils.getVariablesFromTextContent(docContent);
         Properties variablesMap = SettingsService.getInstance().getVariablesForServerXml(domDocument.getDocumentURI());
         if (variablesMap.isEmpty() && !variables.isEmpty()) {
-            String message = "ERROR: Dev mode is not started for current liberty workspace. Please start Dev mode to enable variable processing.";
+            String message = "WARNING: Variable resolution is not available for workspace %s . Please start the Liberty server for the workspace to enable variable resolution.";
+            LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI());
             Range range = XMLPositionUtility.createRange(domDocument.getDocumentElement().getStartTagOpenOffset(), domDocument.getDocumentElement().getStartTagCloseOffset(),
                     domDocument);
-            Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE);
+            Diagnostic diag = new Diagnostic(range, message.formatted(workspace.getWorkspaceURI().getPath()), DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE);
             diagnosticsList.add(diag);
             return;
         }
-        for (String variable : variables) {
-            if (!variablesMap.containsKey(variable)) {
-                String variableInDoc = String.format("${%s}", variable);
-                Range range = XMLPositionUtility.createRange(docContent.indexOf(variableInDoc),
-                        docContent.indexOf(variableInDoc) + variableInDoc.length(),
+        for (VariableLoc variable : variables) {
+            if (!variablesMap.containsKey(variable.getValue())) {
+                String variableInDoc = String.format("${%s}", variable.getValue());
+                Range range = XMLPositionUtility.createRange(variable.getStartLoc(),variable.getEndLoc(),
                         domDocument);
-                String message = "ERROR: The variable \"" + variable + "\" does not exist";
+                String message = "ERROR: The variable \"" + variable.getValue() + "\" does not exist";
 
                 Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_VARIABLE_CODE);
-                diag.setData(variable);
+                diag.setData(variable.getValue());
                 diagnosticsList.add(diag);
             }
         }

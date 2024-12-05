@@ -60,7 +60,7 @@ public class ReplaceVariable implements ICodeActionParticipant {
                                         .contains(finalInvalidVariable.toLowerCase()))
                         .collect(Collectors.toSet());
                 for (Map.Entry<Object, Object> nextVariable : filteredVariables) {
-                    String title = "Replace Variable with " + nextVariable.getKey();
+                    String title = "Replace attribute value with " + nextVariable.getKey();
                     String variableInDoc = String.format("${%s}", nextVariable.getKey().toString());
                     codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), variableInDoc, document.getTextDocument(), diagnostic));
                 }
@@ -71,7 +71,7 @@ public class ReplaceVariable implements ICodeActionParticipant {
             }
         } catch (Exception e) {
             // BadLocationException not expected
-            LOGGER.warning("Could not generate code action for replace variable: " + e);
+            LOGGER.warning("Could not generate code action for replace attribute value: " + e);
         }
     }
 }

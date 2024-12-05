@@ -30,6 +30,7 @@ import io.openliberty.tools.langserver.lemminx.util.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Properties;
@@ -46,14 +47,23 @@ public class LibertyHoverParticipant implements IHoverParticipant {
 
     @Override
     public Hover onAttributeValue(IHoverRequest request, CancelChecker cancelChecker) {
-        List<String> variables = LibertyUtils.getVariablesFromTextContent(request.getNode().getTextContent());
-        if (variables.size() == 1) {
-            Properties variableMap = SettingsService.getInstance()
-                    .getVariablesForServerXml(request.getXMLDocument()
-                            .getDocumentURI());
-            if (variableMap.containsKey(variables.get(0))) {
-                return new Hover(new MarkupContent("plaintext", String.format("Current value is %s", variableMap.get(variables.get(0)))));
+        List<VariableLoc> variables = LibertyUtils.getVariablesFromTextContent(request.getNode().getTextContent());
+        Properties variableMap = SettingsService.getInstance()
+                .getVariablesForServerXml(request.getXMLDocument()
+                        .getDocumentURI());
+        StringBuilder stringBuilder = new StringBuilder();
+        Iterator<VariableLoc> varIter = variables.iterator();
+        while (varIter.hasNext()) {
+            VariableLoc variable = varIter.next();
+            if (variableMap.containsKey(variable.getValue())) {
+                stringBuilder.append(String.format("%s = %s for variable", variable.getValue(), variableMap.get(variable.getValue())));
             }
+            if (varIter.hasNext()) {
+                stringBuilder.append(System.lineSeparator());
+            }
+        }
+        if (!stringBuilder.isEmpty()) {
+            return new Hover(new MarkupContent("plaintext", stringBuilder.toString()));
         }
         return null;
     }

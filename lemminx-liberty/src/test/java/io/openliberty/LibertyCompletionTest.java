@@ -347,7 +347,8 @@ public class LibertyCompletionTest {
                         "                <platform>javaee-6.0</platform>", //
                         "                <feature>acmeCA-2.0</feature>", //
                         "       </featureManager>", //
-                        " <applicationManager autoExpand=\"f|\"/>",//
+                        " <httpEndpoint host=\"*\" httpPort=\"f|\"\n",//
+                        "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
                         "</server>" //
                 );
                 Map<String,String> propsMap=new HashMap<>();
@@ -363,9 +364,8 @@ public class LibertyCompletionTest {
                 when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
                 CompletionItem httpCompletion = c("${default.http.port}", "${default.http.port}");
                 CompletionItem httpsCompletion = c("${default.https.port}", "${default.https.port}");
-                final int TOTAL_ITEMS = 4; // total number of available completion items
+                final int TOTAL_ITEMS = 2; // total number of available completion items
                 // variables values -> default.http.port, default.https.port
-                // default schema provided value, this is not being filtered -> true, false
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, httpCompletion,
                         httpsCompletion);
         }

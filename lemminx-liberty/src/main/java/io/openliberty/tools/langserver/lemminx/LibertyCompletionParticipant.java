@@ -56,7 +56,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
         String variableName = valuePrefix.replace("$", "")
                 .replace("{", "")
                 .replace("}", "");
-        variableProps.entrySet().stream().filter(it -> it.getKey().toString().contains(variableName))
+        variableProps.entrySet().stream().filter(it -> it.getKey().toString().toLowerCase().contains(variableName.toLowerCase()))
                 .forEach(variableProp -> {
                     String varValue = String.format("${%s}", variableProp.getKey());
 

@@ -111,12 +111,12 @@ public class SettingsService {
                     variablesForWorkspace.putAll(serverConfigDocument.getDefaultProperties());
                     variablesForWorkspace.putAll(serverConfigDocument.getProperties());
                 } catch (Exception e) {
-                    LOGGER.warning("The properties for directories could not be initialized because an error occurred when accessing the directories.");
+                    LOGGER.warning("Variable resolution is not available because the necessary directory locations were not found in the liberty-plugin-config.xml file.");
                     LOGGER.info("Exception received: " + e.getMessage());
                 }
             }
         } else {
-            LOGGER.warning("Could not find liberty-plugin-config.xml in workspace. Variable processing cannot be performed");
+            LOGGER.warning("Could not find liberty-plugin-config.xml in workspace URI" + workspace.getWorkspaceString() + ". Variable processing cannot be performed");
         }
         variables.put(workspace.getWorkspaceString(), variablesForWorkspace);
     }
@@ -130,8 +130,12 @@ public class SettingsService {
     public Properties getVariablesForServerXml(String serverXmlURI) {
         LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlURI);
         Properties variableProps = new Properties();
-        if (workspace != null && variables.containsKey(workspace.getWorkspaceString())) {
+        if (workspace == null) {
+            LOGGER.warning("Could not find workspace for server xml URI %s. Variable processing cannot be performed".formatted(serverXmlURI));
+        } else if (variables.containsKey(workspace.getWorkspaceString())) {
             variableProps = variables.get(workspace.getWorkspaceString());
+        } else {
+            LOGGER.warning("Could not find variable mapping for workspace URI %s. Variable processing cannot be performed".formatted(workspace.getWorkspaceString()));
         }
         return variableProps;
     }

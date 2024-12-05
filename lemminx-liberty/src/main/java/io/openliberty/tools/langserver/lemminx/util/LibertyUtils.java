@@ -31,6 +31,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import io.openliberty.tools.langserver.lemminx.models.feature.VariableLoc;
 import org.eclipse.lemminx.dom.DOMDocument;
 
 import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
@@ -51,6 +52,11 @@ public class LibertyUtils {
     private static final Pattern EXCLUDE_PATTERN = Pattern.compile(EXCLUDE_PATTERN_REGEX);
 
     private static Thread thread;
+
+    //considering ${var} pattern for variable.  do we have other representation for variable?
+    private static String regex = "\\$\\{(.*?)\\}";
+    // Compile the Regex.
+    private static Pattern p = Pattern.compile(regex);
 
     private LibertyUtils() {
     }
@@ -589,11 +595,11 @@ public class LibertyUtils {
                     return elementDir.toFile();
                 }
                 else {
-                    LOGGER.warning("Path specified for %s in liberty-plugin-config.xml does not exist".formatted(elementName));
+                    LOGGER.warning("Path specified for %s in liberty-plugin-config path %s does not exist".formatted(elementName, pluginConfigFilePath));
                 }
             }
             else {
-                LOGGER.warning("Xml Node for %s in does not exist liberty-plugin-config.xml ".formatted(elementName));
+                LOGGER.warning("Element for %s in does not exist in file %s ".formatted(elementName, pluginConfigFilePath));
             }
         return null;
     }
@@ -603,12 +609,8 @@ public class LibertyUtils {
      * @param docContent text content
      * @return list of variables
      */
-    public static List<String> getVariablesFromTextContent(String docContent) {
-        List<String> variables = new ArrayList<>();
-        //considering ${var} pattern for variable.  do we have other representation for variable?
-        String regex = "\\$\\{(.*?)\\}";
-        // Compile the Regex.
-        Pattern p = Pattern.compile(regex);
+    public static List<VariableLoc> getVariablesFromTextContent(String docContent) {
+        List<VariableLoc> variables = new ArrayList<>();
         // Find match between given string
         // and regular expression
         // using Pattern.matcher()
@@ -616,7 +618,8 @@ public class LibertyUtils {
         // Get the subsequence
         // using find() method
         while (m.find()) {
-            variables.add(m.group(1));
+            VariableLoc variableLoc = new VariableLoc(m.group(1), m.start(1), m.end(1));
+            variables.add(variableLoc);
         }
         return variables;
     }
