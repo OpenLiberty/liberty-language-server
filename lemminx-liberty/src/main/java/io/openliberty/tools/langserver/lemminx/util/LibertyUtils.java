@@ -54,9 +54,9 @@ public class LibertyUtils {
     private static Thread thread;
 
     //considering ${var} pattern for variable.  do we have other representation for variable?
-    private static String regex = "\\$\\{(.*?)\\}";
+    private static final String regex = "\\$\\{(.*?)\\}";
     // Compile the Regex.
-    private static Pattern p = Pattern.compile(regex);
+    private static final Pattern p = Pattern.compile(regex);
 
     private LibertyUtils() {
     }
@@ -595,11 +595,11 @@ public class LibertyUtils {
                     return elementDir.toFile();
                 }
                 else {
-                    LOGGER.warning("Path specified for %s in liberty-plugin-config path %s does not exist".formatted(elementName, pluginConfigFilePath));
+                    LOGGER.warning("Path specified for %s in liberty-plugin-config path %s does not exist.".formatted(elementName, pluginConfigFilePath));
                 }
             }
             else {
-                LOGGER.warning("Element for %s in does not exist in file %s ".formatted(elementName, pluginConfigFilePath));
+                LOGGER.warning("Element %s does not exist in file %s.".formatted(elementName, pluginConfigFilePath));
             }
         return null;
     }

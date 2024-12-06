@@ -116,7 +116,7 @@ public class SettingsService {
                 }
             }
         } else {
-            LOGGER.warning("Could not find liberty-plugin-config.xml in workspace URI" + workspace.getWorkspaceString() + ". Variable processing cannot be performed");
+            LOGGER.warning("Could not find liberty-plugin-config.xml in workspace URI " + workspace.getWorkspaceString() + ". Variable resolution cannot be performed");
         }
         variables.put(workspace.getWorkspaceString(), variablesForWorkspace);
     }
@@ -131,11 +131,11 @@ public class SettingsService {
         LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlURI);
         Properties variableProps = new Properties();
         if (workspace == null) {
-            LOGGER.warning("Could not find workspace for server xml URI %s. Variable processing cannot be performed".formatted(serverXmlURI));
+            LOGGER.warning("Could not find workspace for server xml URI %s. Variable resolution cannot be performed.".formatted(serverXmlURI));
         } else if (variables.containsKey(workspace.getWorkspaceString())) {
             variableProps = variables.get(workspace.getWorkspaceString());
         } else {
-            LOGGER.warning("Could not find variable mapping for workspace URI %s. Variable processing cannot be performed".formatted(workspace.getWorkspaceString()));
+            LOGGER.warning("Could not find variable mapping for workspace URI %s. Variable resolution cannot be performed.".formatted(workspace.getWorkspaceString()));
         }
         return variableProps;
     }

@@ -67,6 +67,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
                     completionItem.setTextEdit(edit);
                     completionItem.setFilterText(variableProp.getKey().toString());
                     completionItem.setKind(CompletionItemKind.Value);
+                    completionItem.setDocumentation(String.format("%s = %s", variableProp.getKey(),variableProp.getValue()));
                     response.addCompletionItem(completionItem);
                 });
     }

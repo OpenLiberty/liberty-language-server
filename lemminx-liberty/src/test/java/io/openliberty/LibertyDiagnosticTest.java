@@ -914,7 +914,7 @@ public class LibertyDiagnosticTest {
         dup1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
         dup1.setSource("liberty-lemminx");
         dup1.setSeverity(DiagnosticSeverity.Error);
-        dup1.setMessage("ERROR: The variable \"default.https.port\" does not exist");
+        dup1.setMessage("ERROR: The variable \"default.https.port\" does not exist.");
         dup1.setData("default.https.port");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, dup1);
@@ -941,7 +941,7 @@ public class LibertyDiagnosticTest {
         Diagnostic invalid1 = new Diagnostic();
         invalid1.setRange(r(7, 31, 7, 44));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
-        invalid1.setMessage("ERROR: The variable \"default.https\" does not exist");
+        invalid1.setMessage("ERROR: The variable \"default.https\" does not exist.");
         invalid1.setData("default.https");
         invalid1.setSource("liberty-lemminx");
         invalid1.setSeverity(DiagnosticSeverity.Error);
@@ -986,7 +986,7 @@ public class LibertyDiagnosticTest {
         when(settingsService.getVariablesForServerXml(any())).thenReturn(new Properties());
         Diagnostic dup1 = new Diagnostic();
         dup1.setRange(r(0, 0, 0, 43));
-        String message="WARNING: Variable resolution is not available for workspace %s . Please start the Liberty server for the workspace to enable variable resolution.";
+        String message="WARNING: Variable resolution is not available for workspace %s. Please start the Liberty server for the workspace to enable variable resolution.";
         dup1.setMessage(message.formatted(srcResourcesDir.toURI().getPath()));
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
@@ -1015,7 +1015,7 @@ public class LibertyDiagnosticTest {
         dup1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
         dup1.setSource("liberty-lemminx");
         dup1.setSeverity(DiagnosticSeverity.Error);
-        dup1.setMessage("ERROR: The variable \"default.https.port\" does not exist");
+        dup1.setMessage("ERROR: The variable \"default.https.port\" does not exist.");
         dup1.setData("default.https.port");
 
         Diagnostic dup2 = new Diagnostic();
@@ -1023,7 +1023,7 @@ public class LibertyDiagnosticTest {
         dup2.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
         dup2.setSource("liberty-lemminx");
         dup2.setSeverity(DiagnosticSeverity.Error);
-        dup2.setMessage("ERROR: The variable \"default.https.port\" does not exist");
+        dup2.setMessage("ERROR: The variable \"default.https.port\" does not exist.");
         dup2.setData("default.https.port");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, dup1, dup2);

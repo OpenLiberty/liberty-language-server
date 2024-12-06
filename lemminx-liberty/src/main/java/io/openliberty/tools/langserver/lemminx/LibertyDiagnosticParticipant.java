@@ -118,11 +118,11 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         List<VariableLoc> variables = LibertyUtils.getVariablesFromTextContent(docContent);
         Properties variablesMap = SettingsService.getInstance().getVariablesForServerXml(domDocument.getDocumentURI());
         if (variablesMap.isEmpty() && !variables.isEmpty()) {
-            String message = "WARNING: Variable resolution is not available for workspace %s . Please start the Liberty server for the workspace to enable variable resolution.";
+            String message = "WARNING: Variable resolution is not available for workspace %s. Please start the Liberty server for the workspace to enable variable resolution.";
             LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI());
             Range range = XMLPositionUtility.createRange(domDocument.getDocumentElement().getStartTagOpenOffset(), domDocument.getDocumentElement().getStartTagCloseOffset(),
                     domDocument);
-            Diagnostic diag = new Diagnostic(range, message.formatted(workspace.getWorkspaceURI().getPath()), DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE);
+            Diagnostic diag = new Diagnostic(range, message.formatted(workspace.getWorkspaceURI().getPath()), DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE);
             diagnosticsList.add(diag);
             return;
         }
@@ -131,7 +131,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 String variableInDoc = String.format("${%s}", variable.getValue());
                 Range range = XMLPositionUtility.createRange(variable.getStartLoc(),variable.getEndLoc(),
                         domDocument);
-                String message = "ERROR: The variable \"" + variable.getValue() + "\" does not exist";
+                String message = "ERROR: The variable \"" + variable.getValue() + "\" does not exist.";
 
                 Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_VARIABLE_CODE);
                 diag.setData(variable.getValue());

@@ -56,7 +56,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
         while (varIter.hasNext()) {
             VariableLoc variable = varIter.next();
             if (variableMap.containsKey(variable.getValue())) {
-                stringBuilder.append(String.format("%s = %s for variable", variable.getValue(), variableMap.get(variable.getValue())));
+                stringBuilder.append(String.format("%s = %s", variable.getValue(), variableMap.get(variable.getValue())));
             }
             if (varIter.hasNext()) {
                 stringBuilder.append(System.lineSeparator());

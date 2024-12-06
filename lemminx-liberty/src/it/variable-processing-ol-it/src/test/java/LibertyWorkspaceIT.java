@@ -87,7 +87,7 @@ public class LibertyWorkspaceIT {
         );
 
         XMLAssert.assertHover(serverXML, serverXmlFile.toURI().toString(),
-                "default.http.port = 9080 for variable",
+                "default.http.port = 9080",
                 r(5, 33, 5, 55));
     }
 
@@ -119,7 +119,7 @@ public class LibertyWorkspaceIT {
         dup1.setCode("incorrect_variable");
         dup1.setSource("liberty-lemminx");
         dup1.setSeverity(DiagnosticSeverity.Error);
-        dup1.setMessage("ERROR: The variable \"default.httpsl.port\" does not exist");
+        dup1.setMessage("ERROR: The variable \"default.httpsl.port\" does not exist.");
         dup1.setData("default.httpsl.port");
 
         Diagnostic dup2 = new Diagnostic();
@@ -127,7 +127,7 @@ public class LibertyWorkspaceIT {
         dup2.setCode("incorrect_variable");
         dup2.setSource("liberty-lemminx");
         dup2.setSeverity(DiagnosticSeverity.Error);
-        dup2.setMessage("ERROR: The variable \"default.httpsj.port\" does not exist");
+        dup2.setMessage("ERROR: The variable \"default.httpsj.port\" does not exist.");
         dup2.setData("default.httpsj.port");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXmlFile.toURI().toString(), false, dup1, dup2);
@@ -158,7 +158,7 @@ public class LibertyWorkspaceIT {
         Diagnostic invalid1 = new Diagnostic();
         invalid1.setRange(r(7, 31, 7, 44));
         invalid1.setCode("incorrect_variable");
-        invalid1.setMessage("ERROR: The variable \"default.https\" does not exist");
+        invalid1.setMessage("ERROR: The variable \"default.https\" does not exist.");
         invalid1.setData("default.https");
         invalid1.setSource("liberty-lemminx");
         invalid1.setSeverity(DiagnosticSeverity.Error);

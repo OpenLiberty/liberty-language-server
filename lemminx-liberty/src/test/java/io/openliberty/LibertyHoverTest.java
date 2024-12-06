@@ -178,7 +178,7 @@ public class LibertyHoverTest {
                 props.putAll(propsMap);
                 when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
                 XMLAssert.assertHover(serverXML, serverXMLURI,
-                        "default.http.port = 9080 for variable",
+                        "default.http.port = 9080",
                         r(5, 33, 5, 55));
         }
 }
