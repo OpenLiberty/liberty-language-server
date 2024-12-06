@@ -32,11 +32,19 @@ jobs:
         os: [ubuntu-latest, windows-latest]
     steps:
       - uses: actions/checkout@v3
+      - name: Checkout ci.common
+        uses: actions/checkout@v3
+        with:
+          repository: OpenLiberty/ci.common
+          path: ci.common
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: 17
+      - name: Build ci common
+        working-directory: ci.common
+        run: ./mvnw -V clean install --batch-mode --no-transfer-progress --errors -DtrimStackTrace=false -DskipTests
       - name: Build Lemminx Liberty
         working-directory: ./lemminx-liberty
         run: ./mvnw clean package -ntp -DskipTests

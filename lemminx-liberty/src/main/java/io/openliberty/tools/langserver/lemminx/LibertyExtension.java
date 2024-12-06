@@ -12,6 +12,7 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx;
 
+import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import org.eclipse.lemminx.services.extensions.IDocumentLinkParticipant;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionParticipant;
 import org.eclipse.lemminx.services.extensions.completion.ICompletionParticipant;
@@ -69,6 +70,13 @@ public class LibertyExtension implements IXMLExtension {
 
         documentLinkParticipant = new LibertyDocumentLinkParticipant();
         xmlExtensionsRegistry.registerDocumentLinkParticipant(documentLinkParticipant);
+
+        try {
+            SettingsService.getInstance()
+                    .populateAllVariables(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
@@ -94,6 +102,18 @@ public class LibertyExtension implements IXMLExtension {
             Object xmlSettings = saveContext.getSettings();
             SettingsService.getInstance().updateLibertySettings(xmlSettings);
             LOGGER.info("Liberty XML settings updated");
+        }
+        if (saveContext.getType() == SaveContextType.DOCUMENT) {
+            try {
+                LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(saveContext.getUri());
+                if (workspace != null) {
+                    SettingsService.getInstance()
+                            .populateVariablesForWorkspace(workspace);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+            LOGGER.info("Liberty XML variables updated");
         }
     }
 }

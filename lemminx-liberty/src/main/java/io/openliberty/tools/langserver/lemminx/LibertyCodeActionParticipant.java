@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 
 import io.openliberty.tools.langserver.lemminx.codeactions.ReplacePlatform;
+import io.openliberty.tools.langserver.lemminx.codeactions.ReplaceVariable;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionParticipant;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionRequest;
 import org.eclipse.lsp4j.CodeAction;
@@ -60,6 +61,7 @@ public class LibertyCodeActionParticipant implements ICodeActionParticipant {
             codeActionParticipants.put(LibertyDiagnosticParticipant.IMPLICIT_NOT_OPTIONAL_CODE, new AddAttribute());
             codeActionParticipants.put(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE, new ReplaceFeature());
             codeActionParticipants.put(LibertyDiagnosticParticipant.INCORRECT_PLATFORM_CODE, new ReplacePlatform());
+            codeActionParticipants.put(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE, new ReplaceVariable());
             codeActionParticipants.put(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE, new AddFeature());
             codeActionParticipants.put(LibertyDiagnosticParticipant.IS_FILE_NOT_DIR_CODE, new RemoveTrailingSlash());
             codeActionParticipants.put(LibertyDiagnosticParticipant.Is_DIR_NOT_FILE_CODE, new AddTrailingSlash());

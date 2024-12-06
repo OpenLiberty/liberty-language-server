@@ -1,0 +1,29 @@
+<server description="default server">
+    <featureManager>
+        <feature>jsp-2.3</feature>
+    </featureManager>
+
+    <include location="${shared.config.dir}/environment.xml"/>
+    <webApplication location="${server.config.dir}/apps/${project.artifactId}.war"/>
+
+    <variable name="project.artifactId.two" defaultValue="test-war-two"/>
+    <webApplication location="${project.artifactId.two}.war"/>
+
+    <variable name="includeLocation" defaultValue="includes"/>
+    <include location="${includeLocation}/firstInclude.xml"/>    
+    <webApplication location="${project.artifactId.three}.war"/>
+
+    <variable name="includeLocationNonDefault" value="includes"/>
+    <include location="${includeLocationNonDefault}/firstInclude.xml"/>    
+    <webApplication location="${project.artifactId.four}.ear"/>
+
+    <include location="${server.config.dir}/includeDir/"/>
+    <webApplication location="${project.artifactId.five}.war"/>
+    <webApplication location="${project.artifactId.six}.war"/>
+
+    <variable name="overriden_value" value="new_value"/>
+    <variable name="server.env.defined" defaultValue="${this.value}"/>
+    <variable name="server.env.defined" value="${this.value}"/>
+    <variable name="bootstrap.property.defined" value="${that.value}"/>
+    <variable name="config.dropins.server" value="2"/>
+</server>

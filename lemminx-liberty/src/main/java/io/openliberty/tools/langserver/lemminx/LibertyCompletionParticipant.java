@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -28,6 +29,7 @@ import org.eclipse.lemminx.services.extensions.completion.ICompletionRequest;
 import org.eclipse.lemminx.services.extensions.completion.ICompletionResponse;
 import org.eclipse.lemminx.utils.XMLPositionUtility;
 import org.eclipse.lsp4j.CompletionItem;
+import org.eclipse.lsp4j.CompletionItemKind;
 import org.eclipse.lsp4j.InsertReplaceEdit;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextEdit;
@@ -42,6 +44,33 @@ import io.openliberty.tools.langserver.lemminx.util.LibertyConstants;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
+
+
+    @Override
+    public void onAttributeValue(String valuePrefix, ICompletionRequest request, ICompletionResponse response, CancelChecker cancelChecker) throws Exception {
+        if (!LibertyUtils.isConfigXMLFile(request.getXMLDocument()))
+            return;
+        Properties variableProps = SettingsService.getInstance()
+                .getVariablesForServerXml(request.getXMLDocument()
+                        .getDocumentURI());
+        String variableName = valuePrefix.replace("$", "")
+                .replace("{", "")
+                .replace("}", "");
+        variableProps.entrySet().stream().filter(it -> it.getKey().toString().toLowerCase().contains(variableName.toLowerCase()))
+                .forEach(variableProp -> {
+                    String varValue = String.format("${%s}", variableProp.getKey());
+
+                    Either<TextEdit, InsertReplaceEdit> edit = Either.forLeft(new
+                            TextEdit(request.getReplaceRange(), varValue));
+                    CompletionItem completionItem = new CompletionItem();
+                    completionItem.setLabel(varValue);
+                    completionItem.setTextEdit(edit);
+                    completionItem.setFilterText(variableProp.getKey().toString());
+                    completionItem.setKind(CompletionItemKind.Value);
+                    completionItem.setDocumentation(String.format("%s = %s", variableProp.getKey(),variableProp.getValue()));
+                    response.addCompletionItem(completionItem);
+                });
+    }
 
     @Override
     public void onXMLContent(ICompletionRequest request, ICompletionResponse response, CancelChecker cancelChecker)
