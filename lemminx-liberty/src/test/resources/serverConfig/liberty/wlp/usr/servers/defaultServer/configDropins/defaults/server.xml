@@ -1,0 +1,5 @@
+<server description="default server">
+    <variable name="config.dropins.defaults" value="1"/>
+    <variable name="config.dropins.server" value="1"/>
+    <variable name="config.dropins.overrides" value="1"/>
+</server>

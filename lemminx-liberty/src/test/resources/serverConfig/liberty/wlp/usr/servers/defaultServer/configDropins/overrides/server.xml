@@ -1,0 +1,4 @@
+<server description="default server">
+    <variable name="config.dropins.overrides" value="3"/>
+    <variable name="httpPort" value="7777"/>
+</server>

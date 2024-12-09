@@ -1,22 +1,66 @@
 package io.openliberty;
 
+import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
+import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
+import io.openliberty.tools.langserver.lemminx.services.SettingsService;
+import org.eclipse.lsp4j.WorkspaceFolder;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import static io.openliberty.tools.langserver.lemminx.LibertyXSDURIResolver.SERVER_XSD_RESOURCE;
 
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lemminx.commons.BadLocationException;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoExtension;
 import static org.eclipse.lemminx.XMLAssert.r;
-import java.io.IOException;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
+@ExtendWith(MockitoExtension.class)
 public class LibertyHoverTest {
 
+        @Mock
+        SettingsService settingsService;
+
+        MockedStatic settings;
         static String newLine = System.lineSeparator();
-        static String serverXMLURI = "test/server.xml";
+        static File srcResourcesDir = new File("src/test/resources/sample");
+        static List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
+        LibertyProjectsManager libPM;
+        LibertyWorkspace libWorkspace;
+        static String serverXMLURI = new File(srcResourcesDir, "test/server.xml").toURI().toString();
+
+
+        @BeforeEach
+        public void setup(){
+                initList.add(new WorkspaceFolder(srcResourcesDir.toURI().toString()));
+                libPM = LibertyProjectsManager.getInstance();
+                libPM.setWorkspaceFolders(initList);
+                libWorkspace = libPM.getLibertyWorkspaceFolders().iterator().next();
+                settings=Mockito.mockStatic(SettingsService.class);
+                settings.when(SettingsService::getInstance).thenReturn(settingsService);
+        }
+
+        @AfterEach
+        public void cleanup(){
+                settings.close();
+        }
 
         @Test
         public void testFeatureHover() throws BadLocationException {
-
                 String serverXML = String.join(newLine, //
                                 "<server description=\"Sample Liberty server\">", //
                                 "       <featureManager>", //
@@ -114,5 +158,27 @@ public class LibertyHoverTest {
                         "Description: This platform resolves the Liberty features that support the MicroProfile 1.2/platform> for Cloud Native Java platform.",
                         r(2, 25, 3, 7));
 
+        }
+
+        @Test
+        public void testVariableHover() throws BadLocationException {
+                String serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "                <platform>javaee-6.0</platform>", //
+                        "                <feature>acmeCA-2.0</feature>", //
+                        "       </featureManager>", //
+                        " <httpEndpoint host=\"*\" httpPort=\"${default.|http.port}\"\n",//
+                        "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
+                        "</server>" //
+                );
+                Map<String, String> propsMap = new HashMap<>();
+                propsMap.put("default.http.port", "9080");
+                Properties props = new Properties();
+                props.putAll(propsMap);
+                when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
+                XMLAssert.assertHover(serverXML, serverXMLURI,
+                        "default.http.port = 9080",
+                        r(5, 33, 5, 55));
         }
 }

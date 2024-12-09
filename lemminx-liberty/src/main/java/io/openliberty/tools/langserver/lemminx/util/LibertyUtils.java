@@ -31,6 +31,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import io.openliberty.tools.langserver.lemminx.models.feature.VariableLoc;
 import org.eclipse.lemminx.dom.DOMDocument;
 
 import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
@@ -51,6 +52,11 @@ public class LibertyUtils {
     private static final Pattern EXCLUDE_PATTERN = Pattern.compile(EXCLUDE_PATTERN_REGEX);
 
     private static Thread thread;
+
+    //considering ${var} pattern for variable.  do we have other representation for variable?
+    private static final String regex = "\\$\\{(.*?)\\}";
+    // Compile the Regex.
+    private static final Pattern p = Pattern.compile(regex);
 
     private LibertyUtils() {
     }
@@ -572,5 +578,49 @@ public class LibertyUtils {
             return String.format(LibertyConstants.platformDescriptionMap.get(platformNameNoVersion), version);
         }
         return null;
+    }
+
+    /**
+     * get path for an element from the plugin config location xml file
+     * we will validate the file exists as well
+     * @param pluginConfigFilePath
+     * @param elementName
+     * @return the properties file to use, or null if not found
+     */
+    public static File getFileFromLibertyPluginXml(Path pluginConfigFilePath, String elementName) {
+         String elementValue = XmlReader.getElementValue(pluginConfigFilePath, elementName);
+            if (elementValue != null) {
+                Path elementDir = Paths.get(elementValue);
+                if (elementDir.toFile().exists()) {
+                    return elementDir.toFile();
+                }
+                else {
+                    LOGGER.warning("Path specified for %s in liberty-plugin-config path %s does not exist.".formatted(elementName, pluginConfigFilePath));
+                }
+            }
+            else {
+                LOGGER.warning("Element %s does not exist in file %s.".formatted(elementName, pluginConfigFilePath));
+            }
+        return null;
+    }
+
+    /**
+     * read variables from text content
+     * @param docContent text content
+     * @return list of variables
+     */
+    public static List<VariableLoc> getVariablesFromTextContent(String docContent) {
+        List<VariableLoc> variables = new ArrayList<>();
+        // Find match between given string
+        // and regular expression
+        // using Pattern.matcher()
+        Matcher m = p.matcher(docContent);
+        // Get the subsequence
+        // using find() method
+        while (m.find()) {
+            VariableLoc variableLoc = new VariableLoc(m.group(1), m.start(1), m.end(1));
+            variables.add(variableLoc);
+        }
+        return variables;
     }
 }
