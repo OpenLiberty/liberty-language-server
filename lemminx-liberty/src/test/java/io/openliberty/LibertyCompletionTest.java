@@ -370,4 +370,139 @@ public class LibertyCompletionTest {
                         httpsCompletion);
         }
 
+        // Tests the
+        // availability of variable completion with ${, ${} and invalid patterns
+        @Test
+        public void testVariableCompletionItemWithVariablePatterns() throws BadLocationException {
+                String serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "                <platform>javaee-6.0</platform>", //
+                        "                <feature>acmeCA-2.0</feature>", //
+                        "       </featureManager>", //
+                        " <httpEndpoint host=\"*\" httpPort=\"${de|\"\n",//
+                        "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
+                        "</server>" //
+                );
+                Map<String,String> propsMap=new HashMap<>();
+                propsMap.put("default.http.port","9080");
+                propsMap.put("default.https.port","9443");
+                propsMap.put("testVar","false");
+                propsMap.put("testVar2","true");
+                Properties props = new Properties();
+                props.putAll(propsMap);
+
+                when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
+                CompletionItem httpCompletion = c("${default.http.port}", "${default.http.port}");
+                CompletionItem httpsCompletion = c("${default.https.port}", "${default.https.port}");
+                final int TOTAL_ITEMS = 2; // total number of available completion items
+
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, httpCompletion,
+                        httpsCompletion);
+
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "                <platform>javaee-6.0</platform>", //
+                        "                <feature>acmeCA-2.0</feature>", //
+                        "       </featureManager>", //
+                        " <httpEndpoint host=\"*\" httpPort=\"${de|\"\n",//
+                        "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
+                        "</server>" //
+                );
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, httpCompletion,
+                        httpsCompletion);
+
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "                <platform>javaee-6.0</platform>", //
+                        "                <feature>acmeCA-2.0</feature>", //
+                        "       </featureManager>", //
+                        " <httpEndpoint host=\"*\" httpPort=\"${de|}\"\n",//
+                        "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
+                        "</server>" //
+                );
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, httpCompletion,
+                        httpsCompletion);
+
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "                <platform>javaee-6.0</platform>", //
+                        "                <feature>acmeCA-2.0</feature>", //
+                        "       </featureManager>", //
+                        " <httpEndpoint host=\"*\" httpPort=\"d$e|\"\n",//
+                        "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
+                        "</server>" //
+                );
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 0);
+        }
+
+        // Tests the
+        // availability of multiple variable completion
+        @Test
+        public void testVariableCompletionItemWithMultipleVars() throws BadLocationException {
+                Map<String,String> propsMap=new HashMap<>();
+                propsMap.put("default.http.port","9080");
+                propsMap.put("default.https.port","9443");
+                propsMap.put("testVar","app-name.war");
+                propsMap.put("testVar2","app-name2.war");
+                Properties props = new Properties();
+                props.putAll(propsMap);
+
+                when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
+
+                String serverXML = String.join(newLine,
+                        "<server description=\"Sample Liberty server\">",
+                        "   <featureManager>",
+                        "       <feature>servlet</feature>",
+                        "       <platform>jakartaee-9.1</platform>",
+                        "   </featureManager>",
+                        "   <webApplication contextRoot=\"/app-name\" location=\"${testVar2}/${tes|\" />",
+                        "   <httpEndpoint id=\"defaultHttpEndpoint\" httpPort=\"9080\" httpsPort=\"9443\"/>",
+                        "   <ssl id=\"defaultSSLConfig\" trustDefaultCerts=\"true\" />",
+                        "</server>"
+                );
+
+                CompletionItem testVarCompletion = c("${testVar2}/${testVar}", "${testVar2}/${testVar}");
+                CompletionItem testVar2Completion = c("${testVar2}/${testVar2}", "${testVar2}/${testVar2}");
+                final int TOTAL_ITEMS = 2; // total number of available completion items
+
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, testVarCompletion,
+                        testVar2Completion);
+
+
+                serverXML = String.join(newLine,
+                        "<server description=\"Sample Liberty server\">",
+                        "   <featureManager>",
+                        "       <feature>servlet</feature>",
+                        "       <platform>jakartaee-9.1</platform>",
+                        "   </featureManager>",
+                        "   <webApplication contextRoot=\"/app-name\" location=\"${testVar2}/apps/${tes|\" />",
+                        "   <httpEndpoint id=\"defaultHttpEndpoint\" httpPort=\"9080\" httpsPort=\"9443\"/>",
+                        "   <ssl id=\"defaultSSLConfig\" trustDefaultCerts=\"true\" />",
+                        "</server>"
+                );
+
+                testVarCompletion = c("${testVar2}/apps/${testVar}", "${testVar2}/apps/${testVar}");
+                testVar2Completion = c("${testVar2}/apps/${testVar2}", "${testVar2}/apps/${testVar2}");
+
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, testVarCompletion,
+                        testVar2Completion);
+
+                /* for showing completion of second variable, variable should always prefix with ${ . Hence show no completion here*/
+                serverXML = String.join(newLine,
+                        "<server description=\"Sample Liberty server\">",
+                        "   <featureManager>",
+                        "       <feature>servlet</feature>",
+                        "       <platform>jakartaee-9.1</platform>",
+                        "   </featureManager>",
+                        "   <webApplication contextRoot=\"/app-name\" location=\"${testVar2}/tes|\" />",
+                        "   <httpEndpoint id=\"defaultHttpEndpoint\" httpPort=\"9080\" httpsPort=\"9443\"/>",
+                        "   <ssl id=\"defaultSSLConfig\" trustDefaultCerts=\"true\" />",
+                        "</server>"
+                );
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 0);
+        }
 }
