@@ -71,8 +71,8 @@ public class FeatureService {
 
     // This file is copied to the local .lemminx cache. 
     // This is how we ensure the latest default featurelist xml gets used in each developer environment. 
-    private static final String FEATURELIST_XML_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist-cached-24.0.0.11.xml";
-    private static final String FEATURELIST_XML_CLASSPATH_LOCATION = "/featurelist-cached-24.0.0.11.xml";
+    private static final String FEATURELIST_XML_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist-cached-24.0.0.12.xml";
+    private static final String FEATURELIST_XML_CLASSPATH_LOCATION = "/featurelist-cached-24.0.0.12.xml";
 
     /**
      * FEATURELIST_XML_RESOURCE is the featurelist xml that is located at FEATURELIST_XML_CLASSPATH_LOCATION
@@ -140,7 +140,7 @@ public class FeatureService {
             if (defaultFeatures == null) {
                 // Changing this to contain the version in the file name since the file is copied to the local .lemminx cache. 
                 // This is how we ensure the latest default features json gets used in each developer environment. 
-                InputStream is = getClass().getClassLoader().getResourceAsStream("features-cached-24.0.0.11.json");
+                InputStream is = getClass().getClassLoader().getResourceAsStream("features-cached-24.0.0.12.json");
                 InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
 
                 // Only need the public features
