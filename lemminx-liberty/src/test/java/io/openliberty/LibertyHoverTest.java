@@ -150,14 +150,25 @@ public class LibertyHoverTest {
                 serverXML = String.join(newLine, //
                         "<server description=\"Sample Liberty server\">", //
                         "       <featureManager>", //
-                        "               <platform>mi|croProfile-1.2/platform>", //
+                        "               <platform>mi|croProfile-1.2</platform>", //
                         "       </featureManager>", //
                         "</server>" //
                 );
                 XMLAssert.assertHover(serverXML, serverXMLURI,
-                        "Description: This platform resolves the Liberty features that support the MicroProfile 1.2/platform> for Cloud Native Java platform.",
-                        r(2, 25, 3, 7));
+                        "Description: This platform resolves the Liberty features that support the MicroProfile 1.2 for Cloud Native Java platform.",
+                        r(2, 25, 2, 41));
 
+                // test hover for invalid value - should be null
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <platform>j|akartaee-10.00</platform>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+                XMLAssert.assertHover(serverXML, serverXMLURI,
+                        null,
+                        r(2, 25, 2, 39));
         }
 
         @Test

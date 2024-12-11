@@ -89,7 +89,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
         }
         if (LibertyConstants.PLATFORM_ELEMENT.equals(parentElement.getTagName())) {
             String platformName = request.getNode().getTextContent().trim();
-            return getHoverPlatformDescription(platformName);
+            return getHoverPlatformDescription(platformName, request.getXMLDocument());
         }
 
         return null;
@@ -102,11 +102,22 @@ public class LibertyHoverParticipant implements IHoverParticipant {
      * @param platformName platform name
      * @return hover
      */
-    private Hover getHoverPlatformDescription(String platformName) {
-        String description = LibertyUtils.getPlatformDescription(platformName);
-        if (description != null) {
-            return new Hover(new MarkupContent("plaintext", description));
+    private Hover getHoverPlatformDescription(String platformName, DOMDocument domDocument) {
+        LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
+        String libertyVersion = runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
+        String libertyRuntime = runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
+        final int requestDelay = SettingsService.getInstance().getRequestDelay();
+
+        // check first that the platform is a valid one
+        if (FeatureService.getInstance().platformExists(platformName, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI())) {
+            String description = LibertyUtils.getPlatformDescription(platformName);
+            if (description != null) {
+                return new Hover(new MarkupContent("plaintext", description));
+            }
+        } else {
+            LOGGER.warning("Could not get description for platform: "+platformName+"  from features.json file. Platform does not exist."); 
         }
+
         return null;
     }
 
