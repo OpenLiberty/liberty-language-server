@@ -12,6 +12,7 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx;
 
+import io.openliberty.tools.langserver.lemminx.services.FileWatchService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import org.eclipse.lemminx.services.extensions.IDocumentLinkParticipant;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionParticipant;
@@ -26,6 +27,8 @@ import org.eclipse.lemminx.uriresolver.URIResolverExtension;
 import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.WorkspaceFolder;
 
+import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -77,6 +80,19 @@ public class LibertyExtension implements IXMLExtension {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
+
+        // for each workspace, a file alteration observer is added
+        for (LibertyWorkspace workspace : LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders()) {
+            // checking for any changes in target folder
+            Path libertyPath = new File(workspace.getWorkspaceURI().getPath(),
+                    "target").toPath();
+            try {
+                FileWatchService.getInstance()
+                        .addFileAlterationObserver(libertyPath.toString(), workspace);
+            } catch (Exception e) {
+                LOGGER.warning("unable to add file alteration observer for path " + libertyPath);
+            }
+        }
     }
 
     @Override
@@ -90,6 +106,7 @@ public class LibertyExtension implements IXMLExtension {
         xmlExtensionsRegistry.unregisterHoverParticipant(hoverParticipant);
         xmlExtensionsRegistry.unregisterDiagnosticsParticipant(diagnosticsParticipant);
         xmlExtensionsRegistry.unregisterCodeActionParticipant(codeActionsParticipant);
+        FileWatchService.getInstance().cleanFileMonitors();
     }
 
     // Do save is called on startup with a Settings update
@@ -102,18 +119,6 @@ public class LibertyExtension implements IXMLExtension {
             Object xmlSettings = saveContext.getSettings();
             SettingsService.getInstance().updateLibertySettings(xmlSettings);
             LOGGER.info("Liberty XML settings updated");
-        }
-        if (saveContext.getType() == SaveContextType.DOCUMENT) {
-            try {
-                LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(saveContext.getUri());
-                if (workspace != null) {
-                    SettingsService.getInstance()
-                            .populateVariablesForWorkspace(workspace);
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
-            LOGGER.info("Liberty XML variables updated");
         }
     }
 }

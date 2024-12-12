@@ -910,7 +910,7 @@ public class LibertyDiagnosticTest {
         props.putAll(propsMap);
         when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
         Diagnostic dup1 = new Diagnostic();
-        dup1.setRange(r(7, 31, 7, 49));
+        dup1.setRange(r(7, 29, 7, 50));
         dup1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
         dup1.setSource("liberty-lemminx");
         dup1.setSeverity(DiagnosticSeverity.Error);
@@ -939,7 +939,7 @@ public class LibertyDiagnosticTest {
         props.putAll(propsMap);
         when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
         Diagnostic invalid1 = new Diagnostic();
-        invalid1.setRange(r(7, 31, 7, 44));
+        invalid1.setRange(r(7, 29, 7, 45));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
         invalid1.setMessage("ERROR: The variable \"default.https\" does not exist.");
         invalid1.setData("default.https");
@@ -1011,7 +1011,7 @@ public class LibertyDiagnosticTest {
         props.putAll(propsMap);
         when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
         Diagnostic dup1 = new Diagnostic();
-        dup1.setRange(r(5, 36, 5, 54));
+        dup1.setRange(r(5, 34, 5, 55));
         dup1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
         dup1.setSource("liberty-lemminx");
         dup1.setSeverity(DiagnosticSeverity.Error);
@@ -1019,7 +1019,7 @@ public class LibertyDiagnosticTest {
         dup1.setData("default.https.port");
 
         Diagnostic dup2 = new Diagnostic();
-        dup2.setRange(r(7, 31, 7, 49));
+        dup2.setRange(r(7, 29, 7, 50));
         dup2.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
         dup2.setSource("liberty-lemminx");
         dup2.setSeverity(DiagnosticSeverity.Error);
@@ -1027,5 +1027,35 @@ public class LibertyDiagnosticTest {
         dup2.setData("default.https.port");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, dup1, dup2);
+    }
+
+    @Test
+    public void testMultipleVariablesInSameAttributeDiagnostic() {
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "                <platform>javaee-6.0</platform>", //
+                "                <feature>acmeCA-2.0</feature>", //
+                "       </featureManager>", //
+                " <httpEndpoint host=\"*\" httpPort=\"${default.https.port}\"\n",//
+                "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
+                " <webApplication contextRoot=\"/app-name\" location=\"${testVar2}/${testVar1}\" />",
+                "</server>" //
+        );
+        Map<String, String> propsMap = new HashMap<>();
+        propsMap.put("default.http.port", "9080");
+        propsMap.put("default.https.port", "9443");
+        propsMap.put("testVar2", "apps");
+        Properties props = new Properties();
+        props.putAll(propsMap);
+        when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
+        Diagnostic dup1 = new Diagnostic();
+        dup1.setRange(r(8, 63, 8, 74));
+        dup1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
+        dup1.setSource("liberty-lemminx");
+        dup1.setSeverity(DiagnosticSeverity.Error);
+        dup1.setMessage("ERROR: The variable \"testVar1\" does not exist.");
+        dup1.setData("testVar1");
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, dup1);
     }
 }
