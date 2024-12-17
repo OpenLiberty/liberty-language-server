@@ -59,7 +59,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
                 stringBuilder.append(String.format("%s = %s", variable.getValue(), variableMap.get(variable.getValue())));
             }
             if (varIter.hasNext()) {
-                stringBuilder.append(System.lineSeparator());
+                stringBuilder.append("<br />");
             }
         }
         if (!stringBuilder.isEmpty()) {

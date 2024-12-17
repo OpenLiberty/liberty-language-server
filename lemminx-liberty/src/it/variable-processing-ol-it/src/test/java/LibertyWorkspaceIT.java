@@ -181,7 +181,15 @@ public class LibertyWorkspaceIT {
                     .get(0).getLeft().getTextDocument()
                     .setUri(serverXmlFile.toURI().toString());
         }
+        TextEdit texted = te(8, 9,
+                8, 9, " ");
 
-        XMLAssert.testCodeActionsFor(serverXML, serverXmlFile.toURI().toString(), invalid1, codeActions.get(0));
+        CodeAction invalidCodeAction = ca(invalid1, texted);
+        invalidCodeAction.getEdit()
+                .getDocumentChanges()
+                .get(0).getLeft().getTextDocument()
+                .setUri(serverXmlFile.toURI().toString());
+        codeActions.add(invalidCodeAction);
+        XMLAssert.testCodeActionsFor(serverXML, serverXmlFile.toURI().toString(), invalid1, codeActions.get(0),codeActions.get(1));
     }
 }

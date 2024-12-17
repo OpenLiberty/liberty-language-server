@@ -966,8 +966,16 @@ public class LibertyDiagnosticTest {
                     .get(0).getLeft().getTextDocument()
                     .setUri(serverXMLURI);
         }
+        TextEdit texted = te(8, 9,
+                8, 9, " ");
 
-        XMLAssert.testCodeActionsFor(serverXML, serverXMLURI, invalid1, codeActions.get(0));
+        CodeAction invalidCodeAction = ca(invalid1, texted);
+        invalidCodeAction.getEdit()
+                .getDocumentChanges()
+                .get(0).getLeft().getTextDocument()
+                .setUri(serverXMLURI);
+        codeActions.add(invalidCodeAction);
+        XMLAssert.testCodeActionsFor(serverXML, serverXMLURI, invalid1, codeActions.get(0),codeActions.get(1));
     }
 
 

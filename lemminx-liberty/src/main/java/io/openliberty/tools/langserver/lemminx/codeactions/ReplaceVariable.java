@@ -19,8 +19,10 @@ import org.eclipse.lemminx.commons.CodeActionFactory;
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionParticipant;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionRequest;
+import org.eclipse.lemminx.utils.XMLPositionUtility;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 import java.util.List;
@@ -64,10 +66,12 @@ public class ReplaceVariable implements ICodeActionParticipant {
                     String variableInDoc = String.format("${%s}", nextVariable.getKey().toString());
                     codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), variableInDoc, document.getTextDocument(), diagnostic));
                 }
-                /*for (Map.Entry<Object, Object> nextVariable : existingVariables.entrySet()) {
-                    String title = "Replace Variable with " + nextVariable.getKey() + " with value = " + nextVariable.getValue();
-                    codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), nextVariable.getKey().toString(), document.getTextDocument(), diagnostic));
-                }*/
+                // use special code action to reload variable diagnostics
+                Range range = XMLPositionUtility.createRange(document.getDocumentElement().getEndTagCloseOffset(), document.getDocumentElement().getEndTagCloseOffset()+1,
+                        document);
+                String title = "Reload Diagnostics";
+                codeActions.add(CodeActionFactory.insert(title, range.getEnd(), " ",
+                        document.getTextDocument(), diagnostic));
             }
         } catch (Exception e) {
             // BadLocationException not expected
