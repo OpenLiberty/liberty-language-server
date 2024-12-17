@@ -21,6 +21,7 @@ import org.apache.commons.io.monitor.FileAlterationObserver;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
@@ -43,18 +44,20 @@ public class FileWatchService {
     /**
      * add observer for file changes
      *
-     * @param parentPath parent location
      * @param workspace  workspace
+     * @param watchLocations parent locations
      */
-    public void addFileAlterationObserver(String parentPath, LibertyWorkspace workspace)
+    public void addFileAlterationObserver(LibertyWorkspace workspace, List<String> watchLocations)
             throws Exception {
-        FileAlterationObserver observer = getFileAlterationObserver(parentPath, workspace);
-        observer.initialize();
-        fileObservers.add(observer);
-        FileAlterationMonitor monitor = new FileAlterationMonitor();
-        monitor.addObserver(observer);
-        monitor.start();
-        monitors.add(monitor);
+        for (String location:watchLocations) {
+            FileAlterationObserver observer = getFileAlterationObserver(location, workspace);
+            observer.initialize();
+            fileObservers.add(observer);
+            FileAlterationMonitor monitor = new FileAlterationMonitor();
+            monitor.addObserver(observer);
+            monitor.start();
+            monitors.add(monitor);
+        }
     }
 
     private FileAlterationObserver getFileAlterationObserver(final String parentPath, LibertyWorkspace workspace) {

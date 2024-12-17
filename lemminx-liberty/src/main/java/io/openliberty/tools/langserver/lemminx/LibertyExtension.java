@@ -29,6 +29,7 @@ import org.eclipse.lsp4j.WorkspaceFolder;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -83,14 +84,18 @@ public class LibertyExtension implements IXMLExtension {
 
         // for each workspace, a file alteration observer is added
         for (LibertyWorkspace workspace : LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders()) {
-            // checking for any changes in target folder
-            Path libertyPath = new File(workspace.getWorkspaceURI().getPath(),
-                    "target").toPath();
+            // checking for any changes in wlp user folder for gradle and maven
+            Path libertyUsrGradlePath = new File(workspace.getWorkspaceURI().getPath(),
+                    "target/liberty/wlp/usr").toPath();
+            Path libertyUsrMavenPath = new File(workspace.getWorkspaceURI().getPath(),
+                    "build/liberty/wlp/usr").toPath();
+            List<String> paths = Arrays.asList(libertyUsrMavenPath.toString(), libertyUsrGradlePath.toString());
             try {
                 FileWatchService.getInstance()
-                        .addFileAlterationObserver(libertyPath.toString(), workspace);
+                        .addFileAlterationObserver(workspace, paths);
             } catch (Exception e) {
-                LOGGER.warning("unable to add file alteration observer for path " + libertyPath);
+                LOGGER.warning("unable to add file alteration observer for paths " + paths
+                        + " with error message " + e.getMessage());
             }
         }
     }
