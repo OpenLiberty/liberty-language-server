@@ -69,7 +69,7 @@ public class FileWatchService {
     private FileAlterationObserver getFileAlterationObserver(final String parentPath, LibertyWorkspace workspace) {
         IOFileFilter notFileFilter = FileFilterUtils.notFileFilter(
                 new SuffixFileFilter(Arrays.asList(".class", ".lst", ".txt"), IOCase.INSENSITIVE));
-        FileAlterationObserver observer = new FileAlterationObserver(parentPath, notFileFilter);zs
+        FileAlterationObserver observer = new FileAlterationObserver(parentPath, notFileFilter);
         addFileAlterationListener(observer, workspace);
         return observer;
     }
