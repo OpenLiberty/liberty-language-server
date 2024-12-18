@@ -60,7 +60,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
             variableName = valuePrefix.substring(valuePrefix.lastIndexOf("${"))
                     .replace("${", "");
             if (variableName.contains("}")) {
-                variableName = variableName.replace("}", "");
+                variableName = variableName.substring(variableName.lastIndexOf("}") + 1);
             }
             // existing variables
             replacePrefix = valuePrefix.substring(0, valuePrefix.lastIndexOf("${"));

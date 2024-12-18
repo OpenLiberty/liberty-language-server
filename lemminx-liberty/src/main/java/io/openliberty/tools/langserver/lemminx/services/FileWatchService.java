@@ -17,7 +17,7 @@ import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 import org.apache.commons.io.IOCase;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 import org.apache.commons.io.filefilter.IOFileFilter;
-import org.apache.commons.io.filefilter.NotFileFilter;
+import org.apache.commons.io.filefilter.NameFileFilter;
 import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
@@ -68,7 +68,10 @@ public class FileWatchService {
 
     private FileAlterationObserver getFileAlterationObserver(final String parentPath, LibertyWorkspace workspace) {
         IOFileFilter notFileFilter = FileFilterUtils.notFileFilter(
-                new SuffixFileFilter(Arrays.asList(".class", ".lst", ".txt"), IOCase.INSENSITIVE));
+                new SuffixFileFilter(Arrays.asList(".class", ".lst", ".txt",".log",".manager",".libertyls",".sLock"),
+                        IOCase.INSENSITIVE)
+                        .or(new NameFileFilter("workarea"))
+                        .or(new NameFileFilter("plugin-cfg.xml")));
         FileAlterationObserver observer = new FileAlterationObserver(parentPath, notFileFilter);
         addFileAlterationListener(observer, workspace);
         return observer;
@@ -78,17 +81,14 @@ public class FileWatchService {
         observer.addListener(new FileAlterationListenerAdaptor() {
             @Override
             public void onDirectoryCreate(File file) {
-                onAlteration(file, workspace);
             }
 
             @Override
             public void onDirectoryDelete(File file) {
-                onAlteration(file, workspace);
             }
 
             @Override
             public void onDirectoryChange(File file) {
-                onAlteration(file, workspace);
             }
 
             @Override
