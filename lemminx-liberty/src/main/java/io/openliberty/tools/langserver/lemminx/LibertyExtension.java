@@ -86,9 +86,9 @@ public class LibertyExtension implements IXMLExtension {
         for (LibertyWorkspace workspace : LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders()) {
             // checking for any changes in wlp user folder for gradle and maven
             Path libertyUsrGradlePath = new File(workspace.getWorkspaceURI().getPath(),
-                    "target/liberty/wlp/usr").toPath();
+                    "target").toPath();
             Path libertyUsrMavenPath = new File(workspace.getWorkspaceURI().getPath(),
-                    "build/liberty/wlp/usr").toPath();
+                    "build").toPath();
             List<String> paths = Arrays.asList(libertyUsrMavenPath.toString(), libertyUsrGradlePath.toString());
             try {
                 FileWatchService.getInstance()
