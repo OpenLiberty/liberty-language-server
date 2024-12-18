@@ -14,12 +14,18 @@ package io.openliberty.tools.langserver.lemminx.services;
 
 import io.openliberty.tools.langserver.lemminx.util.LibertyConstants;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
+import org.apache.commons.io.IOCase;
+import org.apache.commons.io.filefilter.FileFilterUtils;
+import org.apache.commons.io.filefilter.IOFileFilter;
+import org.apache.commons.io.filefilter.NotFileFilter;
+import org.apache.commons.io.filefilter.SuffixFileFilter;
 import org.apache.commons.io.monitor.FileAlterationListenerAdaptor;
 import org.apache.commons.io.monitor.FileAlterationMonitor;
 import org.apache.commons.io.monitor.FileAlterationObserver;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -61,7 +67,9 @@ public class FileWatchService {
     }
 
     private FileAlterationObserver getFileAlterationObserver(final String parentPath, LibertyWorkspace workspace) {
-        FileAlterationObserver observer = new FileAlterationObserver(parentPath);
+        IOFileFilter notFileFilter = FileFilterUtils.notFileFilter(
+                new SuffixFileFilter(Arrays.asList(".class", ".lst", ".txt"), IOCase.INSENSITIVE));
+        FileAlterationObserver observer = new FileAlterationObserver(parentPath, notFileFilter);zs
         addFileAlterationListener(observer, workspace);
         return observer;
     }
