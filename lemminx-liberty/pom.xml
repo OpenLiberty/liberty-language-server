@@ -170,7 +170,7 @@
         <dependency>
             <groupId>io.openliberty.tools</groupId>
             <artifactId>ci.common</artifactId>
-            <version>1.8.36-SNAPSHOT</version>
+            <version>1.8.36</version>
             <exclusions>
                 <exclusion>
                     <groupId>junit</groupId>
