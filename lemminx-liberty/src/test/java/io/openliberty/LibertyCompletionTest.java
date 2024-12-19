@@ -504,5 +504,24 @@ public class LibertyCompletionTest {
                         "</server>"
                 );
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 0);
+
+                // in this case, completion will be shown for second variable as there is no special characters in the prefix string
+                serverXML = String.join(newLine,
+                        "<server description=\"Sample Liberty server\">",
+                        "   <featureManager>",
+                        "       <feature>servlet</feature>",
+                        "       <platform>jakartaee-9.1</platform>",
+                        "   </featureManager>",
+                        "   <webApplication contextRoot=\"/app-name\" location=\"${testVar2}tes|\" />",
+                        "   <httpEndpoint id=\"defaultHttpEndpoint\" httpPort=\"9080\" httpsPort=\"9443\"/>",
+                        "   <ssl id=\"defaultSSLConfig\" trustDefaultCerts=\"true\" />",
+                        "</server>"
+                );
+
+                testVarCompletion = c("${testVar2}${testVar}", "${testVar2}${testVar}");
+                testVar2Completion = c("${testVar2}${testVar2}", "${testVar2}${testVar2}");
+
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, testVarCompletion,
+                        testVar2Completion);
         }
 }
