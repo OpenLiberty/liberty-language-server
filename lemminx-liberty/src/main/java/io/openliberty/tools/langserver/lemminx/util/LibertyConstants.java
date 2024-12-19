@@ -12,8 +12,10 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx.util;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class LibertyConstants {
@@ -74,4 +76,6 @@ public final class LibertyConstants {
 
     public static String changedFeatureNameDiagMessage="ERROR: The %s feature cannot be configured with the %s feature because they are two different versions of the same feature. " +
             "The feature name changed from %s to %s for Jakarta EE. Remove one of the features.";
+
+    public static List<String> filesToWatch= Arrays.asList(SERVER_XML,"server.env","bootstrap.properties");
 }
