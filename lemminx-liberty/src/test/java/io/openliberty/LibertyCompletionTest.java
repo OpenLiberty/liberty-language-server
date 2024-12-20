@@ -389,6 +389,8 @@ public class LibertyCompletionTest {
                 propsMap.put("default.https.port","9443");
                 propsMap.put("testVar","false");
                 propsMap.put("testVar2","true");
+                propsMap.put("appName","app-name.war");
+                propsMap.put("appName2","app-name-new.war");
                 Properties props = new Properties();
                 props.putAll(propsMap);
 
@@ -437,6 +439,25 @@ public class LibertyCompletionTest {
                         "</server>" //
                 );
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 0);
+
+                // single variable completion with prefix
+                serverXML = String.join(newLine,
+                        "<server description=\"Sample Liberty server\">",
+                        "   <featureManager>",
+                        "       <feature>servlet</feature>",
+                        "       <platform>jakartaee-9.1</platform>",
+                        "   </featureManager>",
+                        "   <webApplication contextRoot=\"/app-name\" location=\"apps/${app|\" />",
+                        "   <httpEndpoint id=\"defaultHttpEndpoint\" httpPort=\"9080\" httpsPort=\"9443\"/>",
+                        "   <ssl id=\"defaultSSLConfig\" trustDefaultCerts=\"true\" />",
+                        "</server>"
+                );
+
+                CompletionItem testVarCompletion = c("apps/${appName}", "apps/${appName}");
+                CompletionItem testVar2Completion = c("apps/${appName2}", "apps/${appName2}");
+
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, testVarCompletion,
+                        testVar2Completion);
         }
 
         // Tests the
@@ -446,6 +467,7 @@ public class LibertyCompletionTest {
                 Map<String,String> propsMap=new HashMap<>();
                 propsMap.put("default.http.port","9080");
                 propsMap.put("default.https.port","9443");
+                propsMap.put("appLocation","root");
                 propsMap.put("testVar","app-name.war");
                 propsMap.put("testVar2","app-name2.war");
                 Properties props = new Properties();
@@ -479,19 +501,19 @@ public class LibertyCompletionTest {
                         "       <feature>servlet</feature>",
                         "       <platform>jakartaee-9.1</platform>",
                         "   </featureManager>",
-                        "   <webApplication contextRoot=\"/app-name\" location=\"${testVar2}/apps/${tes|\" />",
+                        "   <webApplication contextRoot=\"/app-name\" location=\"${testVar2}/apps/${appLocation}/${tes|\" />",
                         "   <httpEndpoint id=\"defaultHttpEndpoint\" httpPort=\"9080\" httpsPort=\"9443\"/>",
                         "   <ssl id=\"defaultSSLConfig\" trustDefaultCerts=\"true\" />",
                         "</server>"
                 );
 
-                testVarCompletion = c("${testVar2}/apps/${testVar}", "${testVar2}/apps/${testVar}");
-                testVar2Completion = c("${testVar2}/apps/${testVar2}", "${testVar2}/apps/${testVar2}");
+                testVarCompletion = c("${testVar2}/apps/${appLocation}/${testVar}", "${testVar2}/apps/${appLocation}/${testVar}");
+                testVar2Completion = c("${testVar2}/apps/${appLocation}/${testVar2}", "${testVar2}/apps/${appLocation}/${testVar2}");
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, testVarCompletion,
                         testVar2Completion);
 
-                /* for showing completion of second variable, variable should always prefix with ${ . Hence show no completion here*/
+                // for showing completion of second variable, variable should always prefix with ${ . Hence show no completion here
                 serverXML = String.join(newLine,
                         "<server description=\"Sample Liberty server\">",
                         "   <featureManager>",

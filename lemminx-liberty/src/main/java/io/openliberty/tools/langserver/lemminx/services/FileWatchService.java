@@ -72,7 +72,7 @@ public class FileWatchService {
                 new SuffixFileFilter(Arrays.asList(".class", ".lst", ".txt", ".log", ".manager", ".libertyls",
                         ".sLock", ".jar", ".war", ".ear",".mf"),
                         IOCase.INSENSITIVE)
-                        .or(new NameFileFilter(Arrays.asList("workarea", "plugin-cfg.xml", "libs", "tmp", "classes","bin",
+                        .or(new NameFileFilter(Arrays.asList("plugin-cfg.xml", "libs", "tmp", "classes",
                                 "generated-sources", "generated-test-sources", "invoker-reports",
                                 "it", "maven-status", "surefire-reports", "test-classes"), IOCase.INSENSITIVE)));
         FileAlterationObserver observer = new FileAlterationObserver(parentPath, notFileFilter);
@@ -84,14 +84,17 @@ public class FileWatchService {
         observer.addListener(new FileAlterationListenerAdaptor() {
             @Override
             public void onDirectoryCreate(File file) {
+                // not required
             }
 
             @Override
             public void onDirectoryDelete(File file) {
+                // not required
             }
 
             @Override
             public void onDirectoryChange(File file) {
+                // not required
             }
 
             @Override

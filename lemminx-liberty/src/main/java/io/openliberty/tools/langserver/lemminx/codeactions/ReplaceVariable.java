@@ -66,12 +66,6 @@ public class ReplaceVariable implements ICodeActionParticipant {
                     String variableInDoc = String.format("${%s}", nextVariable.getKey().toString());
                     codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), variableInDoc, document.getTextDocument(), diagnostic));
                 }
-                // use special code action to reload variable diagnostics
-                Range range = XMLPositionUtility.createRange(document.getDocumentElement().getEndTagCloseOffset(), document.getDocumentElement().getEndTagCloseOffset()+1,
-                        document);
-                String title = "Reload Diagnostics";
-                codeActions.add(CodeActionFactory.insert(title, range.getEnd(), " ",
-                        document.getTextDocument(), diagnostic));
             }
         } catch (Exception e) {
             // BadLocationException not expected

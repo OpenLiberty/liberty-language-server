@@ -56,32 +56,42 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
                         .getDocumentURI());
         //getting all existing variables in current completion prefix string
         List<VariableLoc> variables = LibertyUtils.getVariablesFromTextContent(valuePrefix);
-        // value prefix will contain all existing attribute value, till the cursor
-        String variableName = valuePrefix.replace("${", "")
-                .replace("}", "");
-        StringBuilder prefixVariables = new StringBuilder();
-        String replacePrefix = "";
-        for (VariableLoc variableLoc : variables) {
-            prefixVariables.append(String.format("${%s}", variableLoc.getValue()));
-        }
+        String variablePrefix = "";
+        String completionPrefix;
+
         if (!variables.isEmpty()) {
+            // for multiple variables
             // find last variable last character and consider new variable completion from that location
             VariableLoc lastVar = variables.get(variables.size() - 1);
-            variableName = valuePrefix.substring(lastVar.getEndLoc() + 1);
-            // if last variable is started with ${
-            if (variableName.contains("${")) {
-                variableName = variableName.substring(variableName.lastIndexOf("${")).replace("${", "")
-                        .replace("}", "");
-                // add char between last variable and start of completion variable to prefix
-                replacePrefix = valuePrefix.substring(lastVar.getEndLoc() + 1, valuePrefix.lastIndexOf("${"));
+            // if last index of an existing variable is less than lastIndex of ${,
+            // this means that completion variable is started with ${
+            if (valuePrefix.lastIndexOf("${") > lastVar.getEndLoc()) {
+                // get whatever is after last ${ as variablePrefix for Completion
+                variablePrefix = valuePrefix.substring(valuePrefix.lastIndexOf("${") + 2);
+                completionPrefix = valuePrefix.substring(0, valuePrefix.lastIndexOf("${"));
+            } else {
+                variablePrefix = valuePrefix.substring(lastVar.getEndLoc() + 1);
+                // add char between last variable and start of completion variable to completionPrefix
+                completionPrefix = valuePrefix.substring(0,lastVar.getEndLoc()+1);
+            }
+        } else {
+            // for single variable,check ${ is specified
+            if (valuePrefix.contains("${")) {
+                // extract variable name with whatever is after ${
+                variablePrefix = valuePrefix.substring(valuePrefix.lastIndexOf("${") + 2);
+                // extract completionPrefix with whatever is before ${
+                completionPrefix = valuePrefix.substring(0, valuePrefix.lastIndexOf("${"));
+            } else {
+                // if no ${ specified, take all data as completion variable
+                variablePrefix = valuePrefix;
+                completionPrefix = "";
             }
         }
-        prefixVariables.append(replacePrefix);
-        String finalVariableName = variableName;
-        variableProps.entrySet().stream().filter(it -> it.getKey().toString().toLowerCase().contains(finalVariableName.toLowerCase()))
+        String finalVariableName = variablePrefix.replace("${","").replace("}","");
+        variableProps.entrySet().stream().filter(it -> it.getKey().toString().toLowerCase()
+                        .contains(finalVariableName.toLowerCase()))
                 .forEach(variableProp -> {
-                    String varValue = String.format("%s${%s}", prefixVariables, variableProp.getKey());
-
+                    String varValue = String.format("%s${%s}", completionPrefix, variableProp.getKey());
                     Either<TextEdit, InsertReplaceEdit> edit = Either.forLeft(new
                             TextEdit(request.getReplaceRange(), varValue));
                     CompletionItem completionItem = new CompletionItem();
