@@ -501,7 +501,7 @@ public class LibertyCompletionTest {
                         "       <feature>servlet</feature>",
                         "       <platform>jakartaee-9.1</platform>",
                         "   </featureManager>",
-                        "   <webApplication contextRoot=\"/app-name\" location=\"${testVar2}/apps/${appLocation}/${tes|\" />",
+                        "   <webApplication contextRoot=\"/app-name\" location=\"${testVar2}/apps/${appLocation}/${tes|}\" />",
                         "   <httpEndpoint id=\"defaultHttpEndpoint\" httpPort=\"9080\" httpsPort=\"9443\"/>",
                         "   <ssl id=\"defaultSSLConfig\" trustDefaultCerts=\"true\" />",
                         "</server>"
