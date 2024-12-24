@@ -115,7 +115,7 @@ public class LibertyWorkspaceIT {
         );
 
         Diagnostic dup1 = new Diagnostic();
-        dup1.setRange(r(5, 36, 5, 55));
+        dup1.setRange(r(5, 34, 5, 56));
         dup1.setCode("incorrect_variable");
         dup1.setSource("liberty-lemminx");
         dup1.setSeverity(DiagnosticSeverity.Error);
@@ -123,7 +123,7 @@ public class LibertyWorkspaceIT {
         dup1.setData("default.httpsl.port");
 
         Diagnostic dup2 = new Diagnostic();
-        dup2.setRange(r(7, 31, 7, 50));
+        dup2.setRange(r(7, 29, 7, 51));
         dup2.setCode("incorrect_variable");
         dup2.setSource("liberty-lemminx");
         dup2.setSeverity(DiagnosticSeverity.Error);
@@ -156,7 +156,7 @@ public class LibertyWorkspaceIT {
         );
 
         Diagnostic invalid1 = new Diagnostic();
-        invalid1.setRange(r(7, 31, 7, 44));
+        invalid1.setRange(r(7, 29, 7, 45));
         invalid1.setCode("incorrect_variable");
         invalid1.setMessage("ERROR: The variable \"default.https\" does not exist.");
         invalid1.setData("default.https");
@@ -181,7 +181,6 @@ public class LibertyWorkspaceIT {
                     .get(0).getLeft().getTextDocument()
                     .setUri(serverXmlFile.toURI().toString());
         }
-
         XMLAssert.testCodeActionsFor(serverXML, serverXmlFile.toURI().toString(), invalid1, codeActions.get(0));
     }
 }

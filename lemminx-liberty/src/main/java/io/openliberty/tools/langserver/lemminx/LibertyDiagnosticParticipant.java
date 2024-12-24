@@ -129,7 +129,9 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         for (VariableLoc variable : variables) {
             if (!variablesMap.containsKey(variable.getValue())) {
                 String variableInDoc = String.format("${%s}", variable.getValue());
-                Range range = XMLPositionUtility.createRange(variable.getStartLoc(),variable.getEndLoc(),
+                //range is used in ReplaceVariable to provide quick fix.
+                // we just need the variable value range here as ${} is added in replace variable message
+                Range range = XMLPositionUtility.createRange(variable.getStartLoc() - 2, variable.getEndLoc() + 1,
                         domDocument);
                 String message = "ERROR: The variable \"" + variable.getValue() + "\" does not exist.";
 

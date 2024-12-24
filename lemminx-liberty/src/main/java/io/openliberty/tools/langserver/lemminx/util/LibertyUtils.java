@@ -54,9 +54,9 @@ public class LibertyUtils {
     private static Thread thread;
 
     //considering ${var} pattern for variable.  do we have other representation for variable?
-    private static final String regex = "\\$\\{(.*?)\\}";
+    private static final String VAR_PATTERN_REGEX = "\\$\\{(.*?)\\}";
     // Compile the Regex.
-    private static final Pattern p = Pattern.compile(regex);
+    private static final Pattern VAR_PATTERN = Pattern.compile(VAR_PATTERN_REGEX);
 
     private LibertyUtils() {
     }
@@ -606,15 +606,17 @@ public class LibertyUtils {
 
     /**
      * read variables from text content
+     * if the text content is ${testVar1}/${testVar2}/app ,response will contain 2 variable values
+     *      [{testVar1,startIndex,endIndex},{testVar2,startIndex,endIndex}]
      * @param docContent text content
-     * @return list of variables
+     * @return list of variables.
      */
     public static List<VariableLoc> getVariablesFromTextContent(String docContent) {
         List<VariableLoc> variables = new ArrayList<>();
         // Find match between given string
         // and regular expression
         // using Pattern.matcher()
-        Matcher m = p.matcher(docContent);
+        Matcher m = VAR_PATTERN.matcher(docContent);
         // Get the subsequence
         // using find() method
         while (m.find()) {
