@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022, 2024 IBM Corporation and others.
+* Copyright (c) 2022, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -20,7 +20,6 @@ import org.eclipse.lsp4j.Position;
 
 import io.openliberty.tools.langserver.LibertyConfigFileManager;
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
-import io.openliberty.tools.langserver.utils.ParserFileHelperUtil;
 
 public class PropertiesEntryInstance {
     private PropertiesKeyInstance propertyKeyInstance;
@@ -108,4 +107,9 @@ public class PropertiesEntryInstance {
         }
         return CompletableFuture.completedFuture(Collections.emptyList());
     }
+
+    public PropertiesValueInstance getPropertyValueInstance() {
+        return propertyValueInstance;
+    }
+
 }
