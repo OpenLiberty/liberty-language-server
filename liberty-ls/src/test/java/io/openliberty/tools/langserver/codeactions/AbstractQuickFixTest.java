@@ -10,7 +10,6 @@ import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.DidSaveTextDocumentParams;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
-import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 import java.io.File;
@@ -18,14 +17,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.time.Duration;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 public abstract class AbstractQuickFixTest extends AbstractLibertyLanguageServerTest {
@@ -33,15 +32,6 @@ public abstract class AbstractQuickFixTest extends AbstractLibertyLanguageServer
     private static final Duration AWAIT_TIMEOUT = Duration.ofSeconds(10);
     private static final Duration AWAIT_POLL_INTERVAL = Duration.ofMillis(5);
 
-    protected TextEdit retrieveTextEdit(TextDocumentIdentifier textDocumentIdentifier, Diagnostic diagnostic, CompletableFuture<List<Either<Command, CodeAction>>> codeActions)
-            throws InterruptedException, ExecutionException {
-        CodeAction codeAction = codeActions.get().get(0).getRight();
-        assertEquals(diagnostic, codeAction.getDiagnostics().get(0));
-        assertEquals(CodeActionKind.QuickFix, codeAction.getKind());
-        List<TextEdit> createdChanges = codeAction.getEdit().getChanges().get(textDocumentIdentifier.getUri());
-        assertFalse(createdChanges.isEmpty());
-        return createdChanges.get(0);
-    }
 
     /**
      * @param fileName inside src/test/resources/workspace/diagnostic/ folder
@@ -73,5 +63,20 @@ public abstract class AbstractQuickFixTest extends AbstractLibertyLanguageServer
 
     protected ConditionFactory createAwait() {
         return await().pollDelay(Duration.ZERO).pollInterval(AWAIT_POLL_INTERVAL).timeout(AWAIT_TIMEOUT);
+    }
+
+    protected void assertEqualCodeAction(CodeAction expected, CodeAction actual){
+        assertEquals(CodeActionKind.QuickFix, actual.getKind());
+        assertEquals(expected.getDiagnostics(),actual.getDiagnostics());
+        assertEquals(expected.getTitle(),actual.getTitle());
+    }
+
+    protected List<CodeAction> populateCodeActions(List<Diagnostic> diagnostics, String codeActionKind,String... codeActionTitles){
+       return Arrays.stream(codeActionTitles).sequential().map(codeActionTitle->{
+            CodeAction codeAction=new CodeAction(codeActionTitle);
+            codeAction.setDiagnostics(diagnostics);
+            codeAction.setKind(codeActionKind);
+            return codeAction;
+        }).collect(Collectors.toList());
     }
 }
