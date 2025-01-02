@@ -237,9 +237,11 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
 
     private List<CompletionItem> getUniqueFeatureCompletionItems(DOMElement featureElement, DOMDocument domDocument, List<Feature> allFeatures, List<String> existingFeatureNames) {
         List<CompletionItem> uniqueFeatureCompletionItems = new ArrayList<CompletionItem>();
+        //collect features without version
         Set<String> existingFeatureNamesWithoutVersion = existingFeatureNames.stream()
                 .map(LibertyUtils::stripVersion)
                 .collect(Collectors.toSet());
+
         for (Feature nextFeature : allFeatures) {
             String nextFeatureName = nextFeature.getWlpInformation().getShortName().toLowerCase();
             String nextFeatureNameWithoutVersion = LibertyUtils.stripVersion(nextFeatureName);
