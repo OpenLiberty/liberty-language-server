@@ -87,7 +87,7 @@ public class LibertyWorkspaceIT {
 
         // this is using a beta runtime which does not have any features.json in Maven Central
         // this causes the featurelist xml file to get generated in the .libertyls folder
-        final int TOTAL_ITEMS = 264; // total number of available completion items
+        final int TOTAL_ITEMS = 261; // total number of available completion items excluding all servlet versions
 
         XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, batchCompletion);
                 

@@ -79,7 +79,7 @@ public class LibertyWorkspaceIT {
 
         CompletionItem jaxrsCompletion = c("jaxrs-2.1", "jaxrs-2.1");
 
-        final int TOTAL_ITEMS = 352; // total number of available completion items
+        final int TOTAL_ITEMS = 345; // total number of available completion items excluding all mpConfig versions
 
         XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, jaxrsCompletion);
         
