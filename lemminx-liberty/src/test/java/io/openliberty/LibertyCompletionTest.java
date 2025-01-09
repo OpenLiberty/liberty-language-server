@@ -111,6 +111,18 @@ public class LibertyCompletionTest {
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, jaxrsCompletion, websocket,
                                 microProfileCompletion);
+                // tests for lowercase
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <feature>|</feature>", //
+                        "               <feature>mpconfig</feature>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, jaxrsCompletion, websocket,
+                        microProfileCompletion);
         }
 
         // Tests the
