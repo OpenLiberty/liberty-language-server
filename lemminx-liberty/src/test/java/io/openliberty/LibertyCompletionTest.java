@@ -107,10 +107,22 @@ public class LibertyCompletionTest {
                 CompletionItem websocket = c("websocket-1.1", "websocket-1.1");
                 CompletionItem microProfileCompletion = c("microProfile-2.2", "microProfile-2.2");
 
-                final int TOTAL_ITEMS = 352; // total number of available completion items
+                final int TOTAL_ITEMS = 345; // total number of available completion items excluding all mpConfig versions
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, jaxrsCompletion, websocket,
                                 microProfileCompletion);
+                // tests for lowercase
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <feature>|</feature>", //
+                        "               <feature>mpconfig</feature>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, jaxrsCompletion, websocket,
+                        microProfileCompletion);
         }
 
         // Tests the

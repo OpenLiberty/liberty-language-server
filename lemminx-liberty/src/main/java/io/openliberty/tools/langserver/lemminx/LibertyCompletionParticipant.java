@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2024 IBM Corporation and others.
+* Copyright (c) 2020, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -108,7 +108,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
     public void onXMLContent(ICompletionRequest request, ICompletionResponse response, CancelChecker cancelChecker)
             throws IOException, BadLocationException {
         if (!LibertyUtils.isConfigXMLFile(request.getXMLDocument()))
-            return;    
+            return;
 
         LibertyUtils.getLibertyRuntimeInfo(request.getXMLDocument());
 
@@ -209,7 +209,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
 
         boolean checkFeatureName = featureName != null && !featureName.isBlank();
-        
+
         if (checkFeatureName) {
             String featureNameLowerCase = featureName.toLowerCase();
 
@@ -237,10 +237,18 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
 
     private List<CompletionItem> getUniqueFeatureCompletionItems(DOMElement featureElement, DOMDocument domDocument, List<Feature> allFeatures, List<String> existingFeatureNames) {
         List<CompletionItem> uniqueFeatureCompletionItems = new ArrayList<CompletionItem>();
+        // collect features without version
+        // existing features are already in lower case
+        Set<String> existingFeatureNamesWithoutVersion = existingFeatureNames.stream()
+                .map(s->LibertyUtils.stripVersion(s).toLowerCase())
+                .collect(Collectors.toSet());
 
         for (Feature nextFeature : allFeatures) {
             String nextFeatureName = nextFeature.getWlpInformation().getShortName().toLowerCase();
-            if (!existingFeatureNames.contains(nextFeatureName)) {
+            String nextFeatureNameWithoutVersion = LibertyUtils.stripVersion(nextFeatureName);
+            // exclude other versions of all included features
+            if (!existingFeatureNames.contains(nextFeatureName)
+                    && !existingFeatureNamesWithoutVersion.contains(nextFeatureNameWithoutVersion)) {
                 CompletionItem ci = buildFeatureCompletionItem(nextFeature, featureElement, domDocument);
                 uniqueFeatureCompletionItems.add(ci);
             }
