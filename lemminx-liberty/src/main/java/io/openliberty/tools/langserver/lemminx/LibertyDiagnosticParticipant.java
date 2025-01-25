@@ -117,11 +117,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         String docContent = domDocument.getTextDocument().getText();
         List<VariableLoc> variables = LibertyUtils.getVariablesFromTextContent(docContent);
         Properties variablesMap = SettingsService.getInstance().getVariablesForServerXml(domDocument.getDocumentURI());
-        if ((variablesMap == null) || (variablesMap.isEmpty() && !variables.isEmpty())) {
-            if (variablesMap == null) {
-                LOGGER.warning("CLK999: variablesMap is NULL!");
-                return;
-            }
+        if (variablesMap.isEmpty() && !variables.isEmpty()) {
             String message = "WARNING: Variable resolution is not available for workspace %s. Please start the Liberty server for the workspace to enable variable resolution.";
             LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI());
             Range range = XMLPositionUtility.createRange(domDocument.getDocumentElement().getStartTagOpenOffset(), domDocument.getDocumentElement().getStartTagCloseOffset(),

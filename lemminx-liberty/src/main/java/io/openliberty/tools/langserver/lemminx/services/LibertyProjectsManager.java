@@ -143,15 +143,28 @@ public class LibertyProjectsManager {
      * @return
      */
     public LibertyWorkspace getWorkspaceFolder(String serverXMLUri) {
+        // Need to ensure the closest match is returned. A parent workspace can match the contains method below, but the variables
+        // for that workspace can be stored in the child workspace.
+        LibertyWorkspace matchingWorkspace = null;
         String normalizeUri = serverXMLUri.replace("///", "/");
         for (LibertyWorkspace folder : getInstance().getLibertyWorkspaceFolders()) {
             //Append workspaceString with file separator to avoid bad matches
             if (normalizeUri.contains(folder.getWorkspaceStringWithTrailingSlash())) {
-                return folder;
+                if (matchingWorkspace != null) {
+                    if (folder.getWorkspaceStringWithTrailingSlash().length() > matchingWorkspace.getWorkspaceStringWithTrailingSlash().length()) {
+                        // this one is a closer match so use it instead
+                        matchingWorkspace = folder;
+                    }
+                } else {
+                    matchingWorkspace = folder;
+                }
             }
         }
-        LOGGER.warning("Could not find LibertyWorkspace for file: " + serverXMLUri);
-        return null;
+
+        if (matchingWorkspace == null) {
+            LOGGER.warning("Could not find LibertyWorkspace for file: " + serverXMLUri);
+        }
+        return matchingWorkspace;
     }
 
     public void cleanUpTempDirs() {

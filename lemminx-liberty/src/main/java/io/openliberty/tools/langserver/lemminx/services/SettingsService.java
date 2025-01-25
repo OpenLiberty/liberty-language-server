@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2022 IBM Corporation and others.
+* Copyright (c) 2020, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -136,13 +136,7 @@ public class SettingsService {
             LOGGER.warning("Could not find workspace for server xml URI %s. Variable resolution cannot be performed.".formatted(serverXmlURI));
         } else if (variables != null && variables.containsKey(workspace.getWorkspaceString())) {
             variableProps = variables.get(workspace.getWorkspaceString());
-            if (variableProps == null) {
-                LOGGER.warning("CLK999: Could not find variable properties for workspace URI %s. Variable resolution cannot be performed.".formatted(workspace.getWorkspaceString()));
-            }
         } else {
-            if (variables == null) {
-                LOGGER.warning("CLK999: Could not find variables for workspace URI %s. Variable resolution cannot be performed.".formatted(workspace.getWorkspaceString()));
-            }
             LOGGER.warning("Could not find variable mapping for workspace URI %s. Variable resolution cannot be performed.".formatted(workspace.getWorkspaceString()));
         }
         return variableProps;
