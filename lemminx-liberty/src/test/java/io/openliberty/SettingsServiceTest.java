@@ -63,6 +63,7 @@ public class SettingsServiceTest {
     public void testPopulateAllVariables() throws IOException {
         List<LibertyWorkspace> initList = new ArrayList<>();
         initList.add(new LibertyWorkspace(resourcesLibertyDir.toURI().toString()));
+        initList.add(new LibertyWorkspace(installDir.toURI().toString()));
         SettingsService.getInstance().populateAllVariables(initList);
         Properties variables = SettingsService.getInstance().getVariablesForServerXml(serverXmlFile.toURI().toString()); // point to a file not a workspace dir
 
