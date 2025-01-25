@@ -132,12 +132,15 @@ public class SettingsService {
         Properties variableProps = new Properties();
         if (workspace == null) {
             LOGGER.warning("Could not find workspace for server xml URI %s. Variable resolution cannot be performed.".formatted(serverXmlURI));
-        } else if (variables.containsKey(workspace.getWorkspaceString())) {
+        } else if (variables != null && variables.containsKey(workspace.getWorkspaceString())) {
             variableProps = variables.get(workspace.getWorkspaceString());
             if (variableProps == null) {
                 LOGGER.warning("CLK999: Could not find variable properties for workspace URI %s. Variable resolution cannot be performed.".formatted(workspace.getWorkspaceString()));
             }
         } else {
+            if (variables == null) {
+                LOGGER.warning("CLK999: Could not find variables for workspace URI %s. Variable resolution cannot be performed.".formatted(workspace.getWorkspaceString()));
+            }
             LOGGER.warning("Could not find variable mapping for workspace URI %s. Variable resolution cannot be performed.".formatted(workspace.getWorkspaceString()));
         }
         return variableProps;
