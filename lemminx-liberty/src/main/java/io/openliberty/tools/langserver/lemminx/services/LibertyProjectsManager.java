@@ -148,6 +148,7 @@ public class LibertyProjectsManager {
         LibertyWorkspace matchingWorkspace = null;
         String normalizeUri = serverXMLUri.replace("///", "/");
         for (LibertyWorkspace folder : getInstance().getLibertyWorkspaceFolders()) {
+            LOGGER.info("CLK999: check workspace: "+folder.getWorkspaceString()+" for match with file URI: "+normalizeUri);
             //Append workspaceString with file separator to avoid bad matches
             if (normalizeUri.contains(folder.getWorkspaceStringWithTrailingSlash())) {
                 if (matchingWorkspace != null) {
@@ -163,6 +164,8 @@ public class LibertyProjectsManager {
 
         if (matchingWorkspace == null) {
             LOGGER.warning("Could not find LibertyWorkspace for file: " + serverXMLUri);
+        } else {
+            LOGGER.info("CLK999: Found matching workspace: "+matchingWorkspace.getWorkspaceString()+" for file URI: "+normalizeUri);
         }
         return matchingWorkspace;
     }
