@@ -127,13 +127,13 @@ public class LibertyWorkspace {
         return this.libertyInstallationDir;
     }
 
-    public List<Feature> getInstalledPublicFeatures() {
-        return this.installedFeaturesAndPlatformsList.getPublicFeatures();
-    }
+    // public List<Feature> getInstalledPublicFeatures() {
+    //     return this.installedFeaturesAndPlatformsList.getPublicFeatures();
+    // }
 
-    public Set<String> getInstalledPlatforms() {
-        return this.installedFeaturesAndPlatformsList.getPlatforms();
-    }
+    // public Set<String> getInstalledPlatforms() {
+    //     return this.installedFeaturesAndPlatformsList.getPlatforms();
+    // }
 
     public FeaturesAndPlatforms getInstalledFeaturesAndPlatformsList() {
         return this.installedFeaturesAndPlatformsList;

@@ -24,16 +24,10 @@ public class PrivateFeature {
     private String symbolicName;
     private List<String> platform;
 
-    WlpInformation wlpInformation;
-
     // Getter Methods
 
     public String getSymbolicName() {
         return symbolicName;
-    }
-
-    public WlpInformation getWlpInformation() {
-        return wlpInformation;
     }
 
     public List<String> getPlatforms() {
@@ -44,10 +38,6 @@ public class PrivateFeature {
 
     public void setSymbolicName(String symbolicName) {
         this.symbolicName = symbolicName;
-    }
-
-    public void setWlpInformation(WlpInformation wlpInformation) {
-        this.wlpInformation = wlpInformation;
     }
 
     public void setPlatforms(List<String> platforms) {
