@@ -27,6 +27,7 @@ public class SettingsServiceTest {
     File resourcesDir = new File("src/test/resources/serverConfig");
     File resourcesLibertyDir = new File("src/test/resources/serverConfig", "liberty");
     File serverDir = new File("src/test/resources/serverConfig/liberty/wlp/usr/servers/defaultServer");
+    File serverXmlFile = new File(serverDir,"server.xml");
     File installDir = new File("src/test/resources/serverConfig/liberty/wlp");
     File userDir = new File("src/test/resources/serverConfig/liberty/wlp/usr");
 
@@ -62,7 +63,7 @@ public class SettingsServiceTest {
         List<LibertyWorkspace> initList = new ArrayList<>();
         initList.add(new LibertyWorkspace(resourcesLibertyDir.toURI().toString()));
         SettingsService.getInstance().populateAllVariables(initList);
-        Properties variables = SettingsService.getInstance().getVariablesForServerXml(resourcesLibertyDir.toURI().toString());
+        Properties variables = SettingsService.getInstance().getVariablesForServerXml(serverXmlFile.toURI().toString()); // point to a file not a workspace dir
 
         assertNotNull(variables);
         // bootstrap.properties.override added in server.env and bootstrap.properties
