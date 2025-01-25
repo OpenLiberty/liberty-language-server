@@ -30,7 +30,7 @@ public class FeaturesAndPlatforms {
         this.publicFeatures = publicFeatures;
         this.privateFeatures = privateFeatures;
 
-        platforms = privateFeatures.stream()
+        this.platforms = privateFeatures.stream()
                 .filter(f -> f.getWlpInformation().getVisibility() != null && f.getWlpInformation().getVisibility().equals(LibertyConstants.PRIVATE_VISIBILITY))
                 .map(Feature::getWlpInformation)
                 .filter(Objects::nonNull)

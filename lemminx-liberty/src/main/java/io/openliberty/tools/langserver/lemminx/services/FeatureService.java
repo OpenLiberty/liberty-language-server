@@ -549,6 +549,7 @@ public class FeatureService {
                     WlpInformation wlpInfo = new WlpInformation(f.getName());
                     f.setWlpInformation(wlpInfo);
                     wlpInfo.setVisibility(LibertyConstants.PRIVATE_VISIBILITY);
+                    wlpInfo.setPlatforms(pf.getPlatforms());
 
                     privateFeatures.add(f);
                 }
