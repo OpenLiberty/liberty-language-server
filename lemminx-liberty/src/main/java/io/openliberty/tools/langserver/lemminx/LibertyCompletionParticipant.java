@@ -219,7 +219,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
             List<Feature> completionFeatures = FeatureService.getInstance().getFeatureReplacements(featureNameToCompare, featureMgrNode, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
             return getFeatureCompletionItems(featureElement, domDocument, completionFeatures);
         } else {
-            List<Feature> features = FeatureService.getInstance().getFeatures(libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
+            List<Feature> features = FeatureService.getInstance().getFeaturesAndPlatforms(libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI()).getPublicFeatures();
             return getUniqueFeatureCompletionItems(featureElement, domDocument, features, existingFeatures);
         }
     }

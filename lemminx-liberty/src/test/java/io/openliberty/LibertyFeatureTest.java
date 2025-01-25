@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
+import io.openliberty.tools.langserver.lemminx.models.feature.FeaturesAndPlatforms;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
@@ -37,11 +38,11 @@ public class LibertyFeatureTest {
 
         LibertyWorkspace libWorkspace = workspaceFolders.iterator().next();
 
-        List<Feature> installedFeatures = new ArrayList<Feature>();
-        installedFeatures = fs.readFeaturesFromFeatureListFile(installedFeatures, libWorkspace, featureListFile);
+        FeaturesAndPlatforms fp = fs.readFeaturesFromFeatureListFile(libWorkspace, featureListFile);
+        List<Feature> installedFeatures = fp.getPublicFeatures();
         
         assertFalse(installedFeatures.isEmpty());
-        assertTrue(installedFeatures.equals(libWorkspace.getInstalledFeatureList()));
+        assertTrue(installedFeatures.equals(libWorkspace.getInstalledFeaturesAndPlatformsList().getPublicFeatures()));
         // Check that list contains a beta feature
         assertTrue(installedFeatures.removeIf(f -> (f.getName().equals("cdi-4.0"))));
 

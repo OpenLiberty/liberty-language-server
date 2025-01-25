@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 
 import io.openliberty.tools.langserver.lemminx.LibertyDiagnosticParticipant;
 import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
-import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
@@ -331,7 +330,7 @@ public class LibertyDiagnosticTest {
     @Test
     public void testConfigElementMissingFeatureManager() throws JAXBException {
         assertTrue(featureList.exists());
-        FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), libWorkspace, featureList);
+        FeatureService.getInstance().readFeaturesFromFeatureListFile(libWorkspace, featureList);
 
         String serverXml = "<server><ssl id=\"\"/></server>";
         // Temporarily disabling config element diagnostics if featureManager element is missing (until issue 230 is addressed)
@@ -403,7 +402,7 @@ public class LibertyDiagnosticTest {
     @Test
     public void testConfigElementDirect() throws JAXBException {
         assertTrue(featureList.exists());
-        FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), libWorkspace, featureList);
+        FeatureService.getInstance().readFeaturesFromFeatureListFile(libWorkspace, featureList);
 
         String correctFeature   = "           <feature>Ssl-1.0</feature>";
         String incorrectFeature = "           <feature>jaxrs-2.0</feature>";
@@ -441,7 +440,7 @@ public class LibertyDiagnosticTest {
     @Test
     public void testConfigElementTransitive() throws JAXBException {
         assertTrue(featureList.exists());
-        FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), libWorkspace, featureList);
+        FeatureService.getInstance().readFeaturesFromFeatureListFile(libWorkspace, featureList);
         String serverXML1 = String.join(newLine,
                 "<server description=\"Sample Liberty server\">",
                 "   <featureManager>",
@@ -694,7 +693,7 @@ public class LibertyDiagnosticTest {
     @Test
     public void testConfigElementVersionLess() throws JAXBException {
         assertTrue(featureList.exists());
-        FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), libWorkspace, featureList);
+        FeatureService.getInstance().readFeaturesFromFeatureListFile(libWorkspace, featureList);
         String serverXML1 = String.join(newLine,
                 "<server description=\"Sample Liberty server\">",
                 "   <featureManager>",

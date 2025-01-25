@@ -168,7 +168,23 @@ public class LibertyCompletionTest {
                         "       </featureManager>", //
                         "</server>" //
                 );
-                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 5);
+
+                //CompletionItem jakartaee11Completion = c("jakartaee-11.0", "jakartaee-11.0"); // this is in beta and should not be included yet
+                CompletionItem jakartaee10Completion = c("jakartaee-10.0", "jakartaee-10.0");
+                CompletionItem jakartaee91Completion = c("jakartaee-9.1", "jakartaee-9.1");
+                CompletionItem jakartaee80Completion = c("jakartaee-8.0", "jakartaee-8.0");
+
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 5, jakartaee80Completion, jakartaee91Completion, jakartaee10Completion);
+
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <platform>jakartaee-11|</platform>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 2);  // one for CDATA and one for <-, no completion for jakartaee-11.0
 
                 serverXML = String.join(newLine, //
                         "<server description=\"Sample Liberty server\">", //
