@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2024 IBM Corporation and others.
+* Copyright (c) 2020, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -35,7 +35,7 @@ import io.openliberty.tools.langserver.lemminx.models.feature.VariableLoc;
 import org.eclipse.lemminx.dom.DOMDocument;
 
 import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
-import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
+import io.openliberty.tools.langserver.lemminx.models.feature.FeaturesAndPlatforms;
 import io.openliberty.tools.langserver.lemminx.models.settings.DevcMetadata;
 import io.openliberty.tools.langserver.lemminx.services.ContainerService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
@@ -347,7 +347,7 @@ public class LibertyUtils {
             // new properties file, reset the installed features stored in the feature cache
             // so that the installed features list will be regenerated as it may have
             // changed between Liberty installations
-            libertyWorkspace.setInstalledFeatureList(new ArrayList<Feature>());
+            libertyWorkspace.setInstalledFeaturesAndPlatformsList(new FeaturesAndPlatforms());
 
             // add a file watcher on this file
             if (!libertyWorkspace.isLibertyInstalled() || updateRuntimeInfo) {

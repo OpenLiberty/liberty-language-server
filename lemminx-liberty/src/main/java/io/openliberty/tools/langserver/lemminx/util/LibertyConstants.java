@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2024 IBM Corporation and others.
+* Copyright (c) 2020, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -31,6 +31,7 @@ public final class LibertyConstants {
     public static final String INCLUDE_ELEMENT = "include";
     public static final String PLATFORM_ELEMENT = "platform";
     public static final String PUBLIC_VISIBILITY = "PUBLIC";
+    public static final String PRIVATE_VISIBILITY = "PRIVATE";
 
     // following URI standard of using "/"
     public static final String WLP_USER_CONFIG_DIR = "/usr/shared/config/";

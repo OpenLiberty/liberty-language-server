@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2024 IBM Corporation and others.
+* Copyright (c) 2020, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -21,18 +21,19 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import io.openliberty.tools.langserver.lemminx.models.feature.FeatureTolerate;
+import io.openliberty.tools.langserver.lemminx.models.feature.FeaturesAndPlatforms;
+import io.openliberty.tools.langserver.lemminx.models.feature.PrivateFeature;
+
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.dom.DOMNode;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
@@ -95,13 +96,13 @@ public class FeatureService {
     }
 
     // Cache of Liberty version -> list of supported features
-    private Map<String, List<Feature>> featureCache;   // the key consists of runtime-version, where runtime is 'ol' or 'wlp'
-    private List<Feature> defaultFeatures;
+    private Map<String, FeaturesAndPlatforms> featureAndPlatformCache;   // the key consists of runtime-version, where runtime is 'ol' or 'wlp'
+    private FeaturesAndPlatforms defaultFeaturesAndPlatforms;
     private FeatureListGraph defaultFeatureList;
     private long featureUpdateTime;
 
     private FeatureService() {
-        featureCache = new HashMap<>();
+        featureAndPlatformCache = new HashMap<>();
         featureUpdateTime = -1;
     }
 
@@ -111,66 +112,76 @@ public class FeatureService {
      * @param libertyVersion - version of Liberty to fetch features for
      * @return list of features supported by the provided version of Liberty
      */
-    private List<Feature> fetchFeaturesForVersion(String libertyVersion, String libertyRuntime) throws IOException, JsonParseException {
+    private FeaturesAndPlatforms fetchFeaturesForVersion(String libertyVersion, String libertyRuntime) throws IOException, JsonParseException {
         String featureEndpoint = libertyRuntime.equals("wlp") ? String.format(wlpFeatureEndpoint, libertyVersion) : 
                                                                 String.format(olFeatureEndpoint, libertyVersion);
 
         InputStreamReader reader = new InputStreamReader(new URL(featureEndpoint).openStream());
 
         // Only need the public features
-        List<Feature> publicFeatures = readPublicFeatures(reader);
+        FeaturesAndPlatforms fp = readFeaturesAndPlatforms(reader);
 
         if (libertyRuntime.equals("wlp")) {
             // need to also get the OpenLiberty features and add them to the list to return
-            List<Feature> olFeatures = fetchFeaturesForVersion(libertyVersion, "ol");
-            publicFeatures.addAll(olFeatures);
+            FeaturesAndPlatforms olFP = fetchFeaturesForVersion(libertyVersion, "ol");
+            fp.addFeaturesAndPlatforms(olFP);
         }
 
-        LOGGER.info("Returning public features from Maven: " + publicFeatures.size());
-        return publicFeatures;
+        LOGGER.info("Returning public features and platforms from Maven - features: " + fp.getPublicFeatures().size()+" platforms: "+fp.getPlatforms().size());
+        return fp;
     }
 
     /**
-     * Returns the default list of features
+     * Returns the default list of features and platforms
      *
-     * @return list of features supported by the default version of Liberty
+     * @return list of features and platforms supported by the default version of Liberty
      */
-    private List<Feature> getDefaultFeatures() {
+    private FeaturesAndPlatforms getDefaultFeaturesAndPlatforms() {
         try {
-            if (defaultFeatures == null) {
+            if (defaultFeaturesAndPlatforms == null) {
                 // Changing this to contain the version in the file name since the file is copied to the local .lemminx cache. 
                 // This is how we ensure the latest default features json gets used in each developer environment. 
                 InputStream is = getClass().getClassLoader().getResourceAsStream("features-cached-24.0.0.12.json");
                 InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
 
                 // Only need the public features
-                defaultFeatures = readPublicFeatures(reader);
+                defaultFeaturesAndPlatforms = readFeaturesAndPlatforms(reader);
             }
-            LOGGER.info("Returning default list of features");
-            return defaultFeatures;
+            LOGGER.info("Returning default list of features and platforms");
+            return defaultFeaturesAndPlatforms;
 
         } catch (JsonParseException e) {
             // unable to read json in resources file, return empty list
-            LOGGER.severe("Error: Unable to get default features.");
-            return defaultFeatures;
+            LOGGER.severe("Error: Unable to get default features and platforms.");
+            defaultFeaturesAndPlatforms = new FeaturesAndPlatforms();
+            return defaultFeaturesAndPlatforms;
         }
     }
 
     /**
-     * Returns a list of public features found in the passed input stream. Does not affect the default feature list.
+     * Returns an object with a list of public features found in the passed input stream. Does not affect the default feature list.
+     * The returned object also contains a list of private features, and a set of available platforms.
      *
      * @param reader - InputStreamReader for json feature list
-     * @return list of public features
+     * @return FeaturesAndPlatforms with a list of public features, list of private features, and set of available platforms.
      */
-    private ArrayList<Feature> readPublicFeatures(InputStreamReader reader) throws JsonParseException {
+    private FeaturesAndPlatforms readFeaturesAndPlatforms(InputStreamReader reader) throws JsonParseException {
         Feature[] featureList = new Gson().fromJson(reader, Feature[].class);
 
         ArrayList<Feature> publicFeatures = new ArrayList<>();
+        ArrayList<Feature> privateFeatures = new ArrayList<>();
+
         // Guard against null visibility field. Ran into this during manual testing of a wlp installation.
-        Arrays.asList(featureList).stream()
-            .filter(f -> f.getWlpInformation().getVisibility() != null && f.getWlpInformation().getVisibility().equals(LibertyConstants.PUBLIC_VISIBILITY))
-            .forEach(publicFeatures::add);
-        return publicFeatures;
+        for (int i=0; i < featureList.length; i++) {
+            if (featureList[i].getWlpInformation().getVisibility() != null) {
+                if (featureList[i].getWlpInformation().getVisibility().equals(LibertyConstants.PUBLIC_VISIBILITY)) {
+                    publicFeatures.add(featureList[i]);
+                } else if (featureList[i].getWlpInformation().getVisibility().equals(LibertyConstants.PRIVATE_VISIBILITY)) {
+                    privateFeatures.add(featureList[i]);
+                }
+            }
+        }
+        return new FeaturesAndPlatforms(publicFeatures, privateFeatures);
     }
 
     /**
@@ -185,10 +196,10 @@ public class FeatureService {
      * @param documentURI Liberty XML document
      * @return List of possible features
      */
-    public List<Feature> getFeatures(String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
+    public FeaturesAndPlatforms getFeaturesAndPlatforms(String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
         if (libertyRuntime == null || libertyVersion == null) {
             // return default list of features
-            List<Feature> defaultFeatures = getDefaultFeatures(); 
+            FeaturesAndPlatforms defaultFeatures = getDefaultFeaturesAndPlatforms(); 
             getDefaultFeatureList();
             return defaultFeatures;
         }
@@ -196,12 +207,12 @@ public class FeatureService {
         String featureCacheKey = libertyRuntime + "-" + libertyVersion;
 
         // if the features are already cached in the feature cache
-        if (featureCache.containsKey(featureCacheKey)) {
-            LOGGER.info("Getting cached features for: " + featureCacheKey);
-            return featureCache.get(featureCacheKey);
+        if (featureAndPlatformCache.containsKey(featureCacheKey)) {
+            LOGGER.info("Getting cached features and platforms for: " + featureCacheKey);
+            return featureAndPlatformCache.get(featureCacheKey);
         }
 
-        LOGGER.info("Getting features for: " + featureCacheKey);
+        LOGGER.info("Getting features and platforms for: " + featureCacheKey);
 
         // if not a beta runtime, fetch features from maven central
         // - beta runtimes do not have a published features.json in mc
@@ -212,8 +223,8 @@ public class FeatureService {
                 // switching back and forth between projects.
                 long currentTime = System.currentTimeMillis();
                 if (this.featureUpdateTime == -1 || currentTime >= (this.featureUpdateTime + (requestDelay * 1000))) {
-                    List<Feature> features = fetchFeaturesForVersion(libertyVersion, libertyRuntime);
-                    featureCache.put(featureCacheKey, features);
+                    FeaturesAndPlatforms features = fetchFeaturesForVersion(libertyVersion, libertyRuntime);
+                    featureAndPlatformCache.put(featureCacheKey, features);
                     this.featureUpdateTime = System.currentTimeMillis();
                     return features;
                 }
@@ -225,18 +236,20 @@ public class FeatureService {
 
         // fetch installed features list - this would only happen if a features.json was not able to be downloaded from Maven Central
         // This is the case for beta runtimes and for very old runtimes pre 18.0.0.2 (or if within the requestDelay window of 120 seconds).
-        List<Feature> installedFeatures = getInstalledFeaturesList(documentURI, libertyRuntime, libertyVersion);
-        if (installedFeatures.size() != 0) {
+        FeaturesAndPlatforms installedFeatures = getInstalledFeaturesList(documentURI, libertyRuntime, libertyVersion);
+        if (installedFeatures.getPublicFeatures().size() != 0) {
             return installedFeatures;
         }
 
         // return default list of features
-        List<Feature> defaultFeatures = getDefaultFeatures(); 
-        return defaultFeatures;
+        getDefaultFeaturesAndPlatforms(); 
+        getDefaultFeatureList();
+        return defaultFeaturesAndPlatforms;
     }
 
     public Optional<Feature> getFeature(String featureName, String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
-        List<Feature> features = getFeatures(libertyVersion, libertyRuntime, requestDelay, documentURI);
+        FeaturesAndPlatforms fp = getFeaturesAndPlatforms(libertyVersion, libertyRuntime, requestDelay, documentURI);
+        List<Feature> features = fp.getPublicFeatures();
         return features.stream().filter(f -> f.getWlpInformation().getShortName().equalsIgnoreCase(featureName))
             .findFirst();
     }
@@ -260,7 +273,8 @@ public class FeatureService {
     }
 
     public List<Feature> getFeatureReplacements(String featureName, DOMNode featureManagerNode, String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
-        List<Feature> features = getFeatures(libertyVersion, libertyRuntime, requestDelay, documentURI);
+        FeaturesAndPlatforms fp = getFeaturesAndPlatforms(libertyVersion, libertyRuntime, requestDelay, documentURI);
+        List<Feature> features = fp.getPublicFeatures();
         List<String> featureNamesLowerCase = getFeatureShortNames(features, true);
 
         // get list of existing features to exclude from list of possible replacements
@@ -332,17 +346,17 @@ public class FeatureService {
      * @param libertyVersion must not be null and should be a valid Liberty version (e.g. 23.0.0.6)
      * @return list of installed features, or empty list
      */
-    public List<Feature> getInstalledFeaturesList(LibertyWorkspace libertyWorkspace, String libertyRuntime, String libertyVersion) {
-        List<Feature> installedFeatures = new ArrayList<Feature>();
+    public FeaturesAndPlatforms getInstalledFeaturesAndPlatformsList(LibertyWorkspace libertyWorkspace, String libertyRuntime, String libertyVersion) {
+        FeaturesAndPlatforms installedFeaturesAndPlatforms = new FeaturesAndPlatforms();
         if (libertyWorkspace == null || libertyWorkspace.getWorkspaceString() == null) {
-            return installedFeatures;
+            return installedFeaturesAndPlatforms;
         }
 
         // return installed features from cache
-        List<Feature> cachedFeatures = libertyWorkspace.getInstalledFeatureList();
-        if (cachedFeatures.size() != 0) {
-            LOGGER.info("Getting cached features from previously generated feature list: " + cachedFeatures.size());
-            return cachedFeatures;
+        FeaturesAndPlatforms cachedFeaturesAndPlatforms = libertyWorkspace.getInstalledFeaturesAndPlatformsList();
+        if (cachedFeaturesAndPlatforms.getPublicFeatures().size() != 0) {
+            LOGGER.info("Getting cached features from previously generated feature list: " + cachedFeaturesAndPlatforms.getPublicFeatures().size());
+            return cachedFeaturesAndPlatforms;
         }
 
         try {
@@ -361,7 +375,7 @@ public class FeatureService {
 
             if (featureListFile != null && featureListFile.exists()) {
                 try {
-                    installedFeatures = readFeaturesFromFeatureListFile(installedFeatures, libertyWorkspace, featureListFile);
+                    installedFeaturesAndPlatforms = readFeaturesFromFeatureListFile(libertyWorkspace, featureListFile);
                 } catch (JAXBException e) {
                     LOGGER.severe("Error: Unable to load the generated feature list file for the target Liberty runtime due to exception: "+e.getMessage());
                 }
@@ -372,13 +386,13 @@ public class FeatureService {
             LOGGER.severe("Error: Unable to generate the feature list file from the target Liberty runtime due to exception: "+e.getMessage());
         }
 
-        LOGGER.info("Returning installed features: " + installedFeatures.size());
-        return installedFeatures;
+        LOGGER.info("Returning installed features: " + installedFeaturesAndPlatforms.getPublicFeatures().size());
+        return installedFeaturesAndPlatforms;
     }
     
-    public List<Feature> getInstalledFeaturesList(String documentURI, String libertyRuntime, String libertyVersion) {
+    public FeaturesAndPlatforms getInstalledFeaturesList(String documentURI, String libertyRuntime, String libertyVersion) {
         LibertyWorkspace libertyWorkspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(documentURI);
-        return getInstalledFeaturesList(libertyWorkspace, libertyRuntime, libertyVersion);
+        return getInstalledFeaturesAndPlatformsList(libertyWorkspace, libertyRuntime, libertyVersion);
     }
 
     public FeatureListGraph getDefaultFeatureList() {
@@ -394,7 +408,7 @@ public class FeatureService {
 
             if (featureListFile != null && featureListFile.exists()) {
                 try {
-                    readFeaturesFromFeatureListFile(null, null, featureListFile, true);
+                    readFeaturesFromFeatureListFile(null, featureListFile, true);
                 } catch (JAXBException e) {
                     LOGGER.severe("Error: Unable to load the default cached featurelist file due to exception: "+e.getMessage());
                 }
@@ -481,21 +495,22 @@ public class FeatureService {
         return featureListFile;
     }
 
-    public List<Feature> readFeaturesFromFeatureListFile(List<Feature> installedFeatures, LibertyWorkspace libertyWorkspace,
+    public FeaturesAndPlatforms readFeaturesFromFeatureListFile(LibertyWorkspace libertyWorkspace,
         File featureListFile) throws JAXBException {
-            return readFeaturesFromFeatureListFile(installedFeatures, libertyWorkspace, featureListFile, false);
+            return readFeaturesFromFeatureListFile(libertyWorkspace, featureListFile, false);
     }
 
     // If the graphOnly boolean is true, the libertyWorkspace parameter may be null. Also, the defaultFeatureList should be initialized
     // after calling this method with graphOnly set to true.
-    public List<Feature> readFeaturesFromFeatureListFile(List<Feature> installedFeatures, LibertyWorkspace libertyWorkspace,
+    public FeaturesAndPlatforms readFeaturesFromFeatureListFile(LibertyWorkspace libertyWorkspace,
         File featureListFile, boolean graphOnly) throws JAXBException {
+        FeaturesAndPlatforms installedFeatures = new FeaturesAndPlatforms();
         JAXBContext jaxbContext = JAXBContext.newInstance(FeatureInfo.class);
         Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
         FeatureInfo featureInfo = (FeatureInfo) jaxbUnmarshaller.unmarshal(featureListFile);
         FeatureListGraph featureListGraph = new FeatureListGraph();
         
-        // Note: Only the public features are loaded when unmarshalling the passed featureListFile.
+        // Note: The public features are loaded in the getFeatures() collection when unmarshalling the passed featureListFile.
         if ((featureInfo.getFeatures() != null) && (featureInfo.getFeatures().size() > 0)) {
             for (Feature f : featureInfo.getFeatures()) {
                 f.setShortDescription(f.getDescription());
@@ -525,9 +540,24 @@ public class FeatureService {
                 }
             }
 
+            // Note: The private features are loaded in the getPrivateFeatures() collection when unmarshalling the passed featureListFile.
+            List<Feature> privateFeatures = new ArrayList<>();
+            if ((featureInfo.getPrivateFeatures() != null) && (featureInfo.getPrivateFeatures().size() > 0)) {
+                for (PrivateFeature pf : featureInfo.getPrivateFeatures()) {
+                    Feature f = new Feature();
+                    f.setName(pf.getSymbolicName());
+                    WlpInformation wlpInfo = new WlpInformation(f.getName());
+                    f.setWlpInformation(wlpInfo);
+                    wlpInfo.setVisibility(LibertyConstants.PRIVATE_VISIBILITY);
+                    wlpInfo.setPlatforms(pf.getPlatforms());
+
+                    privateFeatures.add(f);
+                }
+            }
+
             if (!graphOnly) {
-                installedFeatures = featureInfo.getFeatures();
-                libertyWorkspace.setInstalledFeatureList(installedFeatures);
+                installedFeatures = new FeaturesAndPlatforms(featureInfo.getFeatures(), privateFeatures);
+                libertyWorkspace.setInstalledFeaturesAndPlatformsList(installedFeatures);
                 libertyWorkspace.setFeatureListGraph(featureListGraph);
             } else {
                 defaultFeatureList = featureListGraph;
@@ -552,13 +582,7 @@ public class FeatureService {
      * @return set of unique platforms
      */
     public Set<String> getAllPlatforms(String libertyVersion, String libertyRuntime, int requestDelay, String documentURI) {
-        List<Feature> features = this.getFeatures(libertyVersion, libertyRuntime, requestDelay, documentURI);
-        return features.stream()
-                .map(Feature::getWlpInformation)
-                .filter(Objects::nonNull)
-                .map(WlpInformation::getPlatforms)
-                .filter(Objects::nonNull)
-                .flatMap(List::stream).collect(Collectors.toSet());
+        return getFeaturesAndPlatforms(libertyVersion, libertyRuntime, requestDelay, documentURI).getPlatforms();
     }
 
     /**
@@ -590,7 +614,12 @@ public class FeatureService {
                                                      int requestDelay, String documentURI) {
         Optional<Feature> feature=this.getFeature(featureName,libertyVersion, libertyRuntime, requestDelay, documentURI);
         if (feature.isPresent() && feature.get().getWlpInformation().getPlatforms() != null) {
-            return new HashSet<>(feature.get().getWlpInformation().getPlatforms());
+            // only include available platforms - a feature can list a platform that is in beta
+            Set<String> availablePlatforms = getAllPlatforms(libertyVersion, libertyRuntime, requestDelay, documentURI);
+            Set<String> returnSet = new HashSet<>(feature.get().getWlpInformation().getPlatforms());
+            returnSet.retainAll(availablePlatforms);
+
+            return returnSet;
         }
        return Collections.emptySet();
     }

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2022 IBM Corporation and others.
+* Copyright (c) 2020, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -110,6 +110,7 @@ public class SettingsService {
                             new CommonLogger(LOGGER), null, installDirectory, userDirectory, serverDirectory);
                     variablesForWorkspace.putAll(serverConfigDocument.getDefaultProperties());
                     variablesForWorkspace.putAll(serverConfigDocument.getProperties());
+                    LOGGER.finest("Populated variables for workspace: " + workspace.getWorkspaceString() + ". Number of variables found: " + variablesForWorkspace.size());
                 } catch (Exception e) {
                     LOGGER.warning("Variable resolution is not available because the necessary directory locations were not found in the liberty-plugin-config.xml file.");
                     LOGGER.info("Exception received: " + e.getMessage());
@@ -132,7 +133,7 @@ public class SettingsService {
         Properties variableProps = new Properties();
         if (workspace == null) {
             LOGGER.warning("Could not find workspace for server xml URI %s. Variable resolution cannot be performed.".formatted(serverXmlURI));
-        } else if (variables.containsKey(workspace.getWorkspaceString())) {
+        } else if (variables != null && variables.containsKey(workspace.getWorkspaceString())) {
             variableProps = variables.get(workspace.getWorkspaceString());
         } else {
             LOGGER.warning("Could not find variable mapping for workspace URI %s. Variable resolution cannot be performed.".formatted(workspace.getWorkspaceString()));

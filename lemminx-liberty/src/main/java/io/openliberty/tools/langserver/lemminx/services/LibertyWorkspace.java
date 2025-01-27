@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2024 IBM Corporation and others.
+* Copyright (c) 2020, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -18,8 +18,8 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -28,6 +28,7 @@ import jakarta.xml.bind.JAXBException;
 import jakarta.xml.bind.Unmarshaller;
 import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
 import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
+import io.openliberty.tools.langserver.lemminx.models.feature.FeaturesAndPlatforms;
 import io.openliberty.tools.langserver.lemminx.models.settings.DevcMetadata;
 
 public class LibertyWorkspace {
@@ -40,7 +41,7 @@ public class LibertyWorkspace {
     private String libertyVersion;
     private String libertyRuntime;
     private boolean isLibertyInstalled;
-    private List<Feature> installedFeatureList;
+    private FeaturesAndPlatforms installedFeaturesAndPlatformsList;
     private String libertyInstallationDir;
     private FeatureListGraph featureListGraph;
 
@@ -62,7 +63,7 @@ public class LibertyWorkspace {
         this.libertyRuntime = null;
         this.isLibertyInstalled = false;
         this.libertyInstallationDir = null;
-        this.installedFeatureList = new ArrayList<Feature>();
+        this.installedFeaturesAndPlatformsList = new FeaturesAndPlatforms();
         this.containerName = null;
         this.containerType = "docker";
         this.containerAlive = false;
@@ -110,7 +111,7 @@ public class LibertyWorkspace {
             // do not clear out the libertyRuntime or libertyVersion since those could be set for a live container
             setLibertyInstallationDir(null);
             // clear the cached feature list when Liberty is no longer installed
-            this.installedFeatureList = new ArrayList<Feature>();
+            this.installedFeaturesAndPlatformsList = new FeaturesAndPlatforms();
         }
     }
 
@@ -126,12 +127,12 @@ public class LibertyWorkspace {
         return this.libertyInstallationDir;
     }
 
-    public List<Feature> getInstalledFeatureList() {
-        return this.installedFeatureList;
+    public FeaturesAndPlatforms getInstalledFeaturesAndPlatformsList() {
+        return this.installedFeaturesAndPlatformsList;
     }
 
-    public void setInstalledFeatureList(List<Feature> installedFeatureList) {
-        this.installedFeatureList = installedFeatureList;
+    public void setInstalledFeaturesAndPlatformsList(FeaturesAndPlatforms installedFeaturesAndPlatforms) {
+        this.installedFeaturesAndPlatformsList = installedFeaturesAndPlatforms;
     }
 
     public String getContainerName() {
@@ -239,14 +240,16 @@ public class LibertyWorkspace {
             // regenerate the feature list xml and load the FeatureListGraph.
             if (!FeatureService.getInstance().doesGeneratedFeatureListExist(this)) {
                 generateGraph = true;
-                this.setInstalledFeatureList(new ArrayList<Feature> ()); // clear out cached feature list
+                // clear out cached feature list
+                this.installedFeaturesAndPlatformsList = new FeaturesAndPlatforms();
+
             }
         }
 
         if (generateGraph) {
             if (isLibertyInstalled || isContainerAlive()) {
                 LOGGER.info("Generating installed features list and storing to cache for workspace " + workspaceFolderURI);
-                FeatureService.getInstance().getInstalledFeaturesList(this, libertyRuntime, libertyVersion);
+                FeatureService.getInstance().getInstalledFeaturesAndPlatformsList(this, libertyRuntime, libertyVersion);
                 useFeatureListGraph = this.featureListGraph;
             } else {
                  LOGGER.info("Retrieving default cached feature list for workspace " + workspaceFolderURI);

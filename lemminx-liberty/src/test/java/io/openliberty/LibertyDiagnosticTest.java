@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 
 import io.openliberty.tools.langserver.lemminx.LibertyDiagnosticParticipant;
 import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
-import io.openliberty.tools.langserver.lemminx.models.feature.Feature;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
@@ -331,7 +330,7 @@ public class LibertyDiagnosticTest {
     @Test
     public void testConfigElementMissingFeatureManager() throws JAXBException {
         assertTrue(featureList.exists());
-        FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), libWorkspace, featureList);
+        FeatureService.getInstance().readFeaturesFromFeatureListFile(libWorkspace, featureList);
 
         String serverXml = "<server><ssl id=\"\"/></server>";
         // Temporarily disabling config element diagnostics if featureManager element is missing (until issue 230 is addressed)
@@ -403,7 +402,7 @@ public class LibertyDiagnosticTest {
     @Test
     public void testConfigElementDirect() throws JAXBException {
         assertTrue(featureList.exists());
-        FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), libWorkspace, featureList);
+        FeatureService.getInstance().readFeaturesFromFeatureListFile(libWorkspace, featureList);
 
         String correctFeature   = "           <feature>Ssl-1.0</feature>";
         String incorrectFeature = "           <feature>jaxrs-2.0</feature>";
@@ -441,7 +440,7 @@ public class LibertyDiagnosticTest {
     @Test
     public void testConfigElementTransitive() throws JAXBException {
         assertTrue(featureList.exists());
-        FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), libWorkspace, featureList);
+        FeatureService.getInstance().readFeaturesFromFeatureListFile(libWorkspace, featureList);
         String serverXML1 = String.join(newLine,
                 "<server description=\"Sample Liberty server\">",
                 "   <featureManager>",
@@ -465,6 +464,7 @@ public class LibertyDiagnosticTest {
                 "               <platform>javaee-7.0</platform>", //
                 "               <platform>javaee-8.0</platform>", //
                 "               <platform>jakartaee-9.1</platform>", //
+                "               <platform>jakartaee-11.0</platform>", //
                 "       </featureManager>", //
                 "</server>" //
         );
@@ -486,9 +486,14 @@ public class LibertyDiagnosticTest {
         invalid4.setRange(r(8, 25, 8, 38));
         invalid4.setMessage("ERROR: The following configured platform versions are in conflict [javaee-7.0, javaee-8.0, jakartaee-9.1]");
 
+        Diagnostic invalid5 = new Diagnostic();
+        invalid5.setRange(r(9, 25, 9, 39));
+        invalid5.setCode(LibertyDiagnosticParticipant.INCORRECT_PLATFORM_CODE);
+        invalid5.setMessage("ERROR: The platform \"jakartaee-11.0\" does not exist."); // beta platform should not be valid
+
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
-                invalid1, invalid2, invalid3, invalid4);
+                invalid1, invalid2, invalid3, invalid4, invalid5);
     }
 
     @Test
@@ -694,7 +699,7 @@ public class LibertyDiagnosticTest {
     @Test
     public void testConfigElementVersionLess() throws JAXBException {
         assertTrue(featureList.exists());
-        FeatureService.getInstance().readFeaturesFromFeatureListFile(new ArrayList<Feature>(), libWorkspace, featureList);
+        FeatureService.getInstance().readFeaturesFromFeatureListFile(libWorkspace, featureList);
         String serverXML1 = String.join(newLine,
                 "<server description=\"Sample Liberty server\">",
                 "   <featureManager>",
