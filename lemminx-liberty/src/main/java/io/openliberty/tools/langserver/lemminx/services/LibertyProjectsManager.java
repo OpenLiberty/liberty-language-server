@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2023 IBM Corporation and others.
+* Copyright (c) 2020, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -148,7 +148,6 @@ public class LibertyProjectsManager {
         LibertyWorkspace matchingWorkspace = null;
         String normalizeUri = serverXMLUri.replace("///", "/");
         for (LibertyWorkspace folder : getInstance().getLibertyWorkspaceFolders()) {
-            LOGGER.info("CLK999: check workspace: "+folder.getWorkspaceString()+" for match with file URI: "+normalizeUri);
             //Append workspaceString with file separator to avoid bad matches
             if (normalizeUri.contains(folder.getWorkspaceStringWithTrailingSlash())) {
                 if (matchingWorkspace != null) {
@@ -165,7 +164,7 @@ public class LibertyProjectsManager {
         if (matchingWorkspace == null) {
             LOGGER.warning("Could not find LibertyWorkspace for file: " + serverXMLUri);
         } else {
-            LOGGER.info("CLK999: Found matching workspace: "+matchingWorkspace.getWorkspaceString()+" for file URI: "+normalizeUri);
+            LOGGER.finest("Found matching workspace: "+matchingWorkspace.getWorkspaceString()+" for file URI: "+normalizeUri);
         }
         return matchingWorkspace;
     }

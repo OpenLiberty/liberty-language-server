@@ -464,6 +464,7 @@ public class LibertyDiagnosticTest {
                 "               <platform>javaee-7.0</platform>", //
                 "               <platform>javaee-8.0</platform>", //
                 "               <platform>jakartaee-9.1</platform>", //
+                "               <platform>jakartaee-11.0</platform>", //
                 "       </featureManager>", //
                 "</server>" //
         );
@@ -485,9 +486,14 @@ public class LibertyDiagnosticTest {
         invalid4.setRange(r(8, 25, 8, 38));
         invalid4.setMessage("ERROR: The following configured platform versions are in conflict [javaee-7.0, javaee-8.0, jakartaee-9.1]");
 
+        Diagnostic invalid5 = new Diagnostic();
+        invalid5.setRange(r(9, 25, 9, 39));
+        invalid5.setCode(LibertyDiagnosticParticipant.INCORRECT_PLATFORM_CODE);
+        invalid5.setMessage("ERROR: The platform \"jakartaee-11.0\" does not exist."); // beta platform should not be valid
+
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
-                invalid1, invalid2, invalid3, invalid4);
+                invalid1, invalid2, invalid3, invalid4, invalid5);
     }
 
     @Test

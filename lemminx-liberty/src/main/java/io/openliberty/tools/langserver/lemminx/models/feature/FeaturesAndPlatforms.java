@@ -31,9 +31,10 @@ public class FeaturesAndPlatforms {
         this.privateFeatures = privateFeatures;
 
         this.platforms = privateFeatures.stream()
-                .filter(f -> f.getWlpInformation().getVisibility() != null && f.getWlpInformation().getVisibility().equals(LibertyConstants.PRIVATE_VISIBILITY))
                 .map(Feature::getWlpInformation)
                 .filter(Objects::nonNull)
+                .filter(w -> Objects.nonNull(w.getVisibility()))
+                .filter(w -> w.getVisibility().equals(LibertyConstants.PRIVATE_VISIBILITY))
                 .map(WlpInformation::getPlatforms)
                 .filter(Objects::nonNull)
                 .flatMap(List::stream).collect(Collectors.toSet());

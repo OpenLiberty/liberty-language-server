@@ -110,7 +110,7 @@ public class SettingsService {
                             new CommonLogger(LOGGER), null, installDirectory, userDirectory, serverDirectory);
                     variablesForWorkspace.putAll(serverConfigDocument.getDefaultProperties());
                     variablesForWorkspace.putAll(serverConfigDocument.getProperties());
-                    LOGGER.finest("Populated variables for workspace: "+workspace.getWorkspaceString()+". Number of variables found: "+variablesForWorkspace.size());
+                    LOGGER.finest("Populated variables for workspace: " + workspace.getWorkspaceString() + ". Number of variables found: " + variablesForWorkspace.size());
                 } catch (Exception e) {
                     LOGGER.warning("Variable resolution is not available because the necessary directory locations were not found in the liberty-plugin-config.xml file.");
                     LOGGER.info("Exception received: " + e.getMessage());
