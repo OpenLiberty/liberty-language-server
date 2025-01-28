@@ -21,7 +21,7 @@ import static io.openliberty.tools.langserver.diagnostic.LibertyPropertiesDiagno
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-public class InvalidPropertyQuickfixTest extends QuickFixFactoryTest {
+public class InvalidPropertyQuickfixTest extends CodeActionQuickfixFactoryTest {
 
     @Test
     public void testReturnCodeActionForQuickfixForBootStrapProperties() throws FileNotFoundException, InterruptedException, ExecutionException {

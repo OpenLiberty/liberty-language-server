@@ -27,7 +27,7 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-public abstract class QuickFixFactoryTest extends AbstractLibertyLanguageServerTest {
+public abstract class CodeActionQuickfixFactoryTest extends AbstractLibertyLanguageServerTest {
 
     private static final Duration AWAIT_TIMEOUT = Duration.ofSeconds(10);
     private static final Duration AWAIT_POLL_INTERVAL = Duration.ofMillis(5);
