@@ -1062,4 +1062,70 @@ public class LibertyDiagnosticTest {
         dup1.setData("testVar1");
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, dup1);
     }
+
+    @Test
+    public void testConfigElementSameNameAsVersionlessFeature() throws BadLocationException {
+        String configElement = "<mpMetrics authentication=\"false\"></mpMetrics>";
+
+        String serverXML = String.join(newLine,
+                "<server description=\"Sample Liberty server\">",
+                "    <featureManager>",
+                "        <feature>mpMetrics</feature>",
+                "        <platform>microProfile-2.2</platform>",
+                "    </featureManager>",
+                configElement,
+                "</server>"
+        );
+        // no diagnostics expected, as we have the correct feature
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, sampleserverXMLURI);
+
+        serverXML = String.join(newLine,
+                "<server description=\"Sample Liberty server\">",
+                "    <featureManager>",
+                "        <platform>microProfile-2.2</platform>",
+                "    </featureManager>",
+                configElement,
+                "</server>"
+        );
+        Diagnostic diagnostic = new Diagnostic();
+        diagnostic.setRange(r(4, 0, 4, 46));
+        diagnostic.setCode(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE);
+        diagnostic.setMessage(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_MESSAGE);
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, sampleserverXMLURI,diagnostic);
+        diagnostic.setSource("mpMetrics");
+
+        List<String> featuresToAdd = new ArrayList<String>();
+        featuresToAdd.add("mpMetrics-1.0");
+        featuresToAdd.add("mpMetrics-1.1");
+        featuresToAdd.add("mpMetrics-2.0");
+        featuresToAdd.add("mpMetrics-2.2");
+        featuresToAdd.add("mpMetrics-2.3");
+        featuresToAdd.add("mpMetrics-3.0");
+        featuresToAdd.add("mpMetrics-4.0");
+        featuresToAdd.add("mpMetrics-5.0");
+        featuresToAdd.add("mpMetrics-5.1");
+
+        Collections.sort(featuresToAdd);
+
+        List<CodeAction> codeActions = new ArrayList<CodeAction>();
+        for (String nextFeature: featuresToAdd) {
+            String addFeature = String.format("%s<feature>%s</feature>",System.lineSeparator(),nextFeature);
+            TextEdit texted = te(2, 45, 2, 45, addFeature);
+            CodeAction invalidCodeAction = ca(diagnostic, texted);
+
+            TextDocumentEdit textDoc = tde(sampleserverXMLURI, 0, texted);
+            WorkspaceEdit workspaceEdit = new WorkspaceEdit(Collections.singletonList(Either.forLeft(textDoc)));
+
+            invalidCodeAction.setEdit(workspaceEdit);
+            codeActions.add(invalidCodeAction);
+        }
+
+        // diagnostic with code action expected
+        XMLAssert.testCodeActionsFor(serverXML, sampleserverXMLURI, diagnostic, (String) null,
+                codeActions.get(0), codeActions.get(1), codeActions.get(2),
+                codeActions.get(3), codeActions.get(4), codeActions.get(5),
+                codeActions.get(6), codeActions.get(7), codeActions.get(8)
+        );
+    }
 }
