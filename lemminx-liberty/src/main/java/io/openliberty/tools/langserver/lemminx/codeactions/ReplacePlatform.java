@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2024 IBM Corporation and others.
+* Copyright (c) 2024, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -54,7 +54,7 @@ public class ReplacePlatform implements ICodeActionParticipant {
             if (replacePlatformName) {
                 LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(document);
                 Set<String> allPlatforms = getAllPlatforms(runtimeInfo, document);
-                List<String> existingPlatforms = FeatureService.getInstance().collectExistingPlatforms(document, platformNameToReplace);
+                List<String> existingPlatforms = FeatureService.getInstance().collectExistingPlatforms(document, invalidPlatform);
                 List<String> replacementPlatforms = getReplacementPlatforms(
                         allPlatforms, existingPlatforms);
                 // check for conflicting platforms for already existing platforms. remove them from quick fix items
