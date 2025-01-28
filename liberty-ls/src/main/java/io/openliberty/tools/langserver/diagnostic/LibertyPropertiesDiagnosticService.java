@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022, 2024 IBM Corporation and others.
+* Copyright (c) 2022, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -39,7 +39,7 @@ public class LibertyPropertiesDiagnosticService  {
 
     private static final Logger LOGGER = Logger.getLogger(LibertyPropertiesDiagnosticService.class.getName());
     private static final ResourceBundle DiagnosticMessages = ResourceBundle.getBundle("DiagnosticMessages", Locale.getDefault());
-
+    public static final String ERROR_CODE_INVALID_PROPERTY_VALUE = "unknown_property_value";
 
     public Map<String, PropertiesValidationResult> compute(String text, LibertyTextDocument openedDocument) {
         Map<String, PropertiesValidationResult> errors = new HashMap<>();
@@ -86,7 +86,9 @@ public class LibertyPropertiesDiagnosticService  {
             
             // Currently the last arg (getIntegerRange) is only used for the Integer messages which use {2}. Otherwise null is passed and is ignored by the other messages.
             String message = MessageFormat.format(messageTemplate, validationResult.getValue(), property, ServerPropertyValues.getIntegerRange(property));
-            lspDiagnostics.add(new Diagnostic(computeRange(validationResult, lineContentInError), message, DiagnosticSeverity.Error, "Liberty Config Language Server"));
+            Diagnostic diagnostic = new Diagnostic(computeRange(validationResult, lineContentInError), message, DiagnosticSeverity.Error, "Liberty Config Language Server");
+            diagnostic.setCode(ERROR_CODE_INVALID_PROPERTY_VALUE);
+            lspDiagnostics.add(diagnostic);
         }
         return lspDiagnostics;
     }
