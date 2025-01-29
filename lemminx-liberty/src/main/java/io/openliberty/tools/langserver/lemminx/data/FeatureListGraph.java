@@ -55,6 +55,11 @@ public class FeatureListGraph {
         }
         FeatureListNode node = new FeatureListNode(nodeName, description);
         featureNodes.put(nodeName, node);
+        // in case of versionless features,
+        // there are some config elements with same name as version less feature
+        // such as mpMetrics, currently only one
+        // use putIfAbsent because there might be already a configElement with enabledBy added
+        // for version less features, config elements are not present in xsd
         nodes.putIfAbsent(nodeName, node);
         return node;
     }
@@ -65,7 +70,7 @@ public class FeatureListGraph {
         }
         ConfigElementNode node = new ConfigElementNode(nodeName);
         configElementNodes.put(nodeName, node);
-        nodes.putIfAbsent(nodeName, node);
+        nodes.put(nodeName, node);
         return node;
     }
 

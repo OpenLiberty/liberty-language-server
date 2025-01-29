@@ -1064,7 +1064,7 @@ public class LibertyDiagnosticTest {
     }
 
     @Test
-    public void testConfigElementSameNameAsVersionlessFeature() throws BadLocationException {
+    public void testConfigElementSameNameAsVersionlessFeatureNoDiagnostics() throws BadLocationException {
         String configElement = "<mpMetrics authentication=\"false\"></mpMetrics>";
 
         String serverXML = String.join(newLine,
@@ -1078,8 +1078,12 @@ public class LibertyDiagnosticTest {
         );
         // no diagnostics expected, as we have the correct feature
         XMLAssert.testDiagnosticsFor(serverXML, null, null, sampleserverXMLURI);
+    }
 
-        serverXML = String.join(newLine,
+    @Test
+    public void testConfigElementSameNameAsVersionlessFeatureWithDiagnosticsAndCodeAction() throws BadLocationException {
+        String configElement = "<mpMetrics authentication=\"false\"></mpMetrics>";
+        String serverXML = String.join(newLine,
                 "<server description=\"Sample Liberty server\">",
                 "    <featureManager>",
                 "        <platform>microProfile-2.2</platform>",
@@ -1108,7 +1112,7 @@ public class LibertyDiagnosticTest {
 
         Collections.sort(featuresToAdd);
 
-        List<CodeAction> codeActions = new ArrayList<CodeAction>();
+        List<CodeAction> codeActions = new ArrayList<>();
         for (String nextFeature: featuresToAdd) {
             String addFeature = String.format("%s<feature>%s</feature>",System.lineSeparator(),nextFeature);
             TextEdit texted = te(2, 45, 2, 45, addFeature);
