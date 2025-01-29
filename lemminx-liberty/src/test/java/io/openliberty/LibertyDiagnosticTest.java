@@ -843,21 +843,21 @@ public class LibertyDiagnosticTest {
                 "<server description=\"Sample Liberty server\">", //
                 "       <featureManager>", //
                 "               <feature>batch-1.0</feature>", //
-                "               <platform>miCroP</platform>", //
+                "               <platform>microProfile-5</platform>", //
                 "               <platform>javaee-7.0</platform>", //
                 "       </featureManager>", //
                 "</server>" //
         );
         invalid1 = new Diagnostic();
-        invalid1.setRange(r(3, 25, 3, 31));
+        invalid1.setRange(r(3, 25, 3, 39));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_PLATFORM_CODE);
-        invalid1.setMessage("ERROR: The platform \"miCroP\" does not exist.");
+        invalid1.setMessage("ERROR: The platform \"microProfile-5\" does not exist.");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid1);
 
         //  expecting code action to show only microprofile platforms since
-        //      1. user has entered "microP"
+        //      1. user has entered "microProfile-5"
         List<String> microProfilePlatforms = new ArrayList<>();
         microProfilePlatforms.add("microProfile-1.0");
         microProfilePlatforms.add("microProfile-1.2");
