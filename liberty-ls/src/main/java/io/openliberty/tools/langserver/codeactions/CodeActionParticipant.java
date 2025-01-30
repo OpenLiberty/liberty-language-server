@@ -36,17 +36,19 @@ public class CodeActionParticipant {
         this.libertyLanguageServer = libertyLanguageServer;
     }
 
+    /**
+     *
+     * @param params
+     * @return
+     */
     public CompletableFuture<List<Either<Command, CodeAction>>> getCodeActions(CodeActionParams params) {
         CodeActionContext context = params.getContext();
         if (context != null) {
             List<Either<Command, CodeAction>> codeActions = new ArrayList<>();
             List<String> codeActionsType = context.getOnly();
-            if (codeActionsType == null) {
+            // code action type is coming null from vscode
+            if (codeActionsType == null || codeActionsType.contains(CodeActionKind.QuickFix)) {
                 codeActions.addAll(computeQuickfixes(params));
-            } else {
-                if (codeActionsType.contains(CodeActionKind.QuickFix)) {
-                    codeActions.addAll(computeQuickfixes(params));
-                }
             }
             return CompletableFuture.supplyAsync(() -> codeActions);
         } else {
@@ -55,8 +57,9 @@ public class CodeActionParticipant {
     }
 
     private List<Either<Command, CodeAction>> computeQuickfixes(CodeActionParams params) {
-        List<Either<Command, CodeAction>> allQuickfixes = new ArrayList<>();
-        allQuickfixes.addAll(new InvalidPropertyValueQuickfix(libertyTextDocumentService, libertyLanguageServer).apply(params));
-        return allQuickfixes;
+        // compute InvalidPropertyValueQuickfix
+        // need to change this logic when we have more types of quick fixes
+        return new ArrayList<>(new InvalidPropertyValueQuickfix(libertyTextDocumentService, libertyLanguageServer)
+                .apply(params));
     }
 }

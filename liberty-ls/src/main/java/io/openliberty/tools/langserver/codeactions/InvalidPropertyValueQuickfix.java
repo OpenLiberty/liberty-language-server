@@ -42,6 +42,12 @@ public class InvalidPropertyValueQuickfix extends CodeActionQuickfixFactory {
         return ERROR_CODE_INVALID_PROPERTY_VALUE;
     }
 
+    /**
+     * retrieve list of completion items for a property key
+     * @param textDocumentItem text document
+     * @param position current position, used to compute key
+     * @return list of string of completion item names
+     */
     @Override
     protected List<String> retrieveCompletionValues(TextDocumentItem textDocumentItem,
                                                     Position position) {
@@ -51,6 +57,7 @@ public class InvalidPropertyValueQuickfix extends CodeActionQuickfixFactory {
             PropertiesEntryInstance propertiesEntryInstance = new PropertiesEntryInstance(line, openedDocument);
             // get all completions for current property key
             CompletableFuture<List<CompletionItem>> completions = propertiesEntryInstance.getPropertyValueInstance().getCompletions("", position);
+            // map text values from completion items
             return completions.thenApply(completionItems -> completionItems.stream().map(it -> it.getTextEdit().getLeft().getNewText())
                             .collect(Collectors.toList()))
                     .get();

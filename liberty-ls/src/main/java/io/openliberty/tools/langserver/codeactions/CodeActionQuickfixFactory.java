@@ -43,6 +43,12 @@ public abstract class CodeActionQuickfixFactory {
         this.libertyLanguageServer = libertyLanguageServer;
     }
 
+    /**
+     * returns list of code actions or commands.
+     * called from CodeActionParticipant
+     * @param params code action params
+     * @return codeaction
+     */
     public List<Either<Command, CodeAction>> apply(CodeActionParams params) {
         TextDocumentItem openedDocument = libertyTextDocumentService.getOpenedDocument(params.getTextDocument().getUri());
         List<Diagnostic> diagnostics = params.getContext().getDiagnostics();
@@ -51,8 +57,11 @@ public abstract class CodeActionQuickfixFactory {
             if (diagnostic.getCode() != null && getErrorCode().equals(diagnostic.getCode().getLeft())) {
                 String line = new ParserFileHelperUtil().getLine(new LibertyTextDocument(openedDocument), diagnostic.getRange().getStart().getLine());
                 if (line != null) {
+                    // fetch all completion values and shows them as quick fix
+                    // completion returns empty list if no completion item is present
                     List<String> possibleProperties = retrieveCompletionValues(openedDocument, diagnostic.getRange().getStart());
                     for (String mostProbableProperty : possibleProperties) {
+                        // expected format for a code action is <Command,CodeAction>
                         res.add(Either.forRight(createCodeAction(params, diagnostic, mostProbableProperty)));
                     }
                 }
@@ -61,6 +70,13 @@ public abstract class CodeActionQuickfixFactory {
         return res;
     }
 
+    /**
+     * used to create code action object for quickfix
+     * @param params codeaction params
+     * @param diagnostic diagnostic for which code action to be shown
+     * @param possibleProperty completion value
+     * @return codeaction
+     */
     protected CodeAction createCodeAction(CodeActionParams params, Diagnostic diagnostic, String possibleProperty) {
         CodeAction codeAction = new CodeAction("Replace value with " + possibleProperty);
         codeAction.setDiagnostics(Collections.singletonList(diagnostic));
