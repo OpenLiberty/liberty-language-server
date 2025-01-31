@@ -21,10 +21,9 @@ import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.TextDocumentItem;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -51,6 +50,7 @@ public class InvalidPropertyValueQuickfix extends CodeActionQuickfixFactory {
     @Override
     protected List<String> retrieveCompletionValues(TextDocumentItem textDocumentItem,
                                                     Position position) {
+        List<String> completionValues = new ArrayList<>();
         try {
             LibertyTextDocument openedDocument = libertyLanguageServer.getTextDocumentService().getOpenedDocument(textDocumentItem.getUri());
             String line = new ParserFileHelperUtil().getLine(openedDocument, position);
@@ -58,16 +58,16 @@ public class InvalidPropertyValueQuickfix extends CodeActionQuickfixFactory {
             // get all completions for current property key
             CompletableFuture<List<CompletionItem>> completions = propertiesEntryInstance.getPropertyValueInstance().getCompletions("", position);
             // map text values from completion items
-            return completions.thenApply(completionItems -> completionItems.stream().map(it -> it.getTextEdit().getLeft().getNewText())
+            completionValues = completions.thenApply(completionItems -> completionItems.stream()
+                            .map(it -> it.getTextEdit().getLeft().getNewText())
                             .collect(Collectors.toList()))
                     .get();
         } catch (InterruptedException e) {
             LOGGER.severe("Interruption while computing possible properties for quickfix. Error message is " + e.getMessage());
             Thread.currentThread().interrupt();
-            return Collections.emptyList();
-        } catch (ExecutionException e) {
+        } catch (Exception e) {
             LOGGER.severe("Exception while computing possible properties for quickfix. Error message is " + e.getMessage());
-            return Collections.emptyList();
         }
+        return completionValues;
     }
 }
