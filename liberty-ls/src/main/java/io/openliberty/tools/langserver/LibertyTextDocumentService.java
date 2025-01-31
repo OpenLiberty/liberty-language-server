@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2023 IBM Corporation and others.
+* Copyright (c) 2020, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -12,6 +12,10 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver;
 
+import io.openliberty.tools.langserver.codeactions.CodeActionParticipant;
+import org.eclipse.lsp4j.CodeAction;
+import org.eclipse.lsp4j.CodeActionParams;
+import org.eclipse.lsp4j.Command;
 import org.eclipse.lsp4j.DidChangeTextDocumentParams;
 import org.eclipse.lsp4j.DidCloseTextDocumentParams;
 import org.eclipse.lsp4j.DidOpenTextDocumentParams;
@@ -137,6 +141,12 @@ public class LibertyTextDocumentService implements TextDocumentService {
     public CompletableFuture<CompletionItem> resolveCompletionItem(CompletionItem unresolved) {
         LOGGER.info("resolveCompletionItem: " + unresolved.getLabel());
         return CompletableFuture.completedFuture(unresolved);
+    }
+
+    @Override
+    public CompletableFuture<List<Either<Command, CodeAction>>> codeAction(CodeActionParams params) {
+        LOGGER.info("codeAction: "+ params.getTextDocument());
+        return new CodeActionParticipant(this,libertyLanguageServer).getCodeActions(params);
     }
 
     private void validate(List<String> uris) {
