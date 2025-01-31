@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2023, 2024 IBM Corporation and others.
+* Copyright (c) 2023, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -55,7 +55,12 @@ public class FeatureListGraph {
         }
         FeatureListNode node = new FeatureListNode(nodeName, description);
         featureNodes.put(nodeName, node);
-        nodes.put(nodeName, node);
+        // in case of versionless features,
+        // there are some config elements with same name as version less feature
+        // such as mpMetrics, currently only one
+        // use putIfAbsent because there might be already a configElement with enabledBy added
+        // for version less features, config elements are not present in xsd
+        nodes.putIfAbsent(nodeName, node);
         return node;
     }
     
