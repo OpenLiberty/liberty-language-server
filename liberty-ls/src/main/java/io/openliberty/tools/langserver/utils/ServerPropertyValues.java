@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022, 2023 IBM Corporation and others.
+* Copyright (c) 2022, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -9,6 +9,7 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -74,6 +75,18 @@ public class ServerPropertyValues {
         );
     }};
 
+    private static Set<String> commaSeparatedValuesAllowedProperties = new HashSet<String>() {{
+        add("WLP_LOGGING_CONSOLE_SOURCE");
+        add("WLP_LOGGING_MESSAGE_SOURCE");
+        EquivalentProperties.getServerVarKeys().forEach(
+                serverKey -> {
+                    if(this.contains(serverKey)) {
+                        this.add(EquivalentProperties.getEquivalentProperty(serverKey));
+                    }
+                }
+        );
+    }};
+
     private static HashMap<String, Range<Integer>> integerRangeValues = new HashMap<String, Range<Integer>>() {{
         put("WLP_DEBUG_ADDRESS", Range.between(1,65535));
         put("default.http.port", Range.between(1,65535));
@@ -132,5 +145,13 @@ public class ServerPropertyValues {
      */
     public static Range<Integer> getIntegerRange(String key) {
         return integerRangeValues.get(key);
+    }
+
+    public static boolean multipleCommaSeparatedValuesAllowed(String key) {
+        return caseSensitiveProperties.contains(key);
+    }
+
+    public static List<String> getCommaSeparatedValues(String valueString){
+        return new ArrayList<>(Arrays.asList(valueString.split(",")));
     }
 }

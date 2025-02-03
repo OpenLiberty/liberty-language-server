@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022, 2023 IBM Corporation and others.
+* Copyright (c) 2022, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,6 +13,7 @@
 package io.openliberty.tools.langserver.utils;
 
 import java.math.BigInteger;
+import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -79,8 +80,13 @@ public class PropertiesValidationResult {
         if (ServerPropertyValues.usesPredefinedValues(textDocumentItem, property)) {
             List<String> validValues = ServerPropertyValues.getValidValues(textDocumentItem, property);
             if(ServerPropertyValues.isCaseSensitive(property)) {
-                // if case-sensitive, check if value is valid
-                hasErrors = !validValues.contains(value);
+                // currently all comma separated values properties are case-sensitive
+                if (ServerPropertyValues.multipleCommaSeparatedValuesAllowed(getKey()) && value != null) {
+                    hasErrors = !new HashSet<>(validValues).containsAll(ServerPropertyValues.getCommaSeparatedValues(value));
+                } else {
+                    // if case-sensitive, check if value is valid
+                    hasErrors = !validValues.contains(value);
+                }
             } else {
                 // ignoring case, check if value is valid
                 hasErrors = !validValues.stream().anyMatch(value::equalsIgnoreCase);

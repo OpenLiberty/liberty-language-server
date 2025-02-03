@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022, 2024 IBM Corporation and others.
+* Copyright (c) 2022, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -9,9 +9,10 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.model.propertiesfile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.eclipse.lsp4j.CompletionItem;
 import org.eclipse.lsp4j.CompletionItemKind;
@@ -110,24 +111,54 @@ public class PropertiesKeyInstance {
 
     public List<CompletionItem> getValidValues(String enteredValue, Position position) {
         List<String> values = ServerPropertyValues.getValidValues(textDocumentItem, propertyKey);
-        List<CompletionItem> results = values.stream()
-                .filter(s -> s.toLowerCase().contains(enteredValue.trim().toLowerCase()))
-                .map(s -> {
-                    int line = position.getLine();
-                    Position rangeStart = new Position(line, getEndPosition() + 2);
-                    Position rangeEnd = new Position(line, getEndPosition() + 2 + s.length());
-                    Range range = new Range(rangeStart, rangeEnd);
-                    Either<TextEdit, InsertReplaceEdit> edit = Either.forLeft(new TextEdit(range, s));
-                    CompletionItem completionItem = new CompletionItem();
-                    completionItem.setTextEdit(edit);
-                    completionItem.setLabel(s);
-                    return completionItem;
-                }).toList();
+        List<String> enteredValuesLowerCase = new ArrayList<>();
+        String filterValue;
+        String prefix;
+        int endPosition = getEndPosition() + 2;
+        if (ServerPropertyValues.multipleCommaSeparatedValuesAllowed(propertyKey)) {
+            if (enteredValue != null && enteredValue.contains(",")) {
+                // has comma separated values
+                prefix = enteredValue.substring(0, enteredValue.lastIndexOf(",") + 1);
+                filterValue = enteredValue.substring(enteredValue.lastIndexOf(",") + 1);
+                enteredValuesLowerCase = ServerPropertyValues.getCommaSeparatedValues(enteredValue).stream()
+                        .map(String::toLowerCase).toList();
+            } else {
+                // in case of no comma, set prefix as empty and use entered value to filter for property
+                filterValue = enteredValue;
+                prefix = "";
+            }
+        } else {
+            // in case single value allowed, set prefix as empty and use entered value to filter for property
+            // this else is required to make variable effectively final
+            filterValue = enteredValue;
+            prefix = "";
+        }
+        Stream<String> filteredCompletion = values.stream()
+                .filter(s -> s.toLowerCase().contains(filterValue.trim().toLowerCase()));
+        if (!enteredValuesLowerCase.isEmpty()) {
+            // if there is already a value specified in case of comma separated field, filter out existing
+            List<String> finalEnteredValues = enteredValuesLowerCase;
+            filteredCompletion = filteredCompletion.filter(c -> !finalEnteredValues.contains(c.toLowerCase()));
+        }
+        List<CompletionItem> results = filteredCompletion.map(s -> getCompletionItem(position, prefix + s, endPosition)).toList();
+
         // Preselect the default.
-        // This uses the first item in the List as default. 
+        // This uses the first item in the List as default.
         // (Check ServerPropertyValues.java) Currently sorted to have confirmed/sensible values as default.
         setDetailsOnCompletionItems(results, propertyKey, true);
         return results;
+    }
+
+    private CompletionItem getCompletionItem(Position position, String s, int endPosition) {
+        int line = position.getLine();
+        Position rangeStart = new Position(line, endPosition );
+        Position rangeEnd = new Position(line, endPosition + s.length());
+        Range range = new Range(rangeStart, rangeEnd);
+        Either<TextEdit, InsertReplaceEdit> edit = Either.forLeft(new TextEdit(range, s));
+        CompletionItem completionItem = new CompletionItem();
+        completionItem.setTextEdit(edit);
+        completionItem.setLabel(s);
+        return completionItem;
     }
 
     @Override
