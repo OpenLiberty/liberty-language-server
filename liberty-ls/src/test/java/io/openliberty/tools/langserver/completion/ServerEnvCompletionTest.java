@@ -149,6 +149,34 @@ public class ServerEnvCompletionTest extends AbstractCompletionTest {
 
     }
 
+
+    @Test
+    public void testValueCompletionMultiPropertyValue() throws Exception {
+        CompletableFuture<Either<List<CompletionItem>, CompletionList>> completions = getCompletion("WLP_LOGGING_MESSAGE_SOURCE=trace", new Position(0, 33));
+        List<CompletionItem> completionItems = completions.get().getLeft();
+        assertEquals(1, completionItems.size());
+        checkCompletionsContainAllStrings(completionItems, "trace");
+
+        completions = getCompletion("WLP_LOGGING_MESSAGE_SOURCE=trace,", new Position(0, 34));
+        completionItems = completions.get().getLeft();
+        assertEquals(4, completionItems.size());
+        checkCompletionsContainAllStrings(completionItems, "trace,accessLog","trace,message","trace,ffdc","trace,audit");
+
+        completions = getCompletion("WLP_LOGGING_MESSAGE_SOURCE=trace,a", new Position(0, 35));
+        completionItems = completions.get().getLeft();
+        assertEquals(3, completionItems.size());
+        checkCompletionsContainAllStrings(completionItems, "trace,accessLog","trace,audit","trace,message");
+
+        completions = getCompletion("WLP_LOGGING_MESSAGE_SOURCE=trace,message,", new Position(0, 42));
+        completionItems = completions.get().getLeft();
+        assertEquals(3, completionItems.size());
+        checkCompletionsContainAllStrings(completionItems, "trace,message,accessLog","trace,message,ffdc","trace,message,audit");
+
+        completions = getCompletion("WLP_LOGGING_MESSAGE_SOURCE=trace,message", new Position(0, 41));
+        completionItems = completions.get().getLeft();
+        assertEquals(0, completionItems.size());
+    }
+
     protected CompletableFuture<Either<List<CompletionItem>, CompletionList>> getCompletion(String enteredText, Position position) throws URISyntaxException, InterruptedException, ExecutionException, IOException {
         String filename = "server.env";
         File file = new File(resourcesDir, filename);
