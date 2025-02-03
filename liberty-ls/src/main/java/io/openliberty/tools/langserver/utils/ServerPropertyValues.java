@@ -148,7 +148,7 @@ public class ServerPropertyValues {
     }
 
     public static boolean multipleCommaSeparatedValuesAllowed(String key) {
-        return caseSensitiveProperties.contains(key);
+        return commaSeparatedValuesAllowedProperties.contains(key);
     }
 
     public static List<String> getCommaSeparatedValues(String valueString){
