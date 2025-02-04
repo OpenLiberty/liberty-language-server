@@ -126,9 +126,9 @@ public class PropertiesKeyInstance {
                 enteredValuesLowerCase = ServerPropertyValues.getCommaSeparatedValues(prefix).stream()
                         .map(String::toLowerCase).toList();
                 // in case any of the entered value is invalid, do not show completion
-                Set<String> invalidValuesEntered=new HashSet<>(enteredValuesLowerCase);
-                validValues.forEach(v->invalidValuesEntered.remove(v.toLowerCase()));
-                if(!invalidValuesEntered.isEmpty()){
+                Set<String> invalidValuesEntered = new HashSet<>(enteredValuesLowerCase);
+                validValues.forEach(v -> invalidValuesEntered.remove(v.toLowerCase()));
+                if (!invalidValuesEntered.isEmpty()) {
                     return Collections.emptyList();
                 }
             } else {
@@ -142,15 +142,7 @@ public class PropertiesKeyInstance {
             filterValue = enteredValue;
             prefix = "";
         }
-        Stream<String> filteredCompletion = validValues.stream()
-                .filter(s -> s.toLowerCase().contains(filterValue.trim().toLowerCase()));
-        if (!enteredValuesLowerCase.isEmpty()) {
-            // if there is already a value specified in case of comma separated field, filter out existing
-            List<String> finalEnteredValues = enteredValuesLowerCase;
-            filteredCompletion = filteredCompletion.filter(c -> !finalEnteredValues.contains(c.toLowerCase()));
-        }
-        List<CompletionItem> results = filteredCompletion.map(s -> getCompletionItem(position, prefix + s, endPosition)).toList();
-
+        List<CompletionItem> results = generateCompletionItemsList(position, validValues, filterValue, enteredValuesLowerCase, prefix, endPosition);
         // Preselect the default.
         // This uses the first item in the List as default.
         // (Check ServerPropertyValues.java) Currently sorted to have confirmed/sensible values as default.
@@ -158,9 +150,19 @@ public class PropertiesKeyInstance {
         return results;
     }
 
+    private List<CompletionItem> generateCompletionItemsList(Position position, List<String> validValues, String filterValue, List<String> enteredValuesLowerCase, String prefix, int endPosition) {
+        Stream<String> filteredCompletion = validValues.stream()
+                .filter(s -> s.toLowerCase().contains(filterValue.trim().toLowerCase()));
+        if (!enteredValuesLowerCase.isEmpty()) {
+            // if there is already a value specified in case of comma separated field, filter out existing
+            filteredCompletion = filteredCompletion.filter(c -> !enteredValuesLowerCase.contains(c.toLowerCase()));
+        }
+        return filteredCompletion.map(s -> getCompletionItem(position, prefix + s, endPosition)).toList();
+    }
+
     private CompletionItem getCompletionItem(Position position, String s, int endPosition) {
         int line = position.getLine();
-        Position rangeStart = new Position(line, endPosition );
+        Position rangeStart = new Position(line, endPosition);
         Position rangeEnd = new Position(line, endPosition + s.length());
         Range range = new Range(rangeStart, rangeEnd);
         Either<TextEdit, InsertReplaceEdit> edit = Either.forLeft(new TextEdit(range, s));

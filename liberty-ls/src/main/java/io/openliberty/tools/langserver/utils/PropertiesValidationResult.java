@@ -152,13 +152,15 @@ public class PropertiesValidationResult {
             hasErrors = !new HashSet<>(validValues).containsAll(enteredValues);
             HashSet<String> invalidValues = new HashSet<>(enteredValues);
             validValues.forEach(invalidValues::remove);
+            // setting a custom value for diagnostic message, to show only invalid values in the message
             setCustomValue(String.join(",", invalidValues));
             // getting all valid prefix in case of multiple values
             // example, user entered,WLP_LOGGING_CONSOLE_SOURCE=abc,audit,message,kyc
             // quickfix should contain something like
-            // replace with "audit,message,trace"
-            // replace with "audit,message,ffdc"
-            // replace with "audit,message,auditLog"
+            //      replace with "audit,message
+            //      replace with "audit,message,trace"
+            //      replace with "audit,message,ffdc"
+            //      replace with "audit,message,auditLog"
             List<String> retainValues = new ArrayList<>(validValues);
             retainValues.retainAll(enteredValues);
             Collections.sort(retainValues);

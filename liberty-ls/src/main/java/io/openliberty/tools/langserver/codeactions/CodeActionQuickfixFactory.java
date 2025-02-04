@@ -62,7 +62,7 @@ public abstract class CodeActionQuickfixFactory {
                     String prefix = "";
                     // fetch all completion values and shows them as quick fix
                     // completion returns empty list if no completion item is present
-                    if(diagnostic.getData()!=null) {
+                    if (diagnostic.getData() != null) {
                         if (diagnostic.getData() instanceof JsonPrimitive) {
                             prefix = ((JsonPrimitive) diagnostic.getData()).getAsString();
                         }
@@ -70,11 +70,11 @@ public abstract class CodeActionQuickfixFactory {
                             prefix = (String) diagnostic.getData();
                         }
                     }
-                    if(!Objects.equals(prefix, "")){
+                    if (!Objects.equals(prefix, "")) {
                         // add a code action to just replace with valid values present in current string
                         res.add(Either.forRight(createCodeAction(params, diagnostic, prefix)));
                         // append a comma so that completion will show all values for multi value
-                        prefix+=",";
+                        prefix += ",";
                     }
                     List<String> possibleProperties = retrieveCompletionValues(openedDocument, diagnostic.getRange().getStart(),prefix);
                     for (String mostProbableProperty : possibleProperties) {
