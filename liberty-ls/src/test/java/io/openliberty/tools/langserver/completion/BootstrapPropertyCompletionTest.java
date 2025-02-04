@@ -141,6 +141,10 @@ public class BootstrapPropertyCompletionTest extends AbstractCompletionTest {
 
         completions = getCompletion("com.ibm.ws.logging.console.source=trace,message", new Position(0, 41));
         completionItems = completions.get().getLeft();
+        assertEquals(1, completionItems.size());
+
+        completions = getCompletion("com.ibm.ws.logging.message.source=trace,messag,", new Position(0, 40));
+        completionItems = completions.get().getLeft();
         assertEquals(0, completionItems.size());
     }
 

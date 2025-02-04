@@ -71,6 +71,8 @@ public abstract class CodeActionQuickfixFactory {
                         }
                     }
                     if(!Objects.equals(prefix, "")){
+                        // add a code action to just replace with valid values present in current string
+                        res.add(Either.forRight(createCodeAction(params, diagnostic, prefix)));
                         // append a comma so that completion will show all values for multi value
                         prefix+=",";
                     }

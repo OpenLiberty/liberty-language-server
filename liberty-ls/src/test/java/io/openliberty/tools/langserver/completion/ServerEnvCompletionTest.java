@@ -174,6 +174,11 @@ public class ServerEnvCompletionTest extends AbstractCompletionTest {
 
         completions = getCompletion("WLP_LOGGING_MESSAGE_SOURCE=trace,message", new Position(0, 41));
         completionItems = completions.get().getLeft();
+        assertEquals(1, completionItems.size());
+
+        // no completion expected as there is an invalid value in the string
+        completions = getCompletion("WLP_LOGGING_CONSOLE_SOURCE=trace,abc,", new Position(0, 38));
+        completionItems = completions.get().getLeft();
         assertEquals(0, completionItems.size());
     }
 

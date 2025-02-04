@@ -40,7 +40,7 @@ public class ServerEnvDiagnosticTest extends AbstractDiagnosticTest {
             "There should be no whitespace surrounding the equal sign (=).",
             "There should be no whitespace surrounding the equal sign (=).",
             "The value `messagE` is not valid for the variable `WLP_LOGGING_CONSOLE_SOURCE`.",
-            "The value `message,au` is not valid for the variable `WLP_LOGGING_MESSAGE_SOURCE`."
+            "The value `au` is not valid for the variable `WLP_LOGGING_MESSAGE_SOURCE`."
         );
     }
 }

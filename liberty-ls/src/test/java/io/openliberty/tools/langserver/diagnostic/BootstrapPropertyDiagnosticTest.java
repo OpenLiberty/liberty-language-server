@@ -44,7 +44,7 @@ public class BootstrapPropertyDiagnosticTest extends AbstractDiagnosticTest {
             "The value `yes` is not valid for the property `com.ibm.ws.logging.copy.system.streams`.",
             "This value must be a comma-delimited list of Java packages.",
             "The value `DEVd` is not valid for the property `com.ibm.ws.logging.console.format`.",
-            "The value `trace,aud` is not valid for the property `com.ibm.ws.logging.console.source`."
+            "The value `aud` is not valid for the property `com.ibm.ws.logging.console.source`."
         );
     }
 }

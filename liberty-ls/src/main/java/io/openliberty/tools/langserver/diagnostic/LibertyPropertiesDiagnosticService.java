@@ -85,7 +85,7 @@ public class LibertyPropertiesDiagnosticService  {
             String messageTemplate = DiagnosticMessages.getString(validationResult.getDiagnosticType());
             
             // Currently the last arg (getIntegerRange) is only used for the Integer messages which use {2}. Otherwise null is passed and is ignored by the other messages.
-            String message = MessageFormat.format(messageTemplate, validationResult.getValue(), property, ServerPropertyValues.getIntegerRange(property));
+            String message = MessageFormat.format(messageTemplate, validationResult.getCustomValue() != null ? validationResult.getCustomValue() : validationResult.getValue(), property, ServerPropertyValues.getIntegerRange(property));
             Diagnostic diagnostic = new Diagnostic(computeRange(validationResult, lineContentInError), message, DiagnosticSeverity.Error, "Liberty Config Language Server");
             diagnostic.setCode(ERROR_CODE_INVALID_PROPERTY_VALUE);
             diagnostic.setData(validationResult.getMultiValuePrefix());

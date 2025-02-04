@@ -13,6 +13,8 @@
 package io.openliberty.tools.langserver.utils;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
@@ -34,6 +36,8 @@ public class PropertiesValidationResult {
     // being used for passing correct values for quickfix
     // in case the current value has multiple values, and some of them is correct
     String multiValuePrefix;
+    // used in case we need to send a custom diagnostic message
+    String customValue;
     
     private static final Logger LOGGER = Logger.getLogger(PropertiesValidationResult.class.getName());
 
@@ -86,21 +90,7 @@ public class PropertiesValidationResult {
             if(ServerPropertyValues.isCaseSensitive(property)) {
                 // currently all comma separated values properties are case-sensitive
                 if (ServerPropertyValues.multipleCommaSeparatedValuesAllowed(getKey()) && value != null) {
-                    if (value.startsWith(",") || value.endsWith(",")) {
-                        hasErrors = true;
-                    } else {
-                        List<String> enteredValues = ServerPropertyValues.getCommaSeparatedValues(value);
-                        hasErrors = !new HashSet<>(validValues).containsAll(enteredValues);
-                        //getting all valid prefix in case of multiple values
-                        // example, user entered,WLP_LOGGING_CONSOLE_SOURCE=abc,audit,message,kyc
-                        // quickfix should contain something like
-                        // replace with "audit,message,trace"
-                        // replace with "audit,message,ffdc"
-                        // replace with "audit,message,auditLog"
-                        HashSet<String> retainValues = new HashSet<>(validValues);
-                        retainValues.retainAll(enteredValues);
-                        setMultiValuePrefix(String.join(",", retainValues));
-                    }
+                    validateMultiValueProperty(value, validValues);
                 } else {
                     // if case-sensitive, check if value is valid
                     hasErrors = !validValues.contains(value);
@@ -154,6 +144,28 @@ public class PropertiesValidationResult {
         return;
     }
 
+    private void validateMultiValueProperty(String value, List<String> validValues) {
+        if (value.startsWith(",") || value.endsWith(",")) {
+            hasErrors = true;
+        } else {
+            List<String> enteredValues = ServerPropertyValues.getCommaSeparatedValues(value);
+            hasErrors = !new HashSet<>(validValues).containsAll(enteredValues);
+            HashSet<String> invalidValues = new HashSet<>(enteredValues);
+            validValues.forEach(invalidValues::remove);
+            setCustomValue(String.join(",", invalidValues));
+            // getting all valid prefix in case of multiple values
+            // example, user entered,WLP_LOGGING_CONSOLE_SOURCE=abc,audit,message,kyc
+            // quickfix should contain something like
+            // replace with "audit,message,trace"
+            // replace with "audit,message,ffdc"
+            // replace with "audit,message,auditLog"
+            List<String> retainValues = new ArrayList<>(validValues);
+            retainValues.retainAll(enteredValues);
+            Collections.sort(retainValues);
+            setMultiValuePrefix(String.join(",", retainValues));
+        }
+    }
+
     public void setLineNumber(Integer lineNumber) {
         this.lineNumber = lineNumber;
     }
@@ -196,5 +208,13 @@ public class PropertiesValidationResult {
 
     public void setMultiValuePrefix(String multiValuePrefix) {
         this.multiValuePrefix = multiValuePrefix;
+    }
+
+    public String getCustomValue() {
+        return customValue;
+    }
+
+    public void setCustomValue(String customValue) {
+        this.customValue = customValue;
     }
 }

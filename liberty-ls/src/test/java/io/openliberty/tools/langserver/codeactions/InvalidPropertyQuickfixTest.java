@@ -74,14 +74,14 @@ public class InvalidPropertyQuickfixTest extends CodeActionQuickfixFactoryTest {
 
         Range expectedRange = new Range(new Position(0, 27), new Position(0, 37));
         List<Diagnostic> diagnostics = new ArrayList<>();
-        Diagnostic diagnostic1 = new Diagnostic(expectedRange, "The value `message,au` is not valid for the variable `WLP_LOGGING_MESSAGE_SOURCE`.");
+        Diagnostic diagnostic1 = new Diagnostic(expectedRange, "The value `au` is not valid for the variable `WLP_LOGGING_MESSAGE_SOURCE`.");
         diagnostic1.setCode(ERROR_CODE_INVALID_PROPERTY_VALUE);
         diagnostic1.setSeverity(DiagnosticSeverity.Error);
         diagnostic1.setSource("Liberty Config Language Server");
         diagnostics.add(diagnostic1);
         diagnostic1.setData("message");
         CompletableFuture<List<Either<Command, CodeAction>>> codeActionsCompletableFuture = retrieveCodeActions(textDocumentIdentifier, diagnostic);
-        List<CodeAction> expectedCodeActions=populateCodeActions(diagnostics,
+        List<CodeAction> expectedCodeActions=populateCodeActions(diagnostics,"Replace value with message",
                 "Replace value with message,trace","Replace value with message,accessLog",
                 "Replace value with message,ffdc","Replace value with message,audit");
         checkRetrievedCodeAction(textDocumentIdentifier, codeActionsCompletableFuture, expectedRange, expectedCodeActions);
@@ -96,14 +96,14 @@ public class InvalidPropertyQuickfixTest extends CodeActionQuickfixFactoryTest {
 
         Range expectedRange = new Range(new Position(0, 34), new Position(0, 43));
         List<Diagnostic> diagnostics = new ArrayList<>();
-        Diagnostic diagnostic1 = new Diagnostic(expectedRange, "The value `trace,aud` is not valid for the property `com.ibm.ws.logging.console.source`.");
+        Diagnostic diagnostic1 = new Diagnostic(expectedRange, "The value `aud` is not valid for the property `com.ibm.ws.logging.console.source`.");
         diagnostic1.setCode(ERROR_CODE_INVALID_PROPERTY_VALUE);
         diagnostic1.setSeverity(DiagnosticSeverity.Error);
         diagnostic1.setSource("Liberty Config Language Server");
         diagnostics.add(diagnostic1);
         diagnostic1.setData("trace");
         CompletableFuture<List<Either<Command, CodeAction>>> codeActionsCompletableFuture = retrieveCodeActions(textDocumentIdentifier, diagnostic);
-        List<CodeAction> expectedCodeActions=populateCodeActions(diagnostics,
+        List<CodeAction> expectedCodeActions=populateCodeActions(diagnostics,"Replace value with trace",
                 "Replace value with trace,message","Replace value with trace,accessLog",
                 "Replace value with trace,ffdc","Replace value with trace,audit");
         checkRetrievedCodeAction(textDocumentIdentifier, codeActionsCompletableFuture, expectedRange, expectedCodeActions);

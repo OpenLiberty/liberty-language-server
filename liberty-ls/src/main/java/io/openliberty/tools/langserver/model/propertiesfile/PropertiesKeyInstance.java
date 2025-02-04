@@ -10,7 +10,10 @@
 package io.openliberty.tools.langserver.model.propertiesfile;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
@@ -110,7 +113,7 @@ public class PropertiesKeyInstance {
     }
 
     public List<CompletionItem> getValidValues(String enteredValue, Position position) {
-        List<String> values = ServerPropertyValues.getValidValues(textDocumentItem, propertyKey);
+        List<String> validValues = ServerPropertyValues.getValidValues(textDocumentItem, propertyKey);
         List<String> enteredValuesLowerCase = new ArrayList<>();
         String filterValue;
         String prefix;
@@ -120,8 +123,14 @@ public class PropertiesKeyInstance {
                 // has comma separated values
                 prefix = enteredValue.substring(0, enteredValue.lastIndexOf(",") + 1);
                 filterValue = enteredValue.substring(enteredValue.lastIndexOf(",") + 1);
-                enteredValuesLowerCase = ServerPropertyValues.getCommaSeparatedValues(enteredValue).stream()
+                enteredValuesLowerCase = ServerPropertyValues.getCommaSeparatedValues(prefix).stream()
                         .map(String::toLowerCase).toList();
+                // in case any of the entered value is invalid, do not show completion
+                Set<String> invalidValuesEntered=new HashSet<>(enteredValuesLowerCase);
+                validValues.forEach(v->invalidValuesEntered.remove(v.toLowerCase()));
+                if(!invalidValuesEntered.isEmpty()){
+                    return Collections.emptyList();
+                }
             } else {
                 // in case of no comma, set prefix as empty and use entered value to filter for property
                 filterValue = enteredValue;
@@ -133,7 +142,7 @@ public class PropertiesKeyInstance {
             filterValue = enteredValue;
             prefix = "";
         }
-        Stream<String> filteredCompletion = values.stream()
+        Stream<String> filteredCompletion = validValues.stream()
                 .filter(s -> s.toLowerCase().contains(filterValue.trim().toLowerCase()));
         if (!enteredValuesLowerCase.isEmpty()) {
             // if there is already a value specified in case of comma separated field, filter out existing
