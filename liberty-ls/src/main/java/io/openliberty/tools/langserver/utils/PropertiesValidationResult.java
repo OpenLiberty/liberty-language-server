@@ -31,6 +31,9 @@ public class PropertiesValidationResult {
     String diagnosticType;
     PropertiesEntryInstance entry;
     LibertyTextDocument textDocumentItem;
+    // being used for passing correct values for quickfix
+    // in case the current value has multiple values, and some of them is correct
+    String multiValuePrefix;
     
     private static final Logger LOGGER = Logger.getLogger(PropertiesValidationResult.class.getName());
 
@@ -38,6 +41,7 @@ public class PropertiesValidationResult {
         this.entry = entry;
         this.textDocumentItem = entry.getTextDocument();
         this.hasErrors = false;
+        this.multiValuePrefix = "";
     }
 
     /**
@@ -82,7 +86,21 @@ public class PropertiesValidationResult {
             if(ServerPropertyValues.isCaseSensitive(property)) {
                 // currently all comma separated values properties are case-sensitive
                 if (ServerPropertyValues.multipleCommaSeparatedValuesAllowed(getKey()) && value != null) {
-                    hasErrors = !new HashSet<>(validValues).containsAll(ServerPropertyValues.getCommaSeparatedValues(value));
+                    if (value.startsWith(",") || value.endsWith(",")) {
+                        hasErrors = true;
+                    } else {
+                        List<String> enteredValues = ServerPropertyValues.getCommaSeparatedValues(value);
+                        hasErrors = !new HashSet<>(validValues).containsAll(enteredValues);
+                        //getting all valid prefix in case of multiple values
+                        // example, user entered,WLP_LOGGING_CONSOLE_SOURCE=abc,audit,message,kyc
+                        // quickfix should contain something like
+                        // replace with "audit,message,trace"
+                        // replace with "audit,message,ffdc"
+                        // replace with "audit,message,auditLog"
+                        HashSet<String> retainValues = new HashSet<>(validValues);
+                        retainValues.retainAll(enteredValues);
+                        setMultiValuePrefix(String.join(",", retainValues));
+                    }
                 } else {
                     // if case-sensitive, check if value is valid
                     hasErrors = !validValues.contains(value);
@@ -170,5 +188,13 @@ public class PropertiesValidationResult {
      */
     public String getDiagnosticType() {
         return diagnosticType;
+    }
+
+    public String getMultiValuePrefix() {
+        return multiValuePrefix;
+    }
+
+    public void setMultiValuePrefix(String multiValuePrefix) {
+        this.multiValuePrefix = multiValuePrefix;
     }
 }

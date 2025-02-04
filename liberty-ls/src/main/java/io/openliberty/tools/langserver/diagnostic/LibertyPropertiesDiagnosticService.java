@@ -88,6 +88,7 @@ public class LibertyPropertiesDiagnosticService  {
             String message = MessageFormat.format(messageTemplate, validationResult.getValue(), property, ServerPropertyValues.getIntegerRange(property));
             Diagnostic diagnostic = new Diagnostic(computeRange(validationResult, lineContentInError), message, DiagnosticSeverity.Error, "Liberty Config Language Server");
             diagnostic.setCode(ERROR_CODE_INVALID_PROPERTY_VALUE);
+            diagnostic.setData(validationResult.getMultiValuePrefix());
             lspDiagnostics.add(diagnostic);
         }
         return lspDiagnostics;

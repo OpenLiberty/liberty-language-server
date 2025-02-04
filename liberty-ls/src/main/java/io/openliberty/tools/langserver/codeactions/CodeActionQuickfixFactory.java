@@ -12,6 +12,7 @@
  *******************************************************************************/
 package io.openliberty.tools.langserver.codeactions;
 
+import com.google.gson.JsonPrimitive;
 import io.openliberty.tools.langserver.LibertyLanguageServer;
 import io.openliberty.tools.langserver.LibertyTextDocumentService;
 import io.openliberty.tools.langserver.ls.LibertyTextDocument;
@@ -32,6 +33,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public abstract class CodeActionQuickfixFactory {
 
@@ -57,9 +59,22 @@ public abstract class CodeActionQuickfixFactory {
             if (diagnostic.getCode() != null && getErrorCode().equals(diagnostic.getCode().getLeft())) {
                 String line = new ParserFileHelperUtil().getLine(new LibertyTextDocument(openedDocument), diagnostic.getRange().getStart().getLine());
                 if (line != null) {
+                    String prefix = "";
                     // fetch all completion values and shows them as quick fix
                     // completion returns empty list if no completion item is present
-                    List<String> possibleProperties = retrieveCompletionValues(openedDocument, diagnostic.getRange().getStart());
+                    if(diagnostic.getData()!=null) {
+                        if (diagnostic.getData() instanceof JsonPrimitive) {
+                            prefix = ((JsonPrimitive) diagnostic.getData()).getAsString();
+                        }
+                        if (diagnostic.getData() instanceof String) {
+                            prefix = (String) diagnostic.getData();
+                        }
+                    }
+                    if(!Objects.equals(prefix, "")){
+                        // append a comma so that completion will show all values for multi value
+                        prefix+=",";
+                    }
+                    List<String> possibleProperties = retrieveCompletionValues(openedDocument, diagnostic.getRange().getStart(),prefix);
                     for (String mostProbableProperty : possibleProperties) {
                         // expected format for a code action is <Command,CodeAction>
                         res.add(Either.forRight(createCodeAction(params, diagnostic, mostProbableProperty)));
@@ -88,7 +103,7 @@ public abstract class CodeActionQuickfixFactory {
         return codeAction;
     }
 
-    protected abstract List<String> retrieveCompletionValues(TextDocumentItem textDocumentItem, Position position);
+    protected abstract List<String> retrieveCompletionValues(TextDocumentItem textDocumentItem, Position position, String prefix);
 
     protected abstract String getErrorCode();
 }
