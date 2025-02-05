@@ -755,4 +755,26 @@ public class FeatureService {
         }
         return includedPlatforms;
     }
+
+    /**
+     * get version less feature list for specified list of versioned features
+     * @param versionedFeatureNames list of versioned feature names
+     * @param libertyRuntime librty runtime
+     * @param libertyVersion runtime version
+     * @param requestDelay request delay
+     * @param documentURI server xml document uri
+     * @return version less feature list
+     */
+    public Set<String> getVersionLessFeaturesForVersioned(List<String> versionedFeatureNames, String libertyRuntime, String libertyVersion,int requestDelay, String documentURI) {
+        FeaturesAndPlatforms featuresAndPlatforms = getFeaturesAndPlatforms( libertyVersion,libertyRuntime, requestDelay, documentURI);
+        Set<String> featureNames = featuresAndPlatforms.getPublicFeatures().stream()
+                .filter(feature -> feature.getWlpInformation() != null)
+                .map(feature -> feature.getWlpInformation().getShortName().toLowerCase())
+                .collect(Collectors.toSet());
+
+        return versionedFeatureNames.stream()
+                .map(LibertyUtils::stripVersion)
+                .filter(feature -> featureNames.contains(feature.toLowerCase()))
+                .collect(Collectors.toSet());
+    }
 }

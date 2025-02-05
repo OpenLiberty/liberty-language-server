@@ -1086,6 +1086,61 @@ public class LibertyDiagnosticTest {
         String serverXML = String.join(newLine,
                 "<server description=\"Sample Liberty server\">",
                 "    <featureManager>",
+                "        <platform>javaee-7.0</platform>",
+                "    </featureManager>",
+                configElement,
+                "</server>"
+        );
+        Diagnostic diagnostic = new Diagnostic();
+        diagnostic.setRange(r(4, 0, 4, 46));
+        diagnostic.setCode(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE);
+        diagnostic.setMessage(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_MESSAGE);
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, sampleserverXMLURI, diagnostic);
+        diagnostic.setSource("mpMetrics");
+
+        List<String> featuresToAdd = new ArrayList<>();
+        // here javaee-7.0 platform is specified , which is not valid for mpMetrics
+        // hence versionless feature is not shown
+        featuresToAdd.add("mpMetrics-1.0");
+        featuresToAdd.add("mpMetrics-1.1");
+        featuresToAdd.add("mpMetrics-2.0");
+        featuresToAdd.add("mpMetrics-2.2");
+        featuresToAdd.add("mpMetrics-2.3");
+        featuresToAdd.add("mpMetrics-3.0");
+        featuresToAdd.add("mpMetrics-4.0");
+        featuresToAdd.add("mpMetrics-5.0");
+        featuresToAdd.add("mpMetrics-5.1");
+
+        Collections.sort(featuresToAdd);
+
+        List<CodeAction> codeActions = new ArrayList<>();
+        for (String nextFeature: featuresToAdd) {
+            String addFeature = String.format("%s<feature>%s</feature>",System.lineSeparator(),nextFeature);
+            TextEdit texted = te(2, 39, 2, 39, addFeature);
+            CodeAction invalidCodeAction = ca(diagnostic, texted);
+
+            TextDocumentEdit textDoc = tde(sampleserverXMLURI, 0, texted);
+            WorkspaceEdit workspaceEdit = new WorkspaceEdit(Collections.singletonList(Either.forLeft(textDoc)));
+
+            invalidCodeAction.setEdit(workspaceEdit);
+            codeActions.add(invalidCodeAction);
+        }
+
+        // diagnostic with code action expected
+        XMLAssert.testCodeActionsFor(serverXML, sampleserverXMLURI, diagnostic, (String) null,
+                codeActions.get(0), codeActions.get(1), codeActions.get(2),
+                codeActions.get(3), codeActions.get(4), codeActions.get(5),
+                codeActions.get(6), codeActions.get(7), codeActions.get(8)
+        );
+    }
+
+    @Test
+    public void testConfigElementDiagnosticsAndCodeActionWithVersionless() throws BadLocationException {
+        String configElement = "<mpMetrics authentication=\"false\"></mpMetrics>";
+        String serverXML = String.join(newLine,
+                "<server description=\"Sample Liberty server\">",
+                "    <featureManager>",
                 "        <platform>microProfile-2.2</platform>",
                 "    </featureManager>",
                 configElement,
@@ -1096,10 +1151,12 @@ public class LibertyDiagnosticTest {
         diagnostic.setCode(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE);
         diagnostic.setMessage(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_MESSAGE);
 
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, sampleserverXMLURI,diagnostic);
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, sampleserverXMLURI, diagnostic);
         diagnostic.setSource("mpMetrics");
 
         List<String> featuresToAdd = new ArrayList<String>();
+        // show version less feature name since microprofile platform is added
+        featuresToAdd.add("mpMetrics");
         featuresToAdd.add("mpMetrics-1.0");
         featuresToAdd.add("mpMetrics-1.1");
         featuresToAdd.add("mpMetrics-2.0");
@@ -1129,7 +1186,7 @@ public class LibertyDiagnosticTest {
         XMLAssert.testCodeActionsFor(serverXML, sampleserverXMLURI, diagnostic, (String) null,
                 codeActions.get(0), codeActions.get(1), codeActions.get(2),
                 codeActions.get(3), codeActions.get(4), codeActions.get(5),
-                codeActions.get(6), codeActions.get(7), codeActions.get(8)
+                codeActions.get(6), codeActions.get(7), codeActions.get(8), codeActions.get(9)
         );
     }
 }
