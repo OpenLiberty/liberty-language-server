@@ -112,6 +112,20 @@ public class PropertiesKeyInstance {
         }
     }
 
+    /**
+     * this method will return valid properties for a specified key
+     *      1. In case of multi value property and user has entered multiple properties
+     *          a. split input to prefix and filtervalue
+     *          b. if all values in prefix are valid, use filtervalue and show completion
+     *              of all allowed properties exlcuding already added valid properties
+     *          c. if any of the values in entered text is invalid, do not show completion
+     *      2. in case of single value property or no comma is specified in multi value
+     *          a. consider the entered value as filter and filter through all valid values
+     *              to show completion
+     * @param enteredValue entered value
+     * @param position current position in document
+     * @return completion Items
+     */
     public List<CompletionItem> getValidValues(String enteredValue, Position position) {
         List<String> validValues = ServerPropertyValues.getValidValues(textDocumentItem, propertyKey);
         List<String> enteredValuesLowerCase = new ArrayList<>();
@@ -150,6 +164,23 @@ public class PropertiesKeyInstance {
         return results;
     }
 
+    /**
+     *  1. generate list of completion items based on filtering using filter value,
+     *     and excluding all existing values
+     *  2. append prefix into completion string in case of multi value properties
+     *      if user has user entered,WLP_LOGGING_CONSOLE_SOURCE=abc,audit,message,|
+     *      completion should contain something like
+     *          "audit,message,trace"
+     *          "audit,message,ffdc"
+     *          "audit,message,auditLog"
+     * @param position current position
+     * @param validValues allowed values list
+     * @param filterValue filter through all valid allowed values
+     * @param enteredValuesLowerCase existing values in property, empty incase of single value
+     * @param prefix prefix in case of multi value
+     * @param endPosition last position
+     * @return completion items
+     */
     private List<CompletionItem> generateCompletionItemsList(Position position, List<String> validValues, String filterValue, List<String> enteredValuesLowerCase, String prefix, int endPosition) {
         Stream<String> filteredCompletion = validValues.stream()
                 .filter(s -> s.toLowerCase().contains(filterValue.trim().toLowerCase()));
@@ -160,15 +191,22 @@ public class PropertiesKeyInstance {
         return filteredCompletion.map(s -> getCompletionItem(position, prefix + s, endPosition)).toList();
     }
 
-    private CompletionItem getCompletionItem(Position position, String s, int endPosition) {
+    /**
+     * populate completion item object
+     * @param position current line position
+     * @param labelString string
+     * @param endPosition endposition
+     * @return
+     */
+    private CompletionItem getCompletionItem(Position position, String labelString, int endPosition) {
         int line = position.getLine();
         Position rangeStart = new Position(line, endPosition);
-        Position rangeEnd = new Position(line, endPosition + s.length());
+        Position rangeEnd = new Position(line, endPosition + labelString.length());
         Range range = new Range(rangeStart, rangeEnd);
-        Either<TextEdit, InsertReplaceEdit> edit = Either.forLeft(new TextEdit(range, s));
+        Either<TextEdit, InsertReplaceEdit> edit = Either.forLeft(new TextEdit(range, labelString));
         CompletionItem completionItem = new CompletionItem();
         completionItem.setTextEdit(edit);
-        completionItem.setLabel(s);
+        completionItem.setLabel(labelString);
         return completionItem;
     }
 

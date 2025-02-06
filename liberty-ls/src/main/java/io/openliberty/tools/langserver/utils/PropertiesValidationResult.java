@@ -15,6 +15,7 @@ package io.openliberty.tools.langserver.utils;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
@@ -92,7 +93,7 @@ public class PropertiesValidationResult {
                 if (ServerPropertyValues.multipleCommaSeparatedValuesAllowed(getKey()) && value != null) {
                     validateMultiValueProperty(value, validValues);
                 } else {
-                    // if case-sensitive, check if value is valid
+                    // case-sensitive single value field, check if value is valid
                     hasErrors = !validValues.contains(value);
                 }
             } else {
@@ -144,6 +145,16 @@ public class PropertiesValidationResult {
         return;
     }
 
+    /**
+     * validate multi value property
+     *      1. set hasErrors to true if value starts or ends with comma
+     *      2. if multi value has some valid and invalid values
+     *          a. send a custom message back to show only invalid values in error message
+     *          b. send valid values along with diagnostic data,
+     *             so that code action can show option to quickfix using valid values
+     * @param value
+     * @param validValues
+     */
     private void validateMultiValueProperty(String value, List<String> validValues) {
         if (value.startsWith(",") || value.endsWith(",")) {
             hasErrors = true;
@@ -163,7 +174,8 @@ public class PropertiesValidationResult {
             //      replace with "audit,message,auditLog"
             List<String> retainValues = new ArrayList<>(validValues);
             retainValues.retainAll(enteredValues);
-            Collections.sort(retainValues);
+            retainValues.sort(Comparator.comparingInt(
+                    ServerPropertyValues.LOGGING_SOURCE_VALUES::indexOf));
             setMultiValuePrefix(String.join(",", retainValues));
         }
     }
