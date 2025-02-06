@@ -84,7 +84,7 @@
                     <runtimeArtifact>
                         <groupId>io.openliberty</groupId>
                         <artifactId>openliberty-runtime</artifactId>
-                        <version>24.0.0.12</version>
+                        <version>25.0.0.1</version>
                     </runtimeArtifact>
                 </configuration>
                 <executions>
