@@ -152,7 +152,7 @@ public class AddFeature implements ICodeActionParticipant {
         // adding version less feature
         for (String feature : possibleVersionlessFeatures) {
             Set<String> allPlatforms = FeatureService.getInstance().getAllPlatformsForVersionLessFeature(feature, libertyVersion, libertyRuntime, requestDelay, document.getDocumentURI());
-            if (allPlatforms.containsAll(existingPlatforms)) {
+            if (allPlatforms.stream().anyMatch(existingPlatforms::contains)) {
                 String title = "Add feature " + feature;
                 codeActions.add(CodeActionFactory.insert(
                         title, referenceRange.getEnd(),
