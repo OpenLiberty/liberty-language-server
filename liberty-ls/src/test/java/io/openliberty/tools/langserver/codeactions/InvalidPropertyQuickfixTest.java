@@ -81,7 +81,7 @@ public class InvalidPropertyQuickfixTest extends CodeActionQuickfixFactoryTest {
         diagnostics.add(diagnostic1);
         diagnostic1.setData("message,trace");
         CompletableFuture<List<Either<Command, CodeAction>>> codeActionsCompletableFuture = retrieveCodeActions(textDocumentIdentifier, diagnostic);
-        List<CodeAction> expectedCodeActions=populateCodeActions(diagnostics,"Replace value with trace,message",
+        List<CodeAction> expectedCodeActions=populateCodeActions(diagnostics,"Replace value with message,trace",
                 "Replace value with message,trace,accessLog",
                 "Replace value with message,trace,ffdc","Replace value with message,trace,audit");
         checkRetrievedCodeAction(textDocumentIdentifier, codeActionsCompletableFuture, expectedRange, expectedCodeActions);
