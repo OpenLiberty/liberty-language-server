@@ -49,7 +49,7 @@ public class LibertyWorkspaceIT {
                 "                <platform>javaee-6.0</platform>", //
                 "                <feature>acmeCA-2.0</feature>", //
                 "       </featureManager>", //
-                " <httpEndpoint host=\"*\" httpPort=\"default|\"\n",//
+                " <httpEndpoint host=\"*\" httpPort=\"${default|\"\n",//
                 "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
                 "</server>" //
         );
