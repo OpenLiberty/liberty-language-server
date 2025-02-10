@@ -16,7 +16,7 @@ public class ServerEnvDiagnosticTest extends AbstractDiagnosticTest {
     @Test
     public void testServerEnv() throws Exception {
         // has invalid, case-sensitive, case-insensitive, and negative port integer values.
-        testDiagnostic("server.env", 6);
+        testDiagnostic("server.env", 7);
         checkDiagnosticsContainsAllRanges(
             // Checking invalid value: WLP_LOGGING_CONSOLE_FORMAT=asdf
             createRange(0, 27, 31),
@@ -29,7 +29,9 @@ public class ServerEnvDiagnosticTest extends AbstractDiagnosticTest {
             // Checking invalid whitespace after equal sign: WLP_LOGGING_MESSAGE_FORMAT= SIMPLE
             createRange(7,26,28),
             // Checking invalid case-sensitive property: WLP_LOGGING_CONSOLE_SOURCE=messagE
-            createRange(9, 27, 34)
+            createRange(9, 27, 34),
+            // Checking invalid case-sensitive property: WLP_LOGGING_MESSAGE_SOURCE=message,au
+            createRange(10, 27, 37)
         );
         checkDiagnosticsContainsMessages(
             "The value `asdf` is not valid for the variable `WLP_LOGGING_CONSOLE_FORMAT`.",
@@ -37,7 +39,8 @@ public class ServerEnvDiagnosticTest extends AbstractDiagnosticTest {
             "The value `-2` is not within the valid range `[1..65535]` for the variable `WLP_DEBUG_ADDRESS`.",
             "There should be no whitespace surrounding the equal sign (=).",
             "There should be no whitespace surrounding the equal sign (=).",
-            "The value `messagE` is not valid for the variable `WLP_LOGGING_CONSOLE_SOURCE`."
+            "The value `messagE` is not valid for the variable `WLP_LOGGING_CONSOLE_SOURCE`.",
+            "The value `au` is not valid for the variable `WLP_LOGGING_MESSAGE_SOURCE`."
         );
     }
 }

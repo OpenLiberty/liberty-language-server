@@ -43,20 +43,23 @@ public class InvalidPropertyValueQuickfix extends CodeActionQuickfixFactory {
 
     /**
      * retrieve list of completion items for a property key
+     *
      * @param textDocumentItem text document
-     * @param position current position, used to compute key
+     * @param position         current position, used to compute key
+     * @param prefix           prefix value to trigger completion with
      * @return list of string of completion item names
      */
     @Override
     protected List<String> retrieveCompletionValues(TextDocumentItem textDocumentItem,
-                                                    Position position) {
+                                                    Position position, String prefix) {
         List<String> completionValues = new ArrayList<>();
         try {
             LibertyTextDocument openedDocument = libertyLanguageServer.getTextDocumentService().getOpenedDocument(textDocumentItem.getUri());
             String line = new ParserFileHelperUtil().getLine(openedDocument, position);
             PropertiesEntryInstance propertiesEntryInstance = new PropertiesEntryInstance(line, openedDocument);
+            CompletableFuture<List<CompletionItem>> completions;
             // get all completions for current property key
-            CompletableFuture<List<CompletionItem>> completions = propertiesEntryInstance.getPropertyValueInstance().getCompletions("", position);
+            completions = propertiesEntryInstance.getPropertyValueInstance().getCompletions(prefix, position);
             // map text values from completion items
             completionValues = completions.thenApply(completionItems -> completionItems.stream()
                             .map(it -> it.getTextEdit().getLeft().getNewText())

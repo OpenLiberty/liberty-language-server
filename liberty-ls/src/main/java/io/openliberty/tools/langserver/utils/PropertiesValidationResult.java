@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022, 2023 IBM Corporation and others.
+* Copyright (c) 2022, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -13,6 +13,10 @@
 package io.openliberty.tools.langserver.utils;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -30,6 +34,11 @@ public class PropertiesValidationResult {
     String diagnosticType;
     PropertiesEntryInstance entry;
     LibertyTextDocument textDocumentItem;
+    // being used for passing correct values for quickfix
+    // in case the current value has multiple values, and some of them is correct
+    String multiValuePrefix;
+    // used in case we need to send a custom diagnostic message
+    String customValue;
     
     private static final Logger LOGGER = Logger.getLogger(PropertiesValidationResult.class.getName());
 
@@ -37,6 +46,7 @@ public class PropertiesValidationResult {
         this.entry = entry;
         this.textDocumentItem = entry.getTextDocument();
         this.hasErrors = false;
+        this.multiValuePrefix = "";
     }
 
     /**
@@ -79,8 +89,13 @@ public class PropertiesValidationResult {
         if (ServerPropertyValues.usesPredefinedValues(textDocumentItem, property)) {
             List<String> validValues = ServerPropertyValues.getValidValues(textDocumentItem, property);
             if(ServerPropertyValues.isCaseSensitive(property)) {
-                // if case-sensitive, check if value is valid
-                hasErrors = !validValues.contains(value);
+                // currently all comma separated values properties are case-sensitive
+                if (ServerPropertyValues.multipleCommaSeparatedValuesAllowed(getKey()) && value != null) {
+                    validateMultiValueProperty(value, validValues);
+                } else {
+                    // case-sensitive single value field, check if value is valid
+                    hasErrors = !validValues.contains(value);
+                }
             } else {
                 // ignoring case, check if value is valid
                 hasErrors = !validValues.stream().anyMatch(value::equalsIgnoreCase);
@@ -130,6 +145,41 @@ public class PropertiesValidationResult {
         return;
     }
 
+    /**
+     * validate multi value property
+     *      1. set hasErrors to true if value starts or ends with comma
+     *      2. if multi value has some valid and invalid values
+     *          a. send a custom message back to show only invalid values in error message
+     *          b. send valid values along with diagnostic data,
+     *             so that code action can show option to quickfix using valid values
+     * @param value
+     * @param validValues
+     */
+    private void validateMultiValueProperty(String value, List<String> validValues) {
+        if (value.startsWith(",") || value.endsWith(",")) {
+            hasErrors = true;
+        } else {
+            List<String> enteredValues = ServerPropertyValues.getCommaSeparatedValues(value);
+            hasErrors = !new HashSet<>(validValues).containsAll(enteredValues);
+            HashSet<String> invalidValues = new HashSet<>(enteredValues);
+            validValues.forEach(invalidValues::remove);
+            // setting a custom value for diagnostic message, to show only invalid values in the message
+            setCustomValue(String.join(",", invalidValues));
+            // getting all valid prefix in case of multiple values
+            // example, user entered,WLP_LOGGING_CONSOLE_SOURCE=abc,audit,message,kyc
+            // quickfix should contain something like
+            //      replace with "audit,message
+            //      replace with "audit,message,trace"
+            //      replace with "audit,message,ffdc"
+            //      replace with "audit,message,auditLog"
+            List<String> retainValues = new ArrayList<>(validValues);
+            retainValues.retainAll(enteredValues);
+            retainValues.sort(Comparator.comparingInt(
+                    ServerPropertyValues.LOGGING_SOURCE_VALUES::indexOf));
+            setMultiValuePrefix(String.join(",", retainValues));
+        }
+    }
+
     public void setLineNumber(Integer lineNumber) {
         this.lineNumber = lineNumber;
     }
@@ -164,5 +214,21 @@ public class PropertiesValidationResult {
      */
     public String getDiagnosticType() {
         return diagnosticType;
+    }
+
+    public String getMultiValuePrefix() {
+        return multiValuePrefix;
+    }
+
+    public void setMultiValuePrefix(String multiValuePrefix) {
+        this.multiValuePrefix = multiValuePrefix;
+    }
+
+    public String getCustomValue() {
+        return customValue;
+    }
+
+    public void setCustomValue(String customValue) {
+        this.customValue = customValue;
     }
 }

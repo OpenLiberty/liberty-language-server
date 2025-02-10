@@ -34,6 +34,7 @@ public class InvalidPropertyQuickfixTest extends CodeActionQuickfixFactoryTest {
         diagnostic1.setCode(ERROR_CODE_INVALID_PROPERTY_VALUE);
         diagnostic1.setSeverity(DiagnosticSeverity.Error);
         diagnostic1.setSource("Liberty Config Language Server");
+        diagnostic1.setData("");
         diagnostics.add(diagnostic1);
 
         CompletableFuture<List<Either<Command, CodeAction>>> codeActionsCompletableFuture = retrieveCodeActions(textDocumentIdentifier, lastPublishedDiagnostics.getDiagnostics().get(0));
@@ -57,12 +58,57 @@ public class InvalidPropertyQuickfixTest extends CodeActionQuickfixFactoryTest {
         diagnostic1.setSeverity(DiagnosticSeverity.Error);
         diagnostic1.setSource("Liberty Config Language Server");
         diagnostics.add(diagnostic1);
+        diagnostic1.setData("");
         CompletableFuture<List<Either<Command, CodeAction>>> codeActionsCompletableFuture = retrieveCodeActions(textDocumentIdentifier, diagnostic);
         List<CodeAction> expectedCodeActions=populateCodeActions(diagnostics,
                 "Replace value with AUDIT","Replace value with INFO",
                 "Replace value with WARNING","Replace value with ERROR","Replace value with OFF");
         checkRetrievedCodeAction(textDocumentIdentifier, codeActionsCompletableFuture, expectedRange, expectedCodeActions);
     }
+
+    @Test
+    public void testReturnCodeActionForQuickfixForServerEnvWithMultiValues() throws FileNotFoundException, ExecutionException, InterruptedException {
+        TextDocumentIdentifier textDocumentIdentifier = initAndLaunchDiagnostic("src/test/resources/workspace/codeaction/src/main/liberty/config2/","server.env");
+
+        Diagnostic diagnostic = lastPublishedDiagnostics.getDiagnostics().get(0);
+
+        Range expectedRange = new Range(new Position(0, 27), new Position(0, 43));
+        List<Diagnostic> diagnostics = new ArrayList<>();
+        Diagnostic diagnostic1 = new Diagnostic(expectedRange, "The value `au` is not valid for the variable `WLP_LOGGING_MESSAGE_SOURCE`.");
+        diagnostic1.setCode(ERROR_CODE_INVALID_PROPERTY_VALUE);
+        diagnostic1.setSeverity(DiagnosticSeverity.Error);
+        diagnostic1.setSource("Liberty Config Language Server");
+        diagnostics.add(diagnostic1);
+        diagnostic1.setData("message,trace");
+        CompletableFuture<List<Either<Command, CodeAction>>> codeActionsCompletableFuture = retrieveCodeActions(textDocumentIdentifier, diagnostic);
+        List<CodeAction> expectedCodeActions=populateCodeActions(diagnostics,"Replace value with message,trace",
+                "Replace value with message,trace,accessLog",
+                "Replace value with message,trace,ffdc","Replace value with message,trace,audit");
+        checkRetrievedCodeAction(textDocumentIdentifier, codeActionsCompletableFuture, expectedRange, expectedCodeActions);
+    }
+
+
+    @Test
+    public void testReturnCodeActionForQuickfixForBootstrapWithMultiValues() throws FileNotFoundException, ExecutionException, InterruptedException {
+        TextDocumentIdentifier textDocumentIdentifier = initAndLaunchDiagnostic("src/test/resources/workspace/codeaction/src/main/liberty/config2/","bootstrap.properties");
+
+        Diagnostic diagnostic = lastPublishedDiagnostics.getDiagnostics().get(0);
+
+        Range expectedRange = new Range(new Position(0, 34), new Position(0, 51));
+        List<Diagnostic> diagnostics = new ArrayList<>();
+        Diagnostic diagnostic1 = new Diagnostic(expectedRange, "The value `aud` is not valid for the property `com.ibm.ws.logging.console.source`.");
+        diagnostic1.setCode(ERROR_CODE_INVALID_PROPERTY_VALUE);
+        diagnostic1.setSeverity(DiagnosticSeverity.Error);
+        diagnostic1.setSource("Liberty Config Language Server");
+        diagnostics.add(diagnostic1);
+        diagnostic1.setData("message,trace");
+        CompletableFuture<List<Either<Command, CodeAction>>> codeActionsCompletableFuture = retrieveCodeActions(textDocumentIdentifier, diagnostic);
+        List<CodeAction> expectedCodeActions=populateCodeActions(diagnostics,"Replace value with message,trace",
+                "Replace value with message,trace,accessLog",
+                "Replace value with message,trace,ffdc","Replace value with message,trace,audit");
+        checkRetrievedCodeAction(textDocumentIdentifier, codeActionsCompletableFuture, expectedRange, expectedCodeActions);
+    }
+
 
     private void checkRetrievedCodeAction(TextDocumentIdentifier textDocumentIdentifier, CompletableFuture<List<Either<Command, CodeAction>>> codeActions, Range expectedRange, List<CodeAction> expectedCodeActions)
             throws InterruptedException, ExecutionException {
