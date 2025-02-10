@@ -99,7 +99,7 @@ public class AddFeature implements ICodeActionParticipant {
         // get existing platforms from the document
         List<String> existingPlatforms = FeatureService.getInstance()
                 .collectExistingPlatforms(document, "");
-        // find versionless features for all versioned features in the document
+        // find version less features for all versioned features in the sorted features
         Set<String> possibleVersionlessFeatures = FeatureService.getInstance()
                 .getVersionLessFeaturesForVersioned(sortedFeatures, libertyRuntime, libertyVersion, requestDelay, document.getDocumentURI());
 
@@ -149,7 +149,7 @@ public class AddFeature implements ICodeActionParticipant {
         }
         insertText = IndentUtil.formatText(insertText, indent, referenceRange.getStart().getCharacter());
 
-        // adding version less feature
+        // for each versionless features that has at least one matching platform to a specified platform in the document
         for (String feature : possibleVersionlessFeatures) {
             Set<String> allPlatforms = FeatureService.getInstance().getAllPlatformsForVersionLessFeature(feature, libertyVersion, libertyRuntime, requestDelay, document.getDocumentURI());
             if (allPlatforms.stream().anyMatch(existingPlatforms::contains)) {
