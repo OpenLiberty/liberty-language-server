@@ -168,7 +168,7 @@ public class PropertiesKeyInstance {
      *  1. generate list of completion items based on filtering using filter value,
      *     and excluding all existing values
      *  2. append prefix into completion string in case of multi value properties
-     *      if user has user entered,WLP_LOGGING_CONSOLE_SOURCE=abc,audit,message,|
+     *      if user has user entered,WLP_LOGGING_CONSOLE_SOURCE=audit,message,|
      *      completion should contain something like
      *          "audit,message,trace"
      *          "audit,message,ffdc"
@@ -176,7 +176,7 @@ public class PropertiesKeyInstance {
      * @param position current position
      * @param validValues allowed values list
      * @param filterValue filter through all valid allowed values
-     * @param enteredValuesLowerCase existing values in property, empty incase of single value
+     * @param enteredValuesLowerCase existing values in property, empty in case of single value
      * @param prefix prefix in case of multi value
      * @param endPosition last position
      * @return completion items
