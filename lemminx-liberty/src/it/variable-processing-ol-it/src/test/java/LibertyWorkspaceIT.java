@@ -170,17 +170,27 @@ public class LibertyWorkspaceIT {
         List<String> variables = new ArrayList<>();
         variables.add("default.https.port");
         List<CodeAction> codeActions = new ArrayList<>();
+        TextEdit texted;
+        CodeAction invalidCodeAction;
         for (String nextVar : variables) {
             String variableInDoc = String.format("${%s}", nextVar);
-            TextEdit texted = te(invalid1.getRange().getStart().getLine(), invalid1.getRange().getStart().getCharacter(),
+            texted = te(invalid1.getRange().getStart().getLine(), invalid1.getRange().getStart().getCharacter(),
                     invalid1.getRange().getEnd().getLine(), invalid1.getRange().getEnd().getCharacter(), variableInDoc);
-            CodeAction invalidCodeAction = ca(invalid1, texted);
+            invalidCodeAction = ca(invalid1, texted);
             codeActions.add(invalidCodeAction);
             invalidCodeAction.getEdit()
                     .getDocumentChanges()
                     .get(0).getLeft().getTextDocument()
                     .setUri(serverXmlFile.toURI().toString());
         }
-        XMLAssert.testCodeActionsFor(serverXML, serverXmlFile.toURI().toString(), invalid1, codeActions.get(0));
+        texted = te(7, 0,
+                7, 0, String.format("    <variable name=\"%s\" value=\"\"/> %s","default.https",System.lineSeparator()));
+        invalidCodeAction = ca(invalid1, texted);
+        invalidCodeAction.getEdit()
+                .getDocumentChanges()
+                .get(0).getLeft().getTextDocument()
+                .setUri(serverXmlFile.toURI().toString());
+        codeActions.add(invalidCodeAction);
+        XMLAssert.testCodeActionsFor(serverXML, serverXmlFile.toURI().toString(), invalid1, codeActions.get(0), codeActions.get(1));
     }
 }
