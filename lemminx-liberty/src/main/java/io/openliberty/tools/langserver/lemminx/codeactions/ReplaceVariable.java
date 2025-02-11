@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 IBM Corporation and others.
+ * Copyright (c) 2024, 2025 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -15,20 +15,17 @@ package io.openliberty.tools.langserver.lemminx.codeactions;
 
 import com.google.gson.JsonPrimitive;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
-import org.apache.commons.lang3.StringUtils;
+import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 import org.eclipse.lemminx.commons.CodeActionFactory;
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionParticipant;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionRequest;
-import org.eclipse.lemminx.utils.XMLPositionUtility;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Position;
-import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -60,19 +57,22 @@ public class ReplaceVariable implements ICodeActionParticipant {
                 // filter with entered word -> may not be required
                 String finalInvalidVariable = invalidVariable;
                 Set<Map.Entry<Object, Object>> filteredVariables = existingVariables
-                        .entrySet().stream().filter(entry ->
-                                entry.getKey().toString().toLowerCase()
-                                        .contains(finalInvalidVariable.toLowerCase())
-                                        || finalInvalidVariable.toLowerCase().contains(entry.getKey().toString().toLowerCase())
-                        ).collect(Collectors.toSet());
+                        .entrySet().stream()
+                        .filter(entry -> LibertyUtils.containsEachOther(entry.toString(), finalInvalidVariable, false))
+                        .collect(Collectors.toSet());
                 for (Map.Entry<Object, Object> nextVariable : filteredVariables) {
                     String title = "Replace attribute value with " + nextVariable.getKey();
                     String variableInDoc = String.format("${%s}", nextVariable.getKey().toString());
                     codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), variableInDoc, document.getTextDocument(), diagnostic));
                 }
-                Position insertPos=new Position();
+                // code action for add variable
+                Position insertPos = new Position();
+                // variable will be added in the current line where diagnostic is showing
+                // line separator in end of text insert will move current diagnostic line to 1 line
                 insertPos.setLine(diagnostic.getRange().getEnd().getLine());
-                codeActions.add(CodeActionFactory.insert("Add variable "+ invalidVariable, insertPos, String.format("    <variable name=\"%s\" value=\"\"/> %s",invalidVariable,System.lineSeparator()), document.getTextDocument(), diagnostic));
+                codeActions.add(CodeActionFactory.insert("Add variable " + invalidVariable, insertPos,
+                        String.format("    <variable name=\"%s\" value=\"\"/> %s", invalidVariable, System.lineSeparator()),
+                        document.getTextDocument(), diagnostic));
             }
         } catch (Exception e) {
             // BadLocationException not expected

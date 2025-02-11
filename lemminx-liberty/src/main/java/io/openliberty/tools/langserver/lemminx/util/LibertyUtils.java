@@ -625,4 +625,20 @@ public class LibertyUtils {
         }
         return variables;
     }
+
+    /**
+     * check whether two strings contains each other
+     *
+     * @param string        string 1
+     * @param otherString   string 2
+     * @param caseSensitive is comparison case-sensitive or not
+     * @return boolean result
+     */
+    public static boolean containsEachOther(String string, String otherString, boolean caseSensitive) {
+        if (!caseSensitive) {
+            string = string.toLowerCase();
+            otherString = otherString.toLowerCase();
+        }
+        return string.contains(otherString) || otherString.contains(string);
+    }
 }
