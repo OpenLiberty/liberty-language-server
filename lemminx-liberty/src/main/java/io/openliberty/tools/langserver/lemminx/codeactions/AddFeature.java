@@ -18,6 +18,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.logging.Logger;
 
+import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
+import io.openliberty.tools.langserver.lemminx.services.SettingsService;
+import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lemminx.commons.CodeActionFactory;
 import org.eclipse.lemminx.commons.TextDocument;
@@ -63,7 +66,10 @@ public class AddFeature implements ICodeActionParticipant {
         Diagnostic diagnostic = request.getDiagnostic();
         DOMDocument document = request.getDocument();
         TextDocument textDocument = document.getTextDocument();
-
+        LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(document);
+        String libertyVersion = runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
+        String libertyRuntime = runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
+        final int requestDelay = SettingsService.getInstance().getRequestDelay();
         LibertyWorkspace ws = LibertyProjectsManager.getInstance().getWorkspaceFolder(document.getDocumentURI());    
         FeatureListGraph featureGraph = null;
         if (ws == null) {
@@ -90,6 +96,12 @@ public class AddFeature implements ICodeActionParticipant {
         ArrayList<String> sortedFeatures = new ArrayList<String>();
         sortedFeatures.addAll(featureCandidates);
         Collections.sort(sortedFeatures);
+        // get existing platforms from the document
+        List<String> existingPlatforms = FeatureService.getInstance()
+                .collectExistingPlatforms(document, "");
+        // find version less features for all versioned features in the sorted features
+        Set<String> possibleVersionlessFeatures = FeatureService.getInstance()
+                .getVersionLessFeaturesForVersioned(sortedFeatures, libertyRuntime, libertyVersion, requestDelay, document.getDocumentURI());
 
         String insertText = "";
         int referenceRangeStart = 0;
@@ -137,6 +149,16 @@ public class AddFeature implements ICodeActionParticipant {
         }
         insertText = IndentUtil.formatText(insertText, indent, referenceRange.getStart().getCharacter());
 
+        // for each versionless features that has at least one matching platform to a specified platform in the document
+        for (String feature : possibleVersionlessFeatures) {
+            Set<String> allPlatforms = FeatureService.getInstance().getAllPlatformsForVersionLessFeature(feature, libertyVersion, libertyRuntime, requestDelay, document.getDocumentURI());
+            if (allPlatforms.stream().anyMatch(existingPlatforms::contains)) {
+                String title = "Add feature " + feature;
+                codeActions.add(CodeActionFactory.insert(
+                        title, referenceRange.getEnd(),
+                        String.format(insertText, feature), textDocument, diagnostic));
+            }
+        }
         for (String feature : sortedFeatures) {
             String title = "Add feature " + feature;
             codeActions.add(CodeActionFactory.insert(

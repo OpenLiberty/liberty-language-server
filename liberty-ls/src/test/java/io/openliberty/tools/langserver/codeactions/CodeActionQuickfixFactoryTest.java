@@ -43,6 +43,11 @@ public abstract class CodeActionQuickfixFactoryTest extends AbstractLibertyLangu
         FileInputStream streamWithContentToTest = new FileInputStream(f);
         return initAndLaunchDiagnostic(f, streamWithContentToTest);
     }
+    protected TextDocumentIdentifier initAndLaunchDiagnostic(String path, String fileName) throws FileNotFoundException {
+        File f = new File(path + fileName);
+        FileInputStream streamWithContentToTest = new FileInputStream(f);
+        return initAndLaunchDiagnostic(f, streamWithContentToTest);
+    }
 
     protected TextDocumentIdentifier initAndLaunchDiagnostic(File f, InputStream streamWithContentToTest) {
         libertyLanguageServer = initializeLanguageServerWithFileUriString(streamWithContentToTest, f.toURI().toString());

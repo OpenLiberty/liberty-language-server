@@ -117,6 +117,38 @@ public class BootstrapPropertyCompletionTest extends AbstractCompletionTest {
         assertEquals(0, completionItems.size());
     }
 
+    @Test
+    public void testValueCompletionMultiPropertyValue() throws Exception {
+        CompletableFuture<Either<List<CompletionItem>, CompletionList>> completions = getCompletion("com.ibm.ws.logging.console.source=trace", new Position(0, 33));
+        List<CompletionItem> completionItems = completions.get().getLeft();
+        assertEquals(1, completionItems.size());
+        checkCompletionsContainAllStrings(completionItems, "trace");
+
+        completions = getCompletion("com.ibm.ws.logging.console.source=trace,", new Position(0, 34));
+        completionItems = completions.get().getLeft();
+        assertEquals(4, completionItems.size());
+        checkCompletionsContainAllStrings(completionItems, "trace,accessLog","trace,message","trace,ffdc","trace,audit");
+
+        completions = getCompletion("com.ibm.ws.logging.console.source=trace,a", new Position(0, 35));
+        completionItems = completions.get().getLeft();
+        assertEquals(3, completionItems.size());
+        checkCompletionsContainAllStrings(completionItems, "trace,accessLog","trace,audit","trace,message");
+
+        completions = getCompletion("com.ibm.ws.logging.console.source=trace,message,", new Position(0, 42));
+        completionItems = completions.get().getLeft();
+        assertEquals(3, completionItems.size());
+        checkCompletionsContainAllStrings(completionItems, "trace,message,accessLog","trace,message,ffdc","trace,message,audit");
+
+        completions = getCompletion("com.ibm.ws.logging.console.source=trace,message", new Position(0, 41));
+        completionItems = completions.get().getLeft();
+        assertEquals(1, completionItems.size());
+
+        // return no completion because messag is invalid
+        completions = getCompletion("com.ibm.ws.logging.message.source=trace,messag,", new Position(0, 40));
+        completionItems = completions.get().getLeft();
+        assertEquals(0, completionItems.size());
+    }
+
     protected CompletableFuture<Either<List<CompletionItem>, CompletionList>> getCompletion(String enteredText, Position position) throws URISyntaxException, InterruptedException, ExecutionException {
         String filename = "bootstrap.properties";
         File file = new File(resourcesDir, filename);
