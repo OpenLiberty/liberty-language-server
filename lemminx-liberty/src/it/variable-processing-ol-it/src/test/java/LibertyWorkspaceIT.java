@@ -61,6 +61,38 @@ public class LibertyWorkspaceIT {
         XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, httpCompletion,
                 httpsCompletion);
 
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "                <platform>javaee-6.0</platform>", //
+                "                <feature>acmeCA-2.0</feature>", //
+                "       </featureManager>", //
+                " <webApplication contextRoot=\"/app-name\" location=\"${server.|}\" />",//
+                "</server>" //
+        );
+
+        CompletionItem serverConfigDirCompletion= c("${server.config.dir}", "${server.config.dir}");
+        CompletionItem serverOutputDirCompletion = c("${server.output.dir}", "${server.output.dir}");
+
+        XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, serverConfigDirCompletion,
+                serverOutputDirCompletion);
+
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "                <platform>javaee-6.0</platform>", //
+                "                <feature>acmeCA-2.0</feature>", //
+                "       </featureManager>", //
+                " <webApplication contextRoot=\"/app-name\" location=\"${wlp.|}\" />",//
+                "</server>" //
+        );
+
+        CompletionItem wlpInstallDirCompletion = c("${wlp.install.dir}", "${wlp.install.dir}");
+        CompletionItem wlpUsrDirCompletion = c("${wlp.user.dir}", "${wlp.user.dir}");
+
+        XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, wlpInstallDirCompletion,
+                wlpUsrDirCompletion);
+
     }
 
     @Test

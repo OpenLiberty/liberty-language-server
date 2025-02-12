@@ -104,10 +104,11 @@ public class SettingsService {
             File installDirectory = LibertyUtils.getFileFromLibertyPluginXml(pluginConfigFilePath, "installDirectory");
             File serverDirectory = LibertyUtils.getFileFromLibertyPluginXml(pluginConfigFilePath, "serverDirectory");
             File userDirectory = LibertyUtils.getFileFromLibertyPluginXml(pluginConfigFilePath, "userDirectory");
-            if (serverDirectory != null && installDirectory != null && userDirectory != null) {
+            File serverOutputDirectory = LibertyUtils.getFileFromLibertyPluginXml(pluginConfigFilePath, "serverOutputDirectory");
+            if (serverDirectory != null && installDirectory != null && userDirectory != null && serverOutputDirectory !=null) {
                 try {
                     ServerConfigDocument serverConfigDocument = new ServerConfigDocument(
-                            new CommonLogger(LOGGER), null, installDirectory, userDirectory, serverDirectory);
+                            new CommonLogger(LOGGER), null, installDirectory, userDirectory, serverDirectory, serverOutputDirectory);
                     variablesForWorkspace.putAll(serverConfigDocument.getDefaultProperties());
                     variablesForWorkspace.putAll(serverConfigDocument.getProperties());
                     LOGGER.finest("Populated variables for workspace: " + workspace.getWorkspaceString() + ". Number of variables found: " + variablesForWorkspace.size());

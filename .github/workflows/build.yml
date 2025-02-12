@@ -37,6 +37,7 @@ jobs:
         with:
           repository: OpenLiberty/ci.common
           path: ci.common
+          ref: variable_resolution_fix
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
