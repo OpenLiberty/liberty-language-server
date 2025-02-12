@@ -184,7 +184,7 @@ public class LibertyWorkspaceIT {
                     .setUri(serverXmlFile.toURI().toString());
         }
         texted = te(7, 0,
-                7, 0, String.format("    <variable name=\"%s\" value=\"\"/> %s","default.https",System.lineSeparator()));
+                7, 0, String.format("    <variable name=\"%s\" value=\" \"/> %s","default.https",System.lineSeparator()));
         invalidCodeAction = ca(invalid1, texted);
         invalidCodeAction.getEdit()
                 .getDocumentChanges()
