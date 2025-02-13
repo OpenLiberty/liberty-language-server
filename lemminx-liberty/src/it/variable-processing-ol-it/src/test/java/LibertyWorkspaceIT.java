@@ -61,6 +61,8 @@ public class LibertyWorkspaceIT {
         XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, httpCompletion,
                 httpsCompletion);
 
+        // tests for checking completion of liberty pre defined variables
+        // verifying variables starting with server. and wlp.
         serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
                 "       <featureManager>", //
