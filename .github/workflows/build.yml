@@ -35,7 +35,7 @@ jobs:
       - name: Checkout ci.common
         uses: actions/checkout@v3
         with:
-          repository: arunvenmany-ibm/ci.common
+          repository: OpenLiberty/ci.common
           path: ci.common
           ref: variable_resolution_fix
       - name: Set up Java
