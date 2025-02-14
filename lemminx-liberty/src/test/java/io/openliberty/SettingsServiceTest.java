@@ -52,6 +52,8 @@ public class SettingsServiceTest {
                 .thenReturn(installDir);
         libertyUtils.when(() -> LibertyUtils.getFileFromLibertyPluginXml(any(), eq("userDirectory")))
                 .thenReturn(userDir);
+        libertyUtils.when(() -> LibertyUtils.getFileFromLibertyPluginXml(any(), eq("serverOutputDirectory")))
+                .thenReturn(serverDir);
     }
 
     @AfterEach

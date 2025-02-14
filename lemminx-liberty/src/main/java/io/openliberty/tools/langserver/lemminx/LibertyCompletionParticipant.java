@@ -51,6 +51,9 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
     public void onAttributeValue(String valuePrefix, ICompletionRequest request, ICompletionResponse response, CancelChecker cancelChecker) throws Exception {
         if (!LibertyUtils.isConfigXMLFile(request.getXMLDocument()))
             return;
+        //show variable completion only if user uses "${"
+        if(!valuePrefix.contains("${"))
+            return;
         Properties variableProps = SettingsService.getInstance()
                 .getVariablesForServerXml(request.getXMLDocument()
                         .getDocumentURI());
@@ -75,17 +78,10 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
                 completionPrefix = valuePrefix.substring(0,lastVar.getEndLoc()+1);
             }
         } else {
-            // for single variable,check ${ is specified
-            if (valuePrefix.contains("${")) {
-                // extract variable name with whatever is after ${
-                variablePrefix = valuePrefix.substring(valuePrefix.lastIndexOf("${") + 2);
-                // extract completionPrefix with whatever is before ${
-                completionPrefix = valuePrefix.substring(0, valuePrefix.lastIndexOf("${"));
-            } else {
-                // if no ${ specified, take all data as completion variable
-                variablePrefix = valuePrefix;
-                completionPrefix = "";
-            }
+            // extract variable name with whatever is after ${
+            variablePrefix = valuePrefix.substring(valuePrefix.lastIndexOf("${") + 2);
+            // extract completionPrefix with whatever is before ${
+            completionPrefix = valuePrefix.substring(0, valuePrefix.lastIndexOf("${"));
         }
         String finalVariableName = variablePrefix.replace("${","").replace("}","");
         variableProps.entrySet().stream().filter(it -> it.getKey().toString().toLowerCase()

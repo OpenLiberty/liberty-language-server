@@ -49,7 +49,7 @@ public class LibertyWorkspaceIT {
                 "                <platform>javaee-6.0</platform>", //
                 "                <feature>acmeCA-2.0</feature>", //
                 "       </featureManager>", //
-                " <httpEndpoint host=\"*\" httpPort=\"default|\"\n",//
+                " <httpEndpoint host=\"*\" httpPort=\"${default|\"\n",//
                 "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
                 "</server>" //
         );
@@ -60,6 +60,40 @@ public class LibertyWorkspaceIT {
 
         XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, httpCompletion,
                 httpsCompletion);
+
+        // tests for checking completion of liberty pre defined variables
+        // verifying variables starting with server. and wlp.
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "                <platform>javaee-6.0</platform>", //
+                "                <feature>acmeCA-2.0</feature>", //
+                "       </featureManager>", //
+                " <webApplication contextRoot=\"/app-name\" location=\"${server.|}\" />",//
+                "</server>" //
+        );
+
+        CompletionItem serverConfigDirCompletion= c("${server.config.dir}", "${server.config.dir}");
+        CompletionItem serverOutputDirCompletion = c("${server.output.dir}", "${server.output.dir}");
+
+        XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, serverConfigDirCompletion,
+                serverOutputDirCompletion);
+
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "                <platform>javaee-6.0</platform>", //
+                "                <feature>acmeCA-2.0</feature>", //
+                "       </featureManager>", //
+                " <webApplication contextRoot=\"/app-name\" location=\"${wlp.|}\" />",//
+                "</server>" //
+        );
+
+        CompletionItem wlpInstallDirCompletion = c("${wlp.install.dir}", "${wlp.install.dir}");
+        CompletionItem wlpUsrDirCompletion = c("${wlp.user.dir}", "${wlp.user.dir}");
+
+        XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, wlpInstallDirCompletion,
+                wlpUsrDirCompletion);
 
     }
 

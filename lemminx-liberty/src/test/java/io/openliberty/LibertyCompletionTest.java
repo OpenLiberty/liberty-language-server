@@ -333,7 +333,7 @@ public class LibertyCompletionTest {
                         "                <platform>javaee-6.0</platform>", //
                         "                <feature>acmeCA-2.0</feature>", //
                         "       </featureManager>", //
-                        " <httpEndpoint host=\"*\" httpPort=\"de|\"\n",//
+                        " <httpEndpoint host=\"*\" httpPort=\"${de|\"\n",//
                         "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
                         "</server>" //
                 );
@@ -364,6 +364,20 @@ public class LibertyCompletionTest {
                         "</server>" //
                 );
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 0);
+
+                // here completion should be zero, even though user has used a valid variable prefix,
+                // because its not started with ${
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "                <platform>javaee-6.0</platform>", //
+                        "                <feature>acmeCA-2.0</feature>", //
+                        "       </featureManager>", //
+                        " <httpEndpoint host=\"*\" httpPort=\"default|\"\n",//
+                        "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
+                        "</server>" //
+                );
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 0);
         }
 
         @Test
@@ -374,7 +388,7 @@ public class LibertyCompletionTest {
                         "                <platform>javaee-6.0</platform>", //
                         "                <feature>acmeCA-2.0</feature>", //
                         "       </featureManager>", //
-                        " <httpEndpoint host=\"*\" httpPort=\"f|\"\n",//
+                        " <httpEndpoint host=\"*\" httpPort=\"${f|\"\n",//
                         "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
                         "</server>" //
                 );
