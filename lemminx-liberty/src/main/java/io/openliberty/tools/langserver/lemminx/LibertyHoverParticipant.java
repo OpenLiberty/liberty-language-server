@@ -49,8 +49,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
     public Hover onAttributeValue(IHoverRequest request, CancelChecker cancelChecker) {
         List<VariableLoc> variables = LibertyUtils.getVariablesFromTextContent(request.getNode().getTextContent());
         Properties variableMap = SettingsService.getInstance()
-                .getVariablesForServerXml(request.getXMLDocument()
-                        .getDocumentURI());
+                .getVariablesForServerXml(request.getXMLDocument());
         StringBuilder stringBuilder = new StringBuilder();
         Iterator<VariableLoc> varIter = variables.iterator();
         while (varIter.hasNext()) {

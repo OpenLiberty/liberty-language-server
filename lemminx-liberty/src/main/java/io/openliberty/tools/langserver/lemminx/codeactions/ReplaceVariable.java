@@ -53,7 +53,7 @@ public class ReplaceVariable implements ICodeActionParticipant {
             final boolean replaceVariable = invalidVariable != null && !invalidVariable.isBlank();
 
             if (replaceVariable) {
-                Properties existingVariables=SettingsService.getInstance().getVariablesForServerXml(document.getDocumentURI());
+                Properties existingVariables = SettingsService.getInstance().getVariablesForServerXml(document);
                 // filter with entered word -> may not be required
                 String finalInvalidVariable = invalidVariable;
                 Set<Map.Entry<Object, Object>> filteredVariables = existingVariables

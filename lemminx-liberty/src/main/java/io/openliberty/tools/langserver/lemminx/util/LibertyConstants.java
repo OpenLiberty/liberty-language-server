@@ -32,6 +32,7 @@ public final class LibertyConstants {
     public static final String PLATFORM_ELEMENT = "platform";
     public static final String PUBLIC_VISIBILITY = "PUBLIC";
     public static final String PRIVATE_VISIBILITY = "PRIVATE";
+    public static final String VARIABLE_ELEMENT = "variable";
 
     // following URI standard of using "/"
     public static final String WLP_USER_CONFIG_DIR = "/usr/shared/config/";

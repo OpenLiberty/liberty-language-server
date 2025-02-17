@@ -13,16 +13,21 @@
 package io.openliberty.tools.langserver.lemminx.services;
 
 import io.openliberty.tools.common.plugins.config.ServerConfigDocument;
+import io.openliberty.tools.common.plugins.util.VariableUtility;
 import io.openliberty.tools.langserver.lemminx.util.CommonLogger;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
+import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.utils.JSONUtility;
 import io.openliberty.tools.langserver.lemminx.models.settings.*;
 
+import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -125,19 +130,36 @@ public class SettingsService {
 
     /**
      * Get variables list for a workspace server xml file
-     *
-     * @param serverXmlURI serverXmlURI
+     * If any new variable is found in server.xml but not present in variable map,
+     *      add the new variables from server.xml to variable map
+     *      updated variable map is returned back to diagnostics, so no error will be shown
+     * @param document serverXml document
      * @return variables
      */
-    public Properties getVariablesForServerXml(String serverXmlURI) {
-        LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlURI);
+    public Properties getVariablesForServerXml(DOMDocument document) {
+        LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(document.getDocumentURI());
         Properties variableProps = new Properties();
         if (workspace == null) {
-            LOGGER.warning("Could not find workspace for server xml URI %s. Variable resolution cannot be performed.".formatted(serverXmlURI));
+            LOGGER.warning("Could not find workspace for server xml URI %s. Variable resolution cannot be performed.".formatted(document.getDocumentURI()));
         } else if (variables != null && variables.containsKey(workspace.getWorkspaceString())) {
             variableProps = variables.get(workspace.getWorkspaceString());
         } else {
             LOGGER.warning("Could not find variable mapping for workspace URI %s. Variable resolution cannot be performed.".formatted(workspace.getWorkspaceString()));
+        }
+        if (!variableProps.isEmpty()) {
+            List<Properties> existingVars = new ArrayList<>();
+            try {
+                existingVars = VariableUtility.parseVariables(document, false, false, true);
+            } catch (XPathExpressionException e) {
+                LOGGER.warning("unable to parse variables for %s. Error message is %s ".formatted(document.getDocumentURI(), e.getMessage()));
+            }
+            // a dirty check, verifies whether all variables in server.xml is present in variable map
+            // if not, we consider this variable is added recently with code action
+            Properties additionalVars = existingVars.get(0);
+            additionalVars.values().removeAll(variableProps.values());
+            if (!additionalVars.isEmpty()) {
+                variableProps.putAll(additionalVars);
+            }
         }
         return variableProps;
     }
