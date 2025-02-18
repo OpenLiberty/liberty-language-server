@@ -147,20 +147,43 @@ public class SettingsService {
             LOGGER.warning("Could not find variable mapping for workspace URI %s. Variable resolution cannot be performed.".formatted(workspace.getWorkspaceString()));
         }
         if (!variableProps.isEmpty()) {
-            List<Properties> existingVars = new ArrayList<>();
-            try {
-                existingVars = VariableUtility.parseVariables(document, false, false, true);
-            } catch (XPathExpressionException e) {
-                LOGGER.warning("unable to parse variables for %s. Error message is %s ".formatted(document.getDocumentURI(), e.getMessage()));
-            }
-            // a dirty check, verifies whether all variables in server.xml is present in variable map
-            // if not, we consider this variable is added recently with code action
-            Properties additionalVars = existingVars.get(0);
-            additionalVars.values().removeAll(variableProps.values());
-            if (!additionalVars.isEmpty()) {
-                variableProps.putAll(additionalVars);
-            }
+            checkAndAddNewVariables(document, variableProps);
         }
         return variableProps;
+    }
+
+    /**
+     * Add new variables to variableProps
+     *
+     * @param document      xml document
+     * @param variableProps current variable properties map
+     */
+    private static void checkAndAddNewVariables(DOMDocument document, Properties variableProps) {
+        List<Properties> existingVars = new ArrayList<>();
+        try {
+            existingVars = VariableUtility.parseVariables(document, false, false, true);
+        } catch (XPathExpressionException e) {
+            LOGGER.warning("unable to parse variables for %s. Error message is %s ".formatted(document.getDocumentURI(), e.getMessage()));
+            return;
+        }
+        // a dirty check, verifies whether all variables in server.xml is present in variable map
+        // if not, we consider this variable is added recently with code action or manually
+        Map<String, String> additionalVarMap = new HashMap<>();
+        Map<String, String> combined = new HashMap<>();
+        //put defaultValue first
+        for (final String name : existingVars.get(1).stringPropertyNames()) {
+            additionalVarMap.put(name, existingVars.get(1).getProperty(name));
+        }
+        for (final String name : existingVars.get(0).stringPropertyNames()) {
+            additionalVarMap.put(name, existingVars.get(0).getProperty(name));
+        }
+        for (Map.Entry<String, String> entry : additionalVarMap.entrySet()) {
+            if (!variableProps.containsKey(entry.getKey())) {
+                combined.put(entry.getKey(), entry.getValue());
+            }
+        }
+        if (!combined.isEmpty()) {
+            variableProps.putAll(combined);
+        }
     }
 }

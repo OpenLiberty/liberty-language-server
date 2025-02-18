@@ -1251,9 +1251,9 @@ public class LibertyDiagnosticTest {
         Diagnostic invalid1 = new Diagnostic();
         invalid1.setRange(r(5, 1, 5, 37));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
-        invalid1.setMessage("ERROR: The variable \"httpPort\" should have a valid value defined.");
+        invalid1.setMessage("WARNING: The variable \"httpPort\" should have a valid value defined.");
         invalid1.setSource("liberty-lemminx");
-        invalid1.setSeverity(DiagnosticSeverity.Error);
+        invalid1.setSeverity(DiagnosticSeverity.Warning);
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, invalid1);
     }
@@ -1280,9 +1280,9 @@ public class LibertyDiagnosticTest {
         Diagnostic invalid1 = new Diagnostic();
         invalid1.setRange(r(5, 1, 5, 44));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
-        invalid1.setMessage("ERROR: The variable \"httpPort\" should have a valid value defined.");
+        invalid1.setMessage("WARNING: The variable \"httpPort\" should have a valid value defined.");
         invalid1.setSource("liberty-lemminx");
-        invalid1.setSeverity(DiagnosticSeverity.Error);
+        invalid1.setSeverity(DiagnosticSeverity.Warning);
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, invalid1);
     }

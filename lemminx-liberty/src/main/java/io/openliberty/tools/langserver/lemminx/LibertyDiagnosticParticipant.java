@@ -648,8 +648,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             diagnosticsList.add(diag);
         }
         else if((varValue!=null && varValue.trim().isEmpty())||(varDefaultValue!=null && varDefaultValue.trim().isEmpty())){
-            String message = "ERROR: The variable \"" + varName + "\" should have a valid value defined.";
-            Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_VARIABLE_CODE);
+            String message = "WARNING: The variable \"" + varName + "\" should have a valid value defined.";
+            Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE, INCORRECT_VARIABLE_CODE);
             diagnosticsList.add(diag);
         }
     }
