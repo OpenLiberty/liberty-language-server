@@ -116,7 +116,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     private void validateVariables(DOMDocument domDocument, List<Diagnostic> diagnosticsList) {
         String docContent = domDocument.getTextDocument().getText();
         List<VariableLoc> variables = LibertyUtils.getVariablesFromTextContent(docContent);
-        Properties variablesMap = SettingsService.getInstance().getVariablesForServerXml(domDocument);
+        Properties variablesMap = SettingsService.getInstance().getVariablesForServerXml(domDocument.getDocumentURI());
         if (variablesMap.isEmpty() && !variables.isEmpty()) {
             String message = "WARNING: Variable resolution is not available for workspace %s. Please start the Liberty server for the workspace to enable variable resolution.";
             LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI());

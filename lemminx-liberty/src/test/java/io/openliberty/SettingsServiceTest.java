@@ -4,8 +4,6 @@ import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
-import org.eclipse.lemminx.commons.TextDocument;
-import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lsp4j.WorkspaceFolder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -69,9 +67,7 @@ public class SettingsServiceTest {
         initList.add(new LibertyWorkspace(resourcesLibertyDir.toURI().toString()));
         initList.add(new LibertyWorkspace(installDir.toURI().toString()));
         SettingsService.getInstance().populateAllVariables(initList);
-        DOMDocument domDoc = new DOMDocument(new TextDocument("", serverXmlFile.toURI().toString()), null);
-
-        Properties variables = SettingsService.getInstance().getVariablesForServerXml(domDoc); // point to a file not a workspace dir
+        Properties variables = SettingsService.getInstance().getVariablesForServerXml(serverXmlFile.toURI().toString()); // point to a file not a workspace dir
 
         assertNotNull(variables);
         // bootstrap.properties.override added in server.env and bootstrap.properties

@@ -15,7 +15,6 @@ package io.openliberty.tools.langserver.lemminx.services;
 import io.openliberty.tools.common.plugins.config.ServerConfigDocument;
 import io.openliberty.tools.langserver.lemminx.util.CommonLogger;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
-import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.utils.JSONUtility;
 import io.openliberty.tools.langserver.lemminx.models.settings.*;
 
@@ -126,17 +125,15 @@ public class SettingsService {
 
     /**
      * Get variables list for a workspace server xml file
-     * If any new variable is found in server.xml but not present in variable map,
-     *      add the new variables from server.xml to variable map
-     *      updated variable map is returned back to diagnostics, so no error will be shown
-     * @param document serverXml document
+     *
+     * @param serverXmlURI serverXmlURI
      * @return variables
      */
-    public Properties getVariablesForServerXml(DOMDocument document) {
-        LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(document.getDocumentURI());
+    public Properties getVariablesForServerXml(String serverXmlURI) {
+        LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlURI);
         Properties variableProps = new Properties();
         if (workspace == null) {
-            LOGGER.warning("Could not find workspace for server xml URI %s. Variable resolution cannot be performed.".formatted(document.getDocumentURI()));
+            LOGGER.warning("Could not find workspace for server xml URI %s. Variable resolution cannot be performed.".formatted(serverXmlURI));
         } else if (variables != null && variables.containsKey(workspace.getWorkspaceString())) {
             variableProps = variables.get(workspace.getWorkspaceString());
         } else {
