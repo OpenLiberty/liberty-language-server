@@ -13,21 +13,17 @@
 package io.openliberty.tools.langserver.lemminx.services;
 
 import io.openliberty.tools.common.plugins.config.ServerConfigDocument;
-import io.openliberty.tools.common.plugins.util.VariableUtility;
 import io.openliberty.tools.langserver.lemminx.util.CommonLogger;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.utils.JSONUtility;
 import io.openliberty.tools.langserver.lemminx.models.settings.*;
 
-import javax.xml.xpath.XPathExpressionException;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -146,44 +142,6 @@ public class SettingsService {
         } else {
             LOGGER.warning("Could not find variable mapping for workspace URI %s. Variable resolution cannot be performed.".formatted(workspace.getWorkspaceString()));
         }
-        if (!variableProps.isEmpty()) {
-            checkAndAddNewVariables(document, variableProps);
-        }
         return variableProps;
-    }
-
-    /**
-     * Add new variables to variableProps
-     *
-     * @param document      xml document
-     * @param variableProps current variable properties map
-     */
-    private static void checkAndAddNewVariables(DOMDocument document, Properties variableProps) {
-        List<Properties> existingVars = new ArrayList<>();
-        try {
-            existingVars = VariableUtility.parseVariables(document, false, false, true);
-        } catch (XPathExpressionException e) {
-            LOGGER.warning("unable to parse variables for %s. Error message is %s ".formatted(document.getDocumentURI(), e.getMessage()));
-            return;
-        }
-        // a dirty check, verifies whether all variables in server.xml is present in variable map
-        // if not, we consider this variable is added recently with code action or manually
-        Map<String, String> additionalVarMap = new HashMap<>();
-        Map<String, String> combined = new HashMap<>();
-        //put defaultValue first
-        for (final String name : existingVars.get(1).stringPropertyNames()) {
-            additionalVarMap.put(name, existingVars.get(1).getProperty(name));
-        }
-        for (final String name : existingVars.get(0).stringPropertyNames()) {
-            additionalVarMap.put(name, existingVars.get(0).getProperty(name));
-        }
-        for (Map.Entry<String, String> entry : additionalVarMap.entrySet()) {
-            if (!variableProps.containsKey(entry.getKey())) {
-                combined.put(entry.getKey(), entry.getValue());
-            }
-        }
-        if (!combined.isEmpty()) {
-            variableProps.putAll(combined);
-        }
     }
 }

@@ -50,6 +50,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
         List<VariableLoc> variables = LibertyUtils.getVariablesFromTextContent(request.getNode().getTextContent());
         Properties variableMap = SettingsService.getInstance()
                 .getVariablesForServerXml(request.getXMLDocument());
+        LibertyUtils.checkAndAddNewVariables(request.getXMLDocument(), variableMap);
         StringBuilder stringBuilder = new StringBuilder();
         Iterator<VariableLoc> varIter = variables.iterator();
         while (varIter.hasNext()) {

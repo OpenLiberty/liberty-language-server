@@ -126,6 +126,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             diagnosticsList.add(diag);
             return;
         }
+        LibertyUtils.checkAndAddNewVariables(domDocument, variablesMap);
         validateVariableExists(domDocument, diagnosticsList, variables, variablesMap);
         validateVariableDataTypeValues(domDocument,diagnosticsList,variablesMap);
     }

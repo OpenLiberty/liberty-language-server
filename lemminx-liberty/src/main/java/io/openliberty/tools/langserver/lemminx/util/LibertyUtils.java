@@ -23,7 +23,10 @@ import java.nio.file.StandardWatchEventKinds;
 import java.nio.file.WatchKey;
 import java.nio.file.WatchService;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -31,6 +34,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import io.openliberty.tools.common.plugins.util.VariableUtility;
 import io.openliberty.tools.langserver.lemminx.models.feature.VariableLoc;
 import org.eclipse.lemminx.dom.DOMDocument;
 
@@ -41,6 +45,8 @@ import io.openliberty.tools.langserver.lemminx.services.ContainerService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
+
+import javax.xml.xpath.XPathExpressionException;
 
 public class LibertyUtils {
 
@@ -640,5 +646,43 @@ public class LibertyUtils {
             otherString = otherString.toLowerCase();
         }
         return string.contains(otherString) || otherString.contains(string);
+    }
+
+    /**
+     * Add new variables to variableProps
+     * Used to update local variable map with latest data
+     * Checks the xml document for any new variables added,
+     * if any new variable is found, its added to local variable map
+     *
+     * @param document      xml document
+     * @param variableProps current variable properties map
+     */
+    public static void checkAndAddNewVariables(DOMDocument document, Properties variableProps) {
+        List<Properties> existingVars;
+        try {
+            existingVars = VariableUtility.parseVariables(document, false, false, true);
+        } catch (XPathExpressionException e) {
+            LOGGER.warning("unable to parse variables for %s. Error message is %s ".formatted(document.getDocumentURI(), e.getMessage()));
+            return;
+        }
+        // a dirty check, verifies whether all variables in server.xml is present in variable map
+        // if not, we consider this variable is added recently with code action or manually
+        Map<String, String> additionalVarMap = new HashMap<>();
+        Map<String, String> combined = new HashMap<>();
+        //put defaultValue first
+        for (final String name : existingVars.get(1).stringPropertyNames()) {
+            additionalVarMap.put(name, existingVars.get(1).getProperty(name));
+        }
+        for (final String name : existingVars.get(0).stringPropertyNames()) {
+            additionalVarMap.put(name, existingVars.get(0).getProperty(name));
+        }
+        for (Map.Entry<String, String> entry : additionalVarMap.entrySet()) {
+            if (!variableProps.containsKey(entry.getKey())) {
+                combined.put(entry.getKey(), entry.getValue());
+            }
+        }
+        if (!combined.isEmpty()) {
+            variableProps.putAll(combined);
+        }
     }
 }
