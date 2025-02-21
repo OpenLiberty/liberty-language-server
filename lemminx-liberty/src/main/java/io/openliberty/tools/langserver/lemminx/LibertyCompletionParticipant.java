@@ -57,6 +57,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
         Properties variableProps = SettingsService.getInstance()
                 .getVariablesForServerXml(request.getXMLDocument()
                         .getDocumentURI());
+        LibertyUtils.checkAndAddNewVariables(request.getXMLDocument(), variableProps);
         //getting all existing variables in current completion prefix string
         List<VariableLoc> variables = LibertyUtils.getVariablesFromTextContent(valuePrefix);
         String variablePrefix = "";

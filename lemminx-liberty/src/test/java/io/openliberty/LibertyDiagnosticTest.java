@@ -960,18 +960,28 @@ public class LibertyDiagnosticTest {
 
 
         List<CodeAction> codeActions = new ArrayList<>();
+        TextEdit texted;
+        CodeAction invalidCodeAction;
         for (String nextVar : variables) {
             String variableInDoc = String.format("${%s}", nextVar);
-            TextEdit texted = te(invalid1.getRange().getStart().getLine(), invalid1.getRange().getStart().getCharacter(),
+            texted = te(invalid1.getRange().getStart().getLine(), invalid1.getRange().getStart().getCharacter(),
                     invalid1.getRange().getEnd().getLine(), invalid1.getRange().getEnd().getCharacter(), variableInDoc);
-            CodeAction invalidCodeAction = ca(invalid1, texted);
+            invalidCodeAction = ca(invalid1, texted);
             codeActions.add(invalidCodeAction);
             invalidCodeAction.getEdit()
                     .getDocumentChanges()
                     .get(0).getLeft().getTextDocument()
                     .setUri(serverXMLURI);
         }
-        XMLAssert.testCodeActionsFor(serverXML, serverXMLURI, invalid1, codeActions.get(0));
+        texted = te(7, 0,
+                7, 0, String.format("    <variable name=\"%s\" value=\" \"/> %s","default.https",System.lineSeparator()));
+        invalidCodeAction = ca(invalid1, texted);
+        invalidCodeAction.getEdit()
+                .getDocumentChanges()
+                .get(0).getLeft().getTextDocument()
+                .setUri(serverXMLURI);
+        codeActions.add(invalidCodeAction);
+        XMLAssert.testCodeActionsFor(serverXML, serverXMLURI, invalid1, codeActions.get(0), codeActions.get(1));
     }
 
 
@@ -1188,5 +1198,92 @@ public class LibertyDiagnosticTest {
                 codeActions.get(3), codeActions.get(4), codeActions.get(5),
                 codeActions.get(6), codeActions.get(7), codeActions.get(8), codeActions.get(9)
         );
+    }
+
+    @Test
+    public void testVariableNameEmptyDiagnostic() {
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "                <platform>javaee-6.0</platform>", //
+                "                <feature>acmeCA-2.0</feature>", //
+                "       </featureManager>", //
+                " <variable name=\"\" value=\"9080\"/>", //
+                " <httpEndpoint host=\"*\" httpPort=\"${default.http.port}\"\n",//
+                "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
+                "</server>" //
+        );
+        Map<String, String> propsMap = new HashMap<>();
+        propsMap.put("default.http.port", "9080");
+        propsMap.put("default.https.port", "9443");
+        Properties props = new Properties();
+        props.putAll(propsMap);
+        when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
+        Diagnostic invalid1 = new Diagnostic();
+        invalid1.setRange(r(5, 1, 5, 33));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
+        invalid1.setMessage("ERROR: The variable should have a valid name defined in name attribute.");
+        invalid1.setSource("liberty-lemminx");
+        invalid1.setSeverity(DiagnosticSeverity.Error);
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, invalid1);
+    }
+
+    @Test
+    public void testVariableValueEmptyDiagnostic() {
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "                <platform>javaee-6.0</platform>", //
+                "                <feature>acmeCA-2.0</feature>", //
+                "       </featureManager>", //
+                " <variable name=\"httpPort\" value=\"\"/>", //
+                " <httpEndpoint host=\"*\" httpPort=\"${default.http.port}\"\n",//
+                "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
+                "</server>" //
+        );
+        Map<String, String> propsMap = new HashMap<>();
+        propsMap.put("default.http.port", "9080");
+        propsMap.put("default.https.port", "9443");
+        Properties props = new Properties();
+        props.putAll(propsMap);
+        when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
+        Diagnostic invalid1 = new Diagnostic();
+        invalid1.setRange(r(5, 1, 5, 37));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
+        invalid1.setMessage("WARNING: The variable \"httpPort\" should have a valid value defined.");
+        invalid1.setSource("liberty-lemminx");
+        invalid1.setSeverity(DiagnosticSeverity.Warning);
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, invalid1);
+    }
+
+    @Test
+    public void testVariableDefaultValueEmptyDiagnostic() {
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "                <platform>javaee-6.0</platform>", //
+                "                <feature>acmeCA-2.0</feature>", //
+                "       </featureManager>", //
+                " <variable name=\"httpPort\" defaultValue=\"\"/>", //
+                " <httpEndpoint host=\"*\" httpPort=\"${default.http.port}\"\n",//
+                "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
+                "</server>" //
+        );
+        Map<String, String> propsMap = new HashMap<>();
+        propsMap.put("default.http.port", "9080");
+        propsMap.put("default.https.port", "9443");
+        Properties props = new Properties();
+        props.putAll(propsMap);
+        when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
+        Diagnostic invalid1 = new Diagnostic();
+        invalid1.setRange(r(5, 1, 5, 44));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
+        invalid1.setMessage("WARNING: The variable \"httpPort\" should have a valid value defined.");
+        invalid1.setSource("liberty-lemminx");
+        invalid1.setSeverity(DiagnosticSeverity.Warning);
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, invalid1);
     }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2024 IBM Corporation and others.
+* Copyright (c) 2020, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -126,23 +126,10 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             diagnosticsList.add(diag);
             return;
         }
-        for (VariableLoc variable : variables) {
-            if (!variablesMap.containsKey(variable.getValue())) {
-                String variableInDoc = String.format("${%s}", variable.getValue());
-                //range is used in ReplaceVariable to provide quick fix.
-                // we just need the variable value range here as ${} is added in replace variable message
-                Range range = XMLPositionUtility.createRange(variable.getStartLoc() - 2, variable.getEndLoc() + 1,
-                        domDocument);
-                String message = "ERROR: The variable \"" + variable.getValue() + "\" does not exist.";
-
-                Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_VARIABLE_CODE);
-                diag.setData(variable.getValue());
-                diagnosticsList.add(diag);
-            }
-        }
+        LibertyUtils.checkAndAddNewVariables(domDocument, variablesMap);
+        validateVariableExists(domDocument, diagnosticsList, variables, variablesMap);
+        validateVariableDataTypeValues(domDocument,diagnosticsList,variablesMap);
     }
-
-
 
     private void validateFeaturesAndPlatforms(DOMDocument domDocument, List<Diagnostic> list, DOMNode featureManager, Set<String> includedFeatures) {
 
@@ -612,5 +599,81 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 .filter(f -> f.toLowerCase().contains(LibertyUtils.stripVersion(otherFeatureNameWithoutVersion)))
                 .findFirst().orElse(null);
         return otherFeatureName;
+    }
+
+
+    /**
+     * Validate variable node attributes and values
+     * TODO add DataType level validations for each variables
+     * ie, make sure any variable used is of correct datatype
+     * for example, when a variable is used in one xml element and the valid value is number, but variable defined value is NaN
+     * @param domDocument xml document
+     * @param diagnosticsList existing diagnostic list
+     * @param variablesMap populated variables from all liberty config files
+     */
+    private void validateVariableDataTypeValues(DOMDocument domDocument, List<Diagnostic> diagnosticsList, Properties variablesMap) {
+        List<DOMNode> nodes = domDocument.getDocumentElement().getChildren();
+
+        for (DOMNode node : nodes) {
+            String nodeName = node.getNodeName();
+            if (LibertyConstants.VARIABLE_ELEMENT.equals(nodeName)) {
+                String varName =  node.getAttribute("name");
+                Range range = XMLPositionUtility.createRange(node.getStart(), node.getEnd(),
+                        domDocument);
+                if (!varName.isEmpty()) {
+                    validateVariableValueNonEmpty(diagnosticsList, node, varName, range);
+                }
+                else{
+                    String message = "ERROR: The variable should have a valid name defined in name attribute.";
+                    Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_VARIABLE_CODE);
+                    diagnosticsList.add(diag);
+                }
+            }
+        }
+    }
+
+    /**
+     * validate variable value is not null or empty
+     * @param diagnosticsList diagnostics list
+     * @param varNode current variable DomNode
+     * @param varName current variable Name Attribute value
+     * @param range diagnostics range
+     */
+    private static void validateVariableValueNonEmpty(List<Diagnostic> diagnosticsList, DOMNode varNode, String varName, Range range) {
+        // A variable can have either a value attribute OR a defaultValue attribute.
+        String varValue = varNode.getAttribute("value");
+        String varDefaultValue = varNode.getAttribute("defaultValue");
+        if(varValue==null && varDefaultValue==null){
+            String message = "ERROR: The variable \"" + varName + "\" should have value or defaultValue attribute defined.";
+            Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_VARIABLE_CODE);
+            diagnosticsList.add(diag);
+        }
+        else if((varValue!=null && varValue.trim().isEmpty())||(varDefaultValue!=null && varDefaultValue.trim().isEmpty())){
+            String message = "WARNING: The variable \"" + varName + "\" should have a valid value defined.";
+            Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE, INCORRECT_VARIABLE_CODE);
+            diagnosticsList.add(diag);
+        }
+    }
+
+    /**
+     * validate variable is defined for any usage
+     * @param domDocument xml document
+     * @param diagnosticsList diagnostics list
+     * @param variables variables in use in server xml
+     * @param variablesMap all variables defined in liberty config files
+     */
+    private static void validateVariableExists(DOMDocument domDocument, List<Diagnostic> diagnosticsList, List<VariableLoc> variables, Properties variablesMap) {
+        for (VariableLoc variable : variables) {
+            if (!variablesMap.containsKey(variable.getValue())) {
+                //range is used in ReplaceVariable to provide quick fix.
+                // we just need the variable value range here as ${} is added in replace variable message
+                Range range = XMLPositionUtility.createRange(variable.getStartLoc() - 2, variable.getEndLoc() + 1,
+                        domDocument);
+                String message = "ERROR: The variable \"" + variable.getValue() + "\" does not exist.";
+                Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_VARIABLE_CODE);
+                diag.setData(variable.getValue());
+                diagnosticsList.add(diag);
+            }
+        }
     }
 }
