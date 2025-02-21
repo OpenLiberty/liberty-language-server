@@ -72,7 +72,7 @@ public class ReplaceVariable implements ICodeActionParticipant {
                 // line separator in end of text insert will move current diagnostic line to 1 line
                 insertPos.setLine(diagnostic.getRange().getEnd().getLine());
                 codeActions.add(CodeActionFactory.insert("Add variable " + invalidVariable, insertPos,
-                        String.format("    <variable name=\"%s\" value=\" \"/> %s", invalidVariable, System.lineSeparator()),
+                        String.format("    <variable name=\"%s\" value=\"\"/> %s", invalidVariable, System.lineSeparator()),
                         document.getTextDocument(), diagnostic));
             }
         } catch (Exception e) {
