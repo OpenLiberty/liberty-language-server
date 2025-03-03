@@ -39,7 +39,7 @@ public class LibertyWorkspaceIT {
         testWorkspaceFolders.add(testWorkspace);
         LibertyProjectsManager.getInstance().setWorkspaceFolders(testWorkspaceFolders);
 
-        String schemaFileName = "ol-25.0.0.1.xsd";
+        String schemaFileName = "ol-25.0.0.2.xsd";
         File schemaFile = new File(LibertyUtils.getTempDir(LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlFile.toURI().toString())), schemaFileName);
         String serverGenXSDURI = schemaFile.toPath().toUri().toString().replace("///", "/");
 
@@ -88,7 +88,7 @@ public class LibertyWorkspaceIT {
         XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, websocket);
         
         // Verify that a feature list was NOT generated. It should have downloaded the features.json from Maven Central.
-        String featureListName = "featurelist-ol-25.0.0.1.xml";
+        String featureListName = "featurelist-ol-25.0.0.2.xml";
         File featurelistFile = new File(LibertyUtils.getTempDir(LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlFile.toURI().toString())), featureListName);
 
         org.junit.jupiter.api.Assertions.assertFalse(featurelistFile.exists(), "Found unexpected generated featurelist file: "+featureListName);
