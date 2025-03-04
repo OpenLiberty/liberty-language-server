@@ -51,7 +51,7 @@ public class SettingsService {
 
     private Map<String,Properties> variables;
 
-    private boolean devModeRunning = false;
+    private boolean configCopiedToServer = false;
     /**
      * Takes the xml settings object and parses out the Liberty Settings
      * @param xmlSettings - All xml settings provided by the client
@@ -144,11 +144,11 @@ public class SettingsService {
         return variableProps;
     }
 
-    public boolean isDevModeRunning() {
-        return devModeRunning;
+    public boolean isConfigCopiedToServer() {
+        return configCopiedToServer;
     }
 
-    public void setDevModeRunning(boolean devModeRunning) {
-        this.devModeRunning = devModeRunning;
+    public void setConfigCopiedToServer(boolean configCopiedToServer) {
+        this.configCopiedToServer = configCopiedToServer;
     }
 }

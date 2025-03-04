@@ -124,12 +124,12 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                     domDocument);
             Diagnostic diag = new Diagnostic(range, message.formatted(workspace.getWorkspaceURI().getPath()), DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE);
             diagnosticsList.add(diag);
-            // set devmode running as false, so that hover or completion do not add variables into server.xml variablesMap
-            SettingsService.getInstance().setDevModeRunning(false);
+            // set config copied to server as false, so that hover or completion do not add variables into server.xml variablesMap
+            SettingsService.getInstance().setConfigCopiedToServer(false);
             return;
         }
-        // set dev mode to running for checkAndAddNewVariables()
-        SettingsService.getInstance().setDevModeRunning(true);
+        // set config copied to server for checkAndAddNewVariables()
+        SettingsService.getInstance().setConfigCopiedToServer(true);
         LibertyUtils.checkAndAddNewVariables(domDocument, variablesMap);
         validateVariableExists(domDocument, diagnosticsList, variables, variablesMap);
         validateVariableDataTypeValues(domDocument,diagnosticsList,variablesMap);
