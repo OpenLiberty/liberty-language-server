@@ -658,6 +658,10 @@ public class LibertyUtils {
      * @param variableProps current variable properties map
      */
     public static void checkAndAddNewVariables(DOMDocument document, Properties variableProps) {
+        // do not map new variables if dev mode is not running
+        if(!SettingsService.getInstance().isDevModeRunning()){
+            return;
+        }
         List<Properties> existingVars;
         try {
             existingVars = VariableUtility.parseVariables(document, false, false, true);
