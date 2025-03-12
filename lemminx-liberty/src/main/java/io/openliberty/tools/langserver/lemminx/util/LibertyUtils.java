@@ -579,11 +579,8 @@ public class LibertyUtils {
      */
     public static String getPlatformDescription(String platformItem) {
         String platformNameNoVersion = LibertyUtils.stripVersion(platformItem).toLowerCase();
-        if (LibertyConstants.platformDescriptionMap.containsKey(platformNameNoVersion)) {
-            String version = getVersion(platformItem);
-            return String.format(LibertyConstants.platformDescriptionMap.get(platformNameNoVersion), version);
-        }
-        return null;
+        String version = getVersion(platformItem);
+        return ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.PLATFORM_DESCRIPTION.formatted(platformNameNoVersion),version);
     }
 
     /**

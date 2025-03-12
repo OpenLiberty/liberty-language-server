@@ -8,7 +8,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static io.openliberty.tools.langserver.lemminx.LibertyXSDURIResolver.SERVER_XSD_RESOURCE;
+import static io.openliberty.tools.langserver.lemminx.LibertyXSDURIResolver.SERVER_XSD_RESOURCE_DEFAULT;
 
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lemminx.commons.BadLocationException;
@@ -106,7 +106,7 @@ public class LibertyHoverTest {
 
         @Test
         public void testXSDSchemaHover() throws BadLocationException, IOException {
-                String serverXSDURI = SERVER_XSD_RESOURCE.getDeployedPath().toUri().toString().replace("///", "/");
+                String serverXSDURI = SERVER_XSD_RESOURCE_DEFAULT.getDeployedPath().toUri().toString().replace("///", "/");
 
                 String serverXML = String.join(newLine, //
                                 "<server description=\"Sample Liberty server\">", //

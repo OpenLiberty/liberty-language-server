@@ -57,6 +57,7 @@ public class LibertyExtension implements IXMLExtension {
         } catch (NullPointerException e) {
             LOGGER.warning("Could not get workspace folders: " + e.toString());
         }
+        SettingsService.getInstance().initializeLocale(initializeParams);
         xsdResolver = new LibertyXSDURIResolver();
         xmlExtensionsRegistry.getResolverExtensionManager().registerResolver(xsdResolver);
 

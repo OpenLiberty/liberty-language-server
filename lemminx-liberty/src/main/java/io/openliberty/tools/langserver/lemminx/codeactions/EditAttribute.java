@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -15,6 +15,8 @@ package io.openliberty.tools.langserver.lemminx.codeactions;
 
 import java.util.List;
 
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleMappingConstants;
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleUtil;
 import org.eclipse.lemminx.commons.CodeActionFactory;
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionParticipant;
@@ -30,7 +32,7 @@ public class EditAttribute implements ICodeActionParticipant {
         Diagnostic diagnostic = request.getDiagnostic();
         DOMDocument document = request.getDocument();
         try {
-            String title = "Set the optional attribute to true.";
+            String title = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_SET_OPTIONAL_ATTRIBUTE);
             String replaceText = "optional=\"true\"";
             codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), replaceText, document.getTextDocument(), diagnostic));
 

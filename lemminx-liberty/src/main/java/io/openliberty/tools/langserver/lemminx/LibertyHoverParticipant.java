@@ -149,14 +149,14 @@ public class LibertyHoverParticipant implements IHoverParticipant {
 
         StringBuilder sb = new StringBuilder();
         String description = flNode.getDescription();
-        sb.append("Description: ");
+        sb.append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_HOVER_DESCRIPTION));
         sb.append(description);
         sb.append(System.lineSeparator());
 
         // get features that directly enable this feature
         Set<String> featureEnabledBy = flNode.getEnabledBy();
         if (!featureEnabledBy.isEmpty()) {
-            sb.append("Enabled by: ");
+            sb.append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_HOVER_ENABLED_BY));
             // Need to sort the collection of features so that they are in a reliable order for tests.
             ArrayList<String> sortedFeatures = new ArrayList<String>();
             sortedFeatures.addAll(featureEnabledBy);
@@ -172,7 +172,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
         // get features that this feature directly enables
         Set<String> featureEnables = flNode.getEnablesFeatures();
         if (!featureEnables.isEmpty()) {
-            sb.append("Enables: ");
+            sb.append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_HOVER_ENABLES));
             // Need to sort the collection of features so that they are in a reliable order for tests.
             ArrayList<String> sortedFeatures = new ArrayList<String>();
             sortedFeatures.addAll(featureEnables);

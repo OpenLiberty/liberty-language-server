@@ -16,6 +16,8 @@ package io.openliberty.tools.langserver.lemminx.codeactions;
 import com.google.gson.JsonPrimitive;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleMappingConstants;
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleUtil;
 import org.eclipse.lemminx.commons.CodeActionFactory;
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionParticipant;
@@ -62,7 +64,7 @@ public class ReplaceVariable implements ICodeActionParticipant {
                         .filter(entry -> LibertyUtils.containsEachOther(entry.toString(), finalInvalidVariable, false))
                         .collect(Collectors.toSet());
                 for (Map.Entry<Object, Object> nextVariable : filteredVariables) {
-                    String title = "Replace attribute value with " + nextVariable.getKey();
+                    String title = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_REPLACE_VARIABLE_VALUE, nextVariable.getKey());
                     String variableInDoc = String.format("${%s}", nextVariable.getKey().toString());
                     codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), variableInDoc, document.getTextDocument(), diagnostic));
                 }
@@ -71,7 +73,7 @@ public class ReplaceVariable implements ICodeActionParticipant {
                 // variable will be added in the current line where diagnostic is showing
                 // line separator in end of text insert will move current diagnostic line to 1 line
                 insertPos.setLine(diagnostic.getRange().getEnd().getLine());
-                codeActions.add(CodeActionFactory.insert("Add variable " + invalidVariable, insertPos,
+                codeActions.add(CodeActionFactory.insert(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_ADD_VARIABLE, invalidVariable), insertPos,
                         String.format("    <variable name=\"%s\" value=\"\"/> %s", invalidVariable, System.lineSeparator()),
                         document.getTextDocument(), diagnostic));
             }

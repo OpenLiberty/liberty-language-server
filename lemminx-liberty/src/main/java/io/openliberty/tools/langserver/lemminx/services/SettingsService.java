@@ -15,14 +15,17 @@ package io.openliberty.tools.langserver.lemminx.services;
 import io.openliberty.tools.common.plugins.config.ServerConfigDocument;
 import io.openliberty.tools.langserver.lemminx.util.CommonLogger;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
+import org.apache.commons.lang3.LocaleUtils;
 import org.eclipse.lemminx.utils.JSONUtility;
 import io.openliberty.tools.langserver.lemminx.models.settings.*;
+import org.eclipse.lsp4j.InitializeParams;
 
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 import java.util.logging.Logger;
@@ -50,7 +53,7 @@ public class SettingsService {
     private LibertySettings settings;
 
     private Map<String,Properties> variables;
-
+    private Locale currentLocale;
     private boolean configCopiedToServer = false;
     /**
      * Takes the xml settings object and parses out the Liberty Settings
@@ -150,5 +153,17 @@ public class SettingsService {
 
     public void setConfigCopiedToServer(boolean configCopiedToServer) {
         this.configCopiedToServer = configCopiedToServer;
+    }
+
+    public Locale getCurrentLocale() {
+        return currentLocale;
+    }
+
+    public void initializeLocale(InitializeParams initializeParams) {
+        if (initializeParams == null || initializeParams.getLocale() == null) {
+            this.currentLocale = Locale.getDefault();
+        } else {
+            this.currentLocale = LocaleUtils.toLocale(initializeParams.getLocale());
+        }
     }
 }

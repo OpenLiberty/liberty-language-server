@@ -13,6 +13,7 @@
 package io.openliberty.tools.langserver.lemminx;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -21,6 +22,7 @@ import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
 import org.eclipse.lemminx.uriresolver.IExternalGrammarLocationProvider;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager.ResourceToDeploy;
@@ -37,8 +39,10 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
 
     // Changing this to contain the version in the file name since the file is copied to the local .lemminx cache. 
     // This is how we ensure the latest default server schema gets used in each developer environment. 
-    private static final String XSD_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server-cached-25.0.0.2.xsd";
-    private static final String XSD_CLASSPATH_LOCATION = "/schema/xsd/liberty/server-cached-25.0.0.2.xsd";
+    private static final String XSD_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server-cached-25.0.0.2_%s.xsd";
+    private static final String XSD_CLASSPATH_LOCATION = "/schema/xsd/liberty/server-cached-25.0.0.2_%s.xsd";
+    private static final String XSD_RESOURCE_URL_DEFAULT = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server-cached-25.0.0.2.xsd";
+    private static final String XSD_CLASSPATH_LOCATION_DEFAULT = "/schema/xsd/liberty/server-cached-25.0.0.2.xsd";
 
     /**
      * SERVER_XSD_RESOURCE is the server schema that is located at XSD_CLASSPATH_LOCATION
@@ -50,8 +54,10 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
      * 
      * Declared public to be used by tests
      */
-    public static final ResourceToDeploy SERVER_XSD_RESOURCE = new ResourceToDeploy(XSD_RESOURCE_URL,
-            XSD_CLASSPATH_LOCATION);
+    public ResourceToDeploy SERVER_XSD_RESOURCE;
+
+    public static final ResourceToDeploy SERVER_XSD_RESOURCE_DEFAULT = new ResourceToDeploy(XSD_RESOURCE_URL_DEFAULT,
+            XSD_CLASSPATH_LOCATION_DEFAULT);
 
     /**
      * Will return an existing xsd file or generate one from a Liberty installation if ones exists
@@ -97,13 +103,27 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
         }
 
         try {
-            Path serverXSDFile = CacheResourcesManager.getResourceCachePath(SERVER_XSD_RESOURCE);
+            Path serverXSDFile = getServerXSDFile();
             LOGGER.info("Using cached Liberty schema file located at: " + serverXSDFile.toString());
             return serverXSDFile.toUri().toString();
         } catch (Exception e) {
             LOGGER.severe("Error: Unable to retrieve default cached Liberty schema file.");
             return null;
         }
+    }
+
+    private Path getServerXSDFile() throws IOException {
+        Path serverXSDFile;
+        try {
+            String currentLocaleLang= SettingsService.getInstance().getCurrentLocale().getLanguage();
+            SERVER_XSD_RESOURCE = new ResourceToDeploy(XSD_RESOURCE_URL.formatted(currentLocaleLang),
+                    XSD_CLASSPATH_LOCATION.formatted(currentLocaleLang));
+            serverXSDFile = CacheResourcesManager.getResourceCachePath(SERVER_XSD_RESOURCE);
+        }catch (Exception exception){
+            LOGGER.warning("Unable to find localized xsd resource. Using default instead");
+            serverXSDFile = CacheResourcesManager.getResourceCachePath(SERVER_XSD_RESOURCE_DEFAULT);
+        }
+        return serverXSDFile;
     }
 
     @Override
@@ -147,7 +167,7 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
                 LOGGER.info("Generating schema file at: " + xsdDestPath);
     
                 ProcessBuilder pb = new ProcessBuilder("java", "-jar", schemaGenJarPath.toAbsolutePath().toString(), "--schemaVersion=1.1",
-                        "--outputVersion=2", xsdDestPath); // Add locale param here
+                        "--outputVersion=2", xsdDestPath, "--locale=" + SettingsService.getInstance().getCurrentLocale().getLanguage()); // Add locale param here
                 pb.directory(tempDir);
                 pb.redirectErrorStream(true);
                 pb.redirectOutput(new File(tempDir, "schemagen.log"));
