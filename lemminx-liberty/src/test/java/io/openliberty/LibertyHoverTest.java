@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
@@ -52,6 +53,7 @@ public class LibertyHoverTest {
                 libWorkspace = libPM.getLibertyWorkspaceFolders().iterator().next();
                 settings=Mockito.mockStatic(SettingsService.class);
                 settings.when(SettingsService::getInstance).thenReturn(settingsService);
+                when(settingsService.getCurrentLocale()).thenReturn(Locale.getDefault());
         }
 
         @AfterEach
