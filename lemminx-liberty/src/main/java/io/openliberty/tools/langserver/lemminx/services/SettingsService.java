@@ -137,7 +137,8 @@ public class SettingsService {
         if (workspace == null) {
             LOGGER.warning("Could not find workspace for server xml URI %s. Variable resolution cannot be performed.".formatted(serverXmlURI));
         } else if (variables != null && variables.containsKey(workspace.getWorkspaceString())) {
-            variableProps = variables.get(workspace.getWorkspaceString());
+            variableProps = variables.get(workspace.getWorkspaceString()) != null ?
+                    variables.get(workspace.getWorkspaceString()) : new Properties();
         } else {
             LOGGER.warning("Could not find variable mapping for workspace URI %s. Variable resolution cannot be performed.".formatted(workspace.getWorkspaceString()));
         }
