@@ -53,7 +53,7 @@ public class SettingsService {
     private LibertySettings settings;
 
     private Map<String,Properties> variables;
-    private Locale currentLocale;
+    private Locale currentLocale = Locale.getDefault();
     private boolean configCopiedToServer = false;
     /**
      * Takes the xml settings object and parses out the Liberty Settings
@@ -160,9 +160,7 @@ public class SettingsService {
     }
 
     public void initializeLocale(InitializeParams initializeParams) {
-        if (initializeParams == null || initializeParams.getLocale() == null) {
-            this.currentLocale = Locale.getDefault();
-        } else {
+        if (initializeParams != null && initializeParams.getLocale() != null) {
             this.currentLocale = LocaleUtils.toLocale(initializeParams.getLocale());
         }
     }

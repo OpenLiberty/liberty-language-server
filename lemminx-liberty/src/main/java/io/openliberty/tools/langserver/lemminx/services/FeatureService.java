@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -94,9 +95,8 @@ public class FeatureService {
     public static FeatureService getInstance() {
         if (instance == null) {
             instance = new FeatureService();
-            String currentLocaleLanguage = SettingsService.getInstance().getCurrentLocale().getLanguage();
-            FEATURELIST_XML_RESOURCE = new ResourceToDeploy(FEATURELIST_XML_RESOURCE_URL.formatted(currentLocaleLanguage),
-                    FEATURELIST_XML_CLASSPATH_LOCATION.formatted(currentLocaleLanguage));
+            FEATURELIST_XML_RESOURCE = new ResourceToDeploy(FEATURELIST_XML_RESOURCE_URL.formatted(SettingsService.getInstance().getCurrentLocale().toString()),
+                    FEATURELIST_XML_CLASSPATH_LOCATION.formatted(SettingsService.getInstance().getCurrentLocale().toString()));
         }
         return instance;
     }
@@ -434,10 +434,15 @@ public class FeatureService {
 
     private static Path getFeaturelistXmlFile() throws IOException {
         Path featurelistXmlFile;
+        if (Locale.US.equals(SettingsService.getInstance().getCurrentLocale())) {
+            LOGGER.info("Locale is %s. Using default feature list cache xml in %s".formatted(SettingsService.getInstance().getCurrentLocale(), FEATURELIST_XML_RESOURCE));
+            return CacheResourcesManager.getResourceCachePath(FEATURELIST_XML_RESOURCE_DEFAULT);
+        }
         try {
+            LOGGER.info("Using Locale %s to find feature list xml in %s".formatted(SettingsService.getInstance().getCurrentLocale(), FEATURELIST_XML_RESOURCE));
             featurelistXmlFile = CacheResourcesManager.getResourceCachePath(FEATURELIST_XML_RESOURCE);
-        }catch (Exception e){
-            LOGGER.warning("Unable to find localized feature list cache. Using default instead");
+        } catch (Exception e) {
+            LOGGER.warning("Unable to find localized feature list cache using current locale %s. Using default feature list cache xml in %s".formatted(SettingsService.getInstance().getCurrentLocale(), FEATURELIST_XML_RESOURCE_DEFAULT));
             featurelistXmlFile = CacheResourcesManager.getResourceCachePath(FEATURELIST_XML_RESOURCE_DEFAULT);
         }
         return featurelistXmlFile;

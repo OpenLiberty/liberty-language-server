@@ -32,7 +32,7 @@ public class EditAttribute implements ICodeActionParticipant {
         Diagnostic diagnostic = request.getDiagnostic();
         DOMDocument document = request.getDocument();
         try {
-            String title = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_SET_OPTIONAL_ATTRIBUTE);
+            String title = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_SET_OPTIONAL_ATTRIBUTE).formatted(true);
             String replaceText = "optional=\"true\"";
             codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), replaceText, document.getTextDocument(), diagnostic));
 

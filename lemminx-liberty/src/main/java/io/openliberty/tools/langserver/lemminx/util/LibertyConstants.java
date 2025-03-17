@@ -69,8 +69,5 @@ public final class LibertyConstants {
         put("wasJmsSecurity-", "messagingSecurity-");
     }});
 
-    public static String changedFeatureNameDiagMessage="ERROR: The %s feature cannot be configured with the %s feature because they are two different versions of the same feature. " +
-            "The feature name changed from %s to %s for Jakarta EE. Remove one of the features.";
-
     public static List<String> filesToWatch= Arrays.asList(SERVER_XML,"server.env","bootstrap.properties");
 }

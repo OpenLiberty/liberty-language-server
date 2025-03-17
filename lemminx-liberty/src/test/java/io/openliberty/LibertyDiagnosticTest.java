@@ -1,6 +1,8 @@
 package io.openliberty;
 
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleMappingConstants;
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleUtil;
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lsp4j.CodeAction;
@@ -60,7 +62,7 @@ public class LibertyDiagnosticTest {
     static String sampleserverXMLURI = new File(srcResourcesDir, "sample-server.xml").toURI().toString();
     static List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
     LibertyProjectsManager libPM;
-    public static final String MISSING_CONFIGURED_FEATURE_MESSAGE = "This config element does not relate to a feature configured in the featureManager. If the relevant feature is specified in another server configuration file, this message can be ignored. Otherwise, remove this element or add a relevant feature.";
+    public static String MISSING_CONFIGURED_FEATURE_MESSAGE;
     LibertyWorkspace libWorkspace;
     MockedStatic settings;
 
@@ -73,6 +75,8 @@ public class LibertyDiagnosticTest {
         settings= Mockito.mockStatic(SettingsService.class);
         settings.when(SettingsService::getInstance).thenReturn(settingsService);
         Mockito.lenient().when(settingsService.getVariablesForServerXml(any())).thenReturn(new Properties());
+        Mockito.lenient().when(settingsService.getCurrentLocale()).thenReturn(Locale.getDefault());
+        MISSING_CONFIGURED_FEATURE_MESSAGE = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_MISSING_CONFIGURED_FEATURE_MESSAGE);
     }
 
     @AfterEach

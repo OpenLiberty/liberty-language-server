@@ -18,6 +18,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -112,15 +113,25 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
         }
     }
 
+    /**
+     * get server xsd resource location
+     *
+     * @return
+     * @throws IOException
+     */
     private Path getServerXSDFile() throws IOException {
         Path serverXSDFile;
+        if(Locale.US.equals(SettingsService.getInstance().getCurrentLocale())){
+            LOGGER.info("Locale is %s. Using default xsd resource located in %s".formatted(SettingsService.getInstance().getCurrentLocale(), SERVER_XSD_RESOURCE));
+            return CacheResourcesManager.getResourceCachePath(SERVER_XSD_RESOURCE_DEFAULT);
+        }
         try {
-            String currentLocaleLang= SettingsService.getInstance().getCurrentLocale().getLanguage();
-            SERVER_XSD_RESOURCE = new ResourceToDeploy(XSD_RESOURCE_URL.formatted(currentLocaleLang),
-                    XSD_CLASSPATH_LOCATION.formatted(currentLocaleLang));
+            SERVER_XSD_RESOURCE = new ResourceToDeploy(XSD_RESOURCE_URL.formatted(SettingsService.getInstance().getCurrentLocale().toString()),
+                    XSD_CLASSPATH_LOCATION.formatted(SettingsService.getInstance().getCurrentLocale().toString()));
+            LOGGER.info("Using Locale %s to find xsd resource in %s".formatted(SettingsService.getInstance().getCurrentLocale(), SERVER_XSD_RESOURCE));
             serverXSDFile = CacheResourcesManager.getResourceCachePath(SERVER_XSD_RESOURCE);
-        }catch (Exception exception){
-            LOGGER.warning("Unable to find localized xsd resource. Using default instead");
+        } catch (Exception exception){
+            LOGGER.warning("Unable to find localized xsd resource using current locale %s. Using default xsd resource located in %s".formatted(SettingsService.getInstance().getCurrentLocale(), SERVER_XSD_RESOURCE_DEFAULT));
             serverXSDFile = CacheResourcesManager.getResourceCachePath(SERVER_XSD_RESOURCE_DEFAULT);
         }
         return serverXSDFile;
@@ -167,7 +178,7 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
                 LOGGER.info("Generating schema file at: " + xsdDestPath);
     
                 ProcessBuilder pb = new ProcessBuilder("java", "-jar", schemaGenJarPath.toAbsolutePath().toString(), "--schemaVersion=1.1",
-                        "--outputVersion=2", xsdDestPath, "--locale=" + SettingsService.getInstance().getCurrentLocale().getLanguage()); // Add locale param here
+                        "--outputVersion=2", xsdDestPath, "--locale=" + SettingsService.getInstance().getCurrentLocale().toString()); // Add locale param here
                 pb.directory(tempDir);
                 pb.redirectErrorStream(true);
                 pb.redirectOutput(new File(tempDir, "schemagen.log"));

@@ -32,7 +32,7 @@ public class AddAttribute implements ICodeActionParticipant {
         Diagnostic diagnostic = request.getDiagnostic();
         DOMDocument document = request.getDocument();
         try {
-            String title = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_ADD_OPTIONAL_ATTRIBUTE);
+            String title = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_ADD_OPTIONAL_ATTRIBUTE).formatted(true);
             String replaceText = "optional=\"true\" ";
             codeActions.add(CodeActionFactory.insert(title, diagnostic.getRange().getStart(), replaceText, document.getTextDocument(), diagnostic));
         } catch (Exception e) {
