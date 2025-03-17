@@ -72,6 +72,7 @@ public class LibertyDiagnosticTest {
         libWorkspace = libPM.getLibertyWorkspaceFolders().iterator().next();
         settings= Mockito.mockStatic(SettingsService.class);
         settings.when(SettingsService::getInstance).thenReturn(settingsService);
+        Mockito.lenient().when(settingsService.getVariablesForServerXml(any())).thenReturn(new Properties());
     }
 
     @AfterEach
