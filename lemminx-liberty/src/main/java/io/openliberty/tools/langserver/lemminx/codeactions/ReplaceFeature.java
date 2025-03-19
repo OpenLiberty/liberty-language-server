@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2023, 2024 IBM Corporation and others.
+* Copyright (c) 2023, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -17,6 +17,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleMappingConstants;
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleUtil;
 import org.eclipse.lemminx.commons.CodeActionFactory;
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.dom.DOMNode;
@@ -74,7 +76,7 @@ public class ReplaceFeature implements ICodeActionParticipant {
 
                 for (String nextFeature : replacementFeatureNames) {
                     if (!nextFeature.equals(featureNameToReplace)) {
-                        String title = "Replace feature with " + nextFeature;
+                        String title = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_REPLACE_FEATURE, nextFeature);
                         codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), nextFeature, document.getTextDocument(), diagnostic));
                     }
                 }

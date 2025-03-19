@@ -19,6 +19,8 @@ import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import io.openliberty.tools.langserver.lemminx.util.LibertyConstants;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleMappingConstants;
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleUtil;
 import org.eclipse.lemminx.commons.CodeActionFactory;
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionParticipant;
@@ -65,7 +67,7 @@ public class ReplacePlatform implements ICodeActionParticipant {
                         .toList();
                 for (String nextPlatform : filteredPlatforms) {
                     if (!nextPlatform.equals(platformNameToReplace)) {
-                        String title = "Replace platform with " + nextPlatform;
+                        String title = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_REPLACE_PLATFORM, nextPlatform);
                         codeActions.add(CodeActionFactory.replace(title, diagnostic.getRange(), nextPlatform, document.getTextDocument(), diagnostic));
                     }
                 }

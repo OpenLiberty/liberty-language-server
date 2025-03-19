@@ -46,7 +46,6 @@ import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
-import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.changedFeatureNameDiagMessage;
 
 public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     private static final Logger LOGGER = Logger.getLogger(LibertyDiagnosticParticipant.class.getName());
@@ -55,19 +54,13 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
 
     public static final String NOT_XML_OR_DIR = "The specified resource is not an XML file. If it is a directory, it must end with a trailing slash.";
 
-    public static final String MISSING_FILE_MESSAGE = "The resource at the specified location could not be found.";
     public static final String MISSING_FILE_CODE = "missing_file";
 
-    public static final String MISSING_CONFIGURED_FEATURE_MESSAGE = "This config element does not relate to a feature configured in the featureManager. If the relevant feature is specified in another server configuration file, this message can be ignored. Otherwise, remove this element or add a relevant feature.";
     public static final String MISSING_CONFIGURED_FEATURE_CODE = "lost_config_element";
 
-    public static final String NOT_OPTIONAL_MESSAGE = "The specified resource cannot be skipped. Check location value or set optional to true.";
     public static final String NOT_OPTIONAL_CODE = "not_optional";
-    public static final String IMPLICIT_NOT_OPTIONAL_MESSAGE = "The specified resource cannot be skipped. Check location value or add optional attribute.";
     public static final String IMPLICIT_NOT_OPTIONAL_CODE = "implicit_not_optional";
 
-    public static final String SPECIFIED_DIR_IS_FILE = "Path specified a directory, but resource exists as a file. Please remove the trailing slash.";
-    public static final String SPECIFIED_FILE_IS_DIR = "Path specified a file, but resource exists as a directory. Please add a trailing slash.";
     public static final String IS_FILE_NOT_DIR_CODE = "is_file_not_dir";
     public static final String Is_DIR_NOT_FILE_CODE = "is_dir_not_file";
 
@@ -118,11 +111,11 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         List<VariableLoc> variables = LibertyUtils.getVariablesFromTextContent(docContent);
         Properties variablesMap = SettingsService.getInstance().getVariablesForServerXml(domDocument.getDocumentURI());
         if (variablesMap.isEmpty() && !variables.isEmpty()) {
-            String message = "WARNING: Variable resolution is not available for workspace %s. Please start the Liberty server for the workspace to enable variable resolution.";
             LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI());
+            String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.WARN_VARIABLE_RESOLUTION_NOT_AVAILABLE, workspace.getWorkspaceURI().getPath());
             Range range = XMLPositionUtility.createRange(domDocument.getDocumentElement().getStartTagOpenOffset(), domDocument.getDocumentElement().getStartTagCloseOffset(),
                     domDocument);
-            Diagnostic diag = new Diagnostic(range, message.formatted(workspace.getWorkspaceURI().getPath()), DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE);
+            Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE);
             diagnosticsList.add(diag);
             // set config copied to server as false, so that hover or completion do not add variables into server.xml variablesMap
             SettingsService.getInstance().setConfigCopiedToServer(false);
@@ -173,7 +166,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             if (!featureName.startsWith("usr:") && !FeatureService.getInstance().featureExists(featureName, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI())) {
                 Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
                         domDocument);
-                String message = "ERROR: The feature \"" + featureName + "\" does not exist.";
+                String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_FEATURE_NOT_EXIST, featureName);
                 list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
             } else {
                 checkForFeatureUniqueness(domDocument, list, includedFeatures, featureTextNode, versionedFeatures, versionlessFeatures, featuresWithoutVersions, featureName, featureList);
@@ -226,19 +219,19 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         if (includedFeatures.contains(featureNameLower)) {
             Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
                     featureTextNode.getEnd(), domDocument);
-            String message = "ERROR: " + featureName + " is already included.";
+            String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_FEATURE_ALREADY_INCLUDED, featureName);
             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
         } else if (featuresWithoutVersions.contains(featureNameNoVersionLower)) {
             Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
                     featureTextNode.getEnd(), domDocument);
-            String message = "ERROR: More than one version of feature " + featureNameNoVersion + " is included. Only one version of a feature may be specified.";
+            String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_FEATURE_MULTIPLE_VERSIONS, featureNameNoVersion);
             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
         } else if (featuresWithOldNames.contains(featureNameNoVersionLower + "-")) {
             String otherFeatureName = getOtherFeatureName(featureList, changedFeatureNameMapLowerReversed, featureNameNoVersionLower);
             //check for features whose name is changed such as jsp is changed to pages
             Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
                     featureTextNode.getEnd(), domDocument);
-            String message = String.format(changedFeatureNameDiagMessage, featureName, otherFeatureName,
+            String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_FEATURE_NAME_CHANGED, featureName, otherFeatureName,
                     LibertyUtils.stripVersion(otherFeatureName),
                     LibertyUtils.stripVersion(featureName));
             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
@@ -246,7 +239,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             String otherFeatureName = getOtherFeatureName(featureList, changedFeatureNameMapLower, featureNameNoVersionLower);
             Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
                     featureTextNode.getEnd(), domDocument);
-            String message = String.format(changedFeatureNameDiagMessage, featureName, otherFeatureName,
+            String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_FEATURE_NAME_CHANGED, featureName, otherFeatureName,
                     LibertyUtils.stripVersion(featureName),
                     LibertyUtils.stripVersion(otherFeatureName));
             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
@@ -294,16 +287,20 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             if (!configFile.exists()) {
                 DOMAttr optNode = node.getAttributeNode("optional");
                 if (optNode == null) {
-                    diagnosticsList.add(new Diagnostic(range, IMPLICIT_NOT_OPTIONAL_MESSAGE, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, IMPLICIT_NOT_OPTIONAL_CODE));
+                    String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_IMPLICIT_NOT_OPTIONAL_MESSAGE);
+                    diagnosticsList.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, IMPLICIT_NOT_OPTIONAL_CODE));
                 } else if (optNode.getValue().equals("false")) {
                     Range optRange = XMLPositionUtility.createRange(optNode.getStart(), optNode.getEnd(), domDocument);
-                    diagnosticsList.add(new Diagnostic(optRange, NOT_OPTIONAL_MESSAGE, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, NOT_OPTIONAL_CODE));
+                    String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_NOT_OPTIONAL_MESSAGE);
+                    diagnosticsList.add(new Diagnostic(optRange, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, NOT_OPTIONAL_CODE));
                 }
-                diagnosticsList.add(new Diagnostic(range, MISSING_FILE_MESSAGE, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE, MISSING_FILE_CODE));
+                String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.WARN_MISSING_FILE_MESSAGE);
+                diagnosticsList.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE, MISSING_FILE_CODE));
             }
             validateFileOrDirIncludeLocation(configFile, isLibertyDirectory, range, diagnosticsList);
         } catch (IllegalArgumentException e) {
-            diagnosticsList.add(new Diagnostic(range, MISSING_FILE_MESSAGE, DiagnosticSeverity.Warning, "liberty-lemminx-exception", MISSING_FILE_CODE));
+            String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.WARN_MISSING_FILE_MESSAGE);
+            diagnosticsList.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, "liberty-lemminx-exception", MISSING_FILE_CODE));
         }
     }
 
@@ -317,9 +314,11 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      */
     private void validateFileOrDirIncludeLocation(File f, boolean isLibertyDirectory, Range range, List<Diagnostic> diagnosticsList) {
         if (f.isFile() && isLibertyDirectory) {
-            diagnosticsList.add(new Diagnostic(range, SPECIFIED_DIR_IS_FILE, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, IS_FILE_NOT_DIR_CODE));
+            String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_SPECIFIED_DIR_IS_FILE);
+            diagnosticsList.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, IS_FILE_NOT_DIR_CODE));
         } else if (f.isDirectory() && !isLibertyDirectory) {
-            diagnosticsList.add(new Diagnostic(range, SPECIFIED_FILE_IS_DIR, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, Is_DIR_NOT_FILE_CODE));
+            String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_SPECIFIED_FILE_IS_DIR);
+            diagnosticsList.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, Is_DIR_NOT_FILE_CODE));
         }
     }
 
@@ -334,7 +333,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         String configElementName = configElementNode.getNodeName();
         Range range = XMLPositionUtility
                 .createRange(configElementNode.getStart(), configElementNode.getEnd(), domDocument);
-        Diagnostic tempDiagnostic = new Diagnostic(range, MISSING_CONFIGURED_FEATURE_MESSAGE, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE, MISSING_CONFIGURED_FEATURE_CODE);
+        String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_MISSING_CONFIGURED_FEATURE_MESSAGE);
+        Diagnostic tempDiagnostic = new Diagnostic(range, message, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE, MISSING_CONFIGURED_FEATURE_CODE);
         tempDiagnostic.setSource(configElementName);
         tempDiagnosticsList.add(tempDiagnostic);
     }
@@ -412,7 +412,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             if (!FeatureService.getInstance().platformExists(platformName, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI())) {
                 Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(),
                         domDocument);
-                String message = "ERROR: The platform \"" + platformName + "\" does not exist.";
+                String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_PLATFORM_NOT_EXIST, platformName);
                 list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_PLATFORM_CODE));
             }
             // if this exact platform already exists, or another version of this feature already exists, then show a diagnostic
@@ -423,7 +423,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                     Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
                             featureTextNode.getEnd(), domDocument);
                     conflictingPlatforms.add(platformName);
-                    String message = "ERROR: The following configured platform versions are in conflict " + conflictingPlatforms;
+                    String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_PLATFORMS_IN_CONFLICT, conflictingPlatforms);
                     list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
                 }
                 preferredPlatformsWithoutVersion.add(platformNoVersionLower);
@@ -444,7 +444,6 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      * @param preferredPlatforms
      * @param platformNameLowerCase
      * @param platformName
-     * @param platformNoVersionLower
      */
     private void checkForPlatformUniqueness(DOMDocument domDocument, List<Diagnostic> list, DOMNode featureTextNode, Set<String> preferredPlatformsWithoutVersion, Set<String> preferredPlatforms, String platformNameLowerCase, String platformName) {
         String platformNoVersionLower = platformNameLowerCase.contains("-") ? platformNameLowerCase.substring(0, platformNameLowerCase.lastIndexOf("-"))
@@ -452,13 +451,13 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         if (preferredPlatforms.contains(platformNameLowerCase)) {
             Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
                     featureTextNode.getEnd(), domDocument);
-            String message = "ERROR: " + platformName + " is already included.";
+            String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_PLATFORM_ALREADY_INCLUDED, platformName);
             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
         } else if (preferredPlatformsWithoutVersion.contains(platformNoVersionLower)) {
             Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
                     featureTextNode.getEnd(), domDocument);
             String platformNameNoVersion = platformName.substring(0, platformName.lastIndexOf("-"));
-            String message = "ERROR: More than one version of platform " + platformNameNoVersion + " is included. Only one version of a platform may be specified.";
+            String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_PLATFORM_MULTIPLE_VERSIONS, platformNameNoVersion);
             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
         }
     }
@@ -539,7 +538,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         if (versionedFeatures.isEmpty() && preferredPlatforms.isEmpty()) {
             Range range = XMLPositionUtility.createRange(versionLessFeatureTextNode.getStart(),
                     versionLessFeatureTextNode.getEnd(), domDocument);
-                String message = "ERROR: The " + featureName + " versionless feature cannot be resolved. Specify a platform or a feature with a version to enable resolution.";
+            String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_VERSIONLESS_FEATURE_NO_PLATFORM_OR_FEATURE, featureName);
             list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
         } else if (!versionedFeatures.isEmpty() && preferredPlatforms.isEmpty()) {
             Set<String> commonPlatforms = FeatureService.getInstance()
@@ -548,13 +547,13 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                     commonPlatforms.isEmpty()) {
                 Range range = XMLPositionUtility.createRange(versionLessFeatureTextNode.getStart(), versionLessFeatureTextNode.getEnd(),
                         domDocument);
-                String message = "ERROR: \"" + featureName + "\" versionless feature cannot be resolved. The versioned features do not have a platform in common.";
+                String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_VERSIONLESS_FEATURE_NO_COMMON_PLATFORM, featureName);
                 list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
             }
             else if(commonPlatforms.size()>1) {
                 Range range = XMLPositionUtility.createRange(versionLessFeatureTextNode.getStart(), versionLessFeatureTextNode.getEnd(),
                         domDocument);
-                String message = "ERROR: The \"" + featureName + "\" versionless feature cannot be resolved since there are more than one common platform. Specify a platform or a feature with a version to enable resolution.";
+                String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_VERSIONLESS_FEATURE_MULTIPLE_COMMON_PLATFORM, featureName);
                 list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
             }
             else{
@@ -579,9 +578,9 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         if (Sets.intersection(allPlatforrmsForVersionLess, platformsToCompare).isEmpty()) {
             String message;
             if (isPlatformFromXml) {
-                message = "ERROR: The \"" + featureName + "\" versionless feature does not have a configured platform.";
+                message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_VERSIONLESS_FEATURE_NO_CONFIGURED_PLATFORM, featureName);
             } else {
-                message = "ERROR: The \"" + featureName + "\" versionless feature cannot be resolved. Specify a platform or a versioned feature from a supported platform to enable resolution.";
+                message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_VERSIONLESS_FEATURE_NO_SUPPORTED_PLATFORM, featureName);
             }
             Range range = XMLPositionUtility.createRange(versionLessFeatureTextNode.getStart(), versionLessFeatureTextNode.getEnd(),
                     domDocument);
@@ -628,7 +627,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                     validateVariableValueNonEmpty(diagnosticsList, node, varName, range);
                 }
                 else{
-                    String message = "ERROR: The variable should have a valid name defined in name attribute.";
+                    String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_VARIABLE_INVALID_NAME_ATTRIBUTE);
                     Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_VARIABLE_CODE);
                     diagnosticsList.add(diag);
                 }
@@ -648,12 +647,12 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         String varValue = varNode.getAttribute("value");
         String varDefaultValue = varNode.getAttribute("defaultValue");
         if(varValue==null && varDefaultValue==null){
-            String message = "ERROR: The variable \"" + varName + "\" should have value or defaultValue attribute defined.";
+            String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_VARIABLE_INVALID_VALUE_ATTRIBUTE, varName);
             Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_VARIABLE_CODE);
             diagnosticsList.add(diag);
         }
         else if((varValue!=null && varValue.trim().isEmpty())||(varDefaultValue!=null && varDefaultValue.trim().isEmpty())){
-            String message = "WARNING: The variable \"" + varName + "\" should have a valid value defined.";
+            String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.WARN_VARIABLE_INVALID_VALUE, varName);
             Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE, INCORRECT_VARIABLE_CODE);
             diagnosticsList.add(diag);
         }
@@ -673,7 +672,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 // we just need the variable value range here as ${} is added in replace variable message
                 Range range = XMLPositionUtility.createRange(variable.getStartLoc() - 2, variable.getEndLoc() + 1,
                         domDocument);
-                String message = "ERROR: The variable \"" + variable.getValue() + "\" does not exist.";
+                String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_VARIABLE_NOT_EXIST, variable.getValue());
                 Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_VARIABLE_CODE);
                 diag.setData(variable.getValue());
                 diagnosticsList.add(diag);

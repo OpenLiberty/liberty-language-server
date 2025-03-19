@@ -1,6 +1,8 @@
 package io.openliberty;
 
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleMappingConstants;
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleUtil;
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lsp4j.CodeAction;
@@ -42,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
@@ -59,6 +62,7 @@ public class LibertyDiagnosticTest {
     static String sampleserverXMLURI = new File(srcResourcesDir, "sample-server.xml").toURI().toString();
     static List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
     LibertyProjectsManager libPM;
+    public static String MISSING_CONFIGURED_FEATURE_MESSAGE;
     LibertyWorkspace libWorkspace;
     MockedStatic settings;
 
@@ -71,6 +75,8 @@ public class LibertyDiagnosticTest {
         settings= Mockito.mockStatic(SettingsService.class);
         settings.when(SettingsService::getInstance).thenReturn(settingsService);
         Mockito.lenient().when(settingsService.getVariablesForServerXml(any())).thenReturn(new Properties());
+        Mockito.lenient().when(settingsService.getCurrentLocale()).thenReturn(Locale.getDefault());
+        MISSING_CONFIGURED_FEATURE_MESSAGE = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_MISSING_CONFIGURED_FEATURE_MESSAGE);
     }
 
     @AfterEach
@@ -338,7 +344,7 @@ public class LibertyDiagnosticTest {
         // Diagnostic config_for_missing_feature = new Diagnostic();
         // config_for_missing_feature.setRange(r(0, serverXml.indexOf("<ssl"), 0, serverXml.length()-"</server>".length()));
         // config_for_missing_feature.setCode(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE);
-        // config_for_missing_feature.setMessage(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_MESSAGE);
+        // config_for_missing_feature.setMessage(MISSING_CONFIGURED_FEATURE_MESSAGE);
 
         // XMLAssert.testDiagnosticsFor(serverXml, null, null, serverXMLURI, config_for_missing_feature);
         XMLAssert.testDiagnosticsFor(serverXml, null, null, serverXMLURI); // expect no diagnostic for this scenario right now
@@ -368,7 +374,7 @@ public class LibertyDiagnosticTest {
         Diagnostic config_for_missing_feature = new Diagnostic();
         config_for_missing_feature.setRange(r(4, diagnosticStart, 4, diagnosticStart + diagnosticLength));
         config_for_missing_feature.setCode(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE);
-        config_for_missing_feature.setMessage(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_MESSAGE);
+        config_for_missing_feature.setMessage(MISSING_CONFIGURED_FEATURE_MESSAGE);
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, sampleserverXMLURI, config_for_missing_feature);
 
@@ -403,6 +409,7 @@ public class LibertyDiagnosticTest {
     @Test
     public void testConfigElementDirect() throws JAXBException {
         assertTrue(featureList.exists());
+        when(settingsService.getCurrentLocale()).thenReturn(Locale.getDefault());
         FeatureService.getInstance().readFeaturesFromFeatureListFile(libWorkspace, featureList);
 
         String correctFeature   = "           <feature>Ssl-1.0</feature>";
@@ -433,7 +440,7 @@ public class LibertyDiagnosticTest {
         Diagnostic config_for_missing_feature = new Diagnostic();
         config_for_missing_feature.setRange(r(4, diagnosticStart, 4, diagnosticStart + diagnosticLength));
         config_for_missing_feature.setCode(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE);
-        config_for_missing_feature.setMessage(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_MESSAGE);
+        config_for_missing_feature.setMessage(MISSING_CONFIGURED_FEATURE_MESSAGE);
 
         XMLAssert.testDiagnosticsFor(serverXML2, null, null, serverXMLURI, config_for_missing_feature);
     }
@@ -715,7 +722,7 @@ public class LibertyDiagnosticTest {
         Diagnostic configForMissingFeature = new Diagnostic();
         configForMissingFeature.setRange(r(7, 3, 7, 57));
         configForMissingFeature.setCode(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE);
-        configForMissingFeature.setMessage(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_MESSAGE);
+        configForMissingFeature.setMessage(MISSING_CONFIGURED_FEATURE_MESSAGE);
         XMLAssert.testDiagnosticsFor(serverXML1, null, null, serverXMLURI,configForMissingFeature);
     }
 
@@ -1105,7 +1112,7 @@ public class LibertyDiagnosticTest {
         Diagnostic diagnostic = new Diagnostic();
         diagnostic.setRange(r(4, 0, 4, 46));
         diagnostic.setCode(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE);
-        diagnostic.setMessage(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_MESSAGE);
+        diagnostic.setMessage(MISSING_CONFIGURED_FEATURE_MESSAGE);
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, sampleserverXMLURI, diagnostic);
         diagnostic.setSource("mpMetrics");
@@ -1160,7 +1167,7 @@ public class LibertyDiagnosticTest {
         Diagnostic diagnostic = new Diagnostic();
         diagnostic.setRange(r(4, 0, 4, 46));
         diagnostic.setCode(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE);
-        diagnostic.setMessage(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_MESSAGE);
+        diagnostic.setMessage(MISSING_CONFIGURED_FEATURE_MESSAGE);
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, sampleserverXMLURI, diagnostic);
         diagnostic.setSource("mpMetrics");

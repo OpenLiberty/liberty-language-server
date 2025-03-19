@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022, 2023 IBM Corporation and others.
+* Copyright (c) 2022, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -17,6 +17,8 @@ import java.io.File;
 import java.util.List;
 import java.util.logging.Logger;
 
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleMappingConstants;
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleUtil;
 import org.eclipse.lemminx.commons.CodeActionFactory;
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionParticipant;
@@ -41,7 +43,7 @@ public class CreateFile implements ICodeActionParticipant {
             File parentFile = LibertyUtils.getDocumentAsFile(document).getParentFile();
             String locationValue = document.findNodeAt(document.offsetAt(diagnostic.getRange().getEnd())).getAttribute("location");
             codeActions.add(CodeActionFactory.createFile(
-                "Create the missing server config file relative from this file.", 
+                    ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_CREATE_SERVER_CONFIG_FILE),
                 new File(parentFile, locationValue).toURI().toString(), 
                 EMPTY_SERVER_CONFIG, diagnostic));
 
