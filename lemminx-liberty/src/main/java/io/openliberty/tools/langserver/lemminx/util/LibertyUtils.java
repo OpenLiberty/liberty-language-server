@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Properties;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -579,11 +580,13 @@ public class LibertyUtils {
      */
     public static String getPlatformDescription(String platformItem) {
         String platformNameNoVersion = LibertyUtils.stripVersion(platformItem).toLowerCase();
-        if (LibertyConstants.platformDescriptionMap.containsKey(platformNameNoVersion)) {
-            String version = getVersion(platformItem);
-            return String.format(LibertyConstants.platformDescriptionMap.get(platformNameNoVersion), version);
-        }
-        return null;
+        String version = getVersion(platformItem);
+        String key = ResourceBundleMappingConstants.PLATFORM_DESCRIPTION.formatted(platformNameNoVersion);
+        String msg = ResourceBundleUtil.getMessage(key, version);
+        // return null if key does not exist in resource bundle
+        if (Objects.equals(msg, key))
+            return null;
+        return msg;
     }
 
     /**

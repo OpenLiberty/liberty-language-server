@@ -39,13 +39,6 @@ public final class LibertyConstants {
     public static final String SERVER_CONFIG_DROPINS_DEFAULTS = "/configDropins/defaults/";
     public static final String SERVER_CONFIG_DROPINS_OVERRIDES = "/configDropins/overrides/";
 
-    // map to load description for features if description is not present in feature.json
-    public static final Map<String, String> platformDescriptionMap = Collections.unmodifiableMap(new HashMap<>() {{
-        put("javaee", "Description: This platform resolves the Liberty features that support the Java EE %s platform.");
-        put("jakartaee", "Description: This platform resolves the Liberty features that support the Jakarta EE %s platform.");
-        put("microprofile", "Description: This platform resolves the Liberty features that support the MicroProfile %s for Cloud Native Java platform.");
-    }});
-
     public static final Map<String, String> conflictingPlatforms = Collections.unmodifiableMap(new HashMap<>() {{
         put("javaee", "jakartaee");
         put("jakartaee", "javaee");
@@ -75,9 +68,6 @@ public final class LibertyConstants {
         put("wasJmsClient-", "messagingClient-");
         put("wasJmsSecurity-", "messagingSecurity-");
     }});
-
-    public static String changedFeatureNameDiagMessage="ERROR: The %s feature cannot be configured with the %s feature because they are two different versions of the same feature. " +
-            "The feature name changed from %s to %s for Jakarta EE. Remove one of the features.";
 
     public static List<String> filesToWatch= Arrays.asList(SERVER_XML,"server.env","bootstrap.properties");
 }

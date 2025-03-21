@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2023 IBM Corporation and others.
+* Copyright (c) 2023, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -21,6 +21,8 @@ import java.util.logging.Logger;
 import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleMappingConstants;
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleUtil;
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lemminx.commons.CodeActionFactory;
 import org.eclipse.lemminx.commons.TextDocument;
@@ -153,14 +155,14 @@ public class AddFeature implements ICodeActionParticipant {
         for (String feature : possibleVersionlessFeatures) {
             Set<String> allPlatforms = FeatureService.getInstance().getAllPlatformsForVersionLessFeature(feature, libertyVersion, libertyRuntime, requestDelay, document.getDocumentURI());
             if (allPlatforms.stream().anyMatch(existingPlatforms::contains)) {
-                String title = "Add feature " + feature;
+                String title = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_ADD_FEATURE, feature);
                 codeActions.add(CodeActionFactory.insert(
                         title, referenceRange.getEnd(),
                         String.format(insertText, feature), textDocument, diagnostic));
             }
         }
         for (String feature : sortedFeatures) {
-            String title = "Add feature " + feature;
+            String title = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_ADD_FEATURE, feature);
             codeActions.add(CodeActionFactory.insert(
                     title, referenceRange.getEnd(), String.format(insertText, feature), textDocument, diagnostic));
         }

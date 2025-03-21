@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import org.eclipse.lsp4j.WorkspaceFolder;
 import org.junit.jupiter.api.Test;
 
@@ -24,6 +25,7 @@ public class LibertyFeatureTest {
     
     @Test
     public void getInstalledFeaturesListTest() throws JAXBException {
+        SettingsService.getInstance().initializeLocale(null);
         FeatureService fs = FeatureService.getInstance();
         File srcResourcesDir = new File("src/test/resources/sample");
         File featureListFile = new File(srcResourcesDir.getParentFile(), "featurelist-ol-25.0.0.2.xml");

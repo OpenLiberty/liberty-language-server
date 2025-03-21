@@ -25,6 +25,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -72,8 +73,10 @@ public class FeatureService {
 
     // This file is copied to the local .lemminx cache. 
     // This is how we ensure the latest default featurelist xml gets used in each developer environment. 
-    private static final String FEATURELIST_XML_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist-cached-25.0.0.2.xml";
-    private static final String FEATURELIST_XML_CLASSPATH_LOCATION = "/featurelist-cached-25.0.0.2.xml";
+    private static final String FEATURELIST_XML_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist.cached/featurelist-cached-25.0.0.2_%s.xml";
+    private static final String FEATURELIST_XML_CLASSPATH_LOCATION = "/featurelist.cached/featurelist-cached-25.0.0.2_%s.xml";
+    private static final String FEATURELIST_XML_RESOURCE_URL_DEFAULT = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist.cached/featurelist-cached-25.0.0.2.xml";
+    private static final String FEATURELIST_XML_CLASSPATH_LOCATION_DEFAULT = "/featurelist.cached/featurelist-cached-25.0.0.2.xml";
 
     /**
      * FEATURELIST_XML_RESOURCE is the featurelist xml that is located at FEATURELIST_XML_CLASSPATH_LOCATION
@@ -85,12 +88,15 @@ public class FeatureService {
      * 
      * Declared public to be used by tests
      */
-    public static final ResourceToDeploy FEATURELIST_XML_RESOURCE = new ResourceToDeploy(FEATURELIST_XML_RESOURCE_URL,
-            FEATURELIST_XML_CLASSPATH_LOCATION);
+    private static ResourceToDeploy FEATURELIST_XML_RESOURCE;
+    private static final ResourceToDeploy FEATURELIST_XML_RESOURCE_DEFAULT = new ResourceToDeploy(FEATURELIST_XML_RESOURCE_URL_DEFAULT,
+            FEATURELIST_XML_CLASSPATH_LOCATION_DEFAULT) ;
 
     public static FeatureService getInstance() {
         if (instance == null) {
             instance = new FeatureService();
+            FEATURELIST_XML_RESOURCE = new ResourceToDeploy(FEATURELIST_XML_RESOURCE_URL.formatted(SettingsService.getInstance().getCurrentLocale().toString()),
+                    FEATURELIST_XML_CLASSPATH_LOCATION.formatted(SettingsService.getInstance().getCurrentLocale().toString()));
         }
         return instance;
     }
@@ -401,7 +407,7 @@ public class FeatureService {
         }
 
         try {
-            Path featurelistXmlFile = CacheResourcesManager.getResourceCachePath(FEATURELIST_XML_RESOURCE);
+            Path featurelistXmlFile = getFeaturelistXmlFile();
             LOGGER.info("Using cached Liberty featurelist xml file located at: " + featurelistXmlFile.toString());
 
             File featureListFile = featurelistXmlFile.toFile();
@@ -424,6 +430,22 @@ public class FeatureService {
         }
 
         return defaultFeatureList;
+    }
+
+    private static Path getFeaturelistXmlFile() throws IOException {
+        Path featurelistXmlFile;
+        if (Locale.US.equals(SettingsService.getInstance().getCurrentLocale())) {
+            LOGGER.info("Locale is %s. Using default feature list cache xml in %s".formatted(SettingsService.getInstance().getCurrentLocale(), FEATURELIST_XML_RESOURCE));
+            return CacheResourcesManager.getResourceCachePath(FEATURELIST_XML_RESOURCE_DEFAULT);
+        }
+        try {
+            LOGGER.info("Using Locale %s to find feature list xml in %s".formatted(SettingsService.getInstance().getCurrentLocale(), FEATURELIST_XML_RESOURCE));
+            featurelistXmlFile = CacheResourcesManager.getResourceCachePath(FEATURELIST_XML_RESOURCE);
+        } catch (Exception e) {
+            LOGGER.warning("Unable to find localized feature list cache using current locale %s. Using default feature list cache xml in %s".formatted(SettingsService.getInstance().getCurrentLocale(), FEATURELIST_XML_RESOURCE_DEFAULT));
+            featurelistXmlFile = CacheResourcesManager.getResourceCachePath(FEATURELIST_XML_RESOURCE_DEFAULT);
+        }
+        return featurelistXmlFile;
     }
 
     public boolean doesGeneratedFeatureListExist(LibertyWorkspace libertyWorkspace) {

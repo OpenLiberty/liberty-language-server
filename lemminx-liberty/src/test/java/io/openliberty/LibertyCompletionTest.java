@@ -15,6 +15,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.File;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
@@ -36,7 +37,9 @@ public class LibertyCompletionTest {
         @BeforeEach
         public void setup(){
                 settings = Mockito.mockStatic(SettingsService.class);
+
                 settings.when(SettingsService::getInstance).thenReturn(settingsService);
+                when(settingsService.getCurrentLocale()).thenReturn(Locale.getDefault());
         }
 
         @AfterEach
