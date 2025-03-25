@@ -35,6 +35,7 @@ import io.openliberty.tools.langserver.lemminx.models.feature.FeatureTolerate;
 import io.openliberty.tools.langserver.lemminx.models.feature.FeaturesAndPlatforms;
 import io.openliberty.tools.langserver.lemminx.models.feature.PrivateFeature;
 
+import io.openliberty.tools.langserver.lemminx.util.SchemaAndFeatureListGeneratorUtil;
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.dom.DOMNode;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
@@ -495,18 +496,13 @@ public class FeatureService {
 
             LOGGER.info("Generating feature list file at: " + xmlDestPath);
 
-            ProcessBuilder pb = new ProcessBuilder("java", "-jar", featurelistJarPath.toAbsolutePath().toString(), xmlDestPath);
-            pb.directory(tempDir);
-            pb.redirectErrorStream(true);
-            pb.redirectOutput(new File(tempDir, "ws-featurelist.log"));
-
-            Process proc = pb.start();
-            if (!proc.waitFor(30, TimeUnit.SECONDS)) {
-                proc.destroy();
-                LOGGER.warning("Exceeded 30 second timeout during feature list generation. Using cached features json file.");
-                return null;
-            }
-
+            SchemaAndFeatureListGeneratorUtil.generateFile(
+                    SchemaAndFeatureListGeneratorUtil.ProcessType.FEATURE_LIST,
+                    tempDir.toPath(),
+                    featurelistJarPath,
+                    featureListFile,
+                    SettingsService.getInstance().getCurrentLocale().toString()
+            );
         } catch (Exception e) {
             LOGGER.warning(e.getMessage());
             LOGGER.warning("Due to an exception during feature list file generation, a cached features json file will be used.");
