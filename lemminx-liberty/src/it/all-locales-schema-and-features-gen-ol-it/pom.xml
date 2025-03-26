@@ -67,7 +67,7 @@
         <plugin>
           <groupId>io.openliberty.tools</groupId>
           <artifactId>liberty-maven-plugin</artifactId>
-          <version>3.7.1</version>
+          <version>3.11.3</version>
         </plugin>
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
@@ -95,7 +95,7 @@
           <runtimeArtifact>
             <groupId>io.openliberty</groupId>
             <artifactId>openliberty-runtime</artifactId>
-            <version>25.0.0.2</version>
+            <version>${liberty.version}</version>
           </runtimeArtifact>
         </configuration>
         <executions>

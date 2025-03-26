@@ -1,3 +1,15 @@
+/*******************************************************************************
+ * Copyright (c) 2025 IBM Corporation and others.
+ *
+ * This program and the accompanying materials are made available under the
+ * terms of the Eclipse Public License v. 2.0 which is available at
+ * http://www.eclipse.org/legal/epl-2.0.
+ *
+ * SPDX-License-Identifier: EPL-2.0
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx.util;
 
 import org.apache.commons.lang3.StringUtils;
@@ -48,9 +60,10 @@ public class SchemaAndFeatureListGeneratorUtil {
         if (success && outputFile.exists()) {
             if (type == ProcessType.SCHEMA) {
                 DocumentUtil.removeExtraneousAnyAttributeElements(outputFile);
-                LOGGER.info(String.format("Generated %s with URI: %s", type.description, outputFile.toURI()));
             }
-            LOGGER.info(String.format("Generated %s: %s", type.description, outputFile.getName()));
+            LOGGER.info(String.format("Generated %s: %s", type.description, outputFile.toURI()));
+        } else {
+            LOGGER.info(String.format("The %s is not generated", type.description));
         }
     }
 

@@ -46,12 +46,13 @@ public class LibertyWorkspaceIT {
         }
 
         List<Locale> locales = new ArrayList<>(SettingsService.getInstance().getAvailableLocales());
+        locales.add(new Locale("")); // This is to generate a common file (without locale)
 
         for (Locale locale : locales) {
             String localeName = locale.toString();
             File outputFile = new File(
                     resourcesSchemaDir.toFile(),
-                    "server-cached-" + System.getProperty("liberty.version") + "-" + localeName + ".xsd"
+                    "server-cached-" + System.getProperty("liberty.version") + (StringUtils.isNotEmpty(localeName) ? "_" + localeName : "") + ".xsd"
             );
             SchemaAndFeatureListGeneratorUtil.generateFile(
                     SchemaAndFeatureListGeneratorUtil.ProcessType.SCHEMA,
@@ -75,12 +76,13 @@ public class LibertyWorkspaceIT {
         }
 
         List<Locale> locales = new ArrayList<>(SettingsService.getInstance().getAvailableLocales());
+        locales.add(new Locale("")); // This is to generate a common file (without locale)
 
         for (Locale locale : locales) {
             String localeName = locale.toString();
             File outputFile = new File(
                     resourcesFeatureListDir.toFile(),
-                    "featurelist-cached-" + System.getProperty("liberty.version") + "-" + localeName + ".xml"
+                    "featurelist-cached-" + System.getProperty("liberty.version") + (StringUtils.isNotEmpty(localeName) ? "_" + localeName : "") + ".xml"
             );
             SchemaAndFeatureListGeneratorUtil.generateFile(
                     SchemaAndFeatureListGeneratorUtil.ProcessType.FEATURE_LIST,
