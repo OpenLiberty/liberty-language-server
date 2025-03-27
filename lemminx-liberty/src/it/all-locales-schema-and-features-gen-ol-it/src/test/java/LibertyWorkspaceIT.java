@@ -5,10 +5,12 @@ import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import io.openliberty.tools.langserver.lemminx.util.SchemaAndFeatureListGeneratorUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -34,6 +36,12 @@ public class LibertyWorkspaceIT {
 
         schemaJarPath = projectRoot.resolve("target/it/all-locales-schema-and-features-gen-ol-it/target/liberty/wlp/bin/tools/ws-schemagen.jar");
         featureListJarPath = projectRoot.resolve("target/it/all-locales-schema-and-features-gen-ol-it/target/liberty/wlp/bin/tools/ws-featurelist.jar");
+
+        // Assert that schemaJarPath exists
+        Assertions.assertTrue(Files.exists(schemaJarPath), "Schema JAR file should exist: " + schemaJarPath);
+
+        // Assert that featureListJarPath exists
+        Assertions.assertTrue(Files.exists(featureListJarPath), "Feature List JAR file should exist: " + featureListJarPath);
     }
 
     @Test

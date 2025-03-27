@@ -40,7 +40,7 @@ public class SchemaAndFeatureListGeneratorUtil {
         }
     }
 
-    public static void generateFile(ProcessType type, Path resourcesDir, Path jarPath, File outputFile, String localeName) throws IOException, InterruptedException {
+    public static void generateFile(ProcessType type, Path resourcesDir, Path jarPath, File outputFile, String localeName) throws Exception {
         String destinationPath = outputFile.getCanonicalPath();
         LOGGER.info(String.format("Generating %s at the destination %s ", type.description, destinationPath));
 
@@ -63,7 +63,9 @@ public class SchemaAndFeatureListGeneratorUtil {
             }
             LOGGER.info(String.format("Generated %s: %s", type.description, outputFile.toURI()));
         } else {
-            LOGGER.info(String.format("The %s is not generated", type.description));
+            String errorMessage = String.format("The %s is not generated", type.description);
+            LOGGER.info(errorMessage);
+            throw new Exception(errorMessage); // Throwing this as it will be cached from LibertyXSDURIResolver and will return null from there
         }
     }
 
