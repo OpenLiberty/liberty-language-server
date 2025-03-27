@@ -38,10 +38,12 @@ public class LibertyWorkspaceIT {
         featureListJarPath = projectRoot.resolve("target/it/all-locales-schema-and-features-gen-ol-it/target/liberty/wlp/bin/tools/ws-featurelist.jar");
 
         // Assert that schemaJarPath exists
-        Assertions.assertTrue(Files.exists(schemaJarPath), "Schema JAR file should exist: " + schemaJarPath);
+        Assertions.assertTrue(Files.exists(schemaJarPath.toAbsolutePath()),
+                "Schema JAR file does not exist. Path: " + schemaJarPath.toAbsolutePath());
 
         // Assert that featureListJarPath exists
-        Assertions.assertTrue(Files.exists(featureListJarPath), "Feature List JAR file should exist: " + featureListJarPath);
+        Assertions.assertTrue(Files.exists(featureListJarPath.toAbsolutePath()),
+                "Feature List JAR file does not exist. Path: " + featureListJarPath.toAbsolutePath());
     }
 
     @Test
