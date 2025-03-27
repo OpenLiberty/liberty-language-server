@@ -34,15 +34,12 @@ public class LibertyWorkspaceIT {
     void setUp() {
         Path projectRoot = getProjectRoot();
 
-        schemaJarPath = projectRoot.resolve("target/it/all-locales-schema-and-features-gen-ol-it/target/liberty/wlp/bin/tools/ws-schemagen.jar");
-        featureListJarPath = projectRoot.resolve("target/it/all-locales-schema-and-features-gen-ol-it/target/liberty/wlp/bin/tools/ws-featurelist.jar");
+        this.schemaJarPath = projectRoot.resolve(Paths.get("target", "it", "all-locales-schema-and-features-gen-ol-it", "target", "liberty", "wlp", "bin", "tools", "ws-schemagen.jar"));
+        this.featureListJarPath = projectRoot.resolve(Paths.get("target", "it", "all-locales-schema-and-features-gen-ol-it", "target", "liberty", "wlp", "bin", "tools", "ws-featurelist.jar"));
 
-        // Assert that schemaJarPath exists
-        Assertions.assertTrue(Files.exists(schemaJarPath.toAbsolutePath()),
+        Assertions.assertTrue(Files.exists(schemaJarPath),
                 "Schema JAR file does not exist. Path: " + schemaJarPath.toAbsolutePath());
-
-        // Assert that featureListJarPath exists
-        Assertions.assertTrue(Files.exists(featureListJarPath.toAbsolutePath()),
+        Assertions.assertTrue(Files.exists(featureListJarPath),
                 "Feature List JAR file does not exist. Path: " + featureListJarPath.toAbsolutePath());
     }
 
@@ -109,6 +106,10 @@ public class LibertyWorkspaceIT {
     private Path getProjectRoot() {
         String dir = System.getProperty("user.dir");
         String itPath = "/target/it/all-locales-schema-and-features-gen-ol-it";
-        return Paths.get(dir.endsWith(itPath) ? dir.replace(itPath, "") : dir);
+
+        if (dir.endsWith(itPath) || dir.endsWith(itPath.replace("/", File.separator))) {
+            return Paths.get(dir).getParent().getParent().getParent();
+        }
+        return Paths.get(dir);
     }
 }
