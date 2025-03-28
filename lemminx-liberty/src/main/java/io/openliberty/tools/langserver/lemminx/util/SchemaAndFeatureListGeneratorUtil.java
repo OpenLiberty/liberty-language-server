@@ -63,7 +63,7 @@ public class SchemaAndFeatureListGeneratorUtil {
             }
             LOGGER.info(String.format("Generated %s: %s", type.description, outputFile.toURI()));
         } else {
-            String errorMessage = String.format("The %s is not generated", type.description);
+            String errorMessage = String.format("The %s is not generated. See the previous log messages for errors or warnings.", type.description);
             LOGGER.info(errorMessage);
             throw new Exception(errorMessage); // Throwing this as it will be cached from LibertyXSDURIResolver and will return null from there
         }
