@@ -24,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
+import io.openliberty.tools.langserver.lemminx.util.SchemaAndFeatureListGeneratorUtil;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
 import org.eclipse.lemminx.uriresolver.IExternalGrammarLocationProvider;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager.ResourceToDeploy;
@@ -172,30 +173,17 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
 
         if (!xsdDestFile.exists()) {
             try {
-                LOGGER.info("Generating schema file from: " + schemaGenJarPath.toString());
                 String xsdDestPath = xsdDestFile.getCanonicalPath();
     
                 LOGGER.info("Generating schema file at: " + xsdDestPath);
-    
-                ProcessBuilder pb = new ProcessBuilder("java", "-jar", schemaGenJarPath.toAbsolutePath().toString(), "--schemaVersion=1.1",
-                        "--outputVersion=2", xsdDestPath, "--locale=" + SettingsService.getInstance().getCurrentLocale().toString()); // Add locale param here
-                pb.directory(tempDir);
-                pb.redirectErrorStream(true);
-                pb.redirectOutput(new File(tempDir, "schemagen.log"));
-    
-                Process proc = pb.start();
-                if (!proc.waitFor(30, TimeUnit.SECONDS)) {
-                    proc.destroy();
-                    LOGGER.warning("Exceeded 30 second timeout during schema file generation. Using cached schema.xsd file.");
-                    return null;
-                }
 
-                if (xsdDestFile.exists()) {
-                    // do some post processing to remove the anyAttribute element from parent element if there is no extraProperties sibling
-                    DocumentUtil.removeExtraneousAnyAttributeElements(xsdDestFile);
-                }
-
-                LOGGER.info("Caching schema file with URI: " + xsdDestFile.toURI().toString());
+                SchemaAndFeatureListGeneratorUtil.generateFile(
+                        SchemaAndFeatureListGeneratorUtil.ProcessType.SCHEMA,
+                        tempDir.toPath(),
+                        schemaGenJarPath,
+                        xsdDestFile,
+                        SettingsService.getInstance().getCurrentLocale().toString()
+                );
             } catch (Exception e) {
                 LOGGER.warning(e.getMessage());
                 LOGGER.warning("Due to an exception during schema file generation, a cached schema file will be used.");
@@ -206,5 +194,4 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
         LOGGER.info("Using schema file at: " + xsdDestFile.toURI().toString());
         return xsdDestFile.toURI().toString();
     }
-
 }
