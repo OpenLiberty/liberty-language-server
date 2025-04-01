@@ -23,11 +23,7 @@ import org.eclipse.lsp4j.InitializeParams;
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static io.openliberty.tools.langserver.lemminx.util.LibertyUtils.findFileInWorkspace;
@@ -163,5 +159,15 @@ public class SettingsService {
         if (initializeParams != null && initializeParams.getLocale() != null) {
             this.currentLocale = LocaleUtils.toLocale(initializeParams.getLocale());
         }
+    }
+
+    public List<Locale> getAvailableLocales() {
+        return Arrays.asList(
+                new Locale("pt", "BR"), Locale.SIMPLIFIED_CHINESE, Locale.TRADITIONAL_CHINESE,
+                new Locale("cs", "CZ"), Locale.ENGLISH, Locale.FRENCH, Locale.GERMAN,
+                new Locale("hu", "HU"), Locale.ITALIAN, Locale.JAPANESE, Locale.KOREAN,
+                new Locale("pl", "PL"), new Locale("ro", "RO"), new Locale("ru", "RU"),
+                new Locale("es", "ES")
+        );
     }
 }
