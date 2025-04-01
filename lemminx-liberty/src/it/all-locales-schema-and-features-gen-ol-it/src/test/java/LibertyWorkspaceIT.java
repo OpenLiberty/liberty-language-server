@@ -83,6 +83,7 @@ public class LibertyWorkspaceIT {
                 return;
             }
         }
+        Path testResourcesDir = projectRoot.resolve("src/test/resources");
 
         List<Locale> locales = new ArrayList<>(SettingsService.getInstance().getAvailableLocales());
         locales.add(new Locale("")); // This is to generate a common file (without locale)
@@ -101,6 +102,13 @@ public class LibertyWorkspaceIT {
                     localeName
             );
         }
+        // copy default locale featurelist file to test/resources folder for unit tests
+        Files.copy(new File(
+                resourcesFeatureListDir.toFile(),
+                "featurelist-cached-" + System.getProperty("liberty.version")+".xml").toPath(),
+                new File(testResourcesDir.toFile(),"featurelist-ol-" + System.getProperty("liberty.version")+".xml").toPath());
+
+
     }
 
     private Path getProjectRoot() {
