@@ -53,7 +53,7 @@ public class LibertyHoverTest {
                 libWorkspace = libPM.getLibertyWorkspaceFolders().iterator().next();
                 settings=Mockito.mockStatic(SettingsService.class);
                 settings.when(SettingsService::getInstance).thenReturn(settingsService);
-                when(settingsService.getCurrentLocale()).thenReturn(Locale.getDefault());
+                when(settingsService.getCurrentLocale()).thenReturn(Locale.US);
         }
 
         @AfterEach
