@@ -922,6 +922,7 @@ public class LibertyDiagnosticTest {
         Properties props = new Properties();
         props.putAll(propsMap);
         when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
+        when(settingsService.isLibertyPluginConfigAvailableInServer(any())).thenReturn(true);
         Diagnostic dup1 = new Diagnostic();
         dup1.setRange(r(7, 29, 7, 50));
         dup1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
@@ -951,6 +952,7 @@ public class LibertyDiagnosticTest {
         Properties props = new Properties();
         props.putAll(propsMap);
         when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
+        when(settingsService.isLibertyPluginConfigAvailableInServer(any())).thenReturn(true);
         Diagnostic invalid1 = new Diagnostic();
         invalid1.setRange(r(7, 29, 7, 45));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
@@ -1032,6 +1034,7 @@ public class LibertyDiagnosticTest {
         Properties props = new Properties();
         props.putAll(propsMap);
         when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
+        when(settingsService.isLibertyPluginConfigAvailableInServer(any())).thenReturn(true);
         Diagnostic dup1 = new Diagnostic();
         dup1.setRange(r(5, 34, 5, 55));
         dup1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
@@ -1071,6 +1074,7 @@ public class LibertyDiagnosticTest {
         Properties props = new Properties();
         props.putAll(propsMap);
         when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
+        when(settingsService.isLibertyPluginConfigAvailableInServer(any())).thenReturn(true);
         Diagnostic dup1 = new Diagnostic();
         dup1.setRange(r(8, 63, 8, 74));
         dup1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
@@ -1227,6 +1231,7 @@ public class LibertyDiagnosticTest {
         Properties props = new Properties();
         props.putAll(propsMap);
         when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
+        when(settingsService.isLibertyPluginConfigAvailableInServer(any())).thenReturn(true);
         Diagnostic invalid1 = new Diagnostic();
         invalid1.setRange(r(5, 1, 5, 33));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
@@ -1256,6 +1261,7 @@ public class LibertyDiagnosticTest {
         Properties props = new Properties();
         props.putAll(propsMap);
         when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
+        when(settingsService.isLibertyPluginConfigAvailableInServer(any())).thenReturn(true);
         Diagnostic invalid1 = new Diagnostic();
         invalid1.setRange(r(5, 1, 5, 37));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
@@ -1285,6 +1291,7 @@ public class LibertyDiagnosticTest {
         Properties props = new Properties();
         props.putAll(propsMap);
         when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
+        when(settingsService.isLibertyPluginConfigAvailableInServer(any())).thenReturn(true);
         Diagnostic invalid1 = new Diagnostic();
         invalid1.setRange(r(5, 1, 5, 44));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_VARIABLE_CODE);
