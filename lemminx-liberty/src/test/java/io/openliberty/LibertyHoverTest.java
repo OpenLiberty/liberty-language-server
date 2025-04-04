@@ -53,7 +53,7 @@ public class LibertyHoverTest {
                 libWorkspace = libPM.getLibertyWorkspaceFolders().iterator().next();
                 settings=Mockito.mockStatic(SettingsService.class);
                 settings.when(SettingsService::getInstance).thenReturn(settingsService);
-                when(settingsService.getCurrentLocale()).thenReturn(Locale.getDefault());
+                when(settingsService.getCurrentLocale()).thenReturn(Locale.US);
         }
 
         @AfterEach
@@ -120,7 +120,7 @@ public class LibertyHoverTest {
 
                 XMLAssert.assertHover(serverXML, serverXMLURI, "Defines how the server loads features." + //
                                 System.lineSeparator() + System.lineSeparator() + //
-                                "Source: [server-cached-25.0.0.2.xsd](" + serverXSDURI + ")", //
+                                "Source: [server-cached-25.0.0.3.xsd](" + serverXSDURI + ")", //
                                 r(1, 8, 1, 22));
         }
 

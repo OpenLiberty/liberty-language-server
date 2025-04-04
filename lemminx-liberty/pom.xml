@@ -117,6 +117,9 @@
                         <goal>install</goal>
                     </goals>
                     <projectsDirectory>src/it</projectsDirectory>
+                    <pomExcludes>
+                        <pomExclude>all-locales-schema-and-features-gen-ol-it/pom.xml</pomExclude>
+                    </pomExcludes>
                     <cloneProjectsTo>${project.build.directory}/it</cloneProjectsTo>
                     <streamLogs>true</streamLogs>
                     <properties>

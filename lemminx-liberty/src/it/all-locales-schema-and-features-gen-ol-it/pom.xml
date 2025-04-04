@@ -10,7 +10,7 @@
   <packaging>pom</packaging>
 
   <properties>
-    <liberty.version>25.0.0.2</liberty.version>
+    <liberty.version>25.0.0.3</liberty.version>
   </properties>
 
   <dependencies>
