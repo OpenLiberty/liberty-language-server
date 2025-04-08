@@ -170,4 +170,13 @@ public class SettingsService {
                 new Locale("es", "ES")
         );
     }
+
+    // Check if the liberty-plugin-config.xml is copied to server or not
+    public boolean isLibertyPluginConfigAvailableInServer(LibertyWorkspace libertyWorkspace) {
+        if (libertyWorkspace != null) {
+            Path pluginConfigFilePath = LibertyUtils.findFileInWorkspace(libertyWorkspace, Paths.get("liberty-plugin-config.xml"));
+            return pluginConfigFilePath != null;
+        }
+        return false;
+    }
 }

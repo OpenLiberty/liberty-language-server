@@ -103,15 +103,19 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             }
         }
         validateConfigElements(domDocument, diagnosticsList, tempDiagnosticsList, featureGraph, includedFeatures, featureManagerPresent);
-        validateVariables(domDocument,diagnosticsList);
+        validateVariables(domDocument, diagnosticsList, workspace);
     }
 
-    private void validateVariables(DOMDocument domDocument, List<Diagnostic> diagnosticsList) {
+    private void validateVariables(DOMDocument domDocument, List<Diagnostic> diagnosticsList, LibertyWorkspace workspace) {
         String docContent = domDocument.getTextDocument().getText();
         List<VariableLoc> variables = LibertyUtils.getVariablesFromTextContent(docContent);
         Properties variablesMap = SettingsService.getInstance().getVariablesForServerXml(domDocument.getDocumentURI());
-        if (variablesMap.isEmpty() && !variables.isEmpty()) {
-            LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI());
+
+        // Check if the liberty plugin config has been copied to the server or not.
+        // SettingsService have a setConfigCopiedToServer method, which is setting up after this check for a different purpose, so it can't be used from here
+        boolean isLibertyPluginConfigAvailableInServer = SettingsService.getInstance().isLibertyPluginConfigAvailableInServer(workspace);
+
+        if ((variablesMap.isEmpty() || !isLibertyPluginConfigAvailableInServer) && !variables.isEmpty()) {
             String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.WARN_VARIABLE_RESOLUTION_NOT_AVAILABLE, workspace.getWorkspaceURI().getPath());
             Range range = XMLPositionUtility.createRange(domDocument.getDocumentElement().getStartTagOpenOffset(), domDocument.getDocumentElement().getStartTagCloseOffset(),
                     domDocument);

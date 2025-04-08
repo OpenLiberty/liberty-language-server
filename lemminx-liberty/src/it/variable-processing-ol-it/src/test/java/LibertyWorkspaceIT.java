@@ -6,6 +6,8 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
+import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
+import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lsp4j.CodeAction;
@@ -42,6 +44,10 @@ public class LibertyWorkspaceIT {
         List<WorkspaceFolder> testWorkspaceFolders = new ArrayList<WorkspaceFolder>();
         testWorkspaceFolders.add(testWorkspace);
         LibertyProjectsManager.getInstance().setWorkspaceFolders(testWorkspaceFolders);
+
+        // Assert that the liberty plugin config is copied to the server
+        LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(testWorkspace.getUri());
+        assert SettingsService.getInstance().isLibertyPluginConfigAvailableInServer(workspace);
 
         String serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
