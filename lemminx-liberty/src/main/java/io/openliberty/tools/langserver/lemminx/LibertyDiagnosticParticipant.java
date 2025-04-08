@@ -103,14 +103,13 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             }
         }
         validateConfigElements(domDocument, diagnosticsList, tempDiagnosticsList, featureGraph, includedFeatures, featureManagerPresent);
-        validateVariables(domDocument,diagnosticsList);
+        validateVariables(domDocument, diagnosticsList, workspace);
     }
 
-    private void validateVariables(DOMDocument domDocument, List<Diagnostic> diagnosticsList) {
+    private void validateVariables(DOMDocument domDocument, List<Diagnostic> diagnosticsList, LibertyWorkspace workspace) {
         String docContent = domDocument.getTextDocument().getText();
         List<VariableLoc> variables = LibertyUtils.getVariablesFromTextContent(docContent);
         Properties variablesMap = SettingsService.getInstance().getVariablesForServerXml(domDocument.getDocumentURI());
-        LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI());
 
         // Check if the liberty plugin config has been copied to the server or not.
         // SettingsService have a setConfigCopiedToServer method, which is setting up after this check for a different purpose, so it can't be used from here
