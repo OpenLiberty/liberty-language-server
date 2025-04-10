@@ -951,7 +951,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 DOMNode featureNode = (DOMNode) entry.getValue().get("node");
                 String featureName = featureNode.getChildren().get(0).getTextContent();
                 String otherFeatures = featureMap.keySet().stream().filter(key -> !key.equals(featureName)).map(Objects::toString).collect(Collectors.joining(","));
-                String message = String.format("Feature %s is incompatible with %s.", featureName, otherFeatures);
+                String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_INCOMPATIBLE_FEATURES, featureName, otherFeatures);
                 if (featureNode != null) {
                     Range range = XMLPositionUtility.createRange(featureNode.getStart(), featureNode.getEnd(), domDocument);
                     Diagnostic diagnostic = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE);
