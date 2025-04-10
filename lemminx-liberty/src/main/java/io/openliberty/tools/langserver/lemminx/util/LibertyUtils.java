@@ -46,6 +46,7 @@ import io.openliberty.tools.langserver.lemminx.services.ContainerService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
+import org.eclipse.lemminx.dom.DOMNode;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -691,5 +692,53 @@ public class LibertyUtils {
         if (!combined.isEmpty()) {
             variableProps.putAll(combined);
         }
+    }
+
+    /**
+     * Fetch feature manager element from the dom document
+     * @param domDocument
+     * @return
+     */
+    public static DOMNode getFeatureManagerElement(DOMDocument domDocument) {
+        List<DOMNode> nodes = domDocument.getDocumentElement().getChildren();
+        DOMNode featureManagerNode = null;
+
+        for (DOMNode node : nodes) {
+            String nodeName = node.getNodeName();
+            if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(nodeName)) {
+                featureManagerNode = node;
+                break;
+            }
+        }
+
+        return featureManagerNode;
+    }
+
+    /**
+     * Collects feature nodes from the featureManager element.
+     *
+     * @param featureManagerNode The featureManager DOM node
+     * @return Map of feature names to their DOM nodes
+     */
+    public static Map<String, DOMNode> getAllFeatureNodes(DOMNode featureManagerNode) {
+        Map<String, DOMNode> featureNodes = new HashMap<>();
+
+        List<DOMNode> children = featureManagerNode.getChildren();
+        if (children == null) {
+            return featureNodes;
+        }
+
+        List<DOMNode> features = featureManagerNode.getChildren();
+        for (DOMNode featureNode : features) {
+            if ("feature".equals(featureNode.getLocalName())) {
+                DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
+                String featureName = featureTextNode.getTextContent();
+                if (featureName != null && !featureName.trim().isEmpty()) {
+                    featureNodes.put(featureName.trim(), featureNode);
+                }
+            }
+        }
+
+        return featureNodes;
     }
 }
