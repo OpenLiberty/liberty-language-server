@@ -124,6 +124,7 @@ public class LibertyDiagnosticTest {
         Diagnostic dup1 = new Diagnostic();
         dup1.setRange(r(3, 24, 3, 33));
         dup1.setMessage("ERROR: More than one version of feature jaxrs is included. Only one version of a feature may be specified.");
+        dup1.setCode(LibertyDiagnosticParticipant.DUPLICATE_FEATURE_CODE);
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, dup1);
     }
@@ -739,6 +740,7 @@ public class LibertyDiagnosticTest {
         Diagnostic invalid = new Diagnostic();
         invalid.setRange(r(3, 24, 3, 37));
         invalid.setMessage("ERROR: The messaging-3.0 feature cannot be configured with the jms-2.0 feature because they are two different versions of the same feature. The feature name changed from jms to messaging for Jakarta EE. Remove one of the features.");
+        invalid.setCode(LibertyDiagnosticParticipant.FEATURE_NAME_CHANGED_CODE); // Set code to validate the diagnostics, so that some new diagnostics can be skipped based on this
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid);
 
@@ -753,6 +755,7 @@ public class LibertyDiagnosticTest {
         invalid = new Diagnostic();
         invalid.setRange(r(3, 24, 3, 31));
         invalid.setMessage("ERROR: The jms-2.0 feature cannot be configured with the messaging-3.0 feature because they are two different versions of the same feature. The feature name changed from jms to messaging for Jakarta EE. Remove one of the features.");
+        invalid.setCode(LibertyDiagnosticParticipant.FEATURE_NAME_CHANGED_CODE); // Set code to validate the diagnostics, so that some new diagnostics can be skipped based on this
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid);
 
@@ -769,6 +772,7 @@ public class LibertyDiagnosticTest {
         invalid = new Diagnostic();
         invalid.setRange(r(4, 24, 4, 31));
         invalid.setMessage("ERROR: The ejb-3.2 feature cannot be configured with the enterpriseBeans-4.0 feature because they are two different versions of the same feature. The feature name changed from ejb to enterpriseBeans for Jakarta EE. Remove one of the features.");
+        invalid.setCode(LibertyDiagnosticParticipant.FEATURE_NAME_CHANGED_CODE); // Set code to validate the diagnostics, so that some new diagnostics can be skipped based on this
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid);
 
@@ -785,6 +789,7 @@ public class LibertyDiagnosticTest {
         invalid = new Diagnostic();
         invalid.setRange(r(4, 24, 4, 27));
         invalid.setMessage("ERROR: The ejb feature cannot be configured with the enterpriseBeans feature because they are two different versions of the same feature. The feature name changed from ejb to enterpriseBeans for Jakarta EE. Remove one of the features.");
+        invalid.setCode(LibertyDiagnosticParticipant.FEATURE_NAME_CHANGED_CODE); // Set code to validate the diagnostics, so that some new diagnostics can be skipped based on this
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid);
     }
@@ -1293,5 +1298,27 @@ public class LibertyDiagnosticTest {
         invalid1.setSeverity(DiagnosticSeverity.Warning);
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, invalid1);
+    }
+
+    @Test
+    public void testVersionedFeatureIncompatibility() throws JAXBException {
+        assertTrue(featureList.exists());
+        FeatureService.getInstance().readFeaturesFromFeatureListFile(libWorkspace, featureList);
+        String serverXML1 = String.join(newLine,
+                "<server description=\"Sample Liberty server\">\n" +
+                        "    <featureManager>\n" +
+                        "        <feature>mpTelemetry-2.0</feature>\n" +
+                        "        <feature>servlet-4.0</feature>\n" +
+                        "        <feature>mpConfig-1.3</feature>\n" +
+                        "    </featureManager>\n" +
+                        "</server>\n"
+        );
+        Diagnostic configForIncompatibleFeature1 = new Diagnostic();
+        configForIncompatibleFeature1.setRange(r(2, 8, 2, 42));
+        configForIncompatibleFeature1.setMessage("ERROR: The feature mpTelemetry-2.0 is incompatible with mpConfig-1.3. They are not sharing any common platforms.");
+        Diagnostic configForIncompatibleFeature2 = new Diagnostic();
+        configForIncompatibleFeature2.setRange(r(4, 8, 4, 39));
+        configForIncompatibleFeature2.setMessage("ERROR: The feature mpConfig-1.3 is incompatible with mpTelemetry-2.0. They are not sharing any common platforms.");
+        XMLAssert.testDiagnosticsFor(serverXML1, null, null, serverXMLURI, configForIncompatibleFeature1, configForIncompatibleFeature2);
     }
 }
