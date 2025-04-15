@@ -76,6 +76,7 @@ public class LibertyDiagnosticTest {
         settings.when(SettingsService::getInstance).thenReturn(settingsService);
         Mockito.lenient().when(settingsService.getVariablesForServerXml(any())).thenReturn(new Properties());
         Mockito.lenient().when(settingsService.getCurrentLocale()).thenReturn(Locale.getDefault());
+        Mockito.lenient().when(settingsService.isLibertyPluginConfigAvailableInServer(any())).thenReturn(true);
         MISSING_CONFIGURED_FEATURE_MESSAGE = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_MISSING_CONFIGURED_FEATURE_MESSAGE);
     }
 
@@ -1013,6 +1014,38 @@ public class LibertyDiagnosticTest {
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 dup1);
+    }
+
+    @Test
+    public void testNoPluginConfigAvailableDiagnostic() throws IOException {
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "                <platform>javaee-6.0</platform>", //
+                "                <feature>acmeCA-2.0</feature>", //
+                "       </featureManager>", //
+                " <variable name=\"httpPort\" value=\"9080\"/>", //
+                " <variable name=\"httpPort\" value=\"9443\"/>", //
+                " <httpEndpoint host=\"*\" httpPort=\"${default.http.port}\"\n",//
+                "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
+                "</server>" //
+        );
+        Map<String, String> propsMap = new HashMap<>();
+        propsMap.put("default.http.port", "9080");
+        propsMap.put("default.https.port", "9443");
+        Properties props = new Properties();
+        props.putAll(propsMap);
+        when(settingsService.getVariablesForServerXml(any())).thenReturn(props);
+        when(settingsService.isLibertyPluginConfigAvailableInServer(any())).thenReturn(false);
+
+        Diagnostic dup1 = new Diagnostic();
+        dup1.setRange(r(0, 0, 0, 43));
+        String message="WARNING: Variable resolution is not available for workspace %s. Please start the Liberty server for the workspace to enable variable resolution.";
+        dup1.setMessage(message.formatted(srcResourcesDir.toURI().getPath()));
+        dup1.setSeverity(DiagnosticSeverity.Warning);
+        dup1.setSource("liberty-lemminx");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, dup1);
     }
 
     @Test
