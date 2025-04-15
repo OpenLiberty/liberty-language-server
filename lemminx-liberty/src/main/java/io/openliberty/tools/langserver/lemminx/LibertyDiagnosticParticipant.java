@@ -698,16 +698,6 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         String libertyRuntime = runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
         int requestDelay = SettingsService.getInstance().getRequestDelay();
 
-        // Skip if already there are some diagnostics
-        if (diagnosticsList != null && !diagnosticsList.isEmpty()) {
-            for (Diagnostic diagnostic : diagnosticsList) {
-                if (diagnostic.getCode() != null
-                        && List.of(DUPLICATE_FEATURE_CODE, FEATURE_NAME_CHANGED_CODE).contains(diagnostic.getCode().getLeft())) {
-                    return;
-                }
-            }
-        }
-
         // Maps to track features by platform type
         Map<String, Map<String, Object>> javaEEFeatures = new HashMap<>();
         Map<String, Map<String, Object>> jakartaEEFeatures = new HashMap<>();
@@ -791,11 +781,16 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             // Create diagnostic warning for each incompatible feature
             for (Map.Entry<String, Map<String, Object>> entry : featureMap.entrySet()) {
                 DOMNode featureNode = (DOMNode) entry.getValue().get("node");
+                if (featureNode == null) continue;
                 String featureName = featureNode.getChildren().get(0).getTextContent();
-                String otherFeatures = featureMap.keySet().stream().filter(key -> !key.equals(featureName)).map(Objects::toString).collect(Collectors.joining(","));
+                String otherFeatures = featureMap.keySet().stream().filter(key -> !key.equals(featureName)).collect(Collectors.joining(","));
                 String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_INCOMPATIBLE_FEATURES, featureName, otherFeatures);
-                if (featureNode != null) {
-                    Range range = XMLPositionUtility.createRange(featureNode.getStart(), featureNode.getEnd(), domDocument);
+
+                Range range = XMLPositionUtility.createRange(featureNode.getStart(), featureNode.getEnd(), domDocument);
+                if (range == null) continue;
+
+                // Check if no other diagnostics exists in the current line
+                if (!LibertyUtils.hasDiagnosticInLine(diagnosticsList, range, List.of(DUPLICATE_FEATURE_CODE, FEATURE_NAME_CHANGED_CODE))) {
                     Diagnostic diagnostic = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE);
                     diagnosticsList.add(diagnostic);
                 }

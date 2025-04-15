@@ -47,6 +47,8 @@ import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import org.eclipse.lemminx.dom.DOMNode;
+import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.Range;
 
 import javax.xml.xpath.XPathExpressionException;
 
@@ -740,5 +742,26 @@ public class LibertyUtils {
         }
 
         return featureNodes;
+    }
+
+
+    /**
+     * Verify if there is already a diagnostic present at the line or not
+     *
+     * @param diagnosticsList
+     * @param range
+     * @param diagnosticCodes
+     * @return
+     */
+    public static boolean hasDiagnosticInLine(List<Diagnostic> diagnosticsList, Range range, List<String> diagnosticCodes) {
+        if (range == null || range.getStart() == null) return false;
+
+        return diagnosticsList.stream()
+                .anyMatch(diagnostic ->
+                        diagnostic.getRange() != null &&
+                                diagnostic.getRange().getStart() != null &&
+                                Objects.equals(range.getStart().getLine(), diagnostic.getRange().getStart().getLine()) &&
+                                diagnostic.getCode() != null &&
+                                diagnosticCodes.contains(diagnostic.getCode().getLeft()));
     }
 }

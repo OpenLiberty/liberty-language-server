@@ -121,12 +121,20 @@ public class LibertyDiagnosticTest {
                 "</server>" //
         );
 
-        Diagnostic dup1 = new Diagnostic();
-        dup1.setRange(r(3, 24, 3, 33));
-        dup1.setMessage("ERROR: More than one version of feature jaxrs is included. Only one version of a feature may be specified.");
-        dup1.setCode(LibertyDiagnosticParticipant.DUPLICATE_FEATURE_CODE);
+        Diagnostic duplicateDiagnostic = new Diagnostic();
+        duplicateDiagnostic.setRange(r(3, 24, 3, 33));
+        duplicateDiagnostic.setMessage("ERROR: More than one version of feature jaxrs is included. Only one version of a feature may be specified.");
+        duplicateDiagnostic.setCode(LibertyDiagnosticParticipant.DUPLICATE_FEATURE_CODE);
 
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, dup1);
+        Diagnostic jaxrsIncompatibilityDiagnostic = new Diagnostic();
+        jaxrsIncompatibilityDiagnostic.setRange(r(2, 15, 2, 43));
+        jaxrsIncompatibilityDiagnostic.setMessage("ERROR: The feature jaxrs-2.0 is incompatible with jsonp-1.1,jaxrs-2.1. They are not sharing any common platforms.");
+
+        Diagnostic jsonpIncompatibilityDiagnostic = new Diagnostic();
+        jsonpIncompatibilityDiagnostic.setRange(r(4, 15, 4, 43));
+        jsonpIncompatibilityDiagnostic.setMessage("ERROR: The feature jsonp-1.1 is incompatible with jaxrs-2.0,jaxrs-2.1. They are not sharing any common platforms.");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, duplicateDiagnostic, jsonpIncompatibilityDiagnostic, jaxrsIncompatibilityDiagnostic);
     }
 
     @Test
@@ -174,7 +182,7 @@ public class LibertyDiagnosticTest {
         List<CodeAction> codeActions = new ArrayList<CodeAction>();
         for (String nextFeature: featuresStartWithJAX) {
             TextEdit texted = te(invalid1.getRange().getStart().getLine(), invalid1.getRange().getStart().getCharacter(),
-                                invalid1.getRange().getEnd().getLine(), invalid1.getRange().getEnd().getCharacter(), nextFeature);
+                    invalid1.getRange().getEnd().getLine(), invalid1.getRange().getEnd().getCharacter(), nextFeature);
             CodeAction invalidCodeAction = ca(invalid1, texted);
 
             codeActions.add(invalidCodeAction);
@@ -270,12 +278,12 @@ public class LibertyDiagnosticTest {
         // Check code actions for add/remove trailing slashes
         String fixedFilePath = "location=\"/empty_server.xml\"";
         TextEdit dirIsFileTextEdit = te(dirIsFile.getRange().getStart().getLine(), dirIsFile.getRange().getStart().getCharacter(),
-                            dirIsFile.getRange().getEnd().getLine(), dirIsFile.getRange().getEnd().getCharacter(), fixedFilePath);
+                dirIsFile.getRange().getEnd().getLine(), dirIsFile.getRange().getEnd().getCharacter(), fixedFilePath);
         CodeAction dirIsFileCodeAction = ca(dirIsFile, dirIsFileTextEdit);
 
         String fixedDirPath = "location=\"/testDir.xml/\"";
         TextEdit fileIsDirTextEdit = te(fileIsDir.getRange().getStart().getLine(), fileIsDir.getRange().getStart().getCharacter(),
-                            fileIsDir.getRange().getEnd().getLine(), fileIsDir.getRange().getEnd().getCharacter(), fixedDirPath);
+                fileIsDir.getRange().getEnd().getLine(), fileIsDir.getRange().getEnd().getCharacter(), fixedDirPath);
         CodeAction fileIsDirCodeAction = ca(fileIsDir, fileIsDirTextEdit);
 
 
@@ -322,12 +330,12 @@ public class LibertyDiagnosticTest {
 
         String fixedFilePath = "location=\"\\empty_server.xml\"";
         TextEdit dirIsFileTextEdit = te(dirIsFile.getRange().getStart().getLine(), dirIsFile.getRange().getStart().getCharacter(),
-                            dirIsFile.getRange().getEnd().getLine(), dirIsFile.getRange().getEnd().getCharacter(), fixedFilePath);
+                dirIsFile.getRange().getEnd().getLine(), dirIsFile.getRange().getEnd().getCharacter(), fixedFilePath);
         CodeAction dirIsFileCodeAction = ca(dirIsFile, dirIsFileTextEdit);
 
         String fixedDirPath = "location=\"\\testDir.xml\\\"";
         TextEdit fileIsDirTextEdit = te(fileIsDir.getRange().getStart().getLine(), fileIsDir.getRange().getStart().getCharacter(),
-                            fileIsDir.getRange().getEnd().getLine(), fileIsDir.getRange().getEnd().getCharacter(), fixedDirPath);
+                fileIsDir.getRange().getEnd().getLine(), fileIsDir.getRange().getEnd().getCharacter(), fixedDirPath);
         CodeAction fileIsDirCodeAction = ca(fileIsDir, fileIsDirTextEdit);
 
         XMLAssert.testCodeActionsFor(serverXML, dirIsFile, dirIsFileCodeAction);
@@ -366,9 +374,9 @@ public class LibertyDiagnosticTest {
         String serverXML = String.join(newLine,
                 "<server description=\"Sample Liberty server\">",
                 "    <featureManager>",
-                    incorrectFeature,
+                incorrectFeature,
                 "    </featureManager>",
-                    configElement,
+                configElement,
                 "</server>"
         );
 
@@ -422,9 +430,9 @@ public class LibertyDiagnosticTest {
         String serverXML1 = String.join(newLine,
                 "<server description=\"Sample Liberty server\">",
                 "   <featureManager>",
-                        correctFeature,
+                correctFeature,
                 "   </featureManager>",
-                    configElement,
+                configElement,
                 "</server>"
         );
         XMLAssert.testDiagnosticsFor(serverXML1, null, null, serverXMLURI);
@@ -432,9 +440,9 @@ public class LibertyDiagnosticTest {
         String serverXML2 = String.join(newLine,
                 "<server description=\"Sample Liberty server\">",
                 "   <featureManager>",
-                        incorrectFeature,
+                incorrectFeature,
                 "   </featureManager>",
-                    configElement,
+                configElement,
                 "</server>"
         );
 
@@ -624,7 +632,7 @@ public class LibertyDiagnosticTest {
                 invalid1);
 
         //  mpConfig-3.0 and mpJwt-2.0 have a single common platform(microProfile-5.0) but servlet feature does not support that
-       serverXML = String.join(newLine, //
+        serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
                 "       <featureManager>", //
                 "               <feature>servlet</feature>", //
@@ -646,7 +654,7 @@ public class LibertyDiagnosticTest {
     @Test
     public void testValidPlatformDiagnostic() throws BadLocationException {
 
-       String serverXML = String.join(newLine, //
+        String serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
                 "       <featureManager>", //
                 "               <feature>servlet</feature>", //
@@ -741,8 +749,13 @@ public class LibertyDiagnosticTest {
         invalid.setRange(r(3, 24, 3, 37));
         invalid.setMessage("ERROR: The messaging-3.0 feature cannot be configured with the jms-2.0 feature because they are two different versions of the same feature. The feature name changed from jms to messaging for Jakarta EE. Remove one of the features.");
         invalid.setCode(LibertyDiagnosticParticipant.FEATURE_NAME_CHANGED_CODE); // Set code to validate the diagnostics, so that some new diagnostics can be skipped based on this
+
+        Diagnostic incompatibilityDiagnostic = new Diagnostic();
+        incompatibilityDiagnostic.setRange(r(2, 15, 2, 41));
+        incompatibilityDiagnostic.setMessage("ERROR: The feature jms-2.0 is incompatible with messaging-3.0. They are not sharing any common platforms.");
+
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
-                invalid);
+                invalid, incompatibilityDiagnostic);
 
         serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
@@ -756,8 +769,11 @@ public class LibertyDiagnosticTest {
         invalid.setRange(r(3, 24, 3, 31));
         invalid.setMessage("ERROR: The jms-2.0 feature cannot be configured with the messaging-3.0 feature because they are two different versions of the same feature. The feature name changed from jms to messaging for Jakarta EE. Remove one of the features.");
         invalid.setCode(LibertyDiagnosticParticipant.FEATURE_NAME_CHANGED_CODE); // Set code to validate the diagnostics, so that some new diagnostics can be skipped based on this
+        incompatibilityDiagnostic = new Diagnostic();
+        incompatibilityDiagnostic.setRange(r(2, 15, 2, 47));
+        incompatibilityDiagnostic.setMessage("ERROR: The feature messaging-3.0 is incompatible with jms-2.0. They are not sharing any common platforms.");
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
-                invalid);
+                invalid, incompatibilityDiagnostic);
 
         serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
@@ -773,8 +789,11 @@ public class LibertyDiagnosticTest {
         invalid.setRange(r(4, 24, 4, 31));
         invalid.setMessage("ERROR: The ejb-3.2 feature cannot be configured with the enterpriseBeans-4.0 feature because they are two different versions of the same feature. The feature name changed from ejb to enterpriseBeans for Jakarta EE. Remove one of the features.");
         invalid.setCode(LibertyDiagnosticParticipant.FEATURE_NAME_CHANGED_CODE); // Set code to validate the diagnostics, so that some new diagnostics can be skipped based on this
+        incompatibilityDiagnostic = new Diagnostic();
+        incompatibilityDiagnostic.setRange(r(3, 15, 3, 53));
+        incompatibilityDiagnostic.setMessage("ERROR: The feature enterpriseBeans-4.0 is incompatible with ejb-3.2. They are not sharing any common platforms.");
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
-                invalid);
+                invalid, incompatibilityDiagnostic);
 
         serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
