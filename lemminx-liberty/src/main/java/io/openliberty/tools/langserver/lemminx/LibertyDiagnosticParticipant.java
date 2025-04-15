@@ -35,7 +35,15 @@ import io.openliberty.tools.langserver.lemminx.util.*;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Properties;
+import java.util.Set;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
@@ -79,8 +87,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
 
     private void validateDom(DOMDocument domDocument, List<Diagnostic> diagnosticsList) throws IOException {
         List<DOMNode> nodes = domDocument.getDocumentElement().getChildren();
-        List<Diagnostic> tempDiagnosticsList = new ArrayList<Diagnostic>();
-        Set<String> includedFeatures = new HashSet<String>();
+        List<Diagnostic> tempDiagnosticsList = new ArrayList<>();
+        Set<String> includedFeatures = new HashSet<>();
         boolean featureManagerPresent = false;
         LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI());
         if (workspace == null) {
