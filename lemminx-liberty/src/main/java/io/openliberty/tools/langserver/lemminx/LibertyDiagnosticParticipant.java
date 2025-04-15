@@ -154,7 +154,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         checkForPlatFormAndFeature(domDocument, list, versionlessFeatures, features, preferredPlatforms, versionedFeatures);
 
         // Feature compatibility validation
-        validateFeatureCompatibility(domDocument, list);
+        validateFeatureCompatibility(versionedFeatures, domDocument, list);
     }
 
     private void validateFeature(DOMDocument domDocument, List<Diagnostic> list, Set<String> includedFeatures, DOMNode featureTextNode, String libertyVersion, String libertyRuntime, int requestDelay, Set<String> versionedFeatures, Set<String> versionlessFeatures, Set<String> featuresWithoutVersions, Set<String> featureList) {
@@ -687,11 +687,9 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      * @param domDocument The DOM document (server.xml)
      * @param diagnosticsList List to add diagnostics to
      */
-    private void validateFeatureCompatibility(DOMDocument domDocument, List<Diagnostic> diagnosticsList) {
-        // Find the featureManager element
-        DOMNode featureManagerNode = LibertyUtils.getFeatureManagerElement(domDocument);
-        if (featureManagerNode == null) {
-            return; // No featureManager element found
+    private void validateFeatureCompatibility(Set<String> versionedFeatures, DOMDocument domDocument, List<Diagnostic> diagnosticsList) {
+        if (versionedFeatures == null || versionedFeatures.size() <= 1) {
+            return; // Need at least two features to check compatibility
         }
 
         // Get Liberty version and runtime from the document
@@ -700,15 +698,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         String libertyRuntime = runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
         int requestDelay = SettingsService.getInstance().getRequestDelay();
 
-        // Get all features and their nodes from the featureManager
-        Map<String, DOMNode> featureNodes = LibertyUtils.getAllFeatureNodes(featureManagerNode);
-        List<String> configuredFeatures = new ArrayList<>(featureNodes.keySet());
-
-        if (configuredFeatures.size() <= 1) {
-            return; // Need at least two features to check compatibility
-        }
-
-        // Skip if already there are some diagnostics (This is implemented to ensure that some of the Unit Tests are not broken).
+        // Skip if already there are some diagnostics
         if (diagnosticsList != null && !diagnosticsList.isEmpty()) {
             for (Diagnostic diagnostic : diagnosticsList) {
                 if (diagnostic.getCode() != null
@@ -718,15 +708,21 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             }
         }
 
-        // Maps to track features by platform type (Assuming there will be only three types of platforms)
+        // Maps to track features by platform type
         Map<String, Map<String, Object>> javaEEFeatures = new HashMap<>();
         Map<String, Map<String, Object>> jakartaEEFeatures = new HashMap<>();
         Map<String, Map<String, Object>> microProfileFeatures = new HashMap<>();
 
+        // Find the featureManager element to get feature nodes if available
+        DOMNode featureManagerNode = LibertyUtils.getFeatureManagerElement(domDocument);
+        Map<String, DOMNode> featureNodes = featureManagerNode != null ?
+                LibertyUtils.getAllFeatureNodes(featureManagerNode) :
+                new HashMap<>();
+
         // Categorize features by platform type
-        for (String feature : configuredFeatures) {
+        for (String feature : versionedFeatures) {
             Set<String> platforms = FeatureService.getInstance().getAllPlatformsForFeature(feature, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
-            DOMNode featureNode = featureNodes.get(feature);
+            DOMNode featureNode = featureNodes.getOrDefault(feature, null);
 
             if (platforms == null || platforms.isEmpty()) {
                 continue;
@@ -738,20 +734,23 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                     Map<String, Object> featureData = javaEEFeatures.computeIfAbsent(feature, k -> new HashMap<>());
                     featureData.computeIfAbsent("features", k -> new HashSet<String>());
                     ((Set<String>) featureData.get("features")).add(platform);
-                    // Store feature node
-                    featureData.put("node", featureNode);
+                    if (featureNode != null) {
+                        featureData.put("node", featureNode);
+                    }
                 } else if (platform.toLowerCase().startsWith("jakartaee-")) {
                     Map<String, Object> featureData = jakartaEEFeatures.computeIfAbsent(feature, k -> new HashMap<>());
                     featureData.computeIfAbsent("features", k -> new HashSet<String>());
                     ((Set<String>) featureData.get("features")).add(platform);
-                    // Store feature node
-                    featureData.put("node", featureNode);
+                    if (featureNode != null) {
+                        featureData.put("node", featureNode);
+                    }
                 } else if (platform.toLowerCase().startsWith("microprofile-")) {
                     Map<String, Object> featureData = microProfileFeatures.computeIfAbsent(feature, k -> new HashMap<>());
                     featureData.computeIfAbsent("features", k -> new HashSet<String>());
                     ((Set<String>) featureData.get("features")).add(platform);
-                    // Store feature node
-                    featureData.put("node", featureNode);
+                    if (featureNode != null) {
+                        featureData.put("node", featureNode);
+                    }
                 }
             }
         }
