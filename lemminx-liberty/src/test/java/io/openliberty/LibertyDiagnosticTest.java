@@ -1300,6 +1300,10 @@ public class LibertyDiagnosticTest {
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, invalid1);
     }
 
+    /**
+     * Tests detection of incompatible Liberty features by verifying that appropriate error diagnostics
+     * are generated when features with no common platform support are configured together.
+     */
     @Test
     public void testVersionedFeatureIncompatibility() throws JAXBException {
         assertTrue(featureList.exists());
@@ -1313,12 +1317,17 @@ public class LibertyDiagnosticTest {
                         "    </featureManager>\n" +
                         "</server>\n"
         );
+
+        // Expected diagnostic for the incompatible mpTelemetry-2.0 feature
         Diagnostic configForIncompatibleFeature1 = new Diagnostic();
         configForIncompatibleFeature1.setRange(r(2, 8, 2, 42));
         configForIncompatibleFeature1.setMessage("ERROR: The feature mpTelemetry-2.0 is incompatible with mpConfig-1.3. They are not sharing any common platforms.");
+
+        // Expected diagnostic for the incompatible mpConfig-1.3 feature
         Diagnostic configForIncompatibleFeature2 = new Diagnostic();
         configForIncompatibleFeature2.setRange(r(4, 8, 4, 39));
         configForIncompatibleFeature2.setMessage("ERROR: The feature mpConfig-1.3 is incompatible with mpTelemetry-2.0. They are not sharing any common platforms.");
+
         XMLAssert.testDiagnosticsFor(serverXML1, null, null, serverXMLURI, configForIncompatibleFeature1, configForIncompatibleFeature2);
     }
 }

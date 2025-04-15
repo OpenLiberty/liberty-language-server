@@ -757,25 +757,22 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         }
 
         // Validate compatibility within each platform type
-        validatePlatformTypeCompatibility(javaEEFeatures, "Java EE", featureManagerNode, diagnosticsList, libertyVersion, libertyRuntime, requestDelay, domDocument);
-        validatePlatformTypeCompatibility(jakartaEEFeatures, "Jakarta EE", featureManagerNode, diagnosticsList, libertyVersion, libertyRuntime, requestDelay, domDocument);
-        validatePlatformTypeCompatibility(microProfileFeatures, "MicroProfile", featureManagerNode, diagnosticsList, libertyVersion, libertyRuntime, requestDelay, domDocument);
+        validatePlatformTypeCompatibility(javaEEFeatures, diagnosticsList, libertyVersion, libertyRuntime, requestDelay, domDocument);
+        validatePlatformTypeCompatibility(jakartaEEFeatures, diagnosticsList, libertyVersion, libertyRuntime, requestDelay, domDocument);
+        validatePlatformTypeCompatibility(microProfileFeatures, diagnosticsList, libertyVersion, libertyRuntime, requestDelay, domDocument);
     }
 
     /**
      * Validates compatibility of features within a specific platform type.
      *
      * @param featureMap Map of features and their supported platforms
-     * @param platformType The platform type name (Java EE, Jakarta EE, MicroProfile)
-     * @param featureManagerNode The featureManager DOM node
      * @param diagnosticsList List to add diagnostics to
      * @param libertyVersion Liberty version
      * @param libertyRuntime Liberty runtime
      * @param requestDelay Request delay for feature service
      * @param domDocument The DOM document
      */
-    private void validatePlatformTypeCompatibility(Map<String, Map<String, Object>> featureMap, String platformType,
-                                                   DOMNode featureManagerNode, List<Diagnostic> diagnosticsList,
+    private void validatePlatformTypeCompatibility(Map<String, Map<String, Object>> featureMap, List<Diagnostic> diagnosticsList,
                                                    String libertyVersion, String libertyRuntime, int requestDelay,
                                                    DOMDocument domDocument) {
         if (featureMap.size() <= 1) {
