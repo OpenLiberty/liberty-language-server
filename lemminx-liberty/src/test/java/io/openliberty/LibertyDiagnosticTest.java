@@ -127,11 +127,11 @@ public class LibertyDiagnosticTest {
         duplicateDiagnostic.setCode(LibertyDiagnosticParticipant.DUPLICATE_FEATURE_CODE);
 
         Diagnostic jaxrsIncompatibilityDiagnostic = new Diagnostic();
-        jaxrsIncompatibilityDiagnostic.setRange(r(2, 15, 2, 43));
+        jaxrsIncompatibilityDiagnostic.setRange(r(2, 24, 2, 33));
         jaxrsIncompatibilityDiagnostic.setMessage("ERROR: The feature jaxrs-2.0 is incompatible with jsonp-1.1,jaxrs-2.1. They are not sharing any common platforms.");
 
         Diagnostic jsonpIncompatibilityDiagnostic = new Diagnostic();
-        jsonpIncompatibilityDiagnostic.setRange(r(4, 15, 4, 43));
+        jsonpIncompatibilityDiagnostic.setRange(r(4, 24, 4, 33));
         jsonpIncompatibilityDiagnostic.setMessage("ERROR: The feature jsonp-1.1 is incompatible with jaxrs-2.0,jaxrs-2.1. They are not sharing any common platforms.");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, duplicateDiagnostic, jsonpIncompatibilityDiagnostic, jaxrsIncompatibilityDiagnostic);
@@ -577,11 +577,11 @@ public class LibertyDiagnosticTest {
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
 
         Diagnostic jsonbIncompatibilityDiagnostic = new Diagnostic();
-        jsonbIncompatibilityDiagnostic.setRange(r(4, 15, 4, 43));
+        jsonbIncompatibilityDiagnostic.setRange(r(4, 24, 4, 33));
         jsonbIncompatibilityDiagnostic.setMessage("ERROR: The feature jsonb-2.0 is incompatible with beanValidation-1.1. They are not sharing any common platforms.");
 
         Diagnostic beanValidationIncompatibilityDiagnostic = new Diagnostic();
-        beanValidationIncompatibilityDiagnostic.setRange(r(3, 15, 3, 52));
+        beanValidationIncompatibilityDiagnostic.setRange(r(3, 24, 3, 42));
         beanValidationIncompatibilityDiagnostic.setMessage("ERROR: The feature beanValidation-1.1 is incompatible with jsonb-2.0. They are not sharing any common platforms.");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
@@ -759,7 +759,7 @@ public class LibertyDiagnosticTest {
         invalid.setCode(LibertyDiagnosticParticipant.FEATURE_NAME_CHANGED_CODE); // Set code to validate the diagnostics, so that some new diagnostics can be skipped based on this
 
         Diagnostic incompatibilityDiagnostic = new Diagnostic();
-        incompatibilityDiagnostic.setRange(r(2, 15, 2, 41));
+        incompatibilityDiagnostic.setRange(r(2, 24, 2, 31));
         incompatibilityDiagnostic.setMessage("ERROR: The feature jms-2.0 is incompatible with messaging-3.0. They are not sharing any common platforms.");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
@@ -778,7 +778,7 @@ public class LibertyDiagnosticTest {
         invalid.setMessage("ERROR: The jms-2.0 feature cannot be configured with the messaging-3.0 feature because they are two different versions of the same feature. The feature name changed from jms to messaging for Jakarta EE. Remove one of the features.");
         invalid.setCode(LibertyDiagnosticParticipant.FEATURE_NAME_CHANGED_CODE); // Set code to validate the diagnostics, so that some new diagnostics can be skipped based on this
         incompatibilityDiagnostic = new Diagnostic();
-        incompatibilityDiagnostic.setRange(r(2, 15, 2, 47));
+        incompatibilityDiagnostic.setRange(r(2, 24, 2, 37));
         incompatibilityDiagnostic.setMessage("ERROR: The feature messaging-3.0 is incompatible with jms-2.0. They are not sharing any common platforms.");
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid, incompatibilityDiagnostic);
@@ -798,7 +798,7 @@ public class LibertyDiagnosticTest {
         invalid.setMessage("ERROR: The ejb-3.2 feature cannot be configured with the enterpriseBeans-4.0 feature because they are two different versions of the same feature. The feature name changed from ejb to enterpriseBeans for Jakarta EE. Remove one of the features.");
         invalid.setCode(LibertyDiagnosticParticipant.FEATURE_NAME_CHANGED_CODE); // Set code to validate the diagnostics, so that some new diagnostics can be skipped based on this
         incompatibilityDiagnostic = new Diagnostic();
-        incompatibilityDiagnostic.setRange(r(3, 15, 3, 53));
+        incompatibilityDiagnostic.setRange(r(3, 24, 3, 43));
         incompatibilityDiagnostic.setMessage("ERROR: The feature enterpriseBeans-4.0 is incompatible with ejb-3.2. They are not sharing any common platforms.");
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid, incompatibilityDiagnostic);
@@ -1348,22 +1348,22 @@ public class LibertyDiagnosticTest {
 
         // Expected diagnostic for the incompatible mpTelemetry-2.0 feature
         Diagnostic mpTelemetryIncompatibilityDiagnostic = new Diagnostic();
-        mpTelemetryIncompatibilityDiagnostic.setRange(r(2, 8, 2, 42));
+        mpTelemetryIncompatibilityDiagnostic.setRange(r(2, 17, 2, 32));
         mpTelemetryIncompatibilityDiagnostic.setMessage("ERROR: The feature mpTelemetry-2.0 is incompatible with mpConfig-1.3. They are not sharing any common platforms.");
 
         // Expected diagnostic for the incompatible servlet-3.1 feature
         Diagnostic servletIncompatibilityDiagnostic = new Diagnostic();
-        servletIncompatibilityDiagnostic.setRange(r(3, 8, 3, 38));
+        servletIncompatibilityDiagnostic.setRange(r(3, 17, 3, 28));
         servletIncompatibilityDiagnostic.setMessage("ERROR: The feature servlet-3.1 is incompatible with appSecurity-3.0. They are not sharing any common platforms.");
 
         // Expected diagnostic for the incompatible mpConfig-1.3 feature
         Diagnostic mpConfigIncompatibilityDiagnostic = new Diagnostic();
-        mpConfigIncompatibilityDiagnostic.setRange(r(4, 8, 4, 39));
+        mpConfigIncompatibilityDiagnostic.setRange(r(4, 17, 4, 29));
         mpConfigIncompatibilityDiagnostic.setMessage("ERROR: The feature mpConfig-1.3 is incompatible with mpTelemetry-2.0. They are not sharing any common platforms.");
 
         // Expected diagnostic for the incompatible appSecurity-3.0 feature
         Diagnostic appSecurityIncompatibilityDiagnostic = new Diagnostic();
-        appSecurityIncompatibilityDiagnostic.setRange(r(5, 8, 5, 42));
+        appSecurityIncompatibilityDiagnostic.setRange(r(5, 17, 5, 32));
         appSecurityIncompatibilityDiagnostic.setMessage("ERROR: The feature appSecurity-3.0 is incompatible with servlet-3.1. They are not sharing any common platforms.");
 
         XMLAssert.testDiagnosticsFor(serverXML1, null, null, serverXMLURI, servletIncompatibilityDiagnostic, appSecurityIncompatibilityDiagnostic, mpTelemetryIncompatibilityDiagnostic, mpConfigIncompatibilityDiagnostic);

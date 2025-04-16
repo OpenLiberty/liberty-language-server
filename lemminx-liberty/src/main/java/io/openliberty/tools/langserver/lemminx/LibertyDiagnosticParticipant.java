@@ -790,11 +790,13 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             for (Map.Entry<String, Map<String, Object>> entry : featureMap.entrySet()) {
                 DOMNode featureNode = (DOMNode) entry.getValue().get("node");
                 if (featureNode == null) continue;
+                DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
+                if (featureTextNode == null) continue;
                 String featureName = featureNode.getChildren().get(0).getTextContent();
                 String otherFeatures = featureMap.keySet().stream().filter(key -> !key.equals(featureName)).collect(Collectors.joining(","));
                 String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_INCOMPATIBLE_FEATURES, featureName, otherFeatures);
 
-                Range range = XMLPositionUtility.createRange(featureNode.getStart(), featureNode.getEnd(), domDocument);
+                Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(), domDocument);
                 if (range == null) continue;
 
                 // Check if no other diagnostics exists in the current line
