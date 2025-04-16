@@ -162,7 +162,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         checkForPlatFormAndFeature(domDocument, list, versionlessFeatures, features, preferredPlatforms, versionedFeatures);
 
         // Feature compatibility validation
-        validateFeatureCompatibility(versionedFeatures, domDocument, list);
+        validateFeatureCompatibility(versionedFeatures, domDocument, list, libertyVersion, libertyRuntime, requestDelay, features);
     }
 
     private void validateFeature(DOMDocument domDocument, List<Diagnostic> list, Set<String> includedFeatures, DOMNode featureTextNode, String libertyVersion, String libertyRuntime, int requestDelay, Set<String> versionedFeatures, Set<String> versionlessFeatures, Set<String> featuresWithoutVersions, Set<String> featureList) {
@@ -692,30 +692,37 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
      * Validates feature compatibility by checking if features share common platforms
      * within each platform type (Java EE, Jakarta EE, MicroProfile).
      *
+     * @param versionedFeatures List of versioned feature names
      * @param domDocument The DOM document (server.xml)
      * @param diagnosticsList List to add diagnostics to
+     * @param libertyVersion Liberty version
+     * @param libertyRuntime Liberty runtime
+     * @param requestDelay Request delay for feature service
+     * @param featureNodesList List of feature nodes
      */
-    private void validateFeatureCompatibility(Set<String> versionedFeatures, DOMDocument domDocument, List<Diagnostic> diagnosticsList) {
+    private void validateFeatureCompatibility(Set<String> versionedFeatures, DOMDocument domDocument, List<Diagnostic> diagnosticsList,
+                                              String libertyVersion, String libertyRuntime, int requestDelay,
+                                              List<DOMNode> featureNodesList) {
         if (versionedFeatures == null || versionedFeatures.size() <= 1) {
             return; // Need at least two features to check compatibility
         }
 
-        // Get Liberty version and runtime from the document
-        LibertyRuntime runtimeInfo = LibertyUtils.getLibertyRuntimeInfo(domDocument);
-        String libertyVersion = runtimeInfo == null ? null : runtimeInfo.getRuntimeVersion();
-        String libertyRuntime = runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
-        int requestDelay = SettingsService.getInstance().getRequestDelay();
-
         // Maps to track features by platform type
-        Map<String, Map<String, Object>> javaEEFeatures = new HashMap<>();
-        Map<String, Map<String, Object>> jakartaEEFeatures = new HashMap<>();
+        Map<String, Map<String, Object>> eeFeatures = new HashMap<>(); // Combined JavaEE and JakartaEE
         Map<String, Map<String, Object>> microProfileFeatures = new HashMap<>();
 
-        // Find the featureManager element to get feature nodes if available
-        DOMNode featureManagerNode = LibertyUtils.getFeatureManagerElement(domDocument);
-        Map<String, DOMNode> featureNodes = featureManagerNode != null ?
-                LibertyUtils.getAllFeatureNodes(featureManagerNode) :
-                new HashMap<>();
+        // Convert feature nodes list to a map of feature names to nodes
+        Map<String, DOMNode> featureNodes = new HashMap<>();
+        if (featureNodesList != null) {
+            featureNodesList.stream()
+                    .filter(node -> "feature".equals(node.getLocalName()) && node.getChildNodes().getLength() > 0)
+                    .forEach(node -> {
+                        String featureName = node.getChildNodes().item(0).getTextContent();
+                        if (featureName != null && !featureName.trim().isEmpty()) {
+                            featureNodes.putIfAbsent(featureName.trim(), node);
+                        }
+                    });
+        }
 
         // Categorize features by platform type
         for (String feature : versionedFeatures) {
@@ -728,15 +735,9 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
 
             // Group features by platform type
             for (String platform : platforms) {
-                if (platform.toLowerCase().startsWith("javaee-")) {
-                    Map<String, Object> featureData = javaEEFeatures.computeIfAbsent(feature, k -> new HashMap<>());
-                    featureData.computeIfAbsent("features", k -> new HashSet<String>());
-                    ((Set<String>) featureData.get("features")).add(platform);
-                    if (featureNode != null) {
-                        featureData.put("node", featureNode);
-                    }
-                } else if (platform.toLowerCase().startsWith("jakartaee-")) {
-                    Map<String, Object> featureData = jakartaEEFeatures.computeIfAbsent(feature, k -> new HashMap<>());
+                if (platform.toLowerCase().startsWith("javaee-") || platform.toLowerCase().startsWith("jakartaee-")) {
+                    // Combined category for both JavaEE and JakartaEE
+                    Map<String, Object> featureData = eeFeatures.computeIfAbsent(feature, k -> new HashMap<>());
                     featureData.computeIfAbsent("features", k -> new HashSet<String>());
                     ((Set<String>) featureData.get("features")).add(platform);
                     if (featureNode != null) {
@@ -754,8 +755,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         }
 
         // Validate compatibility within each platform type
-        validatePlatformTypeCompatibility(javaEEFeatures, diagnosticsList, libertyVersion, libertyRuntime, requestDelay, domDocument);
-        validatePlatformTypeCompatibility(jakartaEEFeatures, diagnosticsList, libertyVersion, libertyRuntime, requestDelay, domDocument);
+        validatePlatformTypeCompatibility(eeFeatures, diagnosticsList, libertyVersion, libertyRuntime, requestDelay, domDocument);
         validatePlatformTypeCompatibility(microProfileFeatures, diagnosticsList, libertyVersion, libertyRuntime, requestDelay, domDocument);
     }
 

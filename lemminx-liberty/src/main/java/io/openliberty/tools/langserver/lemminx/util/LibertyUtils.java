@@ -716,34 +716,6 @@ public class LibertyUtils {
         return featureManagerNode;
     }
 
-    /**
-     * Collects feature nodes from the featureManager element.
-     *
-     * @param featureManagerNode The featureManager DOM node
-     * @return Map of feature names to their DOM nodes
-     */
-    public static Map<String, DOMNode> getAllFeatureNodes(DOMNode featureManagerNode) {
-        Map<String, DOMNode> featureNodes = new HashMap<>();
-
-        List<DOMNode> children = featureManagerNode.getChildren();
-        if (children == null) {
-            return featureNodes;
-        }
-
-        List<DOMNode> features = featureManagerNode.getChildren();
-        for (DOMNode featureNode : features) {
-            if ("feature".equals(featureNode.getLocalName())) {
-                DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
-                String featureName = featureTextNode.getTextContent();
-                if (featureName != null && !featureName.trim().isEmpty()) {
-                    featureNodes.put(featureName.trim(), featureNode);
-                }
-            }
-        }
-
-        return featureNodes;
-    }
-
 
     /**
      * Verify if there is already a diagnostic present at the line or not

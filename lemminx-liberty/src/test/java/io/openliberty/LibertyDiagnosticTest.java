@@ -576,8 +576,16 @@ public class LibertyDiagnosticTest {
         invalid1.setMessage("ERROR: \"servlet\" versionless feature cannot be resolved. The versioned features do not have a platform in common.");
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
 
+        Diagnostic jsonbIncompatibilityDiagnostic = new Diagnostic();
+        jsonbIncompatibilityDiagnostic.setRange(r(4, 15, 4, 43));
+        jsonbIncompatibilityDiagnostic.setMessage("ERROR: The feature jsonb-2.0 is incompatible with beanValidation-1.1. They are not sharing any common platforms.");
+
+        Diagnostic beanValidationIncompatibilityDiagnostic = new Diagnostic();
+        beanValidationIncompatibilityDiagnostic.setRange(r(3, 15, 3, 52));
+        beanValidationIncompatibilityDiagnostic.setMessage("ERROR: The feature beanValidation-1.1 is incompatible with jsonb-2.0. They are not sharing any common platforms.");
+
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
-                invalid1);
+                invalid1, jsonbIncompatibilityDiagnostic, beanValidationIncompatibilityDiagnostic);
     }
     @Test
     public void testUnresolvedPlatformForVersionlessFeatureDiagnostic() throws BadLocationException {
@@ -1331,22 +1339,33 @@ public class LibertyDiagnosticTest {
                 "<server description=\"Sample Liberty server\">\n" +
                         "    <featureManager>\n" +
                         "        <feature>mpTelemetry-2.0</feature>\n" +
-                        "        <feature>servlet-4.0</feature>\n" +
+                        "        <feature>servlet-3.1</feature>\n" +
                         "        <feature>mpConfig-1.3</feature>\n" +
+                        "        <feature>appSecurity-3.0</feature>" +
                         "    </featureManager>\n" +
                         "</server>\n"
         );
 
         // Expected diagnostic for the incompatible mpTelemetry-2.0 feature
-        Diagnostic configForIncompatibleFeature1 = new Diagnostic();
-        configForIncompatibleFeature1.setRange(r(2, 8, 2, 42));
-        configForIncompatibleFeature1.setMessage("ERROR: The feature mpTelemetry-2.0 is incompatible with mpConfig-1.3. They are not sharing any common platforms.");
+        Diagnostic mpTelemetryIncompatibilityDiagnostic = new Diagnostic();
+        mpTelemetryIncompatibilityDiagnostic.setRange(r(2, 8, 2, 42));
+        mpTelemetryIncompatibilityDiagnostic.setMessage("ERROR: The feature mpTelemetry-2.0 is incompatible with mpConfig-1.3. They are not sharing any common platforms.");
+
+        // Expected diagnostic for the incompatible servlet-3.1 feature
+        Diagnostic servletIncompatibilityDiagnostic = new Diagnostic();
+        servletIncompatibilityDiagnostic.setRange(r(3, 8, 3, 38));
+        servletIncompatibilityDiagnostic.setMessage("ERROR: The feature servlet-3.1 is incompatible with appSecurity-3.0. They are not sharing any common platforms.");
 
         // Expected diagnostic for the incompatible mpConfig-1.3 feature
-        Diagnostic configForIncompatibleFeature2 = new Diagnostic();
-        configForIncompatibleFeature2.setRange(r(4, 8, 4, 39));
-        configForIncompatibleFeature2.setMessage("ERROR: The feature mpConfig-1.3 is incompatible with mpTelemetry-2.0. They are not sharing any common platforms.");
+        Diagnostic mpConfigIncompatibilityDiagnostic = new Diagnostic();
+        mpConfigIncompatibilityDiagnostic.setRange(r(4, 8, 4, 39));
+        mpConfigIncompatibilityDiagnostic.setMessage("ERROR: The feature mpConfig-1.3 is incompatible with mpTelemetry-2.0. They are not sharing any common platforms.");
 
-        XMLAssert.testDiagnosticsFor(serverXML1, null, null, serverXMLURI, configForIncompatibleFeature1, configForIncompatibleFeature2);
+        // Expected diagnostic for the incompatible appSecurity-3.0 feature
+        Diagnostic appSecurityIncompatibilityDiagnostic = new Diagnostic();
+        appSecurityIncompatibilityDiagnostic.setRange(r(5, 8, 5, 42));
+        appSecurityIncompatibilityDiagnostic.setMessage("ERROR: The feature appSecurity-3.0 is incompatible with servlet-3.1. They are not sharing any common platforms.");
+
+        XMLAssert.testDiagnosticsFor(serverXML1, null, null, serverXMLURI, servletIncompatibilityDiagnostic, appSecurityIncompatibilityDiagnostic, mpTelemetryIncompatibilityDiagnostic, mpConfigIncompatibilityDiagnostic);
     }
 }
