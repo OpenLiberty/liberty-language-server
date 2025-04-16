@@ -59,10 +59,15 @@ Hover your cursor over Liberty properties, variables, or XML configuration to vi
 
 Diagnostics highlight potential problems in your configuration, such as invalid values. Quick fixes provide potential solutions to those problems.
 
-* Diagnostics on Liberty properties and variables
+* Diagnostics and quick fixes for Liberty properties and variables
 
 ![Screen capture showing diagnostics marking an invalid value for a Liberty property in a bootstrap.properties file. Hovering over the diagnostic will provide more details.](./docs/images/property-diagnostic.png "Diagnostics on Liberty properties in bootstrap.properties")
+
+![Screen capture showing a quick fix for a diagnostic of an invalid value in a bootstrap.properties file. Opening the quick fixes menu will show all the available quick fix options.](./docs/images/property-quickFix.png "Quick fixes on bootstrap.properties")
+
 ![Screen capture showing diagnostics marking an invalid value for a Liberty variable in a server.env file. Hovering over the diagnostic will provide more details.](./docs/images/variable-diagnostic.png "Diagnostics on Liberty variables in server.env")
+
+![Screen capture showing a quick fix for a diagnostic of an invalid value in a server.env file. Opening the quick fixes menu will show all the available quick fix options.](./docs/images/variable-quickFix.png "Quick fixes on server.env")
 
 * Diagnostics and quick fixes for Liberty XML configs
 
