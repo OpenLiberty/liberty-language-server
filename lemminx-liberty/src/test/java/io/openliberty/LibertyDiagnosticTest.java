@@ -124,17 +124,23 @@ public class LibertyDiagnosticTest {
         Diagnostic duplicateDiagnostic = new Diagnostic();
         duplicateDiagnostic.setRange(r(3, 24, 3, 33));
         duplicateDiagnostic.setMessage("ERROR: More than one version of feature jaxrs is included. Only one version of a feature may be specified.");
-        duplicateDiagnostic.setCode(LibertyDiagnosticParticipant.DUPLICATE_FEATURE_CODE);
 
+        // Expected diagnostic for the incompatible jaxrs-2.0 feature
         Diagnostic jaxrsIncompatibilityDiagnostic = new Diagnostic();
         jaxrsIncompatibilityDiagnostic.setRange(r(2, 24, 2, 33));
         jaxrsIncompatibilityDiagnostic.setMessage("ERROR: The feature jaxrs-2.0 is incompatible with jsonp-1.1,jaxrs-2.1. They are not sharing any common platforms.");
 
+        // Expected diagnostic for the incompatible jaxrs-2.1 feature
+        Diagnostic jaxrs21IncompatibilityDiagnostic = new Diagnostic();
+        jaxrs21IncompatibilityDiagnostic.setRange(r(3, 24, 3, 33));
+        jaxrs21IncompatibilityDiagnostic.setMessage("ERROR: The feature jaxrs-2.1 is incompatible with jsonp-1.1,jaxrs-2.0. They are not sharing any common platforms.");
+
+        // Expected diagnostic for the incompatible jsonp-1.1 feature
         Diagnostic jsonpIncompatibilityDiagnostic = new Diagnostic();
         jsonpIncompatibilityDiagnostic.setRange(r(4, 24, 4, 33));
         jsonpIncompatibilityDiagnostic.setMessage("ERROR: The feature jsonp-1.1 is incompatible with jaxrs-2.0,jaxrs-2.1. They are not sharing any common platforms.");
 
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, duplicateDiagnostic, jsonpIncompatibilityDiagnostic, jaxrsIncompatibilityDiagnostic);
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, duplicateDiagnostic, jsonpIncompatibilityDiagnostic, jaxrsIncompatibilityDiagnostic, jaxrs21IncompatibilityDiagnostic);
     }
 
     @Test
@@ -576,10 +582,12 @@ public class LibertyDiagnosticTest {
         invalid1.setMessage("ERROR: \"servlet\" versionless feature cannot be resolved. The versioned features do not have a platform in common.");
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
 
+        // Expected diagnostic for the incompatible jsonb-2.0 feature
         Diagnostic jsonbIncompatibilityDiagnostic = new Diagnostic();
         jsonbIncompatibilityDiagnostic.setRange(r(4, 24, 4, 33));
         jsonbIncompatibilityDiagnostic.setMessage("ERROR: The feature jsonb-2.0 is incompatible with beanValidation-1.1. They are not sharing any common platforms.");
 
+        // Expected diagnostic for the incompatible beanValidation-1.1 feature
         Diagnostic beanValidationIncompatibilityDiagnostic = new Diagnostic();
         beanValidationIncompatibilityDiagnostic.setRange(r(3, 24, 3, 42));
         beanValidationIncompatibilityDiagnostic.setMessage("ERROR: The feature beanValidation-1.1 is incompatible with jsonb-2.0. They are not sharing any common platforms.");
@@ -756,14 +764,19 @@ public class LibertyDiagnosticTest {
         Diagnostic invalid = new Diagnostic();
         invalid.setRange(r(3, 24, 3, 37));
         invalid.setMessage("ERROR: The messaging-3.0 feature cannot be configured with the jms-2.0 feature because they are two different versions of the same feature. The feature name changed from jms to messaging for Jakarta EE. Remove one of the features.");
-        invalid.setCode(LibertyDiagnosticParticipant.FEATURE_NAME_CHANGED_CODE); // Set code to validate the diagnostics, so that some new diagnostics can be skipped based on this
 
-        Diagnostic incompatibilityDiagnostic = new Diagnostic();
-        incompatibilityDiagnostic.setRange(r(2, 24, 2, 31));
-        incompatibilityDiagnostic.setMessage("ERROR: The feature jms-2.0 is incompatible with messaging-3.0. They are not sharing any common platforms.");
+        // Expected diagnostic for the incompatible messaging-3.0 feature
+        Diagnostic messagingIncompatibilityDiagnostic = new Diagnostic();
+        messagingIncompatibilityDiagnostic.setRange(r(3, 24, 3, 37));
+        messagingIncompatibilityDiagnostic.setMessage("ERROR: The feature messaging-3.0 is incompatible with jms-2.0. They are not sharing any common platforms.");
+
+        // Expected diagnostic for the incompatible jms-2.0 feature
+        Diagnostic jmsIncompatibilityDiagnostic = new Diagnostic();
+        jmsIncompatibilityDiagnostic.setRange(r(2, 24, 2, 31));
+        jmsIncompatibilityDiagnostic.setMessage("ERROR: The feature jms-2.0 is incompatible with messaging-3.0. They are not sharing any common platforms.");
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
-                invalid, incompatibilityDiagnostic);
+                invalid, messagingIncompatibilityDiagnostic, jmsIncompatibilityDiagnostic);
 
         serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
@@ -776,12 +789,19 @@ public class LibertyDiagnosticTest {
         invalid = new Diagnostic();
         invalid.setRange(r(3, 24, 3, 31));
         invalid.setMessage("ERROR: The jms-2.0 feature cannot be configured with the messaging-3.0 feature because they are two different versions of the same feature. The feature name changed from jms to messaging for Jakarta EE. Remove one of the features.");
-        invalid.setCode(LibertyDiagnosticParticipant.FEATURE_NAME_CHANGED_CODE); // Set code to validate the diagnostics, so that some new diagnostics can be skipped based on this
-        incompatibilityDiagnostic = new Diagnostic();
-        incompatibilityDiagnostic.setRange(r(2, 24, 2, 37));
-        incompatibilityDiagnostic.setMessage("ERROR: The feature messaging-3.0 is incompatible with jms-2.0. They are not sharing any common platforms.");
+
+        // Expected diagnostic for the incompatible jms-2.0 feature
+        jmsIncompatibilityDiagnostic = new Diagnostic();
+        jmsIncompatibilityDiagnostic.setRange(r(3, 24, 3, 31));
+        jmsIncompatibilityDiagnostic.setMessage("ERROR: The feature jms-2.0 is incompatible with messaging-3.0. They are not sharing any common platforms.");
+
+        // Expected diagnostic for the incompatible messaging-3.0 feature
+        messagingIncompatibilityDiagnostic = new Diagnostic();
+        messagingIncompatibilityDiagnostic.setRange(r(2, 24, 2, 37));
+        messagingIncompatibilityDiagnostic.setMessage("ERROR: The feature messaging-3.0 is incompatible with jms-2.0. They are not sharing any common platforms.");
+
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
-                invalid, incompatibilityDiagnostic);
+                invalid, jmsIncompatibilityDiagnostic, messagingIncompatibilityDiagnostic);
 
         serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
@@ -796,12 +816,19 @@ public class LibertyDiagnosticTest {
         invalid = new Diagnostic();
         invalid.setRange(r(4, 24, 4, 31));
         invalid.setMessage("ERROR: The ejb-3.2 feature cannot be configured with the enterpriseBeans-4.0 feature because they are two different versions of the same feature. The feature name changed from ejb to enterpriseBeans for Jakarta EE. Remove one of the features.");
-        invalid.setCode(LibertyDiagnosticParticipant.FEATURE_NAME_CHANGED_CODE); // Set code to validate the diagnostics, so that some new diagnostics can be skipped based on this
-        incompatibilityDiagnostic = new Diagnostic();
-        incompatibilityDiagnostic.setRange(r(3, 24, 3, 43));
-        incompatibilityDiagnostic.setMessage("ERROR: The feature enterpriseBeans-4.0 is incompatible with ejb-3.2. They are not sharing any common platforms.");
+
+        // Expected diagnostic for the incompatible ejb-3.2 feature
+        Diagnostic ejbIncompatibilityDiagnostic = new Diagnostic();
+        ejbIncompatibilityDiagnostic.setRange(r(4, 24, 4, 31));
+        ejbIncompatibilityDiagnostic.setMessage("ERROR: The feature ejb-3.2 is incompatible with enterpriseBeans-4.0. They are not sharing any common platforms.");
+
+        // Expected diagnostic for the incompatible enterpriseBeans-4.0 feature
+        Diagnostic enterpriseBeansIncompatibilityDiagnostic = new Diagnostic();
+        enterpriseBeansIncompatibilityDiagnostic.setRange(r(3, 24, 3, 43));
+        enterpriseBeansIncompatibilityDiagnostic.setMessage("ERROR: The feature enterpriseBeans-4.0 is incompatible with ejb-3.2. They are not sharing any common platforms.");
+
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
-                invalid, incompatibilityDiagnostic);
+                invalid, ejbIncompatibilityDiagnostic, enterpriseBeansIncompatibilityDiagnostic);
 
         serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
@@ -816,7 +843,6 @@ public class LibertyDiagnosticTest {
         invalid = new Diagnostic();
         invalid.setRange(r(4, 24, 4, 27));
         invalid.setMessage("ERROR: The ejb feature cannot be configured with the enterpriseBeans feature because they are two different versions of the same feature. The feature name changed from ejb to enterpriseBeans for Jakarta EE. Remove one of the features.");
-        invalid.setCode(LibertyDiagnosticParticipant.FEATURE_NAME_CHANGED_CODE); // Set code to validate the diagnostics, so that some new diagnostics can be skipped based on this
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
                 invalid);
     }

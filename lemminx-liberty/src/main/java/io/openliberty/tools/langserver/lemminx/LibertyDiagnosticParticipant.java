@@ -69,7 +69,6 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     public static final String INCORRECT_PLATFORM_CODE = "incorrect_platform";
     public static final String INCORRECT_VARIABLE_CODE = "incorrect_variable";
 
-    public static final String DUPLICATE_FEATURE_CODE = "multiple_features";
     public static final String FEATURE_NAME_CHANGED_CODE = "feature_name_changed";
 
     @Override
@@ -233,7 +232,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
                     featureTextNode.getEnd(), domDocument);
             String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_FEATURE_MULTIPLE_VERSIONS, featureNameNoVersion);
-            list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, DUPLICATE_FEATURE_CODE));
+            list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
         } else if (featuresWithOldNames.contains(featureNameNoVersionLower + "-")) {
             String otherFeatureName = getOtherFeatureName(featureList, changedFeatureNameMapLowerReversed, featureNameNoVersionLower);
             //check for features whose name is changed such as jsp is changed to pages
@@ -242,7 +241,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_FEATURE_NAME_CHANGED, featureName, otherFeatureName,
                     LibertyUtils.stripVersion(otherFeatureName),
                     LibertyUtils.stripVersion(featureName));
-            list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, FEATURE_NAME_CHANGED_CODE));
+            list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
         } else if (featuresWithChangedNames.contains(featureNameNoVersionLower + "-")) {
             String otherFeatureName = getOtherFeatureName(featureList, changedFeatureNameMapLower, featureNameNoVersionLower);
             Range range = XMLPositionUtility.createRange(featureTextNode.getStart(),
@@ -250,7 +249,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_FEATURE_NAME_CHANGED, featureName, otherFeatureName,
                     LibertyUtils.stripVersion(featureName),
                     LibertyUtils.stripVersion(otherFeatureName));
-            list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, FEATURE_NAME_CHANGED_CODE));
+            list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE));
         }
         includedFeatures.add(featureNameLower);
         featureList.add(featureName);
@@ -800,10 +799,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 if (range == null) continue;
 
                 // Check if no other diagnostics exists in the current line
-                if (!LibertyUtils.hasDiagnosticInLine(diagnosticsList, range, List.of(DUPLICATE_FEATURE_CODE, FEATURE_NAME_CHANGED_CODE))) {
-                    Diagnostic diagnostic = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE);
-                    diagnosticsList.add(diagnostic);
-                }
+                Diagnostic diagnostic = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE);
+                diagnosticsList.add(diagnostic);
             }
         }
     }
