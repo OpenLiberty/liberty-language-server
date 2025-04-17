@@ -37,6 +37,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -68,6 +69,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
     public static final String INCORRECT_PLATFORM_CODE = "incorrect_platform";
     public static final String INCORRECT_VARIABLE_CODE = "incorrect_variable";
 
+    public static final String FEATURE_NAME_CHANGED_CODE = "feature_name_changed";
+
     @Override
     public void doDiagnostics(DOMDocument domDocument, List<Diagnostic> diagnostics,
             XMLValidationSettings validationSettings, CancelChecker cancelChecker) {
@@ -83,8 +86,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
 
     private void validateDom(DOMDocument domDocument, List<Diagnostic> diagnosticsList) throws IOException {
         List<DOMNode> nodes = domDocument.getDocumentElement().getChildren();
-        List<Diagnostic> tempDiagnosticsList = new ArrayList<Diagnostic>();
-        Set<String> includedFeatures = new HashSet<String>();
+        List<Diagnostic> tempDiagnosticsList = new ArrayList<>();
+        Set<String> includedFeatures = new HashSet<>();
         boolean featureManagerPresent = false;
         LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI());
         if (workspace == null) {
@@ -93,6 +96,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         FeatureListGraph featureGraph = (workspace == null) ? FeatureService.getInstance().getDefaultFeatureList() : workspace.getFeatureListGraph();
         for (DOMNode node : nodes) {
             String nodeName = node.getNodeName();
+
             if (LibertyConstants.FEATURE_MANAGER_ELEMENT.equals(nodeName)) {
                 featureManagerPresent = true;
                 validateFeaturesAndPlatforms(domDocument, diagnosticsList, node, includedFeatures);
@@ -159,6 +163,9 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             }
         }
         checkForPlatFormAndFeature(domDocument, list, versionlessFeatures, features, preferredPlatforms, versionedFeatures);
+
+        // Feature compatibility validation
+        validateFeatureCompatibility(versionedFeatures, domDocument, list, libertyVersion, libertyRuntime, requestDelay, features);
     }
 
     private void validateFeature(DOMDocument domDocument, List<Diagnostic> list, Set<String> includedFeatures, DOMNode featureTextNode, String libertyVersion, String libertyRuntime, int requestDelay, Set<String> versionedFeatures, Set<String> versionlessFeatures, Set<String> featuresWithoutVersions, Set<String> featureList) {
@@ -680,6 +687,124 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_VARIABLE_CODE);
                 diag.setData(variable.getValue());
                 diagnosticsList.add(diag);
+            }
+        }
+    }
+
+    /**
+     * Validates feature compatibility by checking if features share common platforms
+     * within each platform type (Java EE, Jakarta EE, MicroProfile).
+     *
+     * @param versionedFeatures List of versioned feature names
+     * @param domDocument The DOM document (server.xml)
+     * @param diagnosticsList List to add diagnostics to
+     * @param libertyVersion Liberty version
+     * @param libertyRuntime Liberty runtime
+     * @param requestDelay Request delay for feature service
+     * @param featureNodesList List of feature nodes
+     */
+    private void validateFeatureCompatibility(Set<String> versionedFeatures, DOMDocument domDocument, List<Diagnostic> diagnosticsList,
+                                              String libertyVersion, String libertyRuntime, int requestDelay,
+                                              List<DOMNode> featureNodesList) {
+        if (versionedFeatures == null || versionedFeatures.size() <= 1) {
+            return; // Need at least two features to check compatibility
+        }
+
+        // Maps to track features by platform type
+        Map<String, Map<String, Object>> eeFeatures = new HashMap<>(); // Combined JavaEE and JakartaEE
+        Map<String, Map<String, Object>> microProfileFeatures = new HashMap<>();
+
+        // Convert feature nodes list to a map of feature names to nodes
+        Map<String, DOMNode> featureNodes = new HashMap<>();
+        if (featureNodesList != null) {
+            featureNodesList.stream()
+                    .filter(node -> "feature".equals(node.getLocalName()) && node.getChildNodes().getLength() > 0)
+                    .forEach(node -> {
+                        String featureName = node.getChildNodes().item(0).getTextContent();
+                        if (featureName != null && !featureName.trim().isEmpty()) {
+                            featureNodes.putIfAbsent(featureName.trim(), node);
+                        }
+                    });
+        }
+
+        // Categorize features by platform type
+        for (String feature : versionedFeatures) {
+            Set<String> platforms = FeatureService.getInstance().getAllPlatformsForFeature(feature, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
+            DOMNode featureNode = featureNodes.getOrDefault(feature, null);
+
+            if (platforms == null || platforms.isEmpty()) {
+                continue;
+            }
+
+            // Group features by platform type
+            for (String platform : platforms) {
+                if (platform.toLowerCase().startsWith("javaee-") || platform.toLowerCase().startsWith("jakartaee-")) {
+                    // Combined category for both JavaEE and JakartaEE
+                    Map<String, Object> featureData = eeFeatures.computeIfAbsent(feature, k -> new HashMap<>());
+                    featureData.computeIfAbsent("features", k -> new HashSet<String>());
+                    ((Set<String>) featureData.get("features")).add(platform);
+                    if (featureNode != null) {
+                        featureData.put("node", featureNode);
+                    }
+                } else if (platform.toLowerCase().startsWith("microprofile-")) {
+                    Map<String, Object> featureData = microProfileFeatures.computeIfAbsent(feature, k -> new HashMap<>());
+                    featureData.computeIfAbsent("features", k -> new HashSet<String>());
+                    ((Set<String>) featureData.get("features")).add(platform);
+                    if (featureNode != null) {
+                        featureData.put("node", featureNode);
+                    }
+                }
+            }
+        }
+
+        // Validate compatibility within each platform type
+        validatePlatformTypeCompatibility(eeFeatures, diagnosticsList, libertyVersion, libertyRuntime, requestDelay, domDocument);
+        validatePlatformTypeCompatibility(microProfileFeatures, diagnosticsList, libertyVersion, libertyRuntime, requestDelay, domDocument);
+    }
+
+    /**
+     * Validates compatibility of features within a specific platform type.
+     *
+     * @param featureMap Map of features and their supported platforms
+     * @param diagnosticsList List to add diagnostics to
+     * @param libertyVersion Liberty version
+     * @param libertyRuntime Liberty runtime
+     * @param requestDelay Request delay for feature service
+     * @param domDocument The DOM document
+     */
+    private void validatePlatformTypeCompatibility(Map<String, Map<String, Object>> featureMap, List<Diagnostic> diagnosticsList,
+                                                   String libertyVersion, String libertyRuntime, int requestDelay,
+                                                   DOMDocument domDocument) {
+        if (featureMap.size() <= 1) {
+            // Only one or zero features of this type, no compatibility issues
+            return;
+        }
+
+        // Get all features in this platform type
+        Set<String> featureNames = featureMap.keySet();
+
+        // Find common platforms across all features in this platform type
+        Set<String> commonPlatforms = FeatureService.getInstance().getCommonPlatformsForFeatures(featureNames, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
+
+        if (commonPlatforms == null || commonPlatforms.isEmpty()) {
+            // No common platform version - incompatible features
+
+            // Create diagnostic warning for each incompatible feature
+            for (Map.Entry<String, Map<String, Object>> entry : featureMap.entrySet()) {
+                DOMNode featureNode = (DOMNode) entry.getValue().get("node");
+                if (featureNode == null) continue;
+                DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
+                if (featureTextNode == null) continue;
+                String featureName = featureNode.getChildren().get(0).getTextContent();
+                String otherFeatures = featureMap.keySet().stream().filter(key -> !key.equals(featureName)).collect(Collectors.joining(","));
+                String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_INCOMPATIBLE_FEATURES, featureName, otherFeatures);
+
+                Range range = XMLPositionUtility.createRange(featureTextNode.getStart(), featureTextNode.getEnd(), domDocument);
+                if (range == null) continue;
+
+                // Check if no other diagnostics exists in the current line
+                Diagnostic diagnostic = new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE);
+                diagnosticsList.add(diagnostic);
             }
         }
     }
