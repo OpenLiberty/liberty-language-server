@@ -75,9 +75,9 @@ public class LibertyHoverTest {
                             "Description: This feature enables support for Java API for RESTful Web Services v2.1.  "
                                             + "JAX-RS annotations can be used to define web service clients and endpoints that comply with the REST architectural style. "
                                             + "Endpoints are accessed through a common interface that is based on the HTTP standard methods."
-                                            + System.lineSeparator()
+                                            + "\n\n"
                                             + "Enabled by: microProfile-2.0, microProfile-2.1, microProfile-2.2, microProfile-3.0, microProfile-3.2, microProfile-3.3, microProfile-4.0, microProfile-4.1, mpOpenAPI-2.0, opentracing-1.3, opentracing-2.0, webProfile-8.0"
-                                            + System.lineSeparator()
+                                            + "\n\n"
                                             + "Enables: jaxrsClient-2.1, servlet-4.0",
                             r(2, 24, 2, 33));
 
@@ -98,9 +98,9 @@ public class LibertyHoverTest {
                                 "Description: This feature enables support for Java API for RESTful Web Services v2.1.  "
                                                 + "JAX-RS annotations can be used to define web service clients and endpoints that comply with the REST architectural style. "
                                                 + "Endpoints are accessed through a common interface that is based on the HTTP standard methods."
-                                                + System.lineSeparator()
+                                                + "\n\n"
                                                 + "Enabled by: microProfile-2.0, microProfile-2.1, microProfile-2.2, microProfile-3.0, microProfile-3.2, microProfile-3.3, microProfile-4.0, microProfile-4.1, mpOpenAPI-2.0, opentracing-1.3, opentracing-2.0, webProfile-8.0"
-                                                + System.lineSeparator()
+                                                + "\n\n"
                                                 + "Enables: jaxrsClient-2.1, servlet-4.0",
                                 r(2, 24, 2, 34));
 
