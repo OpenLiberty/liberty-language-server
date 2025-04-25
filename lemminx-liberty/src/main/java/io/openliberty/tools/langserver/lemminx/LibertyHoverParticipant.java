@@ -40,6 +40,7 @@ import java.util.logging.Logger;
 
 public class LibertyHoverParticipant implements IHoverParticipant {
     private static final Logger LOGGER = Logger.getLogger(LibertyHoverParticipant.class.getName());
+    private static final String MARKDOWN_NEW_LINE = "  \n  \n";
 
     @Override
     public Hover onAttributeName(IHoverRequest request, CancelChecker cancelChecker) {
@@ -61,7 +62,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
                 stringBuilder.append(String.format("%s = %s", variable.getValue(), variableMap.get(variable.getValue())));
             }
             if (varIter.hasNext()) {
-                stringBuilder.append("\n\n");
+                stringBuilder.append(MARKDOWN_NEW_LINE);
             }
         }
         if (!stringBuilder.isEmpty()) {
@@ -152,7 +153,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
         String description = flNode.getDescription();
         sb.append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_HOVER_DESCRIPTION) + " ");
         sb.append(description);
-        sb.append("\n\n");
+        sb.append(MARKDOWN_NEW_LINE);
 
         // get features that directly enable this feature
         Set<String> featureEnabledBy = flNode.getEnabledBy();
@@ -167,7 +168,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
                 sb.append(", ");
             }
             sb.setLength(sb.length() - 2);
-            sb.append("\n\n");
+            sb.append(MARKDOWN_NEW_LINE);
         }
 
         // get features that this feature directly enables
