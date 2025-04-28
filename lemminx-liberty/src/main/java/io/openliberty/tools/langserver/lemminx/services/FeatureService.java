@@ -41,7 +41,6 @@ import org.eclipse.lemminx.dom.DOMNode;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager.ResourceToDeploy;
 
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import jakarta.xml.bind.JAXBContext;
@@ -74,10 +73,10 @@ public class FeatureService {
 
     // This file is copied to the local .lemminx cache. 
     // This is how we ensure the latest default featurelist xml gets used in each developer environment. 
-    private static final String FEATURELIST_XML_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist.cached/featurelist-cached-25.0.0.3_%s.xml";
-    private static final String FEATURELIST_XML_CLASSPATH_LOCATION = "/featurelist.cached/featurelist-cached-25.0.0.3_%s.xml";
-    private static final String FEATURELIST_XML_RESOURCE_URL_DEFAULT = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist.cached/featurelist-cached-25.0.0.3.xml";
-    private static final String FEATURELIST_XML_CLASSPATH_LOCATION_DEFAULT = "/featurelist.cached/featurelist-cached-25.0.0.3.xml";
+    private static final String FEATURELIST_XML_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist.cached/featurelist-cached-25.0.0.4_%s.xml";
+    private static final String FEATURELIST_XML_CLASSPATH_LOCATION = "/featurelist.cached/featurelist-cached-25.0.0.4_%s.xml";
+    private static final String FEATURELIST_XML_RESOURCE_URL_DEFAULT = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist.cached/featurelist-cached-25.0.0.4.xml";
+    private static final String FEATURELIST_XML_CLASSPATH_LOCATION_DEFAULT = "/featurelist.cached/featurelist-cached-25.0.0.4.xml";
 
     /**
      * FEATURELIST_XML_RESOURCE is the featurelist xml that is located at FEATURELIST_XML_CLASSPATH_LOCATION
