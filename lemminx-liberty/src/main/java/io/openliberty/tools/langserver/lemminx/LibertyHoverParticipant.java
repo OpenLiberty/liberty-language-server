@@ -18,6 +18,7 @@ import org.eclipse.lemminx.services.extensions.hover.IHoverParticipant;
 import org.eclipse.lemminx.services.extensions.hover.IHoverRequest;
 import org.eclipse.lsp4j.Hover;
 import org.eclipse.lsp4j.MarkupContent;
+import org.eclipse.lsp4j.MarkupKind;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
@@ -39,6 +40,7 @@ import java.util.logging.Logger;
 
 public class LibertyHoverParticipant implements IHoverParticipant {
     private static final Logger LOGGER = Logger.getLogger(LibertyHoverParticipant.class.getName());
+    private static final String MARKDOWN_NEW_LINE = "  \n  \n";
 
     @Override
     public Hover onAttributeName(IHoverRequest request, CancelChecker cancelChecker) {
@@ -60,11 +62,11 @@ public class LibertyHoverParticipant implements IHoverParticipant {
                 stringBuilder.append(String.format("%s = %s", variable.getValue(), variableMap.get(variable.getValue())));
             }
             if (varIter.hasNext()) {
-                stringBuilder.append("<br />");
+                stringBuilder.append(MARKDOWN_NEW_LINE);
             }
         }
         if (!stringBuilder.isEmpty()) {
-            return new Hover(new MarkupContent("plaintext", stringBuilder.toString()));
+            return new Hover(new MarkupContent(MarkupKind.MARKDOWN, stringBuilder.toString()));
         }
         return null;
     }
@@ -113,7 +115,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
         if (FeatureService.getInstance().platformExists(platformName, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI())) {
             String description = LibertyUtils.getPlatformDescription(platformName);
             if (description != null) {
-                return new Hover(new MarkupContent("plaintext", description));
+                return new Hover(new MarkupContent(MarkupKind.MARKDOWN, description));
             }
         } else {
             LOGGER.warning("Could not get description for platform: "+platformName+"  from features.json file. Platform does not exist."); 
@@ -130,7 +132,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
         Optional<Feature> feature = FeatureService.getInstance().getFeature(featureName, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
         if (feature.isPresent()) {
-            return new Hover(new MarkupContent("plaintext", feature.get().getShortDescription()));
+            return new Hover(new MarkupContent(MarkupKind.MARKDOWN, feature.get().getShortDescription()));
         }
 
         return null;
@@ -151,7 +153,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
         String description = flNode.getDescription();
         sb.append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_HOVER_DESCRIPTION) + " ");
         sb.append(description);
-        sb.append(System.lineSeparator());
+        sb.append(MARKDOWN_NEW_LINE);
 
         // get features that directly enable this feature
         Set<String> featureEnabledBy = flNode.getEnabledBy();
@@ -166,7 +168,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
                 sb.append(", ");
             }
             sb.setLength(sb.length() - 2);
-            sb.append(System.lineSeparator());
+            sb.append(MARKDOWN_NEW_LINE);
         }
 
         // get features that this feature directly enables
@@ -184,6 +186,6 @@ public class LibertyHoverParticipant implements IHoverParticipant {
             sb.setLength(sb.length() - 2);
         }
 
-       return new Hover(new MarkupContent("plaintext", sb.toString()));
+       return new Hover(new MarkupContent(MarkupKind.MARKDOWN, sb.toString()));
     }
 }
