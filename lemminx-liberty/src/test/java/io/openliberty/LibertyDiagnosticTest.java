@@ -122,11 +122,26 @@ public class LibertyDiagnosticTest {
                 "</server>" //
         );
 
-        Diagnostic dup1 = new Diagnostic();
-        dup1.setRange(r(3, 24, 3, 33));
-        dup1.setMessage("ERROR: More than one version of feature jaxrs is included. Only one version of a feature may be specified.");
+        Diagnostic duplicateDiagnostic = new Diagnostic();
+        duplicateDiagnostic.setRange(r(3, 24, 3, 33));
+        duplicateDiagnostic.setMessage("ERROR: More than one version of feature jaxrs is included. Only one version of a feature may be specified.");
 
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, dup1);
+        // Expected diagnostic for the incompatible jsonp-1.1 feature
+        Diagnostic jsonpIncompatibilityDiagnostic = new Diagnostic();
+        jsonpIncompatibilityDiagnostic.setRange(r(4, 24, 4, 33));
+        jsonpIncompatibilityDiagnostic.setMessage("ERROR: The feature jsonp-1.1 is incompatible with jaxrs-2.0, jaxrs-2.1. The features do not share a common platform.");
+
+        // Expected diagnostic for the incompatible jaxrs-2.0 feature
+        Diagnostic jaxrsIncompatibilityDiagnostic = new Diagnostic();
+        jaxrsIncompatibilityDiagnostic.setRange(r(2, 24, 2, 33));
+        jaxrsIncompatibilityDiagnostic.setMessage("ERROR: The feature jaxrs-2.0 is incompatible with jsonp-1.1, jaxrs-2.1. The features do not share a common platform.");
+
+        // Expected diagnostic for the incompatible jaxrs-2.1 feature
+        Diagnostic jaxrs21IncompatibilityDiagnostic = new Diagnostic();
+        jaxrs21IncompatibilityDiagnostic.setRange(r(3, 24, 3, 33));
+        jaxrs21IncompatibilityDiagnostic.setMessage("ERROR: The feature jaxrs-2.1 is incompatible with jsonp-1.1, jaxrs-2.0. The features do not share a common platform.");
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, duplicateDiagnostic, jsonpIncompatibilityDiagnostic, jaxrsIncompatibilityDiagnostic, jaxrs21IncompatibilityDiagnostic);
     }
 
     @Test
@@ -174,7 +189,7 @@ public class LibertyDiagnosticTest {
         List<CodeAction> codeActions = new ArrayList<CodeAction>();
         for (String nextFeature: featuresStartWithJAX) {
             TextEdit texted = te(invalid1.getRange().getStart().getLine(), invalid1.getRange().getStart().getCharacter(),
-                                invalid1.getRange().getEnd().getLine(), invalid1.getRange().getEnd().getCharacter(), nextFeature);
+                    invalid1.getRange().getEnd().getLine(), invalid1.getRange().getEnd().getCharacter(), nextFeature);
             CodeAction invalidCodeAction = ca(invalid1, texted);
 
             codeActions.add(invalidCodeAction);
@@ -270,12 +285,12 @@ public class LibertyDiagnosticTest {
         // Check code actions for add/remove trailing slashes
         String fixedFilePath = "location=\"/empty_server.xml\"";
         TextEdit dirIsFileTextEdit = te(dirIsFile.getRange().getStart().getLine(), dirIsFile.getRange().getStart().getCharacter(),
-                            dirIsFile.getRange().getEnd().getLine(), dirIsFile.getRange().getEnd().getCharacter(), fixedFilePath);
+                dirIsFile.getRange().getEnd().getLine(), dirIsFile.getRange().getEnd().getCharacter(), fixedFilePath);
         CodeAction dirIsFileCodeAction = ca(dirIsFile, dirIsFileTextEdit);
 
         String fixedDirPath = "location=\"/testDir.xml/\"";
         TextEdit fileIsDirTextEdit = te(fileIsDir.getRange().getStart().getLine(), fileIsDir.getRange().getStart().getCharacter(),
-                            fileIsDir.getRange().getEnd().getLine(), fileIsDir.getRange().getEnd().getCharacter(), fixedDirPath);
+                fileIsDir.getRange().getEnd().getLine(), fileIsDir.getRange().getEnd().getCharacter(), fixedDirPath);
         CodeAction fileIsDirCodeAction = ca(fileIsDir, fileIsDirTextEdit);
 
 
@@ -322,12 +337,12 @@ public class LibertyDiagnosticTest {
 
         String fixedFilePath = "location=\"\\empty_server.xml\"";
         TextEdit dirIsFileTextEdit = te(dirIsFile.getRange().getStart().getLine(), dirIsFile.getRange().getStart().getCharacter(),
-                            dirIsFile.getRange().getEnd().getLine(), dirIsFile.getRange().getEnd().getCharacter(), fixedFilePath);
+                dirIsFile.getRange().getEnd().getLine(), dirIsFile.getRange().getEnd().getCharacter(), fixedFilePath);
         CodeAction dirIsFileCodeAction = ca(dirIsFile, dirIsFileTextEdit);
 
         String fixedDirPath = "location=\"\\testDir.xml\\\"";
         TextEdit fileIsDirTextEdit = te(fileIsDir.getRange().getStart().getLine(), fileIsDir.getRange().getStart().getCharacter(),
-                            fileIsDir.getRange().getEnd().getLine(), fileIsDir.getRange().getEnd().getCharacter(), fixedDirPath);
+                fileIsDir.getRange().getEnd().getLine(), fileIsDir.getRange().getEnd().getCharacter(), fixedDirPath);
         CodeAction fileIsDirCodeAction = ca(fileIsDir, fileIsDirTextEdit);
 
         XMLAssert.testCodeActionsFor(serverXML, dirIsFile, dirIsFileCodeAction);
@@ -366,9 +381,9 @@ public class LibertyDiagnosticTest {
         String serverXML = String.join(newLine,
                 "<server description=\"Sample Liberty server\">",
                 "    <featureManager>",
-                    incorrectFeature,
+                incorrectFeature,
                 "    </featureManager>",
-                    configElement,
+                configElement,
                 "</server>"
         );
 
@@ -422,9 +437,9 @@ public class LibertyDiagnosticTest {
         String serverXML1 = String.join(newLine,
                 "<server description=\"Sample Liberty server\">",
                 "   <featureManager>",
-                        correctFeature,
+                correctFeature,
                 "   </featureManager>",
-                    configElement,
+                configElement,
                 "</server>"
         );
         XMLAssert.testDiagnosticsFor(serverXML1, null, null, serverXMLURI);
@@ -432,9 +447,9 @@ public class LibertyDiagnosticTest {
         String serverXML2 = String.join(newLine,
                 "<server description=\"Sample Liberty server\">",
                 "   <featureManager>",
-                        incorrectFeature,
+                incorrectFeature,
                 "   </featureManager>",
-                    configElement,
+                configElement,
                 "</server>"
         );
 
@@ -568,8 +583,18 @@ public class LibertyDiagnosticTest {
         invalid1.setMessage("ERROR: \"servlet\" versionless feature cannot be resolved. The versioned features do not have a platform in common.");
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
 
+        // Expected diagnostic for the incompatible jsonb-2.0 feature
+        Diagnostic jsonbIncompatibilityDiagnostic = new Diagnostic();
+        jsonbIncompatibilityDiagnostic.setRange(r(4, 24, 4, 33));
+        jsonbIncompatibilityDiagnostic.setMessage("ERROR: The feature jsonb-2.0 is incompatible with beanValidation-1.1. The features do not share a common platform.");
+
+        // Expected diagnostic for the incompatible beanValidation-1.1 feature
+        Diagnostic beanValidationIncompatibilityDiagnostic = new Diagnostic();
+        beanValidationIncompatibilityDiagnostic.setRange(r(3, 24, 3, 42));
+        beanValidationIncompatibilityDiagnostic.setMessage("ERROR: The feature beanValidation-1.1 is incompatible with jsonb-2.0. The features do not share a common platform.");
+
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
-                invalid1);
+                invalid1, jsonbIncompatibilityDiagnostic, beanValidationIncompatibilityDiagnostic);
     }
     @Test
     public void testUnresolvedPlatformForVersionlessFeatureDiagnostic() throws BadLocationException {
@@ -624,7 +649,7 @@ public class LibertyDiagnosticTest {
                 invalid1);
 
         //  mpConfig-3.0 and mpJwt-2.0 have a single common platform(microProfile-5.0) but servlet feature does not support that
-       serverXML = String.join(newLine, //
+        serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
                 "       <featureManager>", //
                 "               <feature>servlet</feature>", //
@@ -646,7 +671,7 @@ public class LibertyDiagnosticTest {
     @Test
     public void testValidPlatformDiagnostic() throws BadLocationException {
 
-       String serverXML = String.join(newLine, //
+        String serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
                 "       <featureManager>", //
                 "               <feature>servlet</feature>", //
@@ -740,8 +765,19 @@ public class LibertyDiagnosticTest {
         Diagnostic invalid = new Diagnostic();
         invalid.setRange(r(3, 24, 3, 37));
         invalid.setMessage("ERROR: The messaging-3.0 feature cannot be configured with the jms-2.0 feature because they are two different versions of the same feature. The feature name changed from jms to messaging for Jakarta EE. Remove one of the features.");
+
+        // Expected diagnostic for the incompatible jms-2.0 feature
+        Diagnostic jmsIncompatibilityDiagnostic = new Diagnostic();
+        jmsIncompatibilityDiagnostic.setRange(r(2, 24, 2, 31));
+        jmsIncompatibilityDiagnostic.setMessage("ERROR: The feature jms-2.0 is incompatible with messaging-3.0. The features do not share a common platform.");
+
+        // Expected diagnostic for the incompatible messaging-3.0 feature
+        Diagnostic messagingIncompatibilityDiagnostic = new Diagnostic();
+        messagingIncompatibilityDiagnostic.setRange(r(3, 24, 3, 37));
+        messagingIncompatibilityDiagnostic.setMessage("ERROR: The feature messaging-3.0 is incompatible with jms-2.0. The features do not share a common platform.");
+
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
-                invalid);
+                invalid, jmsIncompatibilityDiagnostic, messagingIncompatibilityDiagnostic);
 
         serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
@@ -754,8 +790,19 @@ public class LibertyDiagnosticTest {
         invalid = new Diagnostic();
         invalid.setRange(r(3, 24, 3, 31));
         invalid.setMessage("ERROR: The jms-2.0 feature cannot be configured with the messaging-3.0 feature because they are two different versions of the same feature. The feature name changed from jms to messaging for Jakarta EE. Remove one of the features.");
+
+        // Expected diagnostic for the incompatible messaging-3.0 feature
+        messagingIncompatibilityDiagnostic = new Diagnostic();
+        messagingIncompatibilityDiagnostic.setRange(r(2, 24, 2, 37));
+        messagingIncompatibilityDiagnostic.setMessage("ERROR: The feature messaging-3.0 is incompatible with jms-2.0. The features do not share a common platform.");
+
+        // Expected diagnostic for the incompatible jms-2.0 feature
+        jmsIncompatibilityDiagnostic = new Diagnostic();
+        jmsIncompatibilityDiagnostic.setRange(r(3, 24, 3, 31));
+        jmsIncompatibilityDiagnostic.setMessage("ERROR: The feature jms-2.0 is incompatible with messaging-3.0. The features do not share a common platform.");
+
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
-                invalid);
+                invalid, messagingIncompatibilityDiagnostic, jmsIncompatibilityDiagnostic);
 
         serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
@@ -770,8 +817,19 @@ public class LibertyDiagnosticTest {
         invalid = new Diagnostic();
         invalid.setRange(r(4, 24, 4, 31));
         invalid.setMessage("ERROR: The ejb-3.2 feature cannot be configured with the enterpriseBeans-4.0 feature because they are two different versions of the same feature. The feature name changed from ejb to enterpriseBeans for Jakarta EE. Remove one of the features.");
+
+        // Expected diagnostic for the incompatible ejb-3.2 feature
+        Diagnostic ejbIncompatibilityDiagnostic = new Diagnostic();
+        ejbIncompatibilityDiagnostic.setRange(r(4, 24, 4, 31));
+        ejbIncompatibilityDiagnostic.setMessage("ERROR: The feature ejb-3.2 is incompatible with enterpriseBeans-4.0. The features do not share a common platform.");
+
+        // Expected diagnostic for the incompatible enterpriseBeans-4.0 feature
+        Diagnostic enterpriseBeansIncompatibilityDiagnostic = new Diagnostic();
+        enterpriseBeansIncompatibilityDiagnostic.setRange(r(3, 24, 3, 43));
+        enterpriseBeansIncompatibilityDiagnostic.setMessage("ERROR: The feature enterpriseBeans-4.0 is incompatible with ejb-3.2. The features do not share a common platform.");
+
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
-                invalid);
+                invalid, ejbIncompatibilityDiagnostic, enterpriseBeansIncompatibilityDiagnostic);
 
         serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //
@@ -1326,5 +1384,47 @@ public class LibertyDiagnosticTest {
         invalid1.setSeverity(DiagnosticSeverity.Warning);
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, invalid1);
+    }
+
+    /**
+     * Tests detection of incompatible Liberty features by verifying that appropriate error diagnostics
+     * are generated when features with no common platform support are configured together.
+     */
+    @Test
+    public void testVersionedFeatureIncompatibility() throws JAXBException {
+        assertTrue(featureList.exists());
+        FeatureService.getInstance().readFeaturesFromFeatureListFile(libWorkspace, featureList);
+        String serverXML1 = String.join(newLine,
+                "<server description=\"Sample Liberty server\">\n" +
+                        "    <featureManager>\n" +
+                        "        <feature>mpTelemetry-2.0</feature>\n" +
+                        "        <feature>servlet-3.1</feature>\n" +
+                        "        <feature>mpConfig-1.3</feature>\n" +
+                        "        <feature>appSecurity-3.0</feature>" +
+                        "    </featureManager>\n" +
+                        "</server>\n"
+        );
+
+        // Expected diagnostic for the incompatible mpTelemetry-2.0 feature
+        Diagnostic mpTelemetryIncompatibilityDiagnostic = new Diagnostic();
+        mpTelemetryIncompatibilityDiagnostic.setRange(r(2, 17, 2, 32));
+        mpTelemetryIncompatibilityDiagnostic.setMessage("ERROR: The feature mpTelemetry-2.0 is incompatible with mpConfig-1.3. The features do not share a common platform.");
+
+        // Expected diagnostic for the incompatible servlet-3.1 feature
+        Diagnostic servletIncompatibilityDiagnostic = new Diagnostic();
+        servletIncompatibilityDiagnostic.setRange(r(3, 17, 3, 28));
+        servletIncompatibilityDiagnostic.setMessage("ERROR: The feature servlet-3.1 is incompatible with appSecurity-3.0. The features do not share a common platform.");
+
+        // Expected diagnostic for the incompatible mpConfig-1.3 feature
+        Diagnostic mpConfigIncompatibilityDiagnostic = new Diagnostic();
+        mpConfigIncompatibilityDiagnostic.setRange(r(4, 17, 4, 29));
+        mpConfigIncompatibilityDiagnostic.setMessage("ERROR: The feature mpConfig-1.3 is incompatible with mpTelemetry-2.0. The features do not share a common platform.");
+
+        // Expected diagnostic for the incompatible appSecurity-3.0 feature
+        Diagnostic appSecurityIncompatibilityDiagnostic = new Diagnostic();
+        appSecurityIncompatibilityDiagnostic.setRange(r(5, 17, 5, 32));
+        appSecurityIncompatibilityDiagnostic.setMessage("ERROR: The feature appSecurity-3.0 is incompatible with servlet-3.1. The features do not share a common platform.");
+
+        XMLAssert.testDiagnosticsFor(serverXML1, null, null, serverXMLURI, servletIncompatibilityDiagnostic, appSecurityIncompatibilityDiagnostic, mpTelemetryIncompatibilityDiagnostic, mpConfigIncompatibilityDiagnostic);
     }
 }
