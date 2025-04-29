@@ -20,7 +20,6 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
@@ -33,7 +32,6 @@ import org.eclipse.lemminx.uriresolver.URIResolverExtension;
 import io.openliberty.tools.langserver.lemminx.services.ContainerService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
-import io.openliberty.tools.langserver.lemminx.util.DocumentUtil;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGrammarLocationProvider {
@@ -41,10 +39,10 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
 
     // Changing this to contain the version in the file name since the file is copied to the local .lemminx cache. 
     // This is how we ensure the latest default server schema gets used in each developer environment. 
-    private static final String XSD_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server-cached-25.0.0.3_%s.xsd";
-    private static final String XSD_CLASSPATH_LOCATION = "/schema/xsd/liberty/server-cached-25.0.0.3_%s.xsd";
-    private static final String XSD_RESOURCE_URL_DEFAULT = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server-cached-25.0.0.3.xsd";
-    private static final String XSD_CLASSPATH_LOCATION_DEFAULT = "/schema/xsd/liberty/server-cached-25.0.0.3.xsd";
+    private static final String XSD_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server-cached-25.0.0.4_%s.xsd";
+    private static final String XSD_CLASSPATH_LOCATION = "/schema/xsd/liberty/server-cached-25.0.0.4_%s.xsd";
+    private static final String XSD_RESOURCE_URL_DEFAULT = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server-cached-25.0.0.4.xsd";
+    private static final String XSD_CLASSPATH_LOCATION_DEFAULT = "/schema/xsd/liberty/server-cached-25.0.0.4.xsd";
 
     /**
      * SERVER_XSD_RESOURCE is the server schema that is located at XSD_CLASSPATH_LOCATION
