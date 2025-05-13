@@ -153,6 +153,15 @@ public class LibertyHoverParticipant implements IHoverParticipant {
         String description = flNode.getDescription();
         sb.append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_HOVER_DESCRIPTION) + " ");
         sb.append(description);
+
+        // if this is a versionless feature, do not add any info about enables or enabled by
+        if (flNode.isVersionless()) {
+            if (!description.endsWith(".")) {
+                sb.append(".");
+            }
+            return new Hover(new MarkupContent(MarkupKind.MARKDOWN, sb.toString()));
+        }
+
         sb.append(MARKDOWN_NEW_LINE);
 
         // get features that directly enable this feature
