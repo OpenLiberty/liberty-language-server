@@ -107,6 +107,22 @@ public class LibertyHoverTest {
         }
 
         @Test
+        public void testVersionlessFeatureHover() throws BadLocationException {
+                String serverXML = String.join(newLine, //
+                                "<server description=\"Sample Liberty server\">", //
+                                "       <featureManager>", //
+                                "               <feature>j|dbc</feature>", //
+                                "       </featureManager>", //
+                                "</server>" //
+                );
+
+                XMLAssert.assertHover(serverXML, serverXMLURI,
+                            "Description: This feature enables support for versionless jdbc.",
+                            r(2, 24, 2, 28));
+
+        }
+
+        @Test
         public void testXSDSchemaHover() throws BadLocationException, IOException {
                 String serverXSDURI = SERVER_XSD_RESOURCE_DEFAULT.getDeployedPath().toUri().toString().replace("///", "/");
 

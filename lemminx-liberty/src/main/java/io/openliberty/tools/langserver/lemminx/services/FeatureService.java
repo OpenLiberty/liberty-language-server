@@ -541,6 +541,12 @@ public class FeatureService {
                 List<String> enables = f.getEnables();
                 List<String> configElements = f.getConfigElements();
                 FeatureListNode currentFeatureNode = featureListGraph.addFeature(currentFeature, f.getDescription());
+
+                // check symbolicName to see if this is a versionless feature
+                if (f.getSymbolicName().contains(".versionless.")) {
+                    currentFeatureNode.setIsVersionless(true);
+                }
+
                 if (enables != null) {
                     for (String enabledFeature : enables) {
                         FeatureListNode feature = featureListGraph.addFeature(enabledFeature);

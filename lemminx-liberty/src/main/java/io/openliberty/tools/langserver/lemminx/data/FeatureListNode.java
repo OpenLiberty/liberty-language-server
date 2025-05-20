@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2023, 2024 IBM Corporation and others.
+* Copyright (c) 2023, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -21,6 +21,7 @@ public class FeatureListNode extends Node {
     protected String description;
     protected Set<String> enablesFeatures;
     protected Set<String> enablesConfigElements;
+    protected boolean isVersionless;
 
     public FeatureListNode(String nodeName) {
         super(nodeName);
@@ -31,6 +32,14 @@ public class FeatureListNode extends Node {
     public FeatureListNode(String nodeName, String description) {
         this(nodeName);
         this.description = description;
+    }
+
+    public void setIsVersionless(boolean isVersionless) {
+        this.isVersionless = true;
+    }
+
+    public boolean isVersionless() {
+        return this.isVersionless;
     }
 
     public void setDescription(String description) {
