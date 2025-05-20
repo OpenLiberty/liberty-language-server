@@ -28,7 +28,7 @@ public class LibertyFeatureTest {
         SettingsService.getInstance().initializeLocale(null);
         FeatureService fs = FeatureService.getInstance();
         File srcResourcesDir = new File("src/test/resources/sample");
-        File featureListFile = new File(srcResourcesDir.getParentFile(), "featurelist-ol-25.0.0.4.xml");
+        File featureListFile = new File(srcResourcesDir.getParentFile(), "featurelist-ol-25.0.0.5.xml");
         
         // LibertyWorkspace must be initialized
         List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
