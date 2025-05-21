@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2022 IBM Corporation and others.
+* Copyright (c) 2022, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -35,9 +35,8 @@ public class BootstrapPropertyDiagnosticTest extends AbstractDiagnosticTest {
             // Checking invalid value: com.ibm.ws.logging.console.source=trace,aud
             createRange(11, 34, 43)
         );
-        checkDiagnosticsContainsMessages(
+        checkDiagnosticsContainsErrorMessages(
             "The value `DEVd` is not valid for the property `com.ibm.ws.logging.console.format`.",
-            "The value `` is not valid for the property `com.ibm.ws.logging.console.source`.",
             "The value `binaryLogging-1.1` is not valid for the property `websphere.log.provider`.",
             "The value `0` is not within the valid range `[1..65535]` for the property `default.http.port`.",
             "The value `2147483648` is not within the valid range `[0..2147483647]` for the property `com.ibm.hpel.log.purgeMaxSize`.",
@@ -45,6 +44,10 @@ public class BootstrapPropertyDiagnosticTest extends AbstractDiagnosticTest {
             "This value must be a comma-delimited list of Java packages.",
             "The value `DEVd` is not valid for the property `com.ibm.ws.logging.console.format`.",
             "The value `aud` is not valid for the property `com.ibm.ws.logging.console.source`."
+        );
+
+        checkDiagnosticsContainsWarningMessages(
+            "The value is empty for the property `com.ibm.ws.logging.console.source`. Check whether a value should be specified or whether the property should be removed."
         );
     }
 }

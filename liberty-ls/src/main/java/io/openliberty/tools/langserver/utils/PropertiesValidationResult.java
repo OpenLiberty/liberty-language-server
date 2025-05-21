@@ -31,6 +31,7 @@ import io.openliberty.tools.langserver.model.propertiesfile.PropertiesEntryInsta
 public class PropertiesValidationResult {
     Integer lineNumber, startChar = null, endChar = null;
     boolean hasErrors;
+    boolean hasWarnings;
     String diagnosticType;
     PropertiesEntryInstance entry;
     LibertyTextDocument textDocumentItem;
@@ -86,22 +87,31 @@ public class PropertiesValidationResult {
             }
         }
 
+        
+
         if (ServerPropertyValues.usesPredefinedValues(textDocumentItem, property)) {
-            List<String> validValues = ServerPropertyValues.getValidValues(textDocumentItem, property);
-            if(ServerPropertyValues.isCaseSensitive(property)) {
-                // currently all comma separated values properties are case-sensitive
-                if (ServerPropertyValues.multipleCommaSeparatedValuesAllowed(getKey()) && value != null) {
-                    validateMultiValueProperty(value, validValues);
-                } else {
-                    // case-sensitive single value field, check if value is valid
-                    hasErrors = !validValues.contains(value);
-                }
+            // only issue a warning if a value is not specified
+            if (value == null || value.isEmpty()) {
+                hasWarnings = true;
+                diagnosticType = LibertyConfigFileManager.isBootstrapPropertiesFile(textDocumentItem) ? 
+                                            "EMPTY_PROPERTY_VALUE" : "EMPTY_VARIABLE_VALUE";
             } else {
-                // ignoring case, check if value is valid
-                hasErrors = !validValues.stream().anyMatch(value::equalsIgnoreCase);
+                List<String> validValues = ServerPropertyValues.getValidValues(textDocumentItem, property);
+                if(ServerPropertyValues.isCaseSensitive(property)) {
+                    // currently all comma separated values properties are case-sensitive
+                    if (ServerPropertyValues.multipleCommaSeparatedValuesAllowed(getKey()) && value != null) {
+                        validateMultiValueProperty(value, validValues);
+                    } else {
+                        // case-sensitive single value field, check if value is valid
+                        hasErrors = !validValues.contains(value);
+                    }
+                } else {
+                    // ignoring case, check if value is valid
+                    hasErrors = !validValues.stream().anyMatch(value::equalsIgnoreCase);
+                }
+                diagnosticType = LibertyConfigFileManager.isBootstrapPropertiesFile(textDocumentItem) ? 
+                                                "INVALID_PROPERTY_VALUE" : "INVALID_VARIABLE_VALUE";
             }
-            diagnosticType = LibertyConfigFileManager.isBootstrapPropertiesFile(textDocumentItem) ? 
-                                            "INVALID_PROPERTY_VALUE" : "INVALID_VARIABLE_VALUE";
         } else if (ServerPropertyValues.usesIntegerRangeValue(property)) {
             Range<Integer> range = ServerPropertyValues.getIntegerRange(property);
             if (ServerPropertyValues.usesTimeUnit(property)) {
@@ -198,6 +208,14 @@ public class PropertiesValidationResult {
 
     public boolean hasErrors() {
         return hasErrors;
+    }
+
+    public boolean hasWarnings() {
+        return hasWarnings;
+    }
+
+    public boolean hasDiagnostics() {
+        return hasErrors || hasWarnings;
     }
 
     public String getKey() {

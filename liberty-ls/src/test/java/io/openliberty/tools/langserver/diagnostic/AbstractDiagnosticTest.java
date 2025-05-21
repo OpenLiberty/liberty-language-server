@@ -72,18 +72,33 @@ public class AbstractDiagnosticTest extends AbstractLibertyLanguageServerTest {
         assertEquals("Did not find all the expected diagnostics. These expected ranges were not found: " + expectedDiagnosticRanges.toString(), 0, expectedDiagnosticRanges.size());
     }
 
-    protected void checkDiagnosticsContainsMessages(String... messages) {
+    protected void checkDiagnosticsContainsErrorMessages(String... messages) {
         List<Diagnostic> diags = lastPublishedDiagnostics.getDiagnostics();
         List<String> expectedMessages = new LinkedList<String>(Arrays.asList(messages));
 
         for (Diagnostic diag : diags) {
-            assertFalse("Diagnostic message is unexpectedly empty.", diag.getMessage().isEmpty());
-            assertTrue("Diagnostic severity not set to Error as expected.", diag.getSeverity() == DiagnosticSeverity.Error);
-            expectedMessages.remove(diag.getMessage());
+            if (diag.getSeverity() == DiagnosticSeverity.Error) {
+                assertFalse("Diagnostic message is unexpectedly empty.", diag.getMessage().isEmpty());
+                assertTrue("Diagnostic severity not set to Error as expected.", diag.getSeverity() == DiagnosticSeverity.Error);
+                expectedMessages.remove(diag.getMessage());
+            }
         }
-        assertEquals("Did not find all the expected diagnostic messages. These messages were not found: " + expectedMessages.toString(), 0, expectedMessages.size());
+        assertEquals("Did not find all the expected diagnostic error messages. These messages were not found: " + expectedMessages.toString(), 0, expectedMessages.size());
     }
 
+    protected void checkDiagnosticsContainsWarningMessages(String... messages) {
+        List<Diagnostic> diags = lastPublishedDiagnostics.getDiagnostics();
+        List<String> expectedMessages = new LinkedList<String>(Arrays.asList(messages));
+
+        for (Diagnostic diag : diags) {
+            if (diag.getSeverity() == DiagnosticSeverity.Warning) {
+                assertFalse("Diagnostic message is unexpectedly empty.", diag.getMessage().isEmpty());
+                assertTrue("Diagnostic severity not set to Warning as expected.", diag.getSeverity() == DiagnosticSeverity.Warning);
+                expectedMessages.remove(diag.getMessage());
+            }
+        }
+        assertEquals("Did not find all the expected diagnostic warning messages. These messages were not found: " + expectedMessages.toString(), 0, expectedMessages.size());
+    }
     private ConditionFactory createAwait() {
         return await().pollDelay(Duration.ZERO).pollInterval(AWAIT_POLL_INTERVAL).timeout(AWAIT_TIMEOUT);
     }
