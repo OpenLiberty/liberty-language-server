@@ -32,7 +32,7 @@ public class ServerEnvDiagnosticTest extends AbstractDiagnosticTest {
             createRange(9, 27, 34),
             // Checking invalid case-sensitive property: WLP_LOGGING_MESSAGE_SOURCE=message,au
             createRange(10, 27, 37),
-            // Checking invalid empty property: WLP_DEBUG_SUSPEND=
+            // Checking empty variable: WLP_DEBUG_SUSPEND=
             createRange(11, 18, 18)
         );
         checkDiagnosticsContainsErrorMessages(

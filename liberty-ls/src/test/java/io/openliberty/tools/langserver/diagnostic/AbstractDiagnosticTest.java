@@ -79,7 +79,6 @@ public class AbstractDiagnosticTest extends AbstractLibertyLanguageServerTest {
         for (Diagnostic diag : diags) {
             if (diag.getSeverity() == DiagnosticSeverity.Error) {
                 assertFalse("Diagnostic message is unexpectedly empty.", diag.getMessage().isEmpty());
-                assertTrue("Diagnostic severity not set to Error as expected.", diag.getSeverity() == DiagnosticSeverity.Error);
                 expectedMessages.remove(diag.getMessage());
             }
         }
@@ -93,7 +92,6 @@ public class AbstractDiagnosticTest extends AbstractLibertyLanguageServerTest {
         for (Diagnostic diag : diags) {
             if (diag.getSeverity() == DiagnosticSeverity.Warning) {
                 assertFalse("Diagnostic message is unexpectedly empty.", diag.getMessage().isEmpty());
-                assertTrue("Diagnostic severity not set to Warning as expected.", diag.getSeverity() == DiagnosticSeverity.Warning);
                 expectedMessages.remove(diag.getMessage());
             }
         }
