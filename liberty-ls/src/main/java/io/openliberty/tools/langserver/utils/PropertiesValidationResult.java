@@ -90,8 +90,8 @@ public class PropertiesValidationResult {
         
 
         if (ServerPropertyValues.usesPredefinedValues(textDocumentItem, property)) {
-            // only issue a warning if a value is not specified
             if (value == null || value.isEmpty()) {
+                // if a value is not specified, issue a warning not an error
                 hasWarnings = true;
                 diagnosticType = LibertyConfigFileManager.isBootstrapPropertiesFile(textDocumentItem) ? 
                                             "EMPTY_PROPERTY_VALUE" : "EMPTY_VARIABLE_VALUE";
