@@ -42,7 +42,7 @@ public class LibertyPropertiesDiagnosticService  {
     public static final String ERROR_CODE_INVALID_PROPERTY_VALUE = "unknown_property_value";
 
     public Map<String, PropertiesValidationResult> compute(String text, LibertyTextDocument openedDocument) {
-        Map<String, PropertiesValidationResult> errors = new HashMap<>();
+        Map<String, PropertiesValidationResult> diagnostics = new HashMap<>();
         if (LibertyConfigFileManager.isBootstrapPropertiesFile(openedDocument) || LibertyConfigFileManager.isServerEnvFile(openedDocument)) {
             BufferedReader br = new BufferedReader(new StringReader(text));
             String line = null;
@@ -52,8 +52,8 @@ public class LibertyPropertiesDiagnosticService  {
                     //blank line is being ignored
                     if(!line.isBlank()) {
                         PropertiesValidationResult validationResult = PropertiesValidationResult.validateServerProperty(line, openedDocument, lineNumber);
-                        if (validationResult.hasErrors()) {
-                            errors.put(line + "_" + lineNumber, validationResult);
+                        if (validationResult.hasDiagnostics()) {
+                            diagnostics.put(line + "_" + lineNumber, validationResult);
                         }
                     }
                     lineNumber++;
@@ -62,7 +62,7 @@ public class LibertyPropertiesDiagnosticService  {
                 LOGGER.warning("Exception while validating the document " + openedDocument.getUri() + "\n" + e);
             }
         }
-        return errors;
+        return diagnostics;
     }
 
     public Collection<Diagnostic> convertToLSPDiagnostics(Map<String, PropertiesValidationResult> propertiesErrors) {
@@ -80,13 +80,14 @@ public class LibertyPropertiesDiagnosticService  {
     private List<Diagnostic> computeInvalidValuesDiagnostic(PropertiesValidationResult validationResult,
             String lineContentInError) {
         List<Diagnostic> lspDiagnostics = new ArrayList<>();
-        if (validationResult.hasErrors()) {
+        if (validationResult.hasDiagnostics()) {
             String property = validationResult.getKey();
             String messageTemplate = DiagnosticMessages.getString(validationResult.getDiagnosticType());
+            DiagnosticSeverity severity = validationResult.hasErrors() ? DiagnosticSeverity.Error : DiagnosticSeverity.Warning;
             
             // Currently the last arg (getIntegerRange) is only used for the Integer messages which use {2}. Otherwise null is passed and is ignored by the other messages.
             String message = MessageFormat.format(messageTemplate, validationResult.getCustomValue() != null ? validationResult.getCustomValue() : validationResult.getValue(), property, ServerPropertyValues.getIntegerRange(property));
-            Diagnostic diagnostic = new Diagnostic(computeRange(validationResult, lineContentInError), message, DiagnosticSeverity.Error, "Liberty Config Language Server");
+            Diagnostic diagnostic = new Diagnostic(computeRange(validationResult, lineContentInError), message, severity, "Liberty Config Language Server");
             diagnostic.setCode(ERROR_CODE_INVALID_PROPERTY_VALUE);
             diagnostic.setData(validationResult.getMultiValuePrefix());
             lspDiagnostics.add(diagnostic);
