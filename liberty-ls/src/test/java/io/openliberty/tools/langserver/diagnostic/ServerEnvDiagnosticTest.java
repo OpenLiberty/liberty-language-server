@@ -46,7 +46,7 @@ public class ServerEnvDiagnosticTest extends AbstractDiagnosticTest {
         );
 
         checkDiagnosticsContainsWarningMessages(
-            "The value is empty for the variable `WLP_DEBUG_SUSPEND`. Check whether a value should be specified or whether the variable should be removed."
+            "The value is empty for the variable `WLP_DEBUG_SUSPEND`. Check whether a value should be specified."
         );
     }
 }
