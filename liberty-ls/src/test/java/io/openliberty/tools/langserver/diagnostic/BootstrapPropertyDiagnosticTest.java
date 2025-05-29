@@ -47,7 +47,7 @@ public class BootstrapPropertyDiagnosticTest extends AbstractDiagnosticTest {
         );
 
         checkDiagnosticsContainsWarningMessages(
-            "The value is empty for the property `com.ibm.ws.logging.console.source`. Check whether a value should be specified or whether the property should be removed."
+            "The value is empty for the property `com.ibm.ws.logging.console.source`. Check whether a value should be specified."
         );
     }
 }
