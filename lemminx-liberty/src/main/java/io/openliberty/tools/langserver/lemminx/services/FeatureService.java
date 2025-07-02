@@ -73,10 +73,10 @@ public class FeatureService {
 
     // This file is copied to the local .lemminx cache. 
     // This is how we ensure the latest default featurelist xml gets used in each developer environment. 
-    private static final String FEATURELIST_XML_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist.cached/featurelist-cached-25.0.0.5_%s.xml";
-    private static final String FEATURELIST_XML_CLASSPATH_LOCATION = "/featurelist.cached/featurelist-cached-25.0.0.5_%s.xml";
-    private static final String FEATURELIST_XML_RESOURCE_URL_DEFAULT = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist.cached/featurelist-cached-25.0.0.5.xml";
-    private static final String FEATURELIST_XML_CLASSPATH_LOCATION_DEFAULT = "/featurelist.cached/featurelist-cached-25.0.0.5.xml";
+    private static final String FEATURELIST_XML_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist.cached/featurelist-cached-25.0.0.6_%s.xml";
+    private static final String FEATURELIST_XML_CLASSPATH_LOCATION = "/featurelist.cached/featurelist-cached-25.0.0.6_%s.xml";
+    private static final String FEATURELIST_XML_RESOURCE_URL_DEFAULT = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist.cached/featurelist-cached-25.0.0.6.xml";
+    private static final String FEATURELIST_XML_CLASSPATH_LOCATION_DEFAULT = "/featurelist.cached/featurelist-cached-25.0.0.6.xml";
 
     /**
      * FEATURELIST_XML_RESOURCE is the featurelist xml that is located at FEATURELIST_XML_CLASSPATH_LOCATION
@@ -147,7 +147,7 @@ public class FeatureService {
             if (defaultFeaturesAndPlatforms == null) {
                 // Changing this to contain the version in the file name since the file is copied to the local .lemminx cache. 
                 // This is how we ensure the latest default features json gets used in each developer environment. 
-                InputStream is = getClass().getClassLoader().getResourceAsStream("features-cached-25.0.0.5.json");
+                InputStream is = getClass().getClassLoader().getResourceAsStream("features-cached-25.0.0.6.json");
                 InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
 
                 // Only need the public features
