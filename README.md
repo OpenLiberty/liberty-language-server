@@ -81,16 +81,16 @@ Diagnostics highlight potential problems in your configuration, such as invalid 
 
 ## Minimum version recommendations for the Liberty Maven and Gradle plug-ins
 
-A minimum version of the Liberty Maven Plug-in 3.7.1 or Liberty Gradle Plug-in 3.5.1 is recommended. 
+A minimum version of the Liberty Maven Plug-in 3.7.1 or Liberty Gradle Plug-in 3.11.0 is recommended. 
 
-If you are using dev mode for containers, a minimum version of the Liberty Maven Plug-in 3.7 or Liberty Gradle Plug-in 3.5 is recommended. If an earlier version is used, the Liberty Config Language Server cannot generate a schema file for use with `server.xml` editing. In this case, a default schema that is based on Liberty 25.0.0.6 is used instead.
+If you are using dev mode for containers, a minimum version of the Liberty Maven Plug-in 3.7 or Liberty Gradle Plug-in 3.9.0 is recommended. If an earlier version is used, the Liberty Config Language Server cannot generate a schema file for use with `server.xml` editing. In this case, a default schema that is based on Liberty 25.0.0.6 is used instead.
 
 ### Schema and Feature Validation
 If the [Liberty Maven Plug-in](https://github.com/OpenLiberty/ci.maven) or [Liberty Gradle Plug-in](https://github.com/OpenLiberty/ci.gradle) is configured with the Liberty project, the Liberty Config Language Server automatically generates a schema file based on the Liberty runtime and version. This schema file provides relevant information about the supported `server.xml` elements and Liberty features. If an earlier version of either plug-in is used, the schema file is not regenerated when additional features are installed. This limitation might result in a lack of hover, completion, or diagnostic support for elements related to those newly installed features.
 
-Liberty Tools prioritizes accurate and up-to-date schema and feature validation. While it includes periodically updated cached data, the most reliable validation occurs when you **build your project**. Building your project allows Liberty Tools to generate schema and feature information directly from the Open Liberty runtime specified in your project's configuration. This ensures that validation is based on the exact version of Open Liberty you are using, preventing issues caused by potentially outdated cached data.
+Liberty Tools prioritizes accurate and up-to-date schema and feature validation. While it includes periodically updated cached data, the most reliable validation occurs when you **build your project**. Building your project allows Liberty Tools to generate schema and feature information directly from the Liberty runtime specified in your project's configuration. This ensures that validation is based on the exact version of Liberty you are using, preventing issues caused by potentially outdated cached data.
 
-**How to build your Open Liberty project:**
+**How to build your Liberty project:**
 
 * **With Maven:** Navigate to your project's root directory in your terminal and run:
     ```bash
