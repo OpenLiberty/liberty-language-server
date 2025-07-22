@@ -81,9 +81,14 @@ Diagnostics highlight potential problems in your configuration, such as invalid 
 
 ## Minimum version recommendations for the Liberty Maven and Gradle plug-ins
 
-A minimum version of the Liberty Maven Plug-in 3.7.1 or Liberty Gradle Plug-in 3.11.0 is recommended. 
+It is recommended you always use the latest available version of the [Liberty Maven Plug-in](https://github.com/OpenLiberty/ci.maven) or [Liberty Gradle Plug-in](https://github.com/OpenLiberty/ci.gradle). 
+Please refer to the release notes for the latest version available for Liberty Maven Plug-in [here](https://github.com/OpenLiberty/ci.maven/releases) and Liberty Gradle Plug-in [here](https://github.com/OpenLiberty/ci.gradle/releases). 
 
-If you are using dev mode for containers, a minimum version of the Liberty Maven Plug-in 3.7 or Liberty Gradle Plug-in 3.9.0 is recommended. If an earlier version is used, the Liberty Config Language Server cannot generate a schema file for use with `server.xml` editing. In this case, a default schema that is based on Liberty 25.0.0.6 is used instead.
+The minimum version recommended is **3.11.4** for Liberty Maven Plug-in and **3.9.4** for Liberty Gradle Plug-in.
+
+If an earlier version is used, the Liberty Config Language Server cannot generate a schema file for use with `server.xml` editing. 
+The system will automatically use the Liberty **25.0.0.6** schema by default
+
 
 ### Schema and Feature Validation
 If the [Liberty Maven Plug-in](https://github.com/OpenLiberty/ci.maven) or [Liberty Gradle Plug-in](https://github.com/OpenLiberty/ci.gradle) is configured with the Liberty project, the Liberty Config Language Server automatically generates a schema file based on the Liberty runtime and version. This schema file provides relevant information about the supported `server.xml` elements and Liberty features. If an earlier version of either plug-in is used, the schema file is not regenerated when additional features are installed. This limitation might result in a lack of hover, completion, or diagnostic support for elements related to those newly installed features.
