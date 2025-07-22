@@ -7,7 +7,24 @@
     <version>2.3.1-SNAPSHOT</version>
 
     <name>lemminx-liberty</name>
-    <url>https://github.com/OpenLiberty/liberty-language-server</url>
+    <description>The Liberty LemMinX Language Server provides language server features for Liberty server configuration files through any of the supported client IDEs.</description>
+    <url>https://github.com/OpenLiberty/liberty-language-server/tree/main/lemminx-liberty</url>
+
+    <licenses>
+        <license>
+            <name>Eclipse Public License - v 2.0</name>
+            <url>https://www.eclipse.org/org/documents/epl-2.0/EPL-2.0.txt</url>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Cheryl King</name>
+            <email>cheryllk@us.ibm.com</email>
+            <organization>Open Liberty</organization>
+            <url>https://github.com/OpenLiberty</url>
+        </developer>
+    </developers>
 
     <properties>
         <lemminx.version>0.26.1</lemminx.version>
