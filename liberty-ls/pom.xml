@@ -50,7 +50,7 @@
         <repository>
             <id>maven-central-releases</id>
             <name>Maven Central Release Repository</name>
-            <url>hhttps://central.sonatype.com/api/v1/publisher</url>
+            <url>https://central.sonatype.com/api/v1/publisher</url>
         </repository>
     </distributionManagement>
 
@@ -179,6 +179,7 @@
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>maven-central-releases</publishingServerId>
+                            <deploymentName>${project.artifactId}</deploymentName>
                         </configuration>
                     </plugin>
                     <plugin>
