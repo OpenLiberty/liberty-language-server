@@ -20,7 +20,7 @@
     <developers>
         <developer>
             <name>Cheryl King</name>
-            <email>cheryllk@us.ibm.com</email>
+            <email>developers@openliberty.io</email>
             <organization>Open Liberty</organization>
             <url>https://github.com/OpenLiberty</url>
         </developer>
@@ -46,7 +46,7 @@
         <repository>
             <id>maven-central-releases</id>
             <name>Maven Central Release Repository</name>
-            <url>hhttps://central.sonatype.com/api/v1/publisher</url>
+            <url>https://central.sonatype.com/api/v1/publisher</url>
         </repository>
     </distributionManagement>
 
@@ -294,6 +294,7 @@
                         <extensions>true</extensions>
                         <configuration>
                             <publishingServerId>maven-central-releases</publishingServerId>
+                            <deploymentName>${project.artifactId}</deploymentName>
                         </configuration>
                     </plugin>
                     <plugin>
