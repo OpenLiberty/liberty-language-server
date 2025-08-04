@@ -86,8 +86,8 @@ Please refer to the release notes for the latest version available for Liberty M
 
 The minimum version recommended is **3.11.4** for Liberty Maven Plug-in and **3.9.4** for Liberty Gradle Plug-in.
 
-If an earlier version is used, the Liberty Config Language Server cannot generate a schema file for use with `server.xml` editing. 
-The system will automatically use the Liberty **25.0.0.6** schema by default
+If an earlier version is used, the Liberty Config Language Server cannot generate a schema file for use with `server.xml` editing.
+As of version 2.3.1 of the Liberty Config Language Server, a default schema that is based on Liberty 25.0.0.6 is used when a schema cannot be generated.
 
 
 ### Schema and Feature Validation
