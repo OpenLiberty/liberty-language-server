@@ -145,6 +145,30 @@ public class SettingsServiceTest {
         SettingsService.getInstance().initializeLocale(initParams);
         assertEquals("es_ES",SettingsService.getInstance().getCurrentLocale().toString());
 
+        // testing with language code and country, liberty supports "zh_TW" locale
+        initParams.setLocale("zh_TW");
+        SettingsService.getInstance().initializeLocale(initParams);
+        assertEquals("zh_TW",SettingsService.getInstance().getCurrentLocale().toString());
+        initParams.setLocale("zh-tw");
+        SettingsService.getInstance().initializeLocale(initParams);
+        assertEquals("zh_TW",SettingsService.getInstance().getCurrentLocale().toString());
+        initParams.setLocale("zh_tw");
+        SettingsService.getInstance().initializeLocale(initParams);
+        assertEquals("zh_TW",SettingsService.getInstance().getCurrentLocale().toString());
+
+
+        // testing with language code and country, liberty supports "zh_CN" locale
+        initParams.setLocale("zh_CN");
+        SettingsService.getInstance().initializeLocale(initParams);
+        assertEquals("zh_CN",SettingsService.getInstance().getCurrentLocale().toString());
+        initParams.setLocale("zh-cn");
+        SettingsService.getInstance().initializeLocale(initParams);
+        assertEquals("zh_CN",SettingsService.getInstance().getCurrentLocale().toString());
+        initParams.setLocale("ZH-CN");
+        SettingsService.getInstance().initializeLocale(initParams);
+        assertEquals("zh_CN",SettingsService.getInstance().getCurrentLocale().toString());
+
+
         // Language, Script, and Region format
         initParams.setLocale("en-Latn-US");
         SettingsService.getInstance().initializeLocale(initParams);
