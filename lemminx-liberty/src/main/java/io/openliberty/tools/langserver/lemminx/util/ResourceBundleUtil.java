@@ -92,8 +92,8 @@ public final class ResourceBundleUtil {
             return new Locale(parts[0], parts[1], parts[2]);
         }
         // If all else fails, return a default locale
-        LOGGER.warning("Setting locale as en_US as initializeParams locale is null");
-        return Locale.US;
+        LOGGER.warning("Setting locale as en as initializeParams locale is null");
+        return Locale.ENGLISH;
     }
 
     /**
