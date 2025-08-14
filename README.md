@@ -81,10 +81,42 @@ Diagnostics highlight potential problems in your configuration, such as invalid 
 
 ## Minimum version recommendations for the Liberty Maven and Gradle plug-ins
 
-A minimum version of the Liberty Maven Plug-in 3.7.1 or Liberty Gradle Plug-in 3.5.1 is recommended. If the [Liberty Maven Plug-in](https://github.com/OpenLiberty/ci.maven) or [Liberty Gradle Plug-in](https://github.com/OpenLiberty/ci.gradle) is configured with the Liberty project, the Liberty Config Language Server automatically generates a schema file based on the Liberty runtime and version. This schema file provides relevant information about the supported `server.xml` elements and Liberty features. If an earlier version of either plug-in is used, the schema file is not regenerated when additional features are installed. This limitation might result in a lack of hover, completion, or diagnostic support for elements related to those newly installed features.
+It is recommended you always use the latest available version of the [Liberty Maven Plug-in](https://github.com/OpenLiberty/ci.maven) or [Liberty Gradle Plug-in](https://github.com/OpenLiberty/ci.gradle). 
+Please refer to the release notes for the latest version available for Liberty Maven Plug-in [here](https://github.com/OpenLiberty/ci.maven/releases) and Liberty Gradle Plug-in [here](https://github.com/OpenLiberty/ci.gradle/releases). 
 
-If you are using dev mode for containers, a minimum version of the Liberty Maven Plug-in 3.7 or Liberty Gradle Plug-in 3.5 is recommended. If an earlier version is used, the Liberty Config Language Server cannot generate a schema file for use with `server.xml` editing. In this case, a default schema that is based on Liberty 23.0.0.9 is used instead.
+The minimum version recommended is **3.11.4** for Liberty Maven Plug-in and **3.9.4** for Liberty Gradle Plug-in.
 
+If an earlier version is used, the Liberty Config Language Server cannot generate a schema file for use with `server.xml` editing.
+As of version 2.3.1 of the Liberty Config Language Server, a default schema that is based on Liberty 25.0.0.6 is used when a schema cannot be generated.
+
+
+### Schema and Feature Validation
+If the [Liberty Maven Plug-in](https://github.com/OpenLiberty/ci.maven) or [Liberty Gradle Plug-in](https://github.com/OpenLiberty/ci.gradle) is configured with the Liberty project, the Liberty Config Language Server automatically generates a schema file based on the Liberty runtime and version. This schema file provides relevant information about the supported `server.xml` elements and Liberty features. If an earlier version of either plug-in is used, the schema file is not regenerated when additional features are installed. This limitation might result in a lack of hover, completion, or diagnostic support for elements related to those newly installed features.
+
+Liberty Tools prioritizes accurate and up-to-date schema and feature validation. While it includes periodically updated cached data, the most reliable validation occurs when you **build your project**. Building your project allows Liberty Tools to generate schema and feature information directly from the Liberty runtime specified in your project's configuration. This ensures that validation is based on the exact version of Liberty you are using, preventing issues caused by potentially outdated cached data.
+
+**How to build your Liberty project:**
+
+* **With Maven:** Navigate to your project's root directory in your terminal and run:
+    ```bash
+    mvn clean liberty:run
+    ```
+  For fast, iterative development with automatic hot deployment and on-demand testing, use dev mode:
+    ```bash
+    mvn liberty:dev
+    ```
+  Refer [Goals](https://github.com/OpenLiberty/ci.maven?tab=readme-ov-file#goals) for more details
+* **With Gradle:** Navigate to your project's root directory in your terminal and run:
+    ```bash
+    ./gradlew libertyRun
+    ```
+  For fast, iterative development with automatic hot deployment and on-demand testing, use dev mode:
+    ```bash
+    ./gradlew libertyDev
+    ```
+  Refer [Tasks](https://github.com/OpenLiberty/ci.gradle?tab=readme-ov-file#tasks) for more details
+
+For the most accurate validation, always ensure your project has been successfully built.
 ## Contributing
 See the [DEVELOPING](./DEVELOPING.md) and [CONTRIBUTING](./CONTRIBUTING.md) documents for more details.
 ## License
