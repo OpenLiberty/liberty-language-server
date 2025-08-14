@@ -15,7 +15,7 @@ package io.openliberty.tools.langserver.lemminx.services;
 import io.openliberty.tools.common.plugins.config.ServerConfigDocument;
 import io.openliberty.tools.langserver.lemminx.util.CommonLogger;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
-import org.apache.commons.lang3.LocaleUtils;
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleUtil;
 import org.eclipse.lemminx.utils.JSONUtility;
 import io.openliberty.tools.langserver.lemminx.models.settings.*;
 import org.eclipse.lsp4j.InitializeParams;
@@ -27,6 +27,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import static io.openliberty.tools.langserver.lemminx.util.LibertyUtils.findFileInWorkspace;
+import static io.openliberty.tools.langserver.lemminx.util.ResourceBundleUtil.toLocale;
 
 public class SettingsService {
 
@@ -155,20 +156,26 @@ public class SettingsService {
         return currentLocale;
     }
 
+    /**
+     * Initialize locale from IDE extension initialization params
+     *
+     * @param initializeParams initialization params
+     */
     public void initializeLocale(InitializeParams initializeParams) {
-        if (initializeParams != null && initializeParams.getLocale() != null) {
-            this.currentLocale = LocaleUtils.toLocale(initializeParams.getLocale());
+        if (initializeParams != null && initializeParams.getLocale() != null && !initializeParams.getLocale().trim().isEmpty()) {
+            Locale userLocale = toLocale(initializeParams.getLocale());
+            Locale matchingLocale = ResourceBundleUtil.findBestMatchingLocale(userLocale);
+            if (matchingLocale != null) {
+                this.currentLocale = matchingLocale;
+                LOGGER.info("Locale set as %s for locale string %s".formatted(SettingsService.getInstance().getCurrentLocale(), initializeParams.getLocale()));
+            } else {
+                LOGGER.warning("Setting locale as en as initializeParams locale " + initializeParams.getLocale() + "is not matching with available locales");
+                this.currentLocale = Locale.ENGLISH;
+            }
+        } else {
+            LOGGER.warning("Setting locale as en as initializeParams locale is null");
+            this.currentLocale = Locale.ENGLISH;
         }
-    }
-
-    public List<Locale> getAvailableLocales() {
-        return Arrays.asList(
-                new Locale("pt", "BR"), Locale.SIMPLIFIED_CHINESE, Locale.TRADITIONAL_CHINESE,
-                new Locale("cs", "CZ"), Locale.ENGLISH, Locale.FRENCH, Locale.GERMAN,
-                new Locale("hu", "HU"), Locale.ITALIAN, Locale.JAPANESE, Locale.KOREAN,
-                new Locale("pl", "PL"), new Locale("ro", "RO"), new Locale("ru", "RU"),
-                new Locale("es", "ES")
-        );
     }
 
     // Check if the liberty-plugin-config.xml is copied to server or not
