@@ -10,6 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
+import org.eclipse.lsp4j.InitializeParams;
 import org.eclipse.lsp4j.WorkspaceFolder;
 import org.junit.jupiter.api.Test;
 
@@ -25,7 +26,9 @@ public class LibertyFeatureTest {
     
     @Test
     public void getInstalledFeaturesListTest() throws JAXBException {
-        SettingsService.getInstance().initializeLocale(null);
+        InitializeParams initParams = new InitializeParams();
+        initParams.setLocale("en-us");
+        SettingsService.getInstance().initializeLocale(initParams);
         FeatureService fs = FeatureService.getInstance();
         File srcResourcesDir = new File("src/test/resources/sample");
         File featureListFile = new File(srcResourcesDir.getParentFile(), "featurelist-ol-25.0.0.6.xml");
@@ -57,5 +60,6 @@ public class LibertyFeatureTest {
         assertEquals(292, fg.getAllEnabledBy("library").size());
         assertTrue(fg.getAllEnabledBy("ltpa").contains("admincenter-1.0"));  // direct enabler
         assertTrue(fg.getAllEnabledBy("ssl").contains("microprofile-5.0"));  // transitive enabler
+        assertEquals("en",SettingsService.getInstance().getCurrentLocale().toString());
     }
 }
