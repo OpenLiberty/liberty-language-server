@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2023, 2024     IBM Corporation and others.
+* Copyright (c) 2023, 2025     IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -48,6 +48,23 @@ public class DocumentUtil {
             return docBuilder.parse(inputFile);
         } catch (Exception e) {
             LOGGER.warning("Error creating document from xml file: " + inputFile.getAbsolutePath() +" exception: "+e.getMessage());
+            throw e;
+        }
+    }
+
+    /**
+     * get document using string content
+     * @param docContent
+     * @return
+     * @throws Exception
+     */
+    public static Document getDocument(String docContent) throws Exception {
+        try {
+            DocumentBuilderFactory docFactory = getDocumentBuilderFactory();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            return docBuilder.parse(new java.io.ByteArrayInputStream(docContent.getBytes()));
+        } catch (Exception e) {
+            LOGGER.warning("Error creating document from xml content: " + docContent +" exception: "+e.getMessage());
             throw e;
         }
     }
