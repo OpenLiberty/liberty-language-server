@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2023 IBM Corporation and others.
+* Copyright (c) 2020, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -35,6 +35,8 @@ import java.util.logging.Logger;
 
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
+
+import static io.openliberty.tools.langserver.lemminx.util.LibertyFeatureVersionFinder.getLatestVersion;
 
 public class LibertyExtension implements IXMLExtension {
 
@@ -81,6 +83,14 @@ public class LibertyExtension implements IXMLExtension {
                     .populateAllVariables(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders());
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+
+        String latestVersion = getLatestVersion();
+        if (latestVersion != null) {
+           LOGGER.fine("Latest Open Liberty version found: " + latestVersion);
+            SettingsService.getInstance().setLatestRuntimeVersion(latestVersion);
+        } else {
+            LOGGER.warning("Could not determine the latest Open Liberty version.");
         }
 
         // for each workspace, a file alteration observer is added
