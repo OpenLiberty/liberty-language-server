@@ -12,9 +12,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
-import java.net.Authenticator;
-import java.net.CookieHandler;
-import java.net.ProxySelector;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
@@ -22,28 +19,20 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
-import java.util.concurrent.Executor;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
-import org.mockito.MockedConstruction;
 import org.mockito.MockedStatic;
-import org.mockito.Mockito;
-import org.mockito.MockitoAnnotations;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
 import io.openliberty.tools.langserver.lemminx.util.DocumentUtil;
-import io.openliberty.tools.langserver.lemminx.util.LibertyFeatureVersionFinder;
+import io.openliberty.tools.langserver.lemminx.util.LibertyRuntimeVersionUtil;
 
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLParameters;
-
-public class LibertyFeatureVersionFinderTest {
+public class LibertyRuntimeVersionUtilTest {
 
     @TempDir
     Path tempDir;
@@ -56,7 +45,7 @@ public class LibertyFeatureVersionFinderTest {
     @BeforeEach
     public void setUp() throws Exception {
         // Save the original CACHE_BASE_DIR value
-        Field cacheBaseDirField = LibertyFeatureVersionFinder.class.getDeclaredField("CACHE_BASE_DIR");
+        Field cacheBaseDirField = LibertyRuntimeVersionUtil.class.getDeclaredField("CACHE_BASE_DIR");
         cacheBaseDirField.setAccessible(true);
         originalCacheBaseDirValue = (String) cacheBaseDirField.get(null);
 
@@ -64,7 +53,7 @@ public class LibertyFeatureVersionFinderTest {
         cacheBaseDirField.set(null, tempDir.toString());
 
         // Update the CACHE_FILE_PATH to use our temp directory
-        Field cacheFilePathField = LibertyFeatureVersionFinder.class.getDeclaredField("CACHE_FILE_PATH");
+        Field cacheFilePathField = LibertyRuntimeVersionUtil.class.getDeclaredField("CACHE_FILE_PATH");
         cacheFilePathField.setAccessible(true);
         String newCacheFilePath = tempDir.toString() + "/https/repo1.maven.org/maven2/io/openliberty/features/open_liberty_featurelist/maven-metadata.xml";
         cacheFilePathField.set(null, newCacheFilePath);
@@ -91,12 +80,12 @@ public class LibertyFeatureVersionFinderTest {
     @AfterEach
     public void tearDown() throws Exception {
         // Restore the original CACHE_BASE_DIR value
-        Field cacheBaseDirField = LibertyFeatureVersionFinder.class.getDeclaredField("CACHE_BASE_DIR");
+        Field cacheBaseDirField = LibertyRuntimeVersionUtil.class.getDeclaredField("CACHE_BASE_DIR");
         cacheBaseDirField.setAccessible(true);
         cacheBaseDirField.set(null, originalCacheBaseDirValue);
 
         // Restore the original CACHE_FILE_PATH
-        Field cacheFilePathField = LibertyFeatureVersionFinder.class.getDeclaredField("CACHE_FILE_PATH");
+        Field cacheFilePathField = LibertyRuntimeVersionUtil.class.getDeclaredField("CACHE_FILE_PATH");
         cacheFilePathField.setAccessible(true);
         String originalCacheFilePath = originalCacheBaseDirValue + "/https/repo1.maven.org/maven2/io/openliberty/features/open_liberty_featurelist/maven-metadata.xml";
         cacheFilePathField.set(null, originalCacheFilePath);
@@ -117,7 +106,7 @@ public class LibertyFeatureVersionFinderTest {
 
 
         // Call the method under test
-        String actualVersion = LibertyFeatureVersionFinder.getLatestVersion();
+        String actualVersion = LibertyRuntimeVersionUtil.getLatestVersion();
 
         // Verify the result
         assertEquals(expectedVersion, actualVersion);
@@ -137,7 +126,7 @@ public class LibertyFeatureVersionFinderTest {
                 .thenThrow(new IOException("Simulated network error"));
 
         // Call the method under test
-        String actualVersion = LibertyFeatureVersionFinder.getLatestVersion();
+        String actualVersion = LibertyRuntimeVersionUtil.getLatestVersion();
 
         // Verify the result
         assertEquals(expectedVersion, actualVersion);
@@ -154,7 +143,7 @@ public class LibertyFeatureVersionFinderTest {
         Files.deleteIfExists(cacheFilePath);
 
         // Call the method under test
-        String actualVersion = LibertyFeatureVersionFinder.getLatestVersion();
+        String actualVersion = LibertyRuntimeVersionUtil.getLatestVersion();
 
         // Verify the result
         assertNull(actualVersion);
@@ -175,7 +164,7 @@ public class LibertyFeatureVersionFinderTest {
         Files.deleteIfExists(cacheFilePath);
 
         // Call the method under test
-        String actualVersion = LibertyFeatureVersionFinder.getLatestVersion();
+        String actualVersion = LibertyRuntimeVersionUtil.getLatestVersion();
 
         // Verify the result
         assertNull(actualVersion);
@@ -198,7 +187,7 @@ public class LibertyFeatureVersionFinderTest {
                     .thenThrow(new IOException("Simulated network error"));
 
                 // Call the method under test
-                String actualVersion = LibertyFeatureVersionFinder.getLatestVersion();
+                String actualVersion = LibertyRuntimeVersionUtil.getLatestVersion();
 
                 // Verify the result
                 assertNull(actualVersion);
@@ -234,7 +223,7 @@ public class LibertyFeatureVersionFinderTest {
                     .thenReturn(mockResponse);
 
             // Call the method under test
-            String actualVersion = LibertyFeatureVersionFinder.getLatestVersion();
+            String actualVersion = LibertyRuntimeVersionUtil.getLatestVersion();
 
             // Verify the result
             assertNull(actualVersion);

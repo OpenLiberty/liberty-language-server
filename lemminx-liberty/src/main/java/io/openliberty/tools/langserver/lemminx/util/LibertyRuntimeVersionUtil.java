@@ -22,8 +22,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
+import java.util.Locale;
 import java.util.logging.Logger;
 
+import io.openliberty.tools.langserver.lemminx.services.SettingsService;
+import org.apache.tools.ant.taskdefs.Local;
+import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
@@ -31,9 +35,9 @@ import org.w3c.dom.NodeList;
  * A utility to find the latest version of the Open Liberty feature list,
  * first by attempting an HTTP download and then by falling back to a local cache.
  */
-public class LibertyFeatureVersionFinder {
+public class LibertyRuntimeVersionUtil {
 
-    private LibertyFeatureVersionFinder() {
+    private LibertyRuntimeVersionUtil() {
     }
     // The URL for the maven-metadata.xml file.
     private static String METADATA_URL = "https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_featurelist/maven-metadata.xml";
@@ -41,7 +45,7 @@ public class LibertyFeatureVersionFinder {
     // The path to the local cache file, following the specified convention.
     private static String CACHE_BASE_DIR = System.getProperty("user.home") + File.separator + ".lemminx" + File.separator + "cache";
     private static String CACHE_FILE_PATH = CACHE_BASE_DIR + File.separator + "https" + File.separator + "repo1.maven.org" + File.separator + "maven2" + File.separator + "io" + File.separator + "openliberty" + File.separator + "features" + File.separator + "open_liberty_featurelist" + File.separator + "maven-metadata.xml";
-    private static final Logger LOGGER = Logger.getLogger(LibertyFeatureVersionFinder.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(LibertyRuntimeVersionUtil.class.getName());
 
     /**
      * Attempts to get the latest version from either the remote repository or the local cache.
@@ -160,5 +164,51 @@ public class LibertyFeatureVersionFinder {
             LOGGER.warning("Failed to parse metadata XML: " + e.getMessage());
         }
         return null;
+    }
+
+    /**
+     * get url from maven repo
+     * if locale is provided, use different url
+     * @return schemaURl parsed
+     */
+    private static String parseURL(String url, String urlWithLocale) {
+        String rtVersion = SettingsService.getInstance().getLatestRuntimeVersion();
+        String schemaURL;
+        if (SettingsService.getInstance().getCurrentLocale() == null || SettingsService.getInstance().getCurrentLocale().equals(Locale.US)
+                || SettingsService.getInstance().getCurrentLocale().equals(Locale.ENGLISH) || urlWithLocale==null) {
+            schemaURL = url.replace("$VERSION", rtVersion);
+        } else {
+            Locale currentLocale=SettingsService.getInstance().getCurrentLocale();
+            // liberty published file names contain only language code as locale for all locales except Portuguese (Brazil) and Traditional Chinese
+            // filename samples
+            // https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_schema_es/25.0.0.8/open_liberty_schema_es-25.0.0.8.xsd
+            // https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_schema_pt_BR/25.0.0.8/open_liberty_schema_pt_BR-25.0.0.8.xsd
+            schemaURL = urlWithLocale.replace("$VERSION", rtVersion).replace("$LOCALE", currentLocale.getLanguage());
+            if(Locale.TAIWAN.equals(currentLocale) || new Locale("pt","BR").equals(currentLocale)){
+                schemaURL = urlWithLocale.replace("$VERSION", rtVersion).replace("$LOCALE", currentLocale.toString());
+            }
+        }
+        return schemaURL;
+    }
+
+    /**
+     * @param url           schema or featurelist url
+     * @param urlWithLocale url with locale placeholder
+     * @return downloaded
+     */
+    public static Path downloadAndCacheLatestResource(String url, String urlWithLocale) {
+        Path serverResourceFile = null;
+        // check and download latest resource
+        if (SettingsService.getInstance().getLatestRuntimeVersion() != null) {
+            String resourceURL = parseURL(url, urlWithLocale);
+            try {
+                LOGGER.info("Trying to download and cache resource %s, cached data will be returned if found".formatted(resourceURL));
+                // getResource first checks in cache and if not exist, download resources
+                serverResourceFile = new CacheResourcesManager().getResource(resourceURL);
+            } catch (Exception e) {
+                LOGGER.warning("Unable to download latest version schema and file is not in cache as well.. Falling back to default version 25.0.0.6");
+            }
+        }
+        return serverResourceFile;
     }
 }

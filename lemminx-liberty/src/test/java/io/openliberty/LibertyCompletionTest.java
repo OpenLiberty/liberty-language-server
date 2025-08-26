@@ -1,5 +1,6 @@
 package io.openliberty;
 
+import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lemminx.commons.BadLocationException;
@@ -40,6 +41,8 @@ public class LibertyCompletionTest {
 
                 settings.when(SettingsService::getInstance).thenReturn(settingsService);
                 when(settingsService.getCurrentLocale()).thenReturn(Locale.getDefault());
+                when(settingsService.getLatestRuntimeVersion()).thenReturn(null);
+                FeatureService.getInstance().evictCache();
         }
 
         @AfterEach
@@ -105,7 +108,6 @@ public class LibertyCompletionTest {
                                 "       </featureManager>", //
                                 "</server>" //
                 );
-
                 CompletionItem jaxrsCompletion = c("jaxrs-2.1", "jaxrs-2.1");
                 CompletionItem websocket = c("websocket-1.1", "websocket-1.1");
                 CompletionItem microProfileCompletion = c("microProfile-2.2", "microProfile-2.2");
@@ -590,4 +592,39 @@ public class LibertyCompletionTest {
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, testVarCompletion,
                         testVar2Completion);
         }
+
+        // tests availability of feature completion with cached data first and with latest version feature download
+        @Test
+        public void testFeatureCompletionItemWithLatestVersion() throws BadLocationException {
+
+                String serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <feature>mpTelemetry|</feature>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+                CompletionItem mpTelemetryCompletionVersionLess = c("mpTelemetry","mpTelemetry");
+                CompletionItem mpTelemetryCompletion1 = c("mpTelemetry-1.0","mpTelemetry-1.0");
+                CompletionItem mpTelemetryCompletion11 = c("mpTelemetry-1.1","mpTelemetry-1.1");
+                CompletionItem mpTelemetryCompletion2 = c("mpTelemetry-2.0","mpTelemetry-2.0");
+                // total number of available completion items
+                // 4 for mpTelemetry
+                // one for CDATA and one for <-
+                final int TOTAL_ITEMS = 6; // total number of available completion items
+
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, mpTelemetryCompletionVersionLess,mpTelemetryCompletion1,mpTelemetryCompletion11,mpTelemetryCompletion2);
+
+                // once we specify latest runtime version, featurelist will be downloaded from maven repo
+                // 25.0.0.8 has a new version for mpTelemetry with 2.1, which is not present in 25.0.0.6
+                when(settingsService.getLatestRuntimeVersion()).thenReturn("25.0.0.8");
+                FeatureService.getInstance().evictCache();
+                CompletionItem mpTelemetryCompletion21 = c("mpTelemetry-2.1","mpTelemetry-2.1");
+                // total number of available completion items
+                // 5 for mpTelemetry
+                // one for CDATA and one for <-
+                final int NEW_TOTAL_ITEMS = 7; // total number of available completion items
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, NEW_TOTAL_ITEMS, mpTelemetryCompletionVersionLess,mpTelemetryCompletion1,mpTelemetryCompletion11,mpTelemetryCompletion2,mpTelemetryCompletion21);
+        }
+
 }

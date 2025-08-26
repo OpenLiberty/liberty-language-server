@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 
-import static io.openliberty.tools.langserver.lemminx.util.LibertyFeatureVersionFinder.getLatestVersion;
+import static io.openliberty.tools.langserver.lemminx.util.LibertyRuntimeVersionUtil.getLatestVersion;
 
 public class LibertyExtension implements IXMLExtension {
 

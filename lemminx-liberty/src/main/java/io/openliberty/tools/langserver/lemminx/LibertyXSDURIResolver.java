@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
+import io.openliberty.tools.langserver.lemminx.util.LibertyRuntimeVersionUtil;
 import io.openliberty.tools.langserver.lemminx.util.SchemaAndFeatureListGeneratorUtil;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
 import org.eclipse.lemminx.uriresolver.IExternalGrammarLocationProvider;
@@ -43,6 +44,8 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
     private static final String XSD_CLASSPATH_LOCATION = "/schema/xsd/liberty/server-cached-25.0.0.6_%s.xsd";
     private static final String XSD_RESOURCE_URL_DEFAULT = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server-cached-25.0.0.6.xsd";
     private static final String XSD_CLASSPATH_LOCATION_DEFAULT = "/schema/xsd/liberty/server-cached-25.0.0.6.xsd";
+    public static final String LIBERTY_SCHEMA_VERSION_XSD = "https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_schema/$VERSION/open_liberty_schema-$VERSION.xsd";
+    public static final String LIBERTY_SCHEMA_VERSION_WITH_LOCALE_XSD = "https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_schema_$LOCALE/$VERSION/open_liberty_schema_$LOCALE-$VERSION.xsd";
 
     /**
      * SERVER_XSD_RESOURCE is the server schema that is located at XSD_CLASSPATH_LOCATION
@@ -118,24 +121,8 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
      * @return
      * @throws IOException
      */
-    private Path getServerXSDFile() throws IOException {
-        Path serverXSDFile = null;
-        // check and download latest schema
-        if (SettingsService.getInstance().getLatestRuntimeVersion() != null) {
-            String rtVersion = SettingsService.getInstance().getLatestRuntimeVersion();
-            String schemaURL;
-            if (SettingsService.getInstance().getCurrentLocale() == null || SettingsService.getInstance().getCurrentLocale().equals(Locale.US) || SettingsService.getInstance().getCurrentLocale().equals(Locale.ENGLISH)) {
-                schemaURL = "https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_schema/$VERSION/open_liberty_schema-$VERSION.xsd".replace("$VERSION", rtVersion);
-            } else {
-                schemaURL = "https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_schema_$LOCALE/$VERSION/open_liberty_schema_$LOCALE-$VERSION.xsd".replace("$VERSION", rtVersion).replace("$LOCALE", SettingsService.getInstance().getCurrentLocale().toString());
-            }
-            try {
-                // getResource first checks in cache and if not exist, download resources
-                serverXSDFile = new CacheResourcesManager().getResource(schemaURL);
-            }catch (Exception e){
-                LOGGER.warning("Unable to download latest version schema and file is not in cache as well.. Falling back to default version 25.0.0.6");
-            }
-        }
+    public Path getServerXSDFile() throws IOException {
+        Path serverXSDFile = LibertyRuntimeVersionUtil.downloadAndCacheLatestResource(LIBERTY_SCHEMA_VERSION_XSD,LIBERTY_SCHEMA_VERSION_WITH_LOCALE_XSD);
         // if above download failed, fallback to schema stored in local classpath
         if (serverXSDFile == null) {
             if (Locale.US.equals(SettingsService.getInstance().getCurrentLocale())) {
@@ -154,6 +141,9 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
         }
         return serverXSDFile;
     }
+
+
+
 
     @Override
     public Map<String, String> getExternalGrammarLocation(URI fileURI) {
