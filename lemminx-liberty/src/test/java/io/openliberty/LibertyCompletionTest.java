@@ -7,7 +7,10 @@ import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lsp4j.CompletionItem;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.MethodOrderer;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestMethodOrder;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -25,6 +28,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
+@TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class LibertyCompletionTest {
 
         @Mock
@@ -53,7 +57,9 @@ public class LibertyCompletionTest {
         // Tests the availability of completion of XML elements provided by the
         // server.xsd file
         @Test
+        @Order(1)
         public void testXSDElementCompletionItem() throws BadLocationException {
+                when(settingsService.getLatestRuntimeVersion()).thenReturn("25.0.0.8");
                 String serverXML = String.join(newLine, //
                                 "<server description=\"Sample Liberty server\">", //
                                 "       |<featureManager>", //

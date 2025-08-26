@@ -27,6 +27,7 @@ import java.util.logging.Logger;
 
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import org.apache.tools.ant.taskdefs.Local;
+import org.eclipse.lemminx.uriresolver.CacheResourceDownloadingException;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
@@ -37,8 +38,11 @@ import org.w3c.dom.NodeList;
  */
 public class LibertyRuntimeVersionUtil {
 
+    public static final String VERSION = "$VERSION";
+
     private LibertyRuntimeVersionUtil() {
     }
+
     // The URL for the maven-metadata.xml file.
     private static String METADATA_URL = "https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_featurelist/maven-metadata.xml";
 
@@ -46,6 +50,8 @@ public class LibertyRuntimeVersionUtil {
     private static String CACHE_BASE_DIR = System.getProperty("user.home") + File.separator + ".lemminx" + File.separator + "cache";
     private static String CACHE_FILE_PATH = CACHE_BASE_DIR + File.separator + "https" + File.separator + "repo1.maven.org" + File.separator + "maven2" + File.separator + "io" + File.separator + "openliberty" + File.separator + "features" + File.separator + "open_liberty_featurelist" + File.separator + "maven-metadata.xml";
     private static final Logger LOGGER = Logger.getLogger(LibertyRuntimeVersionUtil.class.getName());
+    private static final int MAX_RETRIES = 3;
+    private static final int RETRY_DELAY_MS = 5000;
 
     /**
      * Attempts to get the latest version from either the remote repository or the local cache.
@@ -175,17 +181,17 @@ public class LibertyRuntimeVersionUtil {
         String rtVersion = SettingsService.getInstance().getLatestRuntimeVersion();
         String schemaURL;
         if (SettingsService.getInstance().getCurrentLocale() == null || SettingsService.getInstance().getCurrentLocale().equals(Locale.US)
-                || SettingsService.getInstance().getCurrentLocale().equals(Locale.ENGLISH) || urlWithLocale==null) {
-            schemaURL = url.replace("$VERSION", rtVersion);
+                || SettingsService.getInstance().getCurrentLocale().equals(Locale.ENGLISH) || urlWithLocale == null) {
+            schemaURL = url.replace(VERSION, rtVersion);
         } else {
-            Locale currentLocale=SettingsService.getInstance().getCurrentLocale();
+            Locale currentLocale = SettingsService.getInstance().getCurrentLocale();
             // liberty published file names contain only language code as locale for all locales except Portuguese (Brazil) and Traditional Chinese
             // filename samples
             // https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_schema_es/25.0.0.8/open_liberty_schema_es-25.0.0.8.xsd
             // https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_schema_pt_BR/25.0.0.8/open_liberty_schema_pt_BR-25.0.0.8.xsd
-            schemaURL = urlWithLocale.replace("$VERSION", rtVersion).replace("$LOCALE", currentLocale.getLanguage());
-            if(Locale.TAIWAN.equals(currentLocale) || new Locale("pt","BR").equals(currentLocale)){
-                schemaURL = urlWithLocale.replace("$VERSION", rtVersion).replace("$LOCALE", currentLocale.toString());
+            schemaURL = urlWithLocale.replace(VERSION, rtVersion).replace("$LOCALE", currentLocale.getLanguage());
+            if (Locale.TAIWAN.equals(currentLocale) || new Locale("pt", "BR").equals(currentLocale)) {
+                schemaURL = urlWithLocale.replace(VERSION, rtVersion).replace("$LOCALE", currentLocale.toString());
             }
         }
         return schemaURL;
@@ -198,17 +204,65 @@ public class LibertyRuntimeVersionUtil {
      */
     public static Path downloadAndCacheLatestResource(String url, String urlWithLocale) {
         Path serverResourceFile = null;
-        // check and download latest resource
         if (SettingsService.getInstance().getLatestRuntimeVersion() != null) {
             String resourceURL = parseURL(url, urlWithLocale);
-            try {
-                LOGGER.info("Trying to download and cache resource %s, cached data will be returned if found".formatted(resourceURL));
-                // getResource first checks in cache and if not exist, download resources
-                serverResourceFile = new CacheResourcesManager().getResource(resourceURL);
-            } catch (Exception e) {
-                LOGGER.warning("Unable to download latest version schema and file is not in cache as well.. Falling back to default version 25.0.0.6");
-            }
+            serverResourceFile = downloadWithRetry(resourceURL);
         }
         return serverResourceFile;
+    }
+
+    /**
+     * Downloads a resource with retry capability.
+     *
+     * @param resourceURL The URL of the resource to download
+     * @return Path to the downloaded or cached resource, or null if download failed
+     */
+    private static Path downloadWithRetry(String resourceURL) {
+        int retryCount = 0;
+        Path serverResourceFile = null;
+        CacheResourcesManager resourceManager = new CacheResourcesManager();
+        
+        while (retryCount < MAX_RETRIES) {
+            try {
+                LOGGER.fine("Downloading resource: %s".formatted(resourceURL));
+                // getResource first checks in cache and if not exist, downloads resources
+                serverResourceFile = resourceManager.getResource(resourceURL);
+                return serverResourceFile; // Success - return immediately
+                
+            } catch (CacheResourceDownloadingException e) {
+                // Only retry for RESOURCE_LOADING errors
+                if (CacheResourceDownloadingException.CacheResourceDownloadingError.RESOURCE_LOADING.equals(e.getErrorCode())) {
+                    retryCount++;
+                    LOGGER.fine("Download in progress, retrying... (Attempt %s/%s)".formatted(retryCount, MAX_RETRIES));
+                    try {
+                        Thread.sleep(RETRY_DELAY_MS);
+                    } catch (InterruptedException ex) {
+                        Thread.currentThread().interrupt(); // Restore interrupt status
+                        logFallbackWarning("Download retry interrupted");
+                        return null;
+                    }
+                } else {
+                    // Other download errors - no retry
+                    logFallbackWarning("Resource download failed: " + e.getMessage());
+                    return null;
+                }
+            } catch (Exception e) {
+                // Unexpected errors - no retry
+                logFallbackWarning("Unexpected error during resource download: " + e.getMessage());
+                return null;
+            }
+        }
+        // Max retries reached without success
+        logFallbackWarning("Resource download failed after " + MAX_RETRIES + " attempts");
+        return null;
+    }
+
+    /**
+     * log warning message
+     * @param message message
+     */
+    private static void logFallbackWarning(String message) {
+        LOGGER.warning(message);
+        LOGGER.warning("Falling back to default version 25.0.0.6");
     }
 }
