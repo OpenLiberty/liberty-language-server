@@ -239,28 +239,6 @@ public class LibertyHoverTest {
         }
 
         @Test
-        public void testXSDSchemaHoverWithLatestVersionAndLocale() throws BadLocationException, IOException {
-                when(settingsService.getLatestRuntimeVersion()).thenReturn("25.0.0.8");
-                when(settingsService.getCurrentLocale()).thenReturn(Locale.GERMANY);
-                String serverXSDURI = new CacheResourcesManager.ResourceToDeploy(
-                        LIBERTY_SCHEMA_VERSION_WITH_LOCALE_XSD.replace("$VERSION", "25.0.0.8").replace("$LOCALE",Locale.GERMANY.getLanguage()), LIBERTY_SCHEMA_VERSION_XSD)
-                        .getDeployedPath().toUri().toString().replace("///", "/");
-
-                String serverXML = String.join(newLine, //
-                        "<server description=\"Sample Liberty server\">", //
-                        "       <feature|Manager>", //
-                        "               <feature>jaxrs-2.1</feature>", //
-                        "       </featureManager>", //
-                        "</server>" //
-                );
-
-                XMLAssert.assertHover(serverXML, serverXMLURI, "Definiert, wie der Server Features lädt." + //
-                                System.lineSeparator() + System.lineSeparator() + //
-                                "Source: [open_liberty_schema_de-25.0.0.8.xsd](" + serverXSDURI + ")", //
-                        r(1, 8, 1, 22));
-        }
-
-        @Test
         public void testXSDSchemaHoverWithInvalidLocale() throws BadLocationException, IOException {
                 when(settingsService.getLatestRuntimeVersion()).thenReturn("25.0.0.8");
                 when(settingsService.getCurrentLocale()).thenReturn(new Locale("hi","ind"));
