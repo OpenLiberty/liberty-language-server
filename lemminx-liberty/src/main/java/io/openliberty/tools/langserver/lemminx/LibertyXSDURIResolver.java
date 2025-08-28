@@ -23,6 +23,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
+import io.openliberty.tools.langserver.lemminx.util.LibertyRuntimeVersionUtil;
 import io.openliberty.tools.langserver.lemminx.util.SchemaAndFeatureListGeneratorUtil;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
 import org.eclipse.lemminx.uriresolver.IExternalGrammarLocationProvider;
@@ -43,6 +44,8 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
     private static final String XSD_CLASSPATH_LOCATION = "/schema/xsd/liberty/server-cached-25.0.0.6_%s.xsd";
     private static final String XSD_RESOURCE_URL_DEFAULT = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server-cached-25.0.0.6.xsd";
     private static final String XSD_CLASSPATH_LOCATION_DEFAULT = "/schema/xsd/liberty/server-cached-25.0.0.6.xsd";
+    public static final String LIBERTY_SCHEMA_VERSION_XSD = "https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_schema/$VERSION/open_liberty_schema-$VERSION.xsd";
+    public static final String LIBERTY_SCHEMA_VERSION_WITH_LOCALE_XSD = "https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_schema_$LOCALE/$VERSION/open_liberty_schema_$LOCALE-$VERSION.xsd";
 
     /**
      * SERVER_XSD_RESOURCE is the server schema that is located at XSD_CLASSPATH_LOCATION
@@ -104,7 +107,7 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
 
         try {
             Path serverXSDFile = getServerXSDFile();
-            LOGGER.info("Using cached Liberty schema file located at: " + serverXSDFile.toString());
+            LOGGER.fine("Using cached Liberty schema file located at: " + serverXSDFile.toString());
             return serverXSDFile.toUri().toString();
         } catch (Exception e) {
             LOGGER.severe("Error: Unable to retrieve default cached Liberty schema file.");
@@ -118,23 +121,29 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
      * @return
      * @throws IOException
      */
-    private Path getServerXSDFile() throws IOException {
-        Path serverXSDFile;
-        if(Locale.US.equals(SettingsService.getInstance().getCurrentLocale())){
-            LOGGER.info("Locale is %s. Using default xsd resource located in %s".formatted(SettingsService.getInstance().getCurrentLocale(), SERVER_XSD_RESOURCE));
-            return CacheResourcesManager.getResourceCachePath(SERVER_XSD_RESOURCE_DEFAULT);
-        }
-        try {
-            SERVER_XSD_RESOURCE = new ResourceToDeploy(XSD_RESOURCE_URL.formatted(SettingsService.getInstance().getCurrentLocale().toString()),
-                    XSD_CLASSPATH_LOCATION.formatted(SettingsService.getInstance().getCurrentLocale().toString()));
-            LOGGER.info("Using Locale %s to find xsd resource in %s".formatted(SettingsService.getInstance().getCurrentLocale(), SERVER_XSD_RESOURCE));
-            serverXSDFile = CacheResourcesManager.getResourceCachePath(SERVER_XSD_RESOURCE);
-        } catch (Exception exception){
-            LOGGER.warning("Unable to find localized xsd resource using current locale %s. Using default xsd resource located in %s".formatted(SettingsService.getInstance().getCurrentLocale(), SERVER_XSD_RESOURCE_DEFAULT));
-            serverXSDFile = CacheResourcesManager.getResourceCachePath(SERVER_XSD_RESOURCE_DEFAULT);
+    public Path getServerXSDFile() throws IOException {
+        Path serverXSDFile = LibertyRuntimeVersionUtil.downloadAndCacheLatestResource(LIBERTY_SCHEMA_VERSION_XSD,LIBERTY_SCHEMA_VERSION_WITH_LOCALE_XSD);
+        // if above download failed, fallback to schema stored in local classpath
+        if (serverXSDFile == null) {
+            if (Locale.US.equals(SettingsService.getInstance().getCurrentLocale())) {
+                LOGGER.info("Locale is %s. Using default xsd resource located in %s".formatted(SettingsService.getInstance().getCurrentLocale(), SERVER_XSD_RESOURCE));
+                return CacheResourcesManager.getResourceCachePath(SERVER_XSD_RESOURCE_DEFAULT);
+            }
+            try {
+                SERVER_XSD_RESOURCE = new ResourceToDeploy(XSD_RESOURCE_URL.formatted(SettingsService.getInstance().getCurrentLocale().toString()),
+                        XSD_CLASSPATH_LOCATION.formatted(SettingsService.getInstance().getCurrentLocale().toString()));
+                LOGGER.info("Using Locale %s to find xsd resource in %s".formatted(SettingsService.getInstance().getCurrentLocale(), SERVER_XSD_RESOURCE));
+                serverXSDFile = CacheResourcesManager.getResourceCachePath(SERVER_XSD_RESOURCE);
+            } catch (Exception exception) {
+                LOGGER.warning("Unable to find localized xsd resource using current locale %s. Using default xsd resource located in %s".formatted(SettingsService.getInstance().getCurrentLocale(), SERVER_XSD_RESOURCE_DEFAULT));
+                serverXSDFile = CacheResourcesManager.getResourceCachePath(SERVER_XSD_RESOURCE_DEFAULT);
+            }
         }
         return serverXSDFile;
     }
+
+
+
 
     @Override
     public Map<String, String> getExternalGrammarLocation(URI fileURI) {

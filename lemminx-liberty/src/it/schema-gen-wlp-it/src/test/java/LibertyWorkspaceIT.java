@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 
+import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lsp4j.WorkspaceFolder;
@@ -94,6 +95,9 @@ public class LibertyWorkspaceIT {
         File featurelistFile = new File(LibertyUtils.getTempDir(LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlFile.toURI().toString())), featureListName);
 
         org.junit.jupiter.api.Assertions.assertFalse(featurelistFile.exists(), "Found unexpected generated featurelist file: "+featureListName);
+        // this version test needs to be updated whenever a new liberty version is released
+        org.junit.jupiter.api.Assertions.assertEquals(SettingsService.getInstance().getLatestRuntimeVersion(), "25.0.0.8");
+
 
     }
 }
