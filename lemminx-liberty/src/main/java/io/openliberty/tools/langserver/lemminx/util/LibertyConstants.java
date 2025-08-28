@@ -70,4 +70,5 @@ public final class LibertyConstants {
     }});
 
     public static List<String> filesToWatch= Arrays.asList(SERVER_XML,"server.env","bootstrap.properties");
+    public static final String DEFAULT_LIBERTY_VERSION = "25.0.0.6";
 }
