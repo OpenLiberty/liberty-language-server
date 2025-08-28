@@ -26,7 +26,6 @@ import java.util.Locale;
 import java.util.logging.Logger;
 
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
-import org.apache.tools.ant.taskdefs.Local;
 import org.eclipse.lemminx.uriresolver.CacheResourceDownloadingException;
 import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
 import org.w3c.dom.Document;
@@ -60,7 +59,8 @@ public class LibertyRuntimeVersionUtil {
      */
     public static String getLatestVersion() {
         // Attempt to fetch from the remote URL first.
-        String versionFromRemote = getVersionFromRemote();
+        String resourceContent = getResource(METADATA_URL, CACHE_FILE_PATH);
+        String versionFromRemote = resourceContent != null ? parseVersionFromXml(resourceContent) : null;
         if (versionFromRemote != null) {
             LOGGER.fine("Successfully retrieved version from remote URL.");
             return versionFromRemote;
@@ -78,27 +78,30 @@ public class LibertyRuntimeVersionUtil {
     }
 
     /**
-     * Fetches the maven-metadata.xml file from the remote repository and parses it.
-     * If successful, it also saves the file to the local cache.
+     * fetches a resource from remote repository
+     * if fetch is successful and cache path is present, file will be written to cache path as well
      *
-     * @return The latest version string, or null on failure.
+     * @param resourceUrl   resource url
+     * @param cacheFilePath cache location
+     * @return resource content in string
      */
-    private static String getVersionFromRemote() {
+    public static String getResource(String resourceUrl, String cacheFilePath) {
         HttpClient client = HttpClient.newBuilder()
                 .connectTimeout(Duration.ofSeconds(10))
                 .build();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(METADATA_URL))
+                .uri(URI.create(resourceUrl))
                 .build();
-
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
                 String xmlContent = response.body();
-                // Save the content to the local cache before parsing.
-                saveToLocalCache(xmlContent);
-                return parseVersionFromXml(xmlContent);
+                if (cacheFilePath != null) {
+                    // Save the content to the local cache before parsing.
+                    saveToLocalCache(cacheFilePath, xmlContent);
+                }
+                return xmlContent;
             } else {
                 LOGGER.warning("HTTP request failed with status code: %d".formatted(response.statusCode()));
                 return null;
@@ -136,10 +139,11 @@ public class LibertyRuntimeVersionUtil {
     /**
      * Saves the XML content to the specified local cache file path.
      *
-     * @param xmlContent The XML content to save.
+     * @param cacheFilePath path to save file
+     * @param xmlContent    The XML content to save.
      */
-    private static void saveToLocalCache(String xmlContent) {
-        Path filePath = Paths.get(CACHE_FILE_PATH);
+    private static void saveToLocalCache(String cacheFilePath, String xmlContent) {
+        Path filePath = Paths.get(cacheFilePath);
         try {
             // Ensure the parent directories exist before writing the file.
             Files.createDirectories(filePath.getParent());
@@ -221,14 +225,14 @@ public class LibertyRuntimeVersionUtil {
         int retryCount = 0;
         Path serverResourceFile = null;
         CacheResourcesManager resourceManager = new CacheResourcesManager();
-        
+
         while (retryCount < MAX_RETRIES) {
             try {
                 LOGGER.fine("Downloading resource: %s".formatted(resourceURL));
                 // getResource first checks in cache and if not exist, downloads resources
                 serverResourceFile = resourceManager.getResource(resourceURL);
                 return serverResourceFile; // Success - return immediately
-                
+
             } catch (CacheResourceDownloadingException e) {
                 // Only retry for RESOURCE_LOADING errors
                 if (CacheResourceDownloadingException.CacheResourceDownloadingError.RESOURCE_LOADING.equals(e.getErrorCode())) {

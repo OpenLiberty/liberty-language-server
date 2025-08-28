@@ -29,6 +29,7 @@ import io.openliberty.tools.langserver.lemminx.services.FeatureService;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import io.openliberty.tools.langserver.lemminx.util.*;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -132,10 +133,28 @@ public class LibertyHoverParticipant implements IHoverParticipant {
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
         Optional<Feature> feature = FeatureService.getInstance().getFeature(featureName, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
         if (feature.isPresent()) {
-            return new Hover(new MarkupContent(MarkupKind.MARKDOWN, feature.get().getShortDescription()));
+            StringBuilder sb = new StringBuilder();
+            sb.append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_HOVER_DESCRIPTION) + " ");
+            sb.append(feature.get().getShortDescription());
+            addFeatureListSource(sb);
+            return new Hover(new MarkupContent(MarkupKind.MARKDOWN,sb.toString()));
         }
 
         return null;
+    }
+
+    /**
+     * add source into hover description markdown
+     * @param sb
+     */
+    private static void addFeatureListSource(StringBuilder sb) {
+        Path xmlPath = SettingsService.getInstance().getFeatureJsonFilePath();
+        if(xmlPath!=null){
+            sb.append(MARKDOWN_NEW_LINE);
+            sb.append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_HOVER_SOURCE)).append(" ")
+                    .append("[%s](%s)".formatted(xmlPath.getFileName(),xmlPath.toUri().toString()));
+        }
+        LOGGER.info("successfully appended source to hover %s".formatted(sb.toString()));
     }
 
     private Hover getHoverFeatureDescription(String featureName, DOMDocument document) {
@@ -156,6 +175,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
 
         // if this is a versionless feature, do not add any info about enables or enabled by
         if (flNode.isVersionless()) {
+            addFeatureListSource(sb);
             if (!description.endsWith(".")) {
                 sb.append(".");
             }
@@ -194,7 +214,7 @@ public class LibertyHoverParticipant implements IHoverParticipant {
             }
             sb.setLength(sb.length() - 2);
         }
-
+        addFeatureListSource(sb);
        return new Hover(new MarkupContent(MarkupKind.MARKDOWN, sb.toString()));
     }
 }

@@ -54,6 +54,10 @@ public class SettingsService {
     private boolean configCopiedToServer = false;
 
     private String latestRuntimeVersion;
+
+    private Path featureListXmlFilePath;
+
+    private Path featureJsonFilePath;
     /**
      * Takes the xml settings object and parses out the Liberty Settings
      * @param xmlSettings - All xml settings provided by the client
@@ -197,4 +201,11 @@ public class SettingsService {
         this.latestRuntimeVersion = latestRuntimeVersion;
     }
 
+    public Path getFeatureJsonFilePath() {
+        return featureJsonFilePath;
+    }
+
+    public void setFeatureJsonFilePath(Path featureJsonFilePath) {
+        this.featureJsonFilePath = featureJsonFilePath;
+    }
 }

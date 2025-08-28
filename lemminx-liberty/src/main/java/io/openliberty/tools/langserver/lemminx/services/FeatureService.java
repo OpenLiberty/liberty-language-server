@@ -13,11 +13,11 @@
 package io.openliberty.tools.langserver.lemminx.services;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.File;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -122,25 +122,33 @@ public class FeatureService {
     /**
      * Fetches information about Liberty features from Maven repo
      *
-     * @param libertyVersion - version of Liberty to fetch features for
+     * @param libertyVersion  - version of Liberty to fetch features for
+     * @param workspaceFolder - liberty workspace details
      * @return list of features supported by the provided version of Liberty
      */
-    private FeaturesAndPlatforms fetchFeaturesForVersion(String libertyVersion, String libertyRuntime) throws IOException, JsonParseException {
+    private FeaturesAndPlatforms fetchFeaturesForVersion(String libertyVersion, String libertyRuntime, LibertyWorkspace workspaceFolder) throws IOException, JsonParseException, URISyntaxException {
         String featureEndpoint = libertyRuntime.equals("wlp") ? String.format(wlpFeatureEndpoint, libertyVersion) :
                                                                 String.format(olFeatureEndpoint, libertyVersion);
-
-        InputStreamReader reader = new InputStreamReader(new URL(featureEndpoint).openStream());
+        URL featureJsonURL = new URL(featureEndpoint);
+        File tempDir = LibertyUtils.getTempDir(workspaceFolder);
+        File jsonDestFile = new File(tempDir, featureJsonURL.getFile());
+        LibertyRuntimeVersionUtil.getResource(featureEndpoint,jsonDestFile.getPath());
+        // saving feature.json to .libertyls folder first and then reading from there
+        // saved because this would help to show URL in hover
+        InputStreamReader reader = new InputStreamReader(new FileInputStream(jsonDestFile));
 
         // Only need the public features
         FeaturesAndPlatforms fp = readFeaturesAndPlatforms(reader);
 
         if (libertyRuntime.equals("wlp")) {
             // need to also get the OpenLiberty features and add them to the list to return
-            FeaturesAndPlatforms olFP = fetchFeaturesForVersion(libertyVersion, "ol");
+            FeaturesAndPlatforms olFP = fetchFeaturesForVersion(libertyVersion, "ol", workspaceFolder);
             fp.addFeaturesAndPlatforms(olFP);
         }
 
         LOGGER.info("Returning public features and platforms from Maven - features: " + fp.getPublicFeatures().size()+" platforms: "+fp.getPlatforms().size());
+        LOGGER.info("Setting feature json path using endpoint %s cached to %s".formatted(featureEndpoint,jsonDestFile.toURI()));
+        SettingsService.getInstance().setFeatureJsonFilePath(Path.of(jsonDestFile.toURI()));
         return fp;
     }
 
@@ -157,16 +165,27 @@ public class FeatureService {
                     Path featureVersionPath = LibertyRuntimeVersionUtil.downloadAndCacheLatestResource("https://repo1.maven.org/maven2/io/openliberty/features/features/$VERSION/features-$VERSION.json", null);
                     if (featureVersionPath != null) {
                         is = new FileInputStream(featureVersionPath.toFile());
+                        LOGGER.info("Setting feature json by downloading latest version cached to %s".formatted(featureVersionPath));
+                        SettingsService.getInstance().setFeatureJsonFilePath(featureVersionPath);
                     } else {
                         // falling back to the json stored in local
-                        is = getClass().getClassLoader().getResourceAsStream("features-cached-25.0.0.6.json");
+                        // caching this to .lemminx folder as well to show URL in hover
+                        ResourceToDeploy featureJsonResource = new ResourceToDeploy("https://repo1.maven.org/maven2/io/openliberty/features/features/features-cached-25.0.0.6.json", "features-cached-25.0.0.6.json");
+                        Path deployedPath=CacheResourcesManager.getResourceCachePath(featureJsonResource);
+                        is = new FileInputStream(deployedPath.toFile());
+                        LOGGER.info("Setting feature json by caching local version stored in classpath to %s".formatted(deployedPath));
+                        SettingsService.getInstance().setFeatureJsonFilePath(deployedPath);
                     }
                     InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
                     // Only need the public features
                     defaultFeaturesAndPlatforms = readFeaturesAndPlatforms(reader);
-                } catch (JsonParseException | FileNotFoundException e) {
+                } catch (JsonParseException | IOException e) {
                     // unable to read json in resources file, return empty list
                     LOGGER.severe("Error: Unable to get default features and platforms.");
+                    defaultFeaturesAndPlatforms = new FeaturesAndPlatforms();
+                    return defaultFeaturesAndPlatforms;
+                } catch (Exception e){
+                    LOGGER.severe("Error: " + e.getMessage());
                     defaultFeaturesAndPlatforms = new FeaturesAndPlatforms();
                     return defaultFeaturesAndPlatforms;
                 } finally {
@@ -248,7 +267,8 @@ public class FeatureService {
                 // switching back and forth between projects.
                 long currentTime = System.currentTimeMillis();
                 if (this.featureUpdateTime == -1 || currentTime >= (this.featureUpdateTime + (requestDelay * 1000))) {
-                    FeaturesAndPlatforms features = fetchFeaturesForVersion(libertyVersion, libertyRuntime);
+                    LibertyWorkspace workspaceFolder = LibertyProjectsManager.getInstance().getWorkspaceFolder(documentURI);
+                    FeaturesAndPlatforms features = fetchFeaturesForVersion(libertyVersion, libertyRuntime, workspaceFolder);
                     featureAndPlatformCache.put(featureCacheKey, features);
                     this.featureUpdateTime = System.currentTimeMillis();
                     return features;
