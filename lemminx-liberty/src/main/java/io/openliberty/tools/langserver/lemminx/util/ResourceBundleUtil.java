@@ -34,6 +34,11 @@ public final class ResourceBundleUtil {
 
     private static synchronized void initializeBundles() {
         resourceBundle = ResourceBundle.getBundle("messages.libertyBundles", SettingsService.getInstance().getCurrentLocale());
+        if (resourceBundle == null) {
+            // get language tag only bundle
+            // for some locales, resource bundle will have only language tag, example :- en, de, fr etc.
+            resourceBundle = ResourceBundle.getBundle("messages.libertyBundles", Locale.forLanguageTag(SettingsService.getInstance().getCurrentLocale().getLanguage()));
+        }
     }
 
     /**
