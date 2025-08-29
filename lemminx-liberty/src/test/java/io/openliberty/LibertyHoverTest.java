@@ -15,7 +15,7 @@ import static io.openliberty.tools.langserver.lemminx.LibertyXSDURIResolver.LIBE
 
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lemminx.commons.BadLocationException;
-import org.junit.jupiter.api.condition.EnabledOnOs;
+import org.junit.jupiter.api.condition.DisabledOnOs;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockedStatic;
@@ -25,8 +25,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.LOCALE;
 import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.VERSION;
 import static org.eclipse.lemminx.XMLAssert.r;
-import static org.junit.jupiter.api.condition.OS.LINUX;
-import static org.junit.jupiter.api.condition.OS.MAC;
+import static org.junit.jupiter.api.condition.OS.WINDOWS;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -264,7 +263,7 @@ public class LibertyHoverTest {
         }
 
         @Test
-        //@EnabledOnOs({LINUX, MAC})
+        @DisabledOnOs(WINDOWS)
         public void testXSDSchemaHoverWithValidLocale() throws BadLocationException, IOException {
                 when(settingsService.getLatestRuntimeVersion()).thenReturn("25.0.0.8");
                 when(settingsService.getCurrentLocale()).thenReturn(Locale.FRANCE);
