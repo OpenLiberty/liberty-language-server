@@ -36,16 +36,17 @@ import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
 
 import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.DEFAULT_LIBERTY_VERSION;
+import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.VERSION;
 
 public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGrammarLocationProvider {
     private static final Logger LOGGER = Logger.getLogger(LibertyXSDURIResolver.class.getName());
 
     // Changing this to contain the version in the file name since the file is copied to the local .lemminx cache.
     // This is how we ensure the latest default server schema gets used in each developer environment.
-    private static final String XSD_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server-cached-$VERSION_%s.xsd".replace("$VERSION", DEFAULT_LIBERTY_VERSION);
-    private static final String XSD_CLASSPATH_LOCATION = "/schema/xsd/liberty/server-cached-$VERSION_%s.xsd".replace("$VERSION", DEFAULT_LIBERTY_VERSION);
-    private static final String XSD_RESOURCE_URL_DEFAULT = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server-cached-$VERSION.xsd".replace("$VERSION", DEFAULT_LIBERTY_VERSION);
-    private static final String XSD_CLASSPATH_LOCATION_DEFAULT = "/schema/xsd/liberty/server-cached-$VERSION.xsd".replace("$VERSION", DEFAULT_LIBERTY_VERSION);
+    private static final String XSD_RESOURCE_URL = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server-cached-$VERSION_%s.xsd".replace(VERSION, DEFAULT_LIBERTY_VERSION);
+    private static final String XSD_CLASSPATH_LOCATION = "/schema/xsd/liberty/server-cached-$VERSION_%s.xsd".replace(VERSION, DEFAULT_LIBERTY_VERSION);
+    private static final String XSD_RESOURCE_URL_DEFAULT = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/liberty/server-cached-$VERSION.xsd".replace(VERSION, DEFAULT_LIBERTY_VERSION);
+    private static final String XSD_CLASSPATH_LOCATION_DEFAULT = "/schema/xsd/liberty/server-cached-$VERSION.xsd".replace(VERSION, DEFAULT_LIBERTY_VERSION);
     public static final String LIBERTY_SCHEMA_VERSION_XSD = "https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_schema/$VERSION/open_liberty_schema-$VERSION.xsd";
     public static final String LIBERTY_SCHEMA_VERSION_WITH_LOCALE_XSD = "https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_schema_$LOCALE/$VERSION/open_liberty_schema_$LOCALE-$VERSION.xsd";
 
@@ -124,7 +125,7 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
      * @throws IOException
      */
     public Path getServerXSDFile() throws IOException {
-        Path serverXSDFile = LibertyVersionDownloadUtil.downloadAndCacheLatestResource(LIBERTY_SCHEMA_VERSION_XSD,LIBERTY_SCHEMA_VERSION_WITH_LOCALE_XSD);
+        Path serverXSDFile = LibertyVersionDownloadUtil.downloadAndCacheLatestResource(LIBERTY_SCHEMA_VERSION_XSD, LIBERTY_SCHEMA_VERSION_WITH_LOCALE_XSD);
         // if above download failed, fallback to schema stored in local classpath
         if (serverXSDFile == null) {
             if (Locale.US.equals(SettingsService.getInstance().getCurrentLocale())) {

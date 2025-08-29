@@ -37,6 +37,8 @@ import java.util.logging.Logger;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 
+import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.DEFAULT_LIBERTY_VERSION;
+
 public class LibertyExtension implements IXMLExtension {
 
     private static final Logger LOGGER = Logger.getLogger(LibertyExtension.class.getName());
@@ -64,7 +66,7 @@ public class LibertyExtension implements IXMLExtension {
             LOGGER.info("Latest Open Liberty version found: %s".formatted(latestVersion));
             SettingsService.getInstance().setLatestRuntimeVersion(latestVersion);
         } else {
-            LOGGER.warning("Could not determine the latest Open Liberty version. Using default version");
+            LOGGER.warning("Could not determine the latest Open Liberty version. Using cached default version " + DEFAULT_LIBERTY_VERSION);
         }
         xsdResolver = new LibertyXSDURIResolver();
         xmlExtensionsRegistry.getResolverExtensionManager().registerResolver(xsdResolver);

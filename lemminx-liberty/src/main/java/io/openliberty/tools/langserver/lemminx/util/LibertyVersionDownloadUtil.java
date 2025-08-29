@@ -12,7 +12,6 @@
  *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx.util;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -31,15 +30,17 @@ import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
 import org.w3c.dom.Document;
 import org.w3c.dom.NodeList;
 
+import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.BRAZIL_PORTUGESE_LOCALE;
 import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.DEFAULT_LIBERTY_VERSION;
+import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.LOCALE;
+import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.VERSION;
+import static io.openliberty.tools.langserver.lemminx.util.ResourceBundleUtil.findBestMatchingLocale;
 
 /**
  * A utility to find the latest version of the Open Liberty feature list,
  * first by attempting an HTTP download and then by falling back to a local cache.
  */
 public class LibertyVersionDownloadUtil {
-
-    public static final String VERSION = "$VERSION";
 
     private LibertyVersionDownloadUtil() {
     }
@@ -48,8 +49,10 @@ public class LibertyVersionDownloadUtil {
     private static String METADATA_URL = "https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_featurelist/maven-metadata.xml";
 
     // The path to the local cache file, following the specified convention.
-    private static String CACHE_BASE_DIR = System.getProperty("user.home") + File.separator + ".lemminx" + File.separator + "cache";
-    private static String CACHE_FILE_PATH = CACHE_BASE_DIR + File.separator + "https" + File.separator + "repo1.maven.org" + File.separator + "maven2" + File.separator + "io" + File.separator + "openliberty" + File.separator + "features" + File.separator + "open_liberty_featurelist" + File.separator + "maven-metadata.xml";
+    // Base directory
+    private static String CACHE_BASE_DIR = Paths.get(System.getProperty("user.home"), ".lemminx", "cache").toString();
+    // Full file path
+    private static String CACHE_FILE_PATH = Paths.get(CACHE_BASE_DIR.toString(), "https", "repo1.maven.org", "maven2", "io", "openliberty", "features", "open_liberty_featurelist", "maven-metadata.xml").toString();
     private static final Logger LOGGER = Logger.getLogger(LibertyVersionDownloadUtil.class.getName());
     private static final int MAX_RETRIES = 3;
     private static final int RETRY_DELAY_MS = 5000;
@@ -61,7 +64,7 @@ public class LibertyVersionDownloadUtil {
      */
     public static String getLatestVersionFromMetadata() {
         // Attempt to fetch from the remote URL first.
-        String resourceContent = getResource(METADATA_URL, CACHE_FILE_PATH);
+        String resourceContent = getResource(METADATA_URL, CACHE_FILE_PATH.toString());
         String versionFromRemote = resourceContent != null ? parseVersionFromXml(resourceContent) : null;
         if (versionFromRemote != null) {
             LOGGER.fine("Successfully retrieved version from remote URL.");
@@ -121,7 +124,7 @@ public class LibertyVersionDownloadUtil {
      * @return The latest version string, or null if the file does not exist or parsing fails.
      */
     private static String getVersionFromLocalCache() {
-        Path filePath = Paths.get(CACHE_FILE_PATH);
+        Path filePath = Path.of(CACHE_FILE_PATH);
         if (Files.exists(filePath)) {
             LOGGER.fine("Found local cache file at: %s".formatted(filePath));
             try {
@@ -179,28 +182,41 @@ public class LibertyVersionDownloadUtil {
     }
 
     /**
-     * get url from maven repo
-     * if locale is provided, use different url
-     * @return schemaURl parsed
+     * Constructs a URL for downloading resources from Maven repository based on runtime version and locale.
+     * 
+     * @param url Base URL template with version placeholder
+     * @param urlWithLocale URL template with version and locale placeholders
+     * @return The constructed URL with appropriate version and locale
      */
     private static String parseURL(String url, String urlWithLocale) {
-        String rtVersion = SettingsService.getInstance().getLatestRuntimeVersion();
-        String schemaURL;
-        if (SettingsService.getInstance().getCurrentLocale() == null || SettingsService.getInstance().getCurrentLocale().equals(Locale.US)
-                || SettingsService.getInstance().getCurrentLocale().equals(Locale.ENGLISH) || urlWithLocale == null) {
-            schemaURL = url.replace(VERSION, rtVersion);
-        } else {
-            Locale currentLocale = SettingsService.getInstance().getCurrentLocale();
-            // liberty published file names contain only language code as locale for all locales except Portuguese (Brazil) and Traditional Chinese
-            // filename samples
-            // https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_schema_es/25.0.0.8/open_liberty_schema_es-25.0.0.8.xsd
-            // https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_schema_pt_BR/25.0.0.8/open_liberty_schema_pt_BR-25.0.0.8.xsd
-            schemaURL = urlWithLocale.replace(VERSION, rtVersion).replace("$LOCALE", currentLocale.getLanguage());
-            if (Locale.TAIWAN.equals(currentLocale) || new Locale("pt", "BR").equals(currentLocale)) {
-                schemaURL = urlWithLocale.replace(VERSION, rtVersion).replace("$LOCALE", currentLocale.toString());
-            }
+        final SettingsService settingsService = SettingsService.getInstance();
+        final String rtVersion = settingsService.getLatestRuntimeVersion();
+        
+        // Default to using the base URL with just version replacement
+        final Locale currentLocale = settingsService.getCurrentLocale();
+        
+        // Use base URL in these cases:
+        // 1. No locale information available
+        // 2. No URL with locale template provided
+        // 3. Using English/US locale
+        // 4. No matching locale found in available liberty locales
+        if (currentLocale == null || 
+            urlWithLocale == null || 
+            Locale.US.equals(currentLocale) || 
+            Locale.ENGLISH.equals(currentLocale) || 
+            findBestMatchingLocale(currentLocale) == null) {
+            return url.replace(VERSION, rtVersion != null ? rtVersion : DEFAULT_LIBERTY_VERSION);
         }
-        return schemaURL;
+        
+        // Special handling for specific locales that need full locale code
+        if (Locale.TAIWAN.equals(currentLocale) || BRAZIL_PORTUGESE_LOCALE.equals(currentLocale)) {
+            return urlWithLocale.replace(VERSION, rtVersion)
+                               .replace(LOCALE, currentLocale.toString());
+        }
+        
+        // For all other locales, use just the language code
+        return urlWithLocale.replace(VERSION, rtVersion)
+                           .replace(LOCALE, currentLocale.getLanguage());
     }
 
     /**
