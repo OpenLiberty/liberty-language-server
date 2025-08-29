@@ -52,7 +52,7 @@ public class LibertyVersionDownloadUtil {
     // Base directory
     private static String CACHE_BASE_DIR = Paths.get(System.getProperty("user.home"), ".lemminx", "cache").toString();
     // Full file path
-    private static String CACHE_FILE_PATH = Paths.get(CACHE_BASE_DIR.toString(), "https", "repo1.maven.org", "maven2", "io", "openliberty", "features", "open_liberty_featurelist", "maven-metadata.xml").toString();
+    private static String CACHE_FILE_PATH = Paths.get(CACHE_BASE_DIR, "https", "repo1.maven.org", "maven2", "io", "openliberty", "features", "open_liberty_featurelist", "maven-metadata.xml").toString();
     private static final Logger LOGGER = Logger.getLogger(LibertyVersionDownloadUtil.class.getName());
     private static final int MAX_RETRIES = 3;
     private static final int RETRY_DELAY_MS = 5000;
@@ -64,7 +64,7 @@ public class LibertyVersionDownloadUtil {
      */
     public static String getLatestVersionFromMetadata() {
         // Attempt to fetch from the remote URL first.
-        String resourceContent = getResource(METADATA_URL, CACHE_FILE_PATH.toString());
+        String resourceContent = getResource(METADATA_URL, CACHE_FILE_PATH);
         String versionFromRemote = resourceContent != null ? parseVersionFromXml(resourceContent) : null;
         if (versionFromRemote != null) {
             LOGGER.fine("Successfully retrieved version from remote URL.");
@@ -132,7 +132,7 @@ public class LibertyVersionDownloadUtil {
                 String xmlContent = Files.readString(filePath);
                 return parseVersionFromXml(xmlContent);
             } catch (IOException e) {
-                LOGGER.fine("Failed to read local cache file: " + e.getMessage());
+                LOGGER.warning("Failed to read local cache file: " + e.getMessage());
                 return null;
             }
         } else {
@@ -222,7 +222,7 @@ public class LibertyVersionDownloadUtil {
     /**
      * @param url           schema or featurelist url
      * @param urlWithLocale url with locale placeholder
-     * @return downloaded
+     * @return downloaded resource path
      */
     public static Path downloadAndCacheLatestResource(String url, String urlWithLocale) {
         Path serverResourceFile = null;
@@ -248,11 +248,13 @@ public class LibertyVersionDownloadUtil {
             try {
                 LOGGER.fine("Downloading resource: %s".formatted(resourceURL));
                 // getResource first checks in cache and if not exist, downloads resources
+                // lemminx library api to download and cache file
                 serverResourceFile = resourceManager.getResource(resourceURL);
                 return serverResourceFile; // Success - return immediately
 
             } catch (CacheResourceDownloadingException e) {
                 // Only retry for RESOURCE_LOADING errors
+                // API sometime return RESOURCE_LOADING error which will fix once resource is fully downloaded
                 if (CacheResourceDownloadingException.CacheResourceDownloadingError.RESOURCE_LOADING.equals(e.getErrorCode())) {
                     retryCount++;
                     LOGGER.fine("Download in progress, retrying... (Attempt %s/%s)".formatted(retryCount, MAX_RETRIES));
