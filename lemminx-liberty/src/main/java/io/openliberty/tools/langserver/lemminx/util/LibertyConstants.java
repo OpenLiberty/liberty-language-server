@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 public final class LibertyConstants {
@@ -70,4 +71,10 @@ public final class LibertyConstants {
     }});
 
     public static List<String> filesToWatch= Arrays.asList(SERVER_XML,"server.env","bootstrap.properties");
+    public static final String DEFAULT_LIBERTY_VERSION = "25.0.0.6";
+
+    public static final String VERSION = "$VERSION";
+
+    public static final String LOCALE = "$LOCALE";
+    public static final Locale BRAZIL_PORTUGESE_LOCALE=new Locale("pt", "BR");
 }

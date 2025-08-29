@@ -52,6 +52,8 @@ public class SettingsService {
     private Map<String,Properties> variables;
     private Locale currentLocale = Locale.getDefault();
     private boolean configCopiedToServer = false;
+    private String latestRuntimeVersion;
+
     /**
      * Takes the xml settings object and parses out the Liberty Settings
      * @param xmlSettings - All xml settings provided by the client
@@ -185,5 +187,13 @@ public class SettingsService {
             return pluginConfigFilePath != null;
         }
         return false;
+    }
+
+    public String getLatestRuntimeVersion() {
+        return latestRuntimeVersion;
+    }
+
+    public void setLatestRuntimeVersion(String latestRuntimeVersion) {
+        this.latestRuntimeVersion = latestRuntimeVersion;
     }
 }
