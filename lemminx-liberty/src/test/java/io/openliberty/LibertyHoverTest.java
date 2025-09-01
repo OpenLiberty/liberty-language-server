@@ -22,6 +22,7 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.BRAZIL_PORTUGESE_LOCALE;
 import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.LOCALE;
 import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.VERSION;
 import static org.eclipse.lemminx.XMLAssert.r;
@@ -255,7 +256,7 @@ public class LibertyHoverTest {
                         "       </featureManager>", //
                         "</server>" //
                 );
-                // should default back to 25.0.0.6
+                // should default back to 25.0.0.8
                 XMLAssert.assertHover(serverXML, serverXMLURI, "Defines how the server loads features." + //
                                 System.lineSeparator() + System.lineSeparator() + //
                                 "Source: [open_liberty_schema-25.0.0.8.xsd](" + serverXSDURI + ")", //
@@ -265,13 +266,12 @@ public class LibertyHoverTest {
         // this test is disabled for windows as hover description in french has special characters, which fails assert for description
         // works fine in mac and linux
         @Test
-        @DisabledOnOs(WINDOWS)
         public void testXSDSchemaHoverWithValidLocale() throws BadLocationException, IOException {
                 when(settingsService.getLatestRuntimeVersion()).thenReturn("25.0.0.8");
-                when(settingsService.getCurrentLocale()).thenReturn(Locale.FRANCE);
+                when(settingsService.getCurrentLocale()).thenReturn(BRAZIL_PORTUGESE_LOCALE);
                 String serverXSDURI = new CacheResourcesManager.ResourceToDeploy(
                         LIBERTY_SCHEMA_VERSION_WITH_LOCALE_XSD.replace(VERSION, "25.0.0.8")
-                                .replace(LOCALE, "fr"), LIBERTY_SCHEMA_VERSION_WITH_LOCALE_XSD)
+                                .replace(LOCALE, "pt_BR"), LIBERTY_SCHEMA_VERSION_WITH_LOCALE_XSD)
                         .getDeployedPath().toUri().toString().replace("///", "/");
                 String serverXML = String.join(newLine, //
                         "<server description=\"Sample Liberty server\">", //
@@ -280,10 +280,10 @@ public class LibertyHoverTest {
                         "       </featureManager>", //
                         "</server>" //
                 );
-                // should default back to 25.0.0.6
-                XMLAssert.assertHover(serverXML, serverXMLURI, "Définit comment le serveur charge les fonctions." + //
+                // should default back to 25.0.0.8
+                XMLAssert.assertHover(serverXML, serverXMLURI, "Define como o servidor carrega recursos." + //
                                 System.lineSeparator() + System.lineSeparator() + //
-                                "Source: [open_liberty_schema_fr-25.0.0.8.xsd](" + serverXSDURI + ")", //
+                                "Source: [open_liberty_schema_pt_BR-25.0.0.8.xsd](" + serverXSDURI + ")", //
                         r(1, 8, 1, 22));
         }
 }

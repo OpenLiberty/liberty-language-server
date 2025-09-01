@@ -63,7 +63,7 @@ public class LibertyExtension implements IXMLExtension {
         SettingsService.getInstance().initializeLocale(initializeParams);
         String latestVersion = LibertyVersionDownloadUtil.getLatestVersionFromMetadata();
         if (latestVersion != null) {
-            LOGGER.info("Latest Open Liberty version found: %s".formatted(latestVersion));
+            LOGGER.fine("Latest Open Liberty version found: %s".formatted(latestVersion));
             SettingsService.getInstance().setLatestRuntimeVersion(latestVersion);
         } else {
             LOGGER.warning("Could not determine the latest Open Liberty version. Using cached default version " + DEFAULT_LIBERTY_VERSION);

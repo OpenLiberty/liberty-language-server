@@ -194,7 +194,7 @@ public class LibertyVersionDownloadUtil {
         
         // Default to using the base URL with just version replacement
         final Locale currentLocale = settingsService.getCurrentLocale();
-        
+        String version = rtVersion != null ? rtVersion : DEFAULT_LIBERTY_VERSION;
         // Use base URL in these cases:
         // 1. No locale information available
         // 2. No URL with locale template provided
@@ -205,17 +205,17 @@ public class LibertyVersionDownloadUtil {
             Locale.US.equals(currentLocale) || 
             Locale.ENGLISH.equals(currentLocale) || 
             findBestMatchingLocale(currentLocale) == null) {
-            return url.replace(VERSION, rtVersion != null ? rtVersion : DEFAULT_LIBERTY_VERSION);
+            return url.replace(VERSION, version);
         }
         
         // Special handling for specific locales that need full locale code
         if (Locale.TAIWAN.equals(currentLocale) || BRAZIL_PORTUGESE_LOCALE.equals(currentLocale)) {
-            return urlWithLocale.replace(VERSION, rtVersion)
+            return urlWithLocale.replace(VERSION, version)
                                .replace(LOCALE, currentLocale.toString());
         }
         
         // For all other locales, use just the language code
-        return urlWithLocale.replace(VERSION, rtVersion)
+        return urlWithLocale.replace(VERSION, version)
                            .replace(LOCALE, currentLocale.getLanguage());
     }
 
