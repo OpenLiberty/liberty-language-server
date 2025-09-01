@@ -263,8 +263,6 @@ public class LibertyHoverTest {
                         r(1, 8, 1, 22));
         }
 
-        // this test is disabled for windows as hover description in french has special characters, which fails assert for description
-        // works fine in mac and linux
         @Test
         public void testXSDSchemaHoverWithValidLocale() throws BadLocationException, IOException {
                 when(settingsService.getLatestRuntimeVersion()).thenReturn("25.0.0.8");
