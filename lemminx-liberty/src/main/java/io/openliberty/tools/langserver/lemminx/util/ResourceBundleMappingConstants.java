@@ -58,4 +58,6 @@ public final class ResourceBundleMappingConstants {
     public static final String TITLE_HOVER_ENABLED_BY = "liberty.lemminx.feature.hover.enabled.by.title";
     public static final String TITLE_HOVER_ENABLES = "liberty.lemminx.feature.hover.enables.title";
     public static final String PLATFORM_DESCRIPTION = "liberty.lemminx.platform.hover.%s.description";
+    public static final String TITLE_HOVER_SOURCE = "liberty.lemminx.feature.hover.source.title";
+
 }
