@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2023, 2024     IBM Corporation and others.
+* Copyright (c) 2023, 2025     IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -40,6 +40,23 @@ import javax.xml.transform.stream.StreamSource;
 
 public class DocumentUtil {
     private static final Logger LOGGER = Logger.getLogger(DocumentUtil.class.getName());
+
+    /**
+     * get document using string content
+     * @param docContent
+     * @return document
+     * @throws Exception
+     */
+    public static Document getDocument(String docContent) throws Exception {
+        try {
+            DocumentBuilderFactory docFactory = getDocumentBuilderFactory();
+            DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
+            return docBuilder.parse(new java.io.ByteArrayInputStream(docContent.getBytes()));
+        } catch (Exception e) {
+            LOGGER.warning("Error creating document from xml content: " + docContent +" exception: "+e.getMessage());
+            throw e;
+        }
+    }
 
     public static Document getDocument(File inputFile) throws Exception {
         try {

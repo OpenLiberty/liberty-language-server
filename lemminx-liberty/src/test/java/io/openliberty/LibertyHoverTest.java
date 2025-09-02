@@ -3,12 +3,16 @@ package io.openliberty;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
+import org.apache.commons.io.FilenameUtils;
+import org.eclipse.lemminx.uriresolver.CacheResourcesManager;
 import org.eclipse.lsp4j.WorkspaceFolder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import static io.openliberty.tools.langserver.lemminx.LibertyXSDURIResolver.LIBERTY_SCHEMA_VERSION_WITH_LOCALE_XSD;
 import static io.openliberty.tools.langserver.lemminx.LibertyXSDURIResolver.SERVER_XSD_RESOURCE_DEFAULT;
+import static io.openliberty.tools.langserver.lemminx.LibertyXSDURIResolver.LIBERTY_SCHEMA_VERSION_XSD;
 
 import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lemminx.commons.BadLocationException;
@@ -17,12 +21,17 @@ import org.mockito.Mock;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.BRAZIL_PORTUGESE_LOCALE;
+import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.LOCALE;
+import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.VERSION;
 import static org.eclipse.lemminx.XMLAssert.r;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,6 +42,7 @@ import java.util.Properties;
 @ExtendWith(MockitoExtension.class)
 public class LibertyHoverTest {
 
+        public static final String TEST_VERSION = "25.0.0.8";
         @Mock
         SettingsService settingsService;
 
@@ -54,6 +64,7 @@ public class LibertyHoverTest {
                 settings=Mockito.mockStatic(SettingsService.class);
                 settings.when(SettingsService::getInstance).thenReturn(settingsService);
                 when(settingsService.getCurrentLocale()).thenReturn(Locale.US);
+                when(settingsService.getLatestRuntimeVersion()).thenReturn(null);
         }
 
         @AfterEach
@@ -209,5 +220,69 @@ public class LibertyHoverTest {
                 XMLAssert.assertHover(serverXML, serverXMLURI,
                         "default.http.port = 9080",
                         r(5, 33, 5, 55));
+        }
+
+        @Test
+        public void testXSDSchemaHoverWithLatestVersion() throws BadLocationException, IOException {
+                when(settingsService.getLatestRuntimeVersion()).thenReturn(TEST_VERSION);
+                String serverXSDURI = new CacheResourcesManager.ResourceToDeploy(
+                        LIBERTY_SCHEMA_VERSION_XSD.replace(VERSION, TEST_VERSION), LIBERTY_SCHEMA_VERSION_XSD)
+                        .getDeployedPath().toUri().toString().replace("///", "/");
+
+                String serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <feature|Manager>", //
+                        "               <feature>jaxrs-2.1</feature>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+
+                XMLAssert.assertHover(serverXML, serverXMLURI, "Defines how the server loads features." + //
+                                System.lineSeparator() + System.lineSeparator() + //
+                                "Source: ["+ FilenameUtils.getName(serverXSDURI) +"](" + serverXSDURI + ")", //
+                        r(1, 8, 1, 22));
+        }
+
+        @Test
+        public void testXSDSchemaHoverWithInvalidLocale() throws BadLocationException, IOException {
+                when(settingsService.getLatestRuntimeVersion()).thenReturn(TEST_VERSION);
+                when(settingsService.getCurrentLocale()).thenReturn(new Locale("hi","ind"));
+                String serverXSDURI = new CacheResourcesManager.ResourceToDeploy(
+                        LIBERTY_SCHEMA_VERSION_XSD.replace(VERSION, TEST_VERSION), LIBERTY_SCHEMA_VERSION_XSD)
+                        .getDeployedPath().toUri().toString().replace("///", "/");
+                String serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <feature|Manager>", //
+                        "               <feature>jaxrs-2.1</feature>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+                // should default back to TEST_VERSION
+                XMLAssert.assertHover(serverXML, serverXMLURI, "Defines how the server loads features." + //
+                                System.lineSeparator() + System.lineSeparator() + //
+                                "Source: ["+ FilenameUtils.getName(serverXSDURI) +"](" + serverXSDURI + ")", //
+                        r(1, 8, 1, 22));
+        }
+
+        @Test
+        public void testXSDSchemaHoverWithValidLocale() throws BadLocationException, IOException {
+                when(settingsService.getLatestRuntimeVersion()).thenReturn(TEST_VERSION);
+                when(settingsService.getCurrentLocale()).thenReturn(BRAZIL_PORTUGESE_LOCALE);
+                String serverXSDURI = new CacheResourcesManager.ResourceToDeploy(
+                        LIBERTY_SCHEMA_VERSION_WITH_LOCALE_XSD.replace(VERSION, TEST_VERSION)
+                                .replace(LOCALE, "pt_BR"), LIBERTY_SCHEMA_VERSION_WITH_LOCALE_XSD)
+                        .getDeployedPath().toUri().toString().replace("///", "/");
+                String serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <feature|Manager>", //
+                        "               <feature>jaxrs-2.1</feature>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+                // should default back to 25.0.0.8
+                XMLAssert.assertHover(serverXML, serverXMLURI, "Define como o servidor carrega recursos." + //
+                                System.lineSeparator() + System.lineSeparator() + //
+                                "Source: ["+ FilenameUtils.getName(serverXSDURI) +"](" + serverXSDURI + ")", //
+                        r(1, 8, 1, 22));
         }
 }

@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2023 IBM Corporation and others.
+* Copyright (c) 2020, 2025 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -14,6 +14,7 @@ package io.openliberty.tools.langserver.lemminx;
 
 import io.openliberty.tools.langserver.lemminx.services.FileWatchService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
+import io.openliberty.tools.langserver.lemminx.util.LibertyVersionDownloadUtil;
 import org.eclipse.lemminx.services.extensions.IDocumentLinkParticipant;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionParticipant;
 import org.eclipse.lemminx.services.extensions.completion.ICompletionParticipant;
@@ -35,6 +36,8 @@ import java.util.logging.Logger;
 
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
+
+import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.DEFAULT_LIBERTY_VERSION;
 
 public class LibertyExtension implements IXMLExtension {
 
@@ -58,6 +61,13 @@ public class LibertyExtension implements IXMLExtension {
             LOGGER.warning("Could not get workspace folders: " + e.toString());
         }
         SettingsService.getInstance().initializeLocale(initializeParams);
+        String latestVersion = LibertyVersionDownloadUtil.getLatestVersionFromMetadata();
+        if (latestVersion != null) {
+            LOGGER.fine("Latest Open Liberty version found: %s".formatted(latestVersion));
+            SettingsService.getInstance().setLatestRuntimeVersion(latestVersion);
+        } else {
+            LOGGER.warning("Could not determine the latest Open Liberty version. Using cached default version " + DEFAULT_LIBERTY_VERSION);
+        }
         xsdResolver = new LibertyXSDURIResolver();
         xmlExtensionsRegistry.getResolverExtensionManager().registerResolver(xsdResolver);
 
