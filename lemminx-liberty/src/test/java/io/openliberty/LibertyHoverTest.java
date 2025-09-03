@@ -53,7 +53,7 @@ public class LibertyHoverTest {
         LibertyProjectsManager libPM;
         LibertyWorkspace libWorkspace;
         static String serverXMLURI = new File(srcResourcesDir, "test/server.xml").toURI().toString();
-
+        static File featureListJson = new File("src/main/resources/features-cached-25.0.0.6.json");
 
         @BeforeEach
         public void setup(){
@@ -284,5 +284,49 @@ public class LibertyHoverTest {
                                 System.lineSeparator() + System.lineSeparator() + //
                                 "Source: ["+ FilenameUtils.getName(serverXSDURI) +"](" + serverXSDURI + ")", //
                         r(1, 8, 1, 22));
+        }
+
+        @Test
+        public void testFeatureHoverWithSource() throws BadLocationException {
+                when(settingsService.getFeatureJsonFilePath()).thenReturn(featureListJson.toPath());
+                String serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <feature>j|axrs-2.1</feature>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+
+                XMLAssert.assertHover(serverXML, serverXMLURI,
+                        "Description: This feature enables support for Java API for RESTful Web Services v2.1.  "
+                                + "JAX-RS annotations can be used to define web service clients and endpoints that comply with the REST architectural style. "
+                                + "Endpoints are accessed through a common interface that is based on the HTTP standard methods."
+                                + "  \n  \n"
+                                + "Enabled by: microProfile-2.0, microProfile-2.1, microProfile-2.2, microProfile-3.0, microProfile-3.2, microProfile-3.3, microProfile-4.0, microProfile-4.1, mpOpenAPI-2.0, opentracing-1.3, opentracing-2.0, webProfile-8.0"
+                                + "  \n  \n"
+                                + "Enables: jaxrsClient-2.1, servlet-4.0"
+                                + "  \n  \n"
+                                + "Source: [" + featureListJson.getName() + "](" + featureListJson.toPath().toUri() + ")",
+                        r(2, 24, 2, 33));
+
+        }
+
+        @Test
+        public void testFeatureHoverWithSourceForVersionless() throws BadLocationException {
+                when(settingsService.getFeatureJsonFilePath()).thenReturn(featureListJson.toPath());
+                String serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <feature>j|axrs</feature>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+
+                XMLAssert.assertHover(serverXML, serverXMLURI,
+                        "Description: This feature enables support for versionless jaxrs."
+                                + "  \n  \n"
+                                + "Source: [" + featureListJson.getName() + "](" + featureListJson.toPath().toUri() + ")",
+                        r(2, 24, 2, 29));
+
         }
 }

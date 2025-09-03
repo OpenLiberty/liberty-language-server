@@ -53,6 +53,7 @@ public class SettingsService {
     private Locale currentLocale = Locale.getDefault();
     private boolean configCopiedToServer = false;
     private String latestRuntimeVersion;
+    private Path featureJsonFilePath;
 
     /**
      * Takes the xml settings object and parses out the Liberty Settings
@@ -195,5 +196,13 @@ public class SettingsService {
 
     public void setLatestRuntimeVersion(String latestRuntimeVersion) {
         this.latestRuntimeVersion = latestRuntimeVersion;
+    }
+
+    public Path getFeatureJsonFilePath() {
+        return featureJsonFilePath;
+    }
+
+    public void setFeatureJsonFilePath(Path featureJsonFilePath) {
+        this.featureJsonFilePath = featureJsonFilePath;
     }
 }

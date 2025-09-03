@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
@@ -232,5 +233,32 @@ public class LibertyWorkspaceIT {
                 .setUri(serverXmlFile.toURI().toString());
         codeActions.add(invalidCodeAction);
         XMLAssert.testCodeActionsFor(serverXML, serverXmlFile.toURI().toString(), invalid1, codeActions.get(0), codeActions.get(1));
+
+        // Liberty Runtime version is specified as 25.0.0.7 in pom.xml
+        String jsonFileName = "features-25.0.0.7.json";
+        String jsonFilePath = "maven2/io/openliberty/features/features/25.0.0.7/features-25.0.0.7.json";
+        File jsonFile = new File(LibertyUtils.getTempDir(LibertyProjectsManager.getInstance().getWorkspaceFolder(serverXmlFile.toURI().toString())), jsonFilePath);
+        String jsonFileURI = jsonFile.toPath().toUri().toString();
+
+        serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature>j|axrs-2.1</feature>", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+
+        assertNotNull(SettingsService.getInstance().getFeatureJsonFilePath(), "FeatureJsonFilePath is unexpectedly null.");
+        XMLAssert.assertHover(serverXML, serverXmlFile.toURI().toString(),
+                "Description: This feature enables support for Java API for RESTful Web Services v2.1.  "
+                        + "JAX-RS annotations can be used to define web service clients and endpoints that comply with the REST architectural style. "
+                        + "Endpoints are accessed through a common interface that is based on the HTTP standard methods."
+                        + "  \n  \n"
+                        + "Enabled by: microProfile-2.0, microProfile-2.1, microProfile-2.2, microProfile-3.0, microProfile-3.2, microProfile-3.3, microProfile-4.0, microProfile-4.1, mpOpenAPI-2.0, opentracing-1.3, opentracing-2.0, webProfile-8.0"
+                        + "  \n  \n"
+                        + "Enables: jaxrsClient-2.1, servlet-4.0"
+                        + "  \n  \n"
+                        + "Source: ["+jsonFileName+"]("+jsonFileURI+")",
+                r(2, 24, 2, 33));
     }
 }

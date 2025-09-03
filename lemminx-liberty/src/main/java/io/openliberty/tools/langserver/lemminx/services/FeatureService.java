@@ -12,6 +12,7 @@
 *******************************************************************************/
 package io.openliberty.tools.langserver.lemminx.services;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -35,6 +36,7 @@ import io.openliberty.tools.langserver.lemminx.models.feature.FeatureTolerate;
 import io.openliberty.tools.langserver.lemminx.models.feature.FeaturesAndPlatforms;
 import io.openliberty.tools.langserver.lemminx.models.feature.PrivateFeature;
 
+import io.openliberty.tools.langserver.lemminx.util.LibertyVersionDownloadUtil;
 import io.openliberty.tools.langserver.lemminx.util.SchemaAndFeatureListGeneratorUtil;
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.dom.DOMNode;
@@ -58,6 +60,8 @@ import io.openliberty.tools.langserver.lemminx.models.feature.FeatureInfo;
 import io.openliberty.tools.langserver.lemminx.models.feature.WlpInformation;
 import io.openliberty.tools.langserver.lemminx.util.LibertyConstants;
 import io.openliberty.tools.langserver.lemminx.util.LibertyUtils;
+import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.DEFAULT_LIBERTY_VERSION;
+import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.VERSION;
 
 public class FeatureService {
 
@@ -77,6 +81,11 @@ public class FeatureService {
     private static final String FEATURELIST_XML_CLASSPATH_LOCATION = "/featurelist.cached/featurelist-cached-25.0.0.6_%s.xml";
     private static final String FEATURELIST_XML_RESOURCE_URL_DEFAULT = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/featurelist.cached/featurelist-cached-25.0.0.6.xml";
     private static final String FEATURELIST_XML_CLASSPATH_LOCATION_DEFAULT = "/featurelist.cached/featurelist-cached-25.0.0.6.xml";
+    public static final String LIBERTY_FEATURELIST_VERSION_XML = "https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_featurelist/$VERSION/open_liberty_featurelist-$VERSION.xml";
+    public static final String LIBERTY_FEATURELIST_VERSION_WITH_LOCALE_XML = "https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_featurelist_$LOCALE/$VERSION/open_liberty_featurelist_$LOCALE-$VERSION.xml";
+    public static final String FEATURES_JSON_URI = "https://repo1.maven.org/maven2/io/openliberty/features/features/$VERSION/features-$VERSION.json";
+    public static final String DEFAULT_FEATURES_JSON_FILENAME = "features-cached-$VERSION.json".replace(VERSION, DEFAULT_LIBERTY_VERSION);
+    public static final String FEATURES_CACHED_25_0_0_6_JSON = "https://repo1.maven.org/maven2/io/openliberty/features/" + DEFAULT_FEATURES_JSON_FILENAME;
 
     /**
      * FEATURELIST_XML_RESOURCE is the featurelist xml that is located at FEATURELIST_XML_CLASSPATH_LOCATION
@@ -118,22 +127,30 @@ public class FeatureService {
      * @param libertyVersion - version of Liberty to fetch features for
      * @return list of features supported by the provided version of Liberty
      */
-    private FeaturesAndPlatforms fetchFeaturesForVersion(String libertyVersion, String libertyRuntime) throws IOException, JsonParseException {
-        String featureEndpoint = libertyRuntime.equals("wlp") ? String.format(wlpFeatureEndpoint, libertyVersion) : 
+    private FeaturesAndPlatforms fetchFeaturesForVersion(String libertyVersion, String libertyRuntime, LibertyWorkspace workspaceFolder) throws IOException, JsonParseException {
+        String featureEndpoint = libertyRuntime.equals("wlp") ? String.format(wlpFeatureEndpoint, libertyVersion) :
                                                                 String.format(olFeatureEndpoint, libertyVersion);
 
-        InputStreamReader reader = new InputStreamReader(new URL(featureEndpoint).openStream());
+        URL featureJsonURL = new URL(featureEndpoint);
+        File tempDir = LibertyUtils.getTempDir(workspaceFolder);
+        File jsonDestFile = new File(tempDir, featureJsonURL.getFile());
+        LibertyVersionDownloadUtil.getResource(featureEndpoint,jsonDestFile.getPath());
+        // saving feature.json to .libertyls folder first and then reading from there
+        // saved because this would help to show URL in hover
+        InputStreamReader reader = new InputStreamReader(new FileInputStream(jsonDestFile));
 
         // Only need the public features
         FeaturesAndPlatforms fp = readFeaturesAndPlatforms(reader);
 
         if (libertyRuntime.equals("wlp")) {
             // need to also get the OpenLiberty features and add them to the list to return
-            FeaturesAndPlatforms olFP = fetchFeaturesForVersion(libertyVersion, "ol");
+            FeaturesAndPlatforms olFP = fetchFeaturesForVersion(libertyVersion, "ol", workspaceFolder);
             fp.addFeaturesAndPlatforms(olFP);
         }
 
         LOGGER.info("Returning public features and platforms from Maven - features: " + fp.getPublicFeatures().size()+" platforms: "+fp.getPlatforms().size());
+        LOGGER.fine("Setting feature json path using endpoint %s cached to %s".formatted(featureEndpoint,jsonDestFile.toURI()));
+        SettingsService.getInstance().setFeatureJsonFilePath(Path.of(jsonDestFile.toURI()));
         return fp;
     }
 
@@ -143,25 +160,48 @@ public class FeatureService {
      * @return list of features and platforms supported by the default version of Liberty
      */
     private FeaturesAndPlatforms getDefaultFeaturesAndPlatforms() {
-        try {
-            if (defaultFeaturesAndPlatforms == null) {
-                // Changing this to contain the version in the file name since the file is copied to the local .lemminx cache. 
-                // This is how we ensure the latest default features json gets used in each developer environment. 
-                InputStream is = getClass().getClassLoader().getResourceAsStream("features-cached-25.0.0.6.json");
+        InputStream is = null;
+        if (defaultFeaturesAndPlatforms == null) {
+            try {
+                Path featureVersionPath = LibertyVersionDownloadUtil.downloadAndCacheLatestResource(FEATURES_JSON_URI, null);
+                if (featureVersionPath != null) {
+                    is = new FileInputStream(featureVersionPath.toFile());
+                    LOGGER.info("Setting feature json by downloading latest version cached to %s".formatted(featureVersionPath));
+                    SettingsService.getInstance().setFeatureJsonFilePath(featureVersionPath);
+                } else {
+                    // falling back to the json stored in local
+                    // caching this to .lemminx folder as well to show URL in hover
+                    ResourceToDeploy featureJsonResource = new ResourceToDeploy(FEATURES_CACHED_25_0_0_6_JSON, DEFAULT_FEATURES_JSON_FILENAME);
+                    Path deployedPath = CacheResourcesManager.getResourceCachePath(featureJsonResource);
+                    is = new FileInputStream(deployedPath.toFile());
+                    LOGGER.info("Setting feature json by caching local version stored in classpath to %s".formatted(deployedPath));
+                    SettingsService.getInstance().setFeatureJsonFilePath(deployedPath);
+                }
                 InputStreamReader reader = new InputStreamReader(is, StandardCharsets.UTF_8);
 
                 // Only need the public features
                 defaultFeaturesAndPlatforms = readFeaturesAndPlatforms(reader);
+            } catch (JsonParseException | IOException e) {
+                // unable to read json in resources file, return empty list
+                LOGGER.severe("Error: Unable to get default features and platforms.");
+                defaultFeaturesAndPlatforms = new FeaturesAndPlatforms();
+                return defaultFeaturesAndPlatforms;
+            } catch (Exception e) {
+                LOGGER.severe("Error: " + e.getMessage());
+                defaultFeaturesAndPlatforms = new FeaturesAndPlatforms();
+                return defaultFeaturesAndPlatforms;
+            } finally {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                        LOGGER.severe("Error: Unable to close input stream " + e.getMessage());
+                    }
+                }
             }
-            LOGGER.info("Returning default list of features and platforms");
-            return defaultFeaturesAndPlatforms;
-
-        } catch (JsonParseException e) {
-            // unable to read json in resources file, return empty list
-            LOGGER.severe("Error: Unable to get default features and platforms.");
-            defaultFeaturesAndPlatforms = new FeaturesAndPlatforms();
-            return defaultFeaturesAndPlatforms;
         }
+        LOGGER.info("Returning default list of features and platforms");
+        return defaultFeaturesAndPlatforms;
     }
 
     /**
@@ -229,7 +269,8 @@ public class FeatureService {
                 // switching back and forth between projects.
                 long currentTime = System.currentTimeMillis();
                 if (this.featureUpdateTime == -1 || currentTime >= (this.featureUpdateTime + (requestDelay * 1000))) {
-                    FeaturesAndPlatforms features = fetchFeaturesForVersion(libertyVersion, libertyRuntime);
+                    LibertyWorkspace workspaceFolder = LibertyProjectsManager.getInstance().getWorkspaceFolder(documentURI);
+                    FeaturesAndPlatforms features = fetchFeaturesForVersion(libertyVersion, libertyRuntime, workspaceFolder);
                     featureAndPlatformCache.put(featureCacheKey, features);
                     this.featureUpdateTime = System.currentTimeMillis();
                     return features;
@@ -433,17 +474,20 @@ public class FeatureService {
     }
 
     private static Path getFeaturelistXmlFile() throws IOException {
-        Path featurelistXmlFile;
-        if (Locale.US.equals(SettingsService.getInstance().getCurrentLocale())) {
-            LOGGER.info("Locale is %s. Using default feature list cache xml in %s".formatted(SettingsService.getInstance().getCurrentLocale(), FEATURELIST_XML_RESOURCE));
-            return CacheResourcesManager.getResourceCachePath(FEATURELIST_XML_RESOURCE_DEFAULT);
-        }
-        try {
-            LOGGER.info("Using Locale %s to find feature list xml in %s".formatted(SettingsService.getInstance().getCurrentLocale(), FEATURELIST_XML_RESOURCE));
-            featurelistXmlFile = CacheResourcesManager.getResourceCachePath(FEATURELIST_XML_RESOURCE);
-        } catch (Exception e) {
-            LOGGER.warning("Unable to find localized feature list cache using current locale %s. Using default feature list cache xml in %s".formatted(SettingsService.getInstance().getCurrentLocale(), FEATURELIST_XML_RESOURCE_DEFAULT));
-            featurelistXmlFile = CacheResourcesManager.getResourceCachePath(FEATURELIST_XML_RESOURCE_DEFAULT);
+        Path featurelistXmlFile = LibertyVersionDownloadUtil.downloadAndCacheLatestResource(LIBERTY_FEATURELIST_VERSION_XML, LIBERTY_FEATURELIST_VERSION_WITH_LOCALE_XML);
+        // fallback to classpath cached file
+        if (featurelistXmlFile == null) {
+            if (Locale.US.equals(SettingsService.getInstance().getCurrentLocale())) {
+                LOGGER.info("Locale is %s. Using default feature list cache xml in %s".formatted(SettingsService.getInstance().getCurrentLocale(), FEATURELIST_XML_RESOURCE));
+                return CacheResourcesManager.getResourceCachePath(FEATURELIST_XML_RESOURCE_DEFAULT);
+            }
+            try {
+                LOGGER.info("Using Locale %s to find feature list xml in %s".formatted(SettingsService.getInstance().getCurrentLocale(), FEATURELIST_XML_RESOURCE));
+                featurelistXmlFile = CacheResourcesManager.getResourceCachePath(FEATURELIST_XML_RESOURCE);
+            } catch (Exception e) {
+                LOGGER.warning("Unable to find localized feature list cache using current locale %s. Using default feature list cache xml in %s".formatted(SettingsService.getInstance().getCurrentLocale(), FEATURELIST_XML_RESOURCE_DEFAULT));
+                featurelistXmlFile = CacheResourcesManager.getResourceCachePath(FEATURELIST_XML_RESOURCE_DEFAULT);
+            }
         }
         return featurelistXmlFile;
     }
@@ -799,5 +843,16 @@ public class FeatureService {
                 .map(LibertyUtils::stripVersion)
                 .filter(feature -> featureNames.contains(feature.toLowerCase()))
                 .collect(Collectors.toSet());
+    }
+
+    /**
+     * Clean featurelist and platforms cache when needed
+     * Used for tests
+     */
+    public void evictCache() {
+        featureAndPlatformCache = new HashMap<>();
+        featureUpdateTime = -1;
+        defaultFeatureList = null;
+        defaultFeaturesAndPlatforms = null;
     }
 }
