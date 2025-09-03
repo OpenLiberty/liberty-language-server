@@ -310,4 +310,23 @@ public class LibertyHoverTest {
                         r(2, 24, 2, 33));
 
         }
+
+        @Test
+        public void testFeatureHoverWithSourceForVersionless() throws BadLocationException {
+                when(settingsService.getFeatureJsonFilePath()).thenReturn(featureListJson.toPath());
+                String serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "               <feature>j|axrs</feature>", //
+                        "       </featureManager>", //
+                        "</server>" //
+                );
+
+                XMLAssert.assertHover(serverXML, serverXMLURI,
+                        "Description: This feature enables support for versionless jaxrs."
+                                + "  \n  \n"
+                                + "Source: [" + featureListJson.getName() + "](" + featureListJson.toPath().toUri() + ")",
+                        r(2, 24, 2, 29));
+
+        }
 }

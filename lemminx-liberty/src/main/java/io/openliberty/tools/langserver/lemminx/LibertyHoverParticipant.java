@@ -134,8 +134,12 @@ public class LibertyHoverParticipant implements IHoverParticipant {
         Optional<Feature> feature = FeatureService.getInstance().getFeature(featureName, libertyVersion, libertyRuntime, requestDelay, domDocument.getDocumentURI());
         if (feature.isPresent()) {
             StringBuilder sb = new StringBuilder();
-            sb.append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_HOVER_DESCRIPTION) + " ");
-            sb.append(feature.get().getShortDescription());
+            sb.append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_HOVER_DESCRIPTION)).append(" ");
+            String description = feature.get().getShortDescription();
+            sb.append(description);
+            if (!description.endsWith(".")) {
+                sb.append(".");
+            }
             addFeatureListSource(sb);
             return new Hover(new MarkupContent(MarkupKind.MARKDOWN, sb.toString()));
         }
@@ -161,10 +165,10 @@ public class LibertyHoverParticipant implements IHoverParticipant {
 
         // if this is a versionless feature, do not add any info about enables or enabled by
         if (flNode.isVersionless()) {
-            addFeatureListSource(sb);
             if (!description.endsWith(".")) {
                 sb.append(".");
             }
+            addFeatureListSource(sb);
             return new Hover(new MarkupContent(MarkupKind.MARKDOWN, sb.toString()));
         }
 

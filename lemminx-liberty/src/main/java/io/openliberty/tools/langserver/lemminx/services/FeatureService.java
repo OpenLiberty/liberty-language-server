@@ -85,7 +85,7 @@ public class FeatureService {
     public static final String LIBERTY_FEATURELIST_VERSION_WITH_LOCALE_XML = "https://repo1.maven.org/maven2/io/openliberty/features/open_liberty_featurelist_$LOCALE/$VERSION/open_liberty_featurelist_$LOCALE-$VERSION.xml";
     public static final String FEATURES_JSON_URI = "https://repo1.maven.org/maven2/io/openliberty/features/features/$VERSION/features-$VERSION.json";
     public static final String DEFAULT_FEATURES_JSON_FILENAME = "features-cached-$VERSION.json".replace(VERSION, DEFAULT_LIBERTY_VERSION);
-    public static final String FEATURES_FEATURES_FEATURES_CACHED_25_0_0_6_JSON = "https://repo1.maven.org/maven2/io/openliberty/features/" + DEFAULT_FEATURES_JSON_FILENAME;
+    public static final String FEATURES_CACHED_25_0_0_6_JSON = "https://repo1.maven.org/maven2/io/openliberty/features/" + DEFAULT_FEATURES_JSON_FILENAME;
 
     /**
      * FEATURELIST_XML_RESOURCE is the featurelist xml that is located at FEATURELIST_XML_CLASSPATH_LOCATION
@@ -171,7 +171,7 @@ public class FeatureService {
                 } else {
                     // falling back to the json stored in local
                     // caching this to .lemminx folder as well to show URL in hover
-                    ResourceToDeploy featureJsonResource = new ResourceToDeploy(FEATURES_FEATURES_FEATURES_CACHED_25_0_0_6_JSON, DEFAULT_FEATURES_JSON_FILENAME);
+                    ResourceToDeploy featureJsonResource = new ResourceToDeploy(FEATURES_CACHED_25_0_0_6_JSON, DEFAULT_FEATURES_JSON_FILENAME);
                     Path deployedPath = CacheResourcesManager.getResourceCachePath(featureJsonResource);
                     is = new FileInputStream(deployedPath.toFile());
                     LOGGER.info("Setting feature json by caching local version stored in classpath to %s".formatted(deployedPath));
