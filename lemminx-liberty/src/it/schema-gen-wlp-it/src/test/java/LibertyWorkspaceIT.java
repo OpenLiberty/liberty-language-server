@@ -96,6 +96,6 @@ public class LibertyWorkspaceIT {
 
         org.junit.jupiter.api.Assertions.assertFalse(featurelistFile.exists(), "Found unexpected generated featurelist file: "+featureListName);
         // this version test needs to be updated whenever a new liberty version is released
-        org.junit.jupiter.api.Assertions.assertEquals(SettingsService.getInstance().getLatestRuntimeVersion(), "25.0.0.8");
+        org.junit.jupiter.api.Assertions.assertEquals(SettingsService.getInstance().getLatestRuntimeVersion(), "25.0.0.9");
     }
 }

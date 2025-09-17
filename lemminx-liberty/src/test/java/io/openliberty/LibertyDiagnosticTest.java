@@ -145,6 +145,25 @@ public class LibertyDiagnosticTest {
     }
 
     @Test
+    public void testEmptyFeatureDiagnostic() throws BadLocationException{
+        String serverXML = String.join(newLine, //
+                "<server description=\"Sample Liberty server\">", //
+                "       <featureManager>", //
+                "               <feature></feature>", //
+                "               <!-- <feature>comment</feature> -->", //
+                "       </featureManager>", //
+                "</server>" //
+        );
+        Diagnostic invalid1 = new Diagnostic();
+        invalid1.setRange(r(2, 15, 2, 34));
+        invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
+        invalid1.setMessage("ERROR: The feature node should not be empty.");
+
+
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, invalid1);
+    }
+
+    @Test
     public void testInvalidFeatureDiagnostic() throws BadLocationException{
         String serverXML = String.join(newLine, //
                 "<server description=\"Sample Liberty server\">", //

@@ -42,6 +42,7 @@ public final class ResourceBundleMappingConstants {
     public static final String WARN_VARIABLE_INVALID_VALUE = "liberty.lemminx.variable.value.invalid.warning";
     public static final String ERR_VARIABLE_NOT_EXIST = "liberty.lemminx.variable.does.not.exist.error";
     public static final String ERR_INCOMPATIBLE_FEATURES = "liberty.lemminx.features.incompatible.error";
+    public static final String ERR_FEATURE_EMPTY = "liberty.lemminx.feature.empty.error";
 
     public static final String TITLE_ADD_OPTIONAL_ATTRIBUTE = "liberty.lemminx.codeaction.add.optional.attribute.title";
     public static final String TITLE_SET_OPTIONAL_ATTRIBUTE = "liberty.lemminx.codeaction.set.optional.attribute.title";

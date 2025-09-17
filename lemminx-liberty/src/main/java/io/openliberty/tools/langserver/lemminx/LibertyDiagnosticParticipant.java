@@ -14,6 +14,7 @@ package io.openliberty.tools.langserver.lemminx;
 
 import com.google.common.collect.Sets;
 import io.openliberty.tools.langserver.lemminx.models.feature.VariableLoc;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.lemminx.dom.DOMAttr;
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.dom.DOMNode;
@@ -158,6 +159,12 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             // check for platform element
             if (LibertyConstants.PLATFORM_ELEMENT.equals(featureNode.getLocalName())) {
                 validatePlatform(domDocument, list, featureTextNode, preferredPlatformsWithoutVersion, preferredPlatforms);
+            } else if (LibertyConstants.FEATURE_ELEMENT.equals(featureNode.getLocalName()) && (featureTextNode == null || StringUtils.isEmpty(featureTextNode.getTextContent()))) {
+                // check for empty feature node
+                Range range = XMLPositionUtility.createRange(featureNode.getStart(), featureNode.getEnd(),
+                        domDocument);
+                String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_FEATURE_EMPTY);
+                list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
             } else {
                 validateFeature(domDocument, list, includedFeatures, featureTextNode, libertyVersion, libertyRuntime, requestDelay, versionedFeatures, versionlessFeatures, featuresWithoutVersions, featureList);
             }
