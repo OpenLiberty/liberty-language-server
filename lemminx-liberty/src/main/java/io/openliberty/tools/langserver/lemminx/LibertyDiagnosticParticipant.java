@@ -158,7 +158,15 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
             // check for platform element
             if (LibertyConstants.PLATFORM_ELEMENT.equals(featureNode.getLocalName())) {
-                validatePlatform(domDocument, list, featureTextNode, preferredPlatformsWithoutVersion, preferredPlatforms);
+                if (featureTextNode != null && featureTextNode.getTextContent() != null) {
+                    validatePlatform(domDocument, list, featureTextNode, preferredPlatformsWithoutVersion, preferredPlatforms);
+                } else {
+                    // empty platform validation
+                    Range range = XMLPositionUtility.createRange(featureNode.getStart(), featureNode.getEnd(),
+                            domDocument);
+                    String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.WARN_PLATFORM_EMPTY);
+                    list.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE, INCORRECT_PLATFORM_CODE));
+                }
             } else if (LibertyConstants.FEATURE_ELEMENT.equals(featureNode.getLocalName()) && (featureTextNode == null || StringUtils.isEmpty(featureTextNode.getTextContent()))) {
                 // check for empty feature node
                 Range range = XMLPositionUtility.createRange(featureNode.getStart(), featureNode.getEnd(),
@@ -421,7 +429,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         String libertyRuntime = runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
 
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
-        if (featureTextNode != null && featureTextNode.getTextContent() != null) {
+
             String platformName = featureTextNode.getTextContent().trim();
             String platformNameLowerCase = platformName.toLowerCase();
             String platformNoVersionLower = platformNameLowerCase.contains("-") ? platformNameLowerCase.substring(0, platformNameLowerCase.lastIndexOf("-"))
@@ -448,7 +456,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 preferredPlatforms.add(platformNameLowerCase);
 
             }
-        }
+
     }
 
     /**

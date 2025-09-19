@@ -157,7 +157,7 @@ public class LibertyDiagnosticTest {
         Diagnostic invalid1 = new Diagnostic();
         invalid1.setRange(r(2, 15, 2, 34));
         invalid1.setCode(LibertyDiagnosticParticipant.INCORRECT_FEATURE_CODE);
-        invalid1.setMessage("ERROR: The feature node should not be empty.");
+        invalid1.setMessage("ERROR: An empty value for feature is not valid. Specify a valid feature or remove the feature element.");
 
 
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, invalid1);
@@ -508,6 +508,8 @@ public class LibertyDiagnosticTest {
                 "               <platform>javaee-8.0</platform>", //
                 "               <platform>jakartaee-9.1</platform>", //
                 "               <platform>jakartaee-11.0</platform>", //
+                "               <!-- <platform>comment</platform> -->", //
+                "               <platform></platform>", //
                 "       </featureManager>", //
                 "</server>" //
         );
@@ -534,9 +536,12 @@ public class LibertyDiagnosticTest {
         invalid5.setCode(LibertyDiagnosticParticipant.INCORRECT_PLATFORM_CODE);
         invalid5.setMessage("ERROR: The platform \"jakartaee-11.0\" does not exist."); // beta platform should not be valid
 
-
+        Diagnostic invalid6 = new Diagnostic();
+        invalid6.setRange(r(11, 15, 11, 36));
+        invalid6.setCode(LibertyDiagnosticParticipant.INCORRECT_PLATFORM_CODE);
+        invalid6.setMessage("WARNING: An empty value for platform is not valid. Specify a valid platform or remove the platform element.");
         XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI,
-                invalid1, invalid2, invalid3, invalid4, invalid5);
+                invalid1, invalid2, invalid3, invalid4, invalid5, invalid6);
     }
 
     @Test
