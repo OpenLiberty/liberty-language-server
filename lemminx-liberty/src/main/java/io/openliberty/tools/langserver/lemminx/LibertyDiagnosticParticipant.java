@@ -14,6 +14,7 @@ package io.openliberty.tools.langserver.lemminx;
 
 import com.google.common.collect.Sets;
 import io.openliberty.tools.langserver.lemminx.models.feature.VariableLoc;
+import org.apache.commons.lang3.StringUtils;
 import org.eclipse.lemminx.dom.DOMAttr;
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.dom.DOMNode;
@@ -157,15 +158,40 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             DOMNode featureTextNode = (DOMNode) featureNode.getChildNodes().item(0);
             // check for platform element
             if (LibertyConstants.PLATFORM_ELEMENT.equals(featureNode.getLocalName())) {
-                validatePlatform(domDocument, list, featureTextNode, preferredPlatformsWithoutVersion, preferredPlatforms);
-            } else {
-                validateFeature(domDocument, list, includedFeatures, featureTextNode, libertyVersion, libertyRuntime, requestDelay, versionedFeatures, versionlessFeatures, featuresWithoutVersions, featureList);
+                if (featureTextNodeNotEmpty(featureTextNode)) {
+                    validatePlatform(domDocument, list, featureTextNode, preferredPlatformsWithoutVersion, preferredPlatforms);
+                } else {
+                    // empty platform validation
+                    Range range = XMLPositionUtility.createRange(featureNode.getStart(), featureNode.getEnd(),
+                            domDocument);
+                    String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.WARN_PLATFORM_EMPTY);
+                    list.add(new Diagnostic(range, message, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE, INCORRECT_PLATFORM_CODE));
+                }
+            } else if (LibertyConstants.FEATURE_ELEMENT.equals(featureNode.getLocalName())) {
+                if (featureTextNodeNotEmpty(featureTextNode)) {
+                    validateFeature(domDocument, list, includedFeatures, featureTextNode, libertyVersion, libertyRuntime, requestDelay, versionedFeatures, versionlessFeatures, featuresWithoutVersions, featureList);
+                } else {
+                    // check for empty feature node
+                    Range range = XMLPositionUtility.createRange(featureNode.getStart(), featureNode.getEnd(),
+                            domDocument);
+                    String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_FEATURE_EMPTY);
+                    list.add(new Diagnostic(range, message, DiagnosticSeverity.Error, LIBERTY_LEMMINX_SOURCE, INCORRECT_FEATURE_CODE));
+                }
             }
         }
         checkForPlatFormAndFeature(domDocument, list, versionlessFeatures, features, preferredPlatforms, versionedFeatures);
 
         // Feature compatibility validation
         validateFeatureCompatibility(versionedFeatures, domDocument, list, libertyVersion, libertyRuntime, requestDelay, features);
+    }
+
+    /**
+     * check feature text node content is empty or not
+     * @param featureTextNode
+     * @return true if node is not empty
+     */
+    private static boolean featureTextNodeNotEmpty(DOMNode featureTextNode) {
+        return featureTextNode != null && featureTextNode.getTextContent() != null && !StringUtils.isEmpty(featureTextNode.getTextContent());
     }
 
     private void validateFeature(DOMDocument domDocument, List<Diagnostic> list, Set<String> includedFeatures, DOMNode featureTextNode, String libertyVersion, String libertyRuntime, int requestDelay, Set<String> versionedFeatures, Set<String> versionlessFeatures, Set<String> featuresWithoutVersions, Set<String> featureList) {
@@ -414,7 +440,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         String libertyRuntime = runtimeInfo == null ? null : runtimeInfo.getRuntimeType();
 
         final int requestDelay = SettingsService.getInstance().getRequestDelay();
-        if (featureTextNode != null && featureTextNode.getTextContent() != null) {
+
             String platformName = featureTextNode.getTextContent().trim();
             String platformNameLowerCase = platformName.toLowerCase();
             String platformNoVersionLower = platformNameLowerCase.contains("-") ? platformNameLowerCase.substring(0, platformNameLowerCase.lastIndexOf("-"))
@@ -441,7 +467,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 preferredPlatforms.add(platformNameLowerCase);
 
             }
-        }
+
     }
 
     /**
