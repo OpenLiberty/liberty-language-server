@@ -8,12 +8,15 @@ import org.eclipse.lsp4j.Position;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextDocumentIdentifier;
 import org.eclipse.lsp4j.TextEdit;
+import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 import org.junit.Test;
 
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
@@ -109,6 +112,59 @@ public class InvalidPropertyQuickfixTest extends CodeActionQuickfixFactoryTest {
         checkRetrievedCodeAction(textDocumentIdentifier, codeActionsCompletableFuture, expectedRange, expectedCodeActions);
     }
 
+    @Test
+    public void testReturnCodeActionForQuickfixForServerEnvWithNoValue() throws FileNotFoundException, ExecutionException, InterruptedException {
+        TextDocumentIdentifier textDocumentIdentifier = initAndLaunchDiagnostic("src/test/resources/workspace/codeaction/src/main/liberty/config3/", "server.env");
+
+        Diagnostic diagnostic = lastPublishedDiagnostics.getDiagnostics().get(0);
+
+        Range expectedRange = new Range(new Position(0, 26), new Position(0, 26));
+        List<Diagnostic> diagnostics = new ArrayList<>();
+        Diagnostic diagnostic1 = new Diagnostic(expectedRange, "The value is empty for the variable `WLP_LOGGING_MESSAGE_SOURCE`. Check whether a value should be specified.");
+        diagnostic1.setCode(ERROR_CODE_INVALID_PROPERTY_VALUE);
+        diagnostic1.setSeverity(DiagnosticSeverity.Warning);
+        diagnostic1.setSource("Liberty Config Language Server");
+        diagnostics.add(diagnostic1);
+        diagnostic1.setData("");
+        CompletableFuture<List<Either<Command, CodeAction>>> codeActionsCompletableFuture = retrieveCodeActions(textDocumentIdentifier, diagnostic);
+        List<CodeAction> expectedCodeActions = populateCodeActions(diagnostics, "Insert value message",
+                "Insert value trace", "Insert value accessLog",
+                "Insert value ffdc", "Insert value audit");
+
+        Map<String, List<TextEdit>> changeMap = new HashMap<>(Map.of(textDocumentIdentifier.getUri(),
+                List.of(new TextEdit(diagnostic1.getRange(), "=message"))));
+        WorkspaceEdit edit = new WorkspaceEdit();
+        edit.setChanges(changeMap);
+        expectedCodeActions.get(0).setEdit(edit);
+        checkRetrievedCodeAction(textDocumentIdentifier, codeActionsCompletableFuture, expectedRange, expectedCodeActions);
+    }
+
+
+    @Test
+    public void testReturnCodeActionForQuickfixForBootstrapWithNoValue() throws FileNotFoundException, ExecutionException, InterruptedException {
+        TextDocumentIdentifier textDocumentIdentifier = initAndLaunchDiagnostic("src/test/resources/workspace/codeaction/src/main/liberty/config3/","bootstrap.properties");
+
+        Diagnostic diagnostic = lastPublishedDiagnostics.getDiagnostics().get(0);
+
+        Range expectedRange = new Range(new Position(0, 33), new Position(0, 33));
+        List<Diagnostic> diagnostics = new ArrayList<>();
+        Diagnostic diagnostic1 = new Diagnostic(expectedRange, "The value is empty for the property `com.ibm.ws.logging.console.source`. Check whether a value should be specified.");
+        diagnostic1.setCode(ERROR_CODE_INVALID_PROPERTY_VALUE);
+        diagnostic1.setSeverity(DiagnosticSeverity.Warning);
+        diagnostic1.setSource("Liberty Config Language Server");
+        diagnostics.add(diagnostic1);
+        diagnostic1.setData("");
+        CompletableFuture<List<Either<Command, CodeAction>>> codeActionsCompletableFuture = retrieveCodeActions(textDocumentIdentifier, diagnostic);
+        List<CodeAction> expectedCodeActions = populateCodeActions(diagnostics, "Insert value message",
+                "Insert value trace", "Insert value accessLog",
+                "Insert value ffdc", "Insert value audit");
+        Map<String, List<TextEdit>> changeMap = new HashMap<>(Map.of(textDocumentIdentifier.getUri(),
+                List.of(new TextEdit(diagnostic1.getRange(), "=message"))));
+        WorkspaceEdit edit = new WorkspaceEdit();
+        edit.setChanges(changeMap);
+        expectedCodeActions.get(0).setEdit(edit);
+        checkRetrievedCodeAction(textDocumentIdentifier, codeActionsCompletableFuture, expectedRange, expectedCodeActions);
+    }
 
     private void checkRetrievedCodeAction(TextDocumentIdentifier textDocumentIdentifier, CompletableFuture<List<Either<Command, CodeAction>>> codeActions, Range expectedRange, List<CodeAction> expectedCodeActions)
             throws InterruptedException, ExecutionException {

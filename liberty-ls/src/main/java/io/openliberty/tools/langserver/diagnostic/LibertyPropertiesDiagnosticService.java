@@ -35,6 +35,10 @@ import io.openliberty.tools.langserver.ls.LibertyTextDocument;
 import io.openliberty.tools.langserver.utils.PropertiesValidationResult;
 import io.openliberty.tools.langserver.utils.ServerPropertyValues;
 
+import static io.openliberty.tools.langserver.utils.LanguageServerConstants.EMPTY_PROPERTY_VALUE;
+import static io.openliberty.tools.langserver.utils.LanguageServerConstants.EMPTY_VARIABLE_VALUE;
+import static io.openliberty.tools.langserver.utils.LanguageServerConstants.SYMBOL_EQUALS;
+
 public class LibertyPropertiesDiagnosticService  {
 
     private static final Logger LOGGER = Logger.getLogger(LibertyPropertiesDiagnosticService.class.getName());
@@ -102,13 +106,19 @@ public class LibertyPropertiesDiagnosticService  {
      * @return
      */
     private Range computeRange(PropertiesValidationResult validationResult, String lineContentInError) {
-        int equalIndex = lineContentInError.indexOf("=");
+        int equalIndex = lineContentInError.indexOf(SYMBOL_EQUALS);
         int lineNumber = validationResult.getLineNumber();
         Integer startChar = validationResult.getStartChar();
         Integer endChar = validationResult.getEndChar();
-
-        Position start = startChar == null ? new Position(lineNumber, equalIndex +1) : new Position(lineNumber, startChar);
+        String diagnosticType = validationResult.getDiagnosticType();
+        Position start;
         Position end = endChar == null ? new Position(lineNumber, lineContentInError.length()) : new Position(lineNumber, endChar);
+        // when the user property is correct but user has not supplied equals, diagnostic needs to be shown only on the last char(end position)
+        if (equalIndex == -1 && (diagnosticType.equals(EMPTY_VARIABLE_VALUE)|| diagnosticType.equals(EMPTY_PROPERTY_VALUE))) {
+            start = end;
+        } else {
+            start = startChar == null ? new Position(lineNumber, equalIndex + 1) : new Position(lineNumber, startChar);
+        }
         return new Range(start, end);
     }
     

@@ -35,6 +35,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.openliberty.tools.langserver.utils.LanguageServerConstants.SYMBOL_EQUALS;
+
 public abstract class CodeActionQuickfixFactory {
 
     protected LibertyTextDocumentService libertyTextDocumentService;
@@ -79,7 +81,7 @@ public abstract class CodeActionQuickfixFactory {
                     if (!Objects.equals(prefix, "")) {
                         // add a code action to just replace with valid values
                         // present in current string
-                        res.add(Either.forRight(createCodeAction(params, diagnostic, prefix)));
+                        res.add(Either.forRight(createCodeAction(params, diagnostic, prefix, line)));
                         // append a comma so that completion will show all values
                         // for multi value
                         prefix += ",";
@@ -90,7 +92,7 @@ public abstract class CodeActionQuickfixFactory {
                     List<String> possibleProperties = retrieveCompletionValues(openedDocument, diagnostic.getRange().getStart(), prefix);
                     for (String mostProbableProperty : possibleProperties) {
                         // expected format for a code action is <Command,CodeAction>
-                        res.add(Either.forRight(createCodeAction(params, diagnostic, mostProbableProperty)));
+                        res.add(Either.forRight(createCodeAction(params, diagnostic, mostProbableProperty, line)));
                     }
                 }
             }
@@ -120,13 +122,22 @@ public abstract class CodeActionQuickfixFactory {
 
     /**
      * used to create code action object for quickfix
-     * @param params codeaction params
-     * @param diagnostic diagnostic for which code action to be shown
+     *
+     * @param params           codeaction params
+     * @param diagnostic       diagnostic for which code action to be shown
      * @param possibleProperty completion value
+     * @param currentLine      current diagnostic line
      * @return codeaction
      */
-    protected CodeAction createCodeAction(CodeActionParams params, Diagnostic diagnostic, String possibleProperty) {
-        CodeAction codeAction = new CodeAction("Replace value with " + possibleProperty);
+    protected CodeAction createCodeAction(CodeActionParams params, Diagnostic diagnostic, String possibleProperty, String currentLine) {
+        CodeAction codeAction;
+        if (!currentLine.contains(SYMBOL_EQUALS)) {
+            // append equals symbol before inserting property
+            codeAction = new CodeAction("Insert value " + possibleProperty);
+            possibleProperty = SYMBOL_EQUALS + possibleProperty;
+        } else {
+            codeAction = new CodeAction("Replace value with " + possibleProperty);
+        }
         codeAction.setDiagnostics(Collections.singletonList(diagnostic));
         codeAction.setKind(CodeActionKind.QuickFix);
         Map<String, List<TextEdit>> changes = new HashMap<>();
