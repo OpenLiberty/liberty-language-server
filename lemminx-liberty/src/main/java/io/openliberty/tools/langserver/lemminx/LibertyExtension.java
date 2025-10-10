@@ -61,6 +61,7 @@ public class LibertyExtension implements IXMLExtension {
         } catch (NullPointerException e) {
             LOGGER.warning("Could not get workspace folders: " + e.toString());
         }
+//        This is disabled till we have globalization support in all of liberty tools
 //        SettingsService.getInstance().initializeLocale(initializeParams);
         SettingsService.getInstance().setLocale(Locale.ENGLISH);
         String latestVersion = LibertyVersionDownloadUtil.getLatestVersionFromMetadata();
