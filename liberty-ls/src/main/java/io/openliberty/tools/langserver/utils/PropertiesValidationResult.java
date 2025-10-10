@@ -14,7 +14,6 @@ package io.openliberty.tools.langserver.utils;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -93,8 +92,8 @@ public class PropertiesValidationResult {
             if (value == null || value.isEmpty()) {
                 // if a value is not specified, issue a warning not an error
                 hasWarnings = true;
-                diagnosticType = LibertyConfigFileManager.isBootstrapPropertiesFile(textDocumentItem) ? 
-                                            "EMPTY_PROPERTY_VALUE" : "EMPTY_VARIABLE_VALUE";
+                diagnosticType = LibertyConfigFileManager.isBootstrapPropertiesFile(textDocumentItem) ?
+                        LanguageServerConstants.EMPTY_PROPERTY_VALUE : LanguageServerConstants.EMPTY_VARIABLE_VALUE;
             } else {
                 List<String> validValues = ServerPropertyValues.getValidValues(textDocumentItem, property);
                 if(ServerPropertyValues.isCaseSensitive(property)) {

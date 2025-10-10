@@ -74,6 +74,9 @@ public abstract class CodeActionQuickfixFactoryTest extends AbstractLibertyLangu
         assertEquals(CodeActionKind.QuickFix, actual.getKind());
         assertEquals(expected.getDiagnostics(),actual.getDiagnostics());
         assertEquals(expected.getTitle(),actual.getTitle());
+        if (expected.getEdit() != null) {
+            assertEquals(expected.getEdit(), actual.getEdit());
+        }
     }
 
     protected List<CodeAction> populateCodeActions(List<Diagnostic> diagnostics, String... codeActionTitles){

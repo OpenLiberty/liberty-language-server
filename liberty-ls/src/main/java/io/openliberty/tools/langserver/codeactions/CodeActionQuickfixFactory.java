@@ -35,9 +35,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static io.openliberty.tools.langserver.utils.LanguageServerConstants.SYMBOL_EQUALS;
+
 public abstract class CodeActionQuickfixFactory {
 
-    public static final String SYMBOL_EQUALS = "=";
     protected LibertyTextDocumentService libertyTextDocumentService;
     protected LibertyLanguageServer libertyLanguageServer;
 
@@ -131,8 +132,9 @@ public abstract class CodeActionQuickfixFactory {
     protected CodeAction createCodeAction(CodeActionParams params, Diagnostic diagnostic, String possibleProperty, String currentLine) {
         CodeAction codeAction;
         if (!currentLine.contains(SYMBOL_EQUALS)) {
+            // append equals symbol before inserting property
             codeAction = new CodeAction("Insert value " + possibleProperty);
-            possibleProperty = currentLine.trim() + SYMBOL_EQUALS + possibleProperty;
+            possibleProperty = SYMBOL_EQUALS + possibleProperty;
         } else {
             codeAction = new CodeAction("Replace value with " + possibleProperty);
         }
