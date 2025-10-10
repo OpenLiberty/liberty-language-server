@@ -20,11 +20,14 @@ import io.openliberty.tools.langserver.lemminx.util.ResourceBundleMappingConstan
 import io.openliberty.tools.langserver.lemminx.util.ResourceBundleUtil;
 import org.eclipse.lemminx.commons.CodeActionFactory;
 import org.eclipse.lemminx.dom.DOMDocument;
+import org.eclipse.lemminx.dom.DOMNode;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionParticipant;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionRequest;
+import org.eclipse.lemminx.utils.XMLPositionUtility;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
 
 import java.util.List;
@@ -70,9 +73,12 @@ public class ReplaceVariable implements ICodeActionParticipant {
                 }
                 // code action for add variable
                 Position insertPos = new Position();
-                // variable will be added in the current line where diagnostic is showing
-                // line separator in end of text insert will move current diagnostic line to 1 line
-                insertPos.setLine(diagnostic.getRange().getEnd().getLine());
+                // variable will be added line before current node where diagnostic is showing
+                // line separator in end of text insert will move current node 1 line
+                int offset = document.offsetAt(diagnostic.getRange().getStart());
+                DOMNode node = document.findNodeAt(offset);
+                Range range= XMLPositionUtility.createRange(node.getStart(), node.getEnd(),document);
+                insertPos.setLine(range.getStart().getLine());
                 codeActions.add(CodeActionFactory.insert(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_ADD_VARIABLE, invalidVariable), insertPos,
                         String.format("    <variable name=\"%s\" value=\"\"/> %s", invalidVariable, System.lineSeparator()),
                         document.getTextDocument(), diagnostic));
