@@ -32,6 +32,7 @@ import java.io.File;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.logging.Logger;
 
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
@@ -60,7 +61,8 @@ public class LibertyExtension implements IXMLExtension {
         } catch (NullPointerException e) {
             LOGGER.warning("Could not get workspace folders: " + e.toString());
         }
-        SettingsService.getInstance().initializeLocale(initializeParams);
+//        SettingsService.getInstance().initializeLocale(initializeParams);
+        SettingsService.getInstance().setLocale(Locale.ENGLISH);
         String latestVersion = LibertyVersionDownloadUtil.getLatestVersionFromMetadata();
         if (latestVersion != null) {
             LOGGER.fine("Latest Open Liberty version found: %s".formatted(latestVersion));

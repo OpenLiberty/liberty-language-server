@@ -181,6 +181,14 @@ public class SettingsService {
         }
     }
 
+    /**
+     * Set locale directly
+     * @param locale
+     */
+    public void setLocale(Locale locale) {
+        this.currentLocale = locale;
+    }
+
     // Check if the liberty-plugin-config.xml is copied to server or not
     public boolean isLibertyPluginConfigAvailableInServer(LibertyWorkspace libertyWorkspace) {
         if (libertyWorkspace != null) {
