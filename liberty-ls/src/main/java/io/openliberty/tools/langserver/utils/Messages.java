@@ -35,7 +35,7 @@ public class Messages {
     private static Pattern serverEnvKeyFormat = Pattern.compile("([A-Z]+)(_[A-Z]+)*");
 
     private static synchronized void initializeBundles() {
-        Locale locale = Locale.getDefault();
+        Locale locale = Locale.US;
         serverenvMessages = ResourceBundle.getBundle("ServerEnv", locale);
         bootstrapMessages = ResourceBundle.getBundle("BootstrapProperties", locale);
 

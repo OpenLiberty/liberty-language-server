@@ -63,7 +63,7 @@ public class LibertyExtension implements IXMLExtension {
         }
 //        This is disabled till we have globalization support in all of liberty tools
 //        SettingsService.getInstance().initializeLocale(initializeParams);
-        SettingsService.getInstance().setLocale(Locale.ENGLISH);
+        SettingsService.getInstance().setLocale(Locale.US);
         String latestVersion = LibertyVersionDownloadUtil.getLatestVersionFromMetadata();
         if (latestVersion != null) {
             LOGGER.fine("Latest Open Liberty version found: %s".formatted(latestVersion));
