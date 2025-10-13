@@ -42,7 +42,7 @@ import static io.openliberty.tools.langserver.utils.LanguageServerConstants.SYMB
 public class LibertyPropertiesDiagnosticService  {
 
     private static final Logger LOGGER = Logger.getLogger(LibertyPropertiesDiagnosticService.class.getName());
-    private static final ResourceBundle DiagnosticMessages = ResourceBundle.getBundle("DiagnosticMessages", Locale.getDefault());
+    private static final ResourceBundle DiagnosticMessages = ResourceBundle.getBundle("DiagnosticMessages", Locale.US);
     public static final String ERROR_CODE_INVALID_PROPERTY_VALUE = "unknown_property_value";
 
     public Map<String, PropertiesValidationResult> compute(String text, LibertyTextDocument openedDocument) {
