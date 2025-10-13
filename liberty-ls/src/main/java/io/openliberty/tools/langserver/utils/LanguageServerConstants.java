@@ -18,5 +18,7 @@ public final class LanguageServerConstants {
     }
     public static final String EMPTY_VARIABLE_VALUE = "EMPTY_VARIABLE_VALUE";
     public static final String EMPTY_PROPERTY_VALUE = "EMPTY_PROPERTY_VALUE";
+    public static final String INSERT_VALUE = "INSERT_VALUE";
+    public static final String REPLACE_VALUE = "REPLACE_VALUE";
     public static final String SYMBOL_EQUALS = "=";
 }

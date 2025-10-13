@@ -28,19 +28,25 @@ import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
+import java.util.ResourceBundle;
 
 import static io.openliberty.tools.langserver.utils.LanguageServerConstants.SYMBOL_EQUALS;
+import static io.openliberty.tools.langserver.utils.LanguageServerConstants.INSERT_VALUE;
+import static io.openliberty.tools.langserver.utils.LanguageServerConstants.REPLACE_VALUE;
 
 public abstract class CodeActionQuickfixFactory {
 
     protected LibertyTextDocumentService libertyTextDocumentService;
     protected LibertyLanguageServer libertyLanguageServer;
+    private static final ResourceBundle codeActionMessages = ResourceBundle.getBundle("CodeActionMessages", Locale.US);
 
     protected CodeActionQuickfixFactory(LibertyTextDocumentService libertyTextDocumentService, LibertyLanguageServer libertyLanguageServer) {
         this.libertyTextDocumentService = libertyTextDocumentService;
@@ -133,10 +139,10 @@ public abstract class CodeActionQuickfixFactory {
         CodeAction codeAction;
         if (!currentLine.contains(SYMBOL_EQUALS)) {
             // append equals symbol before inserting property
-            codeAction = new CodeAction("Insert value " + possibleProperty);
+            codeAction = new CodeAction(MessageFormat.format(codeActionMessages.getString(INSERT_VALUE), possibleProperty));
             possibleProperty = SYMBOL_EQUALS + possibleProperty;
         } else {
-            codeAction = new CodeAction("Replace value with " + possibleProperty);
+            codeAction = new CodeAction(MessageFormat.format(codeActionMessages.getString(REPLACE_VALUE), possibleProperty));
         }
         codeAction.setDiagnostics(Collections.singletonList(diagnostic));
         codeAction.setKind(CodeActionKind.QuickFix);
