@@ -59,7 +59,7 @@ public class LibertyCompletionParticipant extends CompletionParticipantAdapter {
                         .getDocumentURI());
         LibertyUtils.checkAndAddNewVariables(request.getXMLDocument(), variableProps);
         //getting all existing variables in current completion prefix string
-        List<VariableLoc> variables = LibertyUtils.getVariablesFromTextContent(valuePrefix);
+        List<VariableLoc> variables = LibertyUtils.getVariablesFromTextContent(request.getXMLDocument(), valuePrefix);
         String variablePrefix = "";
         String completionPrefix;
 

@@ -619,11 +619,13 @@ public class LibertyUtils {
     /**
      * read variables from text content
      * if the text content is ${testVar1}/${testVar2}/app ,response will contain 2 variable values
-     *      [{testVar1,startIndex,endIndex},{testVar2,startIndex,endIndex}]
-     * @param docContent text content
+     * [{testVar1,startIndex,endIndex},{testVar2,startIndex,endIndex}]
+     *
+     * @param domDocument current document
+     * @param docContent  text content
      * @return list of variables.
      */
-    public static List<VariableLoc> getVariablesFromTextContent(String docContent) {
+    public static List<VariableLoc> getVariablesFromTextContent(DOMDocument domDocument, String docContent) {
         List<VariableLoc> variables = new ArrayList<>();
         // Find match between given string
         // and regular expression
@@ -633,7 +635,10 @@ public class LibertyUtils {
         // using find() method
         while (m.find()) {
             VariableLoc variableLoc = new VariableLoc(m.group(1), m.start(1), m.end(1));
-            variables.add(variableLoc);
+            DOMNode node = domDocument.findNodeAt(variableLoc.getStartLoc());
+            if(node!=null && !node.isComment()) {
+                variables.add(variableLoc);
+            }
         }
         return variables;
     }

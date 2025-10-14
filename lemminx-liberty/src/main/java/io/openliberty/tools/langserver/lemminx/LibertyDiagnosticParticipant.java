@@ -113,19 +113,15 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
 
     private void validateVariables(DOMDocument domDocument, List<Diagnostic> diagnosticsList, LibertyWorkspace workspace) {
         String docContent = domDocument.getTextDocument().getText();
-        List<VariableLoc> variables = LibertyUtils.getVariablesFromTextContent(docContent);
-        List<VariableLoc> filteredVars = variables.stream().filter(variableLoc -> {
-                DOMNode node = domDocument.findNodeAt(variableLoc.getStartLoc());
-                //filter out commented nodes
-                return !node.isComment();
-        }).toList();
+        List<VariableLoc> variables = LibertyUtils.getVariablesFromTextContent(domDocument, docContent);
+
         Properties variablesMap = SettingsService.getInstance().getVariablesForServerXml(domDocument.getDocumentURI());
 
         // Check if the liberty plugin config has been copied to the server or not.
         // SettingsService have a setConfigCopiedToServer method, which is setting up after this check for a different purpose, so it can't be used from here
         boolean isLibertyPluginConfigAvailableInServer = SettingsService.getInstance().isLibertyPluginConfigAvailableInServer(workspace);
 
-        if ((variablesMap.isEmpty() || !isLibertyPluginConfigAvailableInServer) && !filteredVars.isEmpty()) {
+        if ((variablesMap.isEmpty() || !isLibertyPluginConfigAvailableInServer) && !variables.isEmpty()) {
             String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.WARN_VARIABLE_RESOLUTION_NOT_AVAILABLE, workspace.getWorkspaceURI().getPath());
             Range range = XMLPositionUtility.createRange(domDocument.getDocumentElement().getStartTagOpenOffset(), domDocument.getDocumentElement().getStartTagCloseOffset(),
                     domDocument);
@@ -138,7 +134,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         // set config copied to server for checkAndAddNewVariables()
         SettingsService.getInstance().setConfigCopiedToServer(true);
         LibertyUtils.checkAndAddNewVariables(domDocument, variablesMap);
-        validateVariableExists(domDocument, diagnosticsList, filteredVars, variablesMap);
+        validateVariableExists(domDocument, diagnosticsList, variables, variablesMap);
         validateVariableDataTypeValues(domDocument,diagnosticsList,variablesMap);
     }
 
