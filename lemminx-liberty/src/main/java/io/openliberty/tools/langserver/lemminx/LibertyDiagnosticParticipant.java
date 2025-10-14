@@ -113,7 +113,8 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
 
     private void validateVariables(DOMDocument domDocument, List<Diagnostic> diagnosticsList, LibertyWorkspace workspace) {
         String docContent = domDocument.getTextDocument().getText();
-        List<VariableLoc> variables = LibertyUtils.getVariablesFromTextContent(docContent);
+        List<VariableLoc> variables = LibertyUtils.getVariablesFromTextContent(domDocument, docContent);
+
         Properties variablesMap = SettingsService.getInstance().getVariablesForServerXml(domDocument.getDocumentURI());
 
         // Check if the liberty plugin config has been copied to the server or not.

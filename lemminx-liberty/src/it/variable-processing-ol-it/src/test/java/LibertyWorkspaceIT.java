@@ -191,13 +191,16 @@ public class LibertyWorkspaceIT {
                 "                <platform>javaee-6.0</platform>", //
                 "                <feature>acmeCA-2.0</feature>", //
                 "       </featureManager>", //
-                " <httpEndpoint host=\"*\" httpPort=\"${default.http.port}\"\n",//
-                "                  httpsPort=\"${default.https}\" id=\"defaultHttpEndpoint\"/>",//
+                " ", //
+                " <httpEndpoint host=\"*\" ",//
+                "        httpPort=\"${default.http.port}\"\n",//
+                "                  httpsPort=\"${default.https}\"",//
+                "        id=\"defaultHttpEndpoint\"/>",//
                 "</server>" //
         );
 
         Diagnostic invalid1 = new Diagnostic();
-        invalid1.setRange(r(7, 29, 7, 45));
+        invalid1.setRange(r(9, 29, 9, 45));
         invalid1.setCode("incorrect_variable");
         invalid1.setMessage("ERROR: The variable \"default.https\" does not exist.");
         invalid1.setData("default.https");
@@ -224,8 +227,9 @@ public class LibertyWorkspaceIT {
                     .get(0).getLeft().getTextDocument()
                     .setUri(serverXmlFile.toURI().toString());
         }
-        texted = te(7, 0,
-                7, 0, String.format("    <variable name=\"%s\" value=\"\"/> %s","default.https",System.lineSeparator()));
+        // code action line is 6, because line#6 is where the httpEndPoint node is placed eventhough the incorrect variable is in line#9
+        texted = te(6, 0,
+                6, 0, String.format("    <variable name=\"%s\" value=\"\"/> %s","default.https",System.lineSeparator()));
         invalidCodeAction = ca(invalid1, texted);
         invalidCodeAction.getEdit()
                 .getDocumentChanges()

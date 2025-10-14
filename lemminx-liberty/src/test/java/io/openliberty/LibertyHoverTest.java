@@ -220,6 +220,21 @@ public class LibertyHoverTest {
                 XMLAssert.assertHover(serverXML, serverXMLURI,
                         "default.http.port = 9080",
                         r(5, 33, 5, 55));
+
+                // no hover if variable is used in commented node
+                serverXML = String.join(newLine, //
+                        "<server description=\"Sample Liberty server\">", //
+                        "       <featureManager>", //
+                        "                <platform>javaee-6.0</platform>", //
+                        "                <feature>acmeCA-2.0</feature>", //
+                        "       </featureManager>", //
+                        "<!-- <httpEndpoint host=\"*\" httpPort=\"${default.|http.port}\"\n",//
+                        "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>  -->",//
+                        "</server>" //
+                );
+                XMLAssert.assertHover(serverXML, serverXMLURI,
+                        null,
+                        r(5, 33, 5, 55));
         }
 
         @Test
