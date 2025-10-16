@@ -5,7 +5,7 @@
 
     <groupId>io.openliberty.tools</groupId>
     <artifactId>liberty-langserver</artifactId>
-    <version>2.4</version>
+    <version>2.4.1-SNAPSHOT</version>
 
     <name>liberty.langserver</name>
     <description>The Liberty Config Language Server provides language server features for Liberty server configuration files through any of the supported client IDEs.</description>
@@ -38,7 +38,7 @@
         <connection>scm:git:git@github.com:OpenLiberty/liberty-language-server.git</connection>
         <developerConnection>scm:git:git@github.com:OpenLiberty/liberty-language-server.git</developerConnection>
         <url>git@github.com:OpenLiberty/liberty-language-server.git</url>
-        <tag>liberty-langserver-2.4</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
