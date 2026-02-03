@@ -146,7 +146,7 @@ public class LibertyWorkspaceIT {
 
             XMLAssert.assertHover(serverXML, serverXmlFile.toURI().toString(),
                     "exp_var_windows = apple_true",
-                    r(5, 33, 5, 51));
+                    r(5, 33, 5, 53));
         }else {
             serverXML = String.join(newLine, //
                     "<server description=\"Sample Liberty server\">", //
