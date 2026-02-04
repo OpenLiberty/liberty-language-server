@@ -28,6 +28,7 @@ import static org.eclipse.lemminx.XMLAssert.*;
 
 public class LibertyWorkspaceIT {
     static String newLine = System.lineSeparator();
+    static final boolean isWindows = System.getProperty("os.name").toLowerCase().indexOf("win") >= 0;
 
     @AfterAll
     public static void tearDown() {
@@ -130,6 +131,38 @@ public class LibertyWorkspaceIT {
         XMLAssert.assertHover(serverXML, serverXmlFile.toURI().toString(),
                 "default.http.port = 9080",
                 r(5, 33, 5, 55));
+        // test for expansion variable
+        if(isWindows){
+            serverXML = String.join(newLine, //
+                    "<server description=\"Sample Liberty server\">", //
+                    "       <featureManager>", //
+                    "                <platform>javaee-6.0</platform>", //
+                    "                <feature>acmeCA-2.0</feature>", //
+                    "       </featureManager>", //
+                    " <httpEndpoint host=\"*\" httpPort=\"${exp_va|r_windows}\"\n",//
+                    "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
+                    "</server>" //
+            );
+
+            XMLAssert.assertHover(serverXML, serverXmlFile.toURI().toString(),
+                    "exp_var_windows = apple_true",
+                    r(5, 33, 5, 53));
+        }else {
+            serverXML = String.join(newLine, //
+                    "<server description=\"Sample Liberty server\">", //
+                    "       <featureManager>", //
+                    "                <platform>javaee-6.0</platform>", //
+                    "                <feature>acmeCA-2.0</feature>", //
+                    "       </featureManager>", //
+                    " <httpEndpoint host=\"*\" httpPort=\"${exp_va|r_linux}\"\n",//
+                    "                  httpsPort=\"${default.https.port}\" id=\"defaultHttpEndpoint\"/>",//
+                    "</server>" //
+            );
+
+            XMLAssert.assertHover(serverXML, serverXmlFile.toURI().toString(),
+                    "exp_var_linux = apple_test2",
+                    r(5, 33, 5, 51));
+        }
     }
 
     @Test
