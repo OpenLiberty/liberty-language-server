@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2025 IBM Corporation and others.
+* Copyright (c) 2020, 2026 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -77,6 +77,15 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             XMLValidationSettings validationSettings, CancelChecker cancelChecker) {
         if (!LibertyUtils.isConfigXMLFile(domDocument))
             return;
+
+        File domDocumentFile = LibertyUtils.getDocumentAsFile(domDocument);
+        if (!LibertyUtils.isConfigXMLFileReferenced(domDocument)) {
+            String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.WARN_LIBERTY_CONFIG_NOT_REFERENCED, domDocumentFile.getName());
+            Range range = XMLPositionUtility.createRange(domDocument.getDocumentElement().getStartTagOpenOffset(), domDocument.getDocumentElement().getStartTagCloseOffset(),
+                    domDocument);
+            Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE);
+            diagnostics.add(diag);
+        }
         try {
             validateDom(domDocument, diagnostics);
         } catch (IOException e) {

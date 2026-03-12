@@ -39,7 +39,7 @@ public class LibertyWorkspaceIT {
     @Test
     public void testGetVariables() throws BadLocationException {
         File testFolder = new File(System.getProperty("user.dir"));
-        File serverXmlFile = new File(testFolder, "src/main/liberty/config/server.xml");
+        File serverXmlFile = new File(testFolder, "src/main/liberty/config/server4.xml");
 
         //Configure Liberty workspace for testing
         WorkspaceFolder testWorkspace = new WorkspaceFolder(testFolder.toURI().toString());
@@ -109,7 +109,7 @@ public class LibertyWorkspaceIT {
     public void testVariableHover() throws BadLocationException {
 
         File testFolder = new File(System.getProperty("user.dir"));
-        File serverXmlFile = new File(testFolder, "src/main/liberty/config/server.xml");
+        File serverXmlFile = new File(testFolder, "src/main/liberty/config/server4.xml");
 
         //Configure Liberty workspace for testing
         WorkspaceFolder testWorkspace = new WorkspaceFolder(testFolder.toURI().toString());
@@ -169,7 +169,7 @@ public class LibertyWorkspaceIT {
     public void testInvalidVariableDiagnostic() {
 
         File testFolder = new File(System.getProperty("user.dir"));
-        File serverXmlFile = new File(testFolder, "src/main/liberty/config/server.xml");
+        File serverXmlFile = new File(testFolder, "src/main/liberty/config/server4.xml");
 
         //Configure Liberty workspace for testing
         WorkspaceFolder testWorkspace = new WorkspaceFolder(testFolder.toURI().toString());
@@ -188,6 +188,12 @@ public class LibertyWorkspaceIT {
                 "</server>" //
         );
 
+        Diagnostic notReferencedDiagnostic = new Diagnostic();
+        notReferencedDiagnostic.setRange(r(0, 0, 0, 43));
+        notReferencedDiagnostic.setMessage("WARNING: The current configuration file server4.xml is not configured with server defined in the Liberty Maven/Gradle plugin configuration. Liberty tools features remain active for this file, though it will not be copied to the target Liberty runtime.");
+        notReferencedDiagnostic.setSource("liberty-lemminx");
+        notReferencedDiagnostic.setSeverity(DiagnosticSeverity.Warning);
+
         Diagnostic dup1 = new Diagnostic();
         dup1.setRange(r(5, 34, 5, 56));
         dup1.setCode("incorrect_variable");
@@ -204,14 +210,14 @@ public class LibertyWorkspaceIT {
         dup2.setMessage("ERROR: The variable \"default.httpsj.port\" does not exist.");
         dup2.setData("default.httpsj.port");
 
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXmlFile.toURI().toString(), false, dup1, dup2);
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXmlFile.toURI().toString(), false, notReferencedDiagnostic, dup1, dup2);
     }
 
     @Test
     public void testInvalidVariableDiagnosticWithCodeAction() throws IOException, BadLocationException {
 
         File testFolder = new File(System.getProperty("user.dir"));
-        File serverXmlFile = new File(testFolder, "src/main/liberty/config/server.xml");
+        File serverXmlFile = new File(testFolder, "src/main/liberty/config/server4.xml");
 
         //Configure Liberty workspace for testing
         WorkspaceFolder testWorkspace = new WorkspaceFolder(testFolder.toURI().toString());
@@ -232,6 +238,12 @@ public class LibertyWorkspaceIT {
                 "</server>" //
         );
 
+        Diagnostic notReferencedDiagnostic = new Diagnostic();
+        notReferencedDiagnostic.setRange(r(0, 0, 0, 43));
+        notReferencedDiagnostic.setMessage("WARNING: The current configuration file server4.xml is not configured with server defined in the Liberty Maven/Gradle plugin configuration. Liberty tools features remain active for this file, though it will not be copied to the target Liberty runtime.");
+        notReferencedDiagnostic.setSource("liberty-lemminx");
+        notReferencedDiagnostic.setSeverity(DiagnosticSeverity.Warning);
+
         Diagnostic invalid1 = new Diagnostic();
         invalid1.setRange(r(9, 29, 9, 45));
         invalid1.setCode("incorrect_variable");
@@ -240,7 +252,7 @@ public class LibertyWorkspaceIT {
         invalid1.setSource("liberty-lemminx");
         invalid1.setSeverity(DiagnosticSeverity.Error);
 
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXmlFile.toURI().toString(), false, invalid1);
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXmlFile.toURI().toString(), false, notReferencedDiagnostic, invalid1);
 
         //  expecting code action to show only default.https.port
         //      1. user has entered "default.https"

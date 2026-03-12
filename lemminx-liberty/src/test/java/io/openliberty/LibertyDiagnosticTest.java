@@ -65,6 +65,7 @@ public class LibertyDiagnosticTest {
     public static String MISSING_CONFIGURED_FEATURE_MESSAGE;
     LibertyWorkspace libWorkspace;
     MockedStatic settings;
+    public static String LIBERTY_CONFIG_NOT_REFERENCED;
 
     @BeforeEach
     public void setupWorkspace() {
@@ -78,6 +79,7 @@ public class LibertyDiagnosticTest {
         Mockito.lenient().when(settingsService.getCurrentLocale()).thenReturn(Locale.getDefault());
         Mockito.lenient().when(settingsService.isLibertyPluginConfigAvailableInServer(any())).thenReturn(true);
         MISSING_CONFIGURED_FEATURE_MESSAGE = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.ERR_MISSING_CONFIGURED_FEATURE_MESSAGE);
+        LIBERTY_CONFIG_NOT_REFERENCED = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.WARN_LIBERTY_CONFIG_NOT_REFERENCED, "sample-server.xml");
     }
 
     @AfterEach
@@ -405,13 +407,16 @@ public class LibertyDiagnosticTest {
                 configElement,
                 "</server>"
         );
+        Diagnostic notReferencedDiagnostic = new Diagnostic();
+        notReferencedDiagnostic.setRange(r(0, 0, 0, 43));
+        notReferencedDiagnostic.setMessage(LIBERTY_CONFIG_NOT_REFERENCED);
 
         Diagnostic config_for_missing_feature = new Diagnostic();
         config_for_missing_feature.setRange(r(4, diagnosticStart, 4, diagnosticStart + diagnosticLength));
         config_for_missing_feature.setCode(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE);
         config_for_missing_feature.setMessage(MISSING_CONFIGURED_FEATURE_MESSAGE);
 
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, sampleserverXMLURI, config_for_missing_feature);
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, sampleserverXMLURI, notReferencedDiagnostic, config_for_missing_feature);
 
         // TODO: Add code to check the CodeActions also.
         config_for_missing_feature.setSource("springBootApplication");
@@ -1214,8 +1219,11 @@ public class LibertyDiagnosticTest {
                 configElement,
                 "</server>"
         );
-        // no diagnostics expected, as we have the correct feature
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, sampleserverXMLURI);
+        // only one diagnostics expected (warning for server.xml filename) , as we have the correct feature
+        Diagnostic notReferencedDiagnostic = new Diagnostic();
+        notReferencedDiagnostic.setRange(r(0, 0, 0, 43));
+        notReferencedDiagnostic.setMessage(LIBERTY_CONFIG_NOT_REFERENCED);
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, sampleserverXMLURI, notReferencedDiagnostic);
     }
 
     @Test
@@ -1229,12 +1237,16 @@ public class LibertyDiagnosticTest {
                 configElement,
                 "</server>"
         );
+        Diagnostic notReferencedDiagnostic = new Diagnostic();
+        notReferencedDiagnostic.setRange(r(0, 0, 0, 43));
+        notReferencedDiagnostic.setMessage(LIBERTY_CONFIG_NOT_REFERENCED);
+
         Diagnostic diagnostic = new Diagnostic();
         diagnostic.setRange(r(4, 0, 4, 46));
         diagnostic.setCode(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE);
         diagnostic.setMessage(MISSING_CONFIGURED_FEATURE_MESSAGE);
 
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, sampleserverXMLURI, diagnostic);
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, sampleserverXMLURI, notReferencedDiagnostic, diagnostic);
         diagnostic.setSource("mpMetrics");
 
         List<String> featuresToAdd = new ArrayList<>();
@@ -1284,12 +1296,17 @@ public class LibertyDiagnosticTest {
                 configElement,
                 "</server>"
         );
+
+        Diagnostic notReferencedDiagnostic = new Diagnostic();
+        notReferencedDiagnostic.setRange(r(0, 0, 0, 43));
+        notReferencedDiagnostic.setMessage(LIBERTY_CONFIG_NOT_REFERENCED);
+
         Diagnostic diagnostic = new Diagnostic();
         diagnostic.setRange(r(4, 0, 4, 46));
         diagnostic.setCode(LibertyDiagnosticParticipant.MISSING_CONFIGURED_FEATURE_CODE);
         diagnostic.setMessage(MISSING_CONFIGURED_FEATURE_MESSAGE);
 
-        XMLAssert.testDiagnosticsFor(serverXML, null, null, sampleserverXMLURI, diagnostic);
+        XMLAssert.testDiagnosticsFor(serverXML, null, null, sampleserverXMLURI, notReferencedDiagnostic, diagnostic);
         diagnostic.setSource("mpMetrics");
 
         List<String> featuresToAdd = new ArrayList<String>();

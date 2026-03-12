@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2025 IBM Corporation and others.
+* Copyright (c) 2025, 2026 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -61,5 +61,7 @@ public final class ResourceBundleMappingConstants {
     public static final String TITLE_HOVER_ENABLES = "liberty.lemminx.feature.hover.enables.title";
     public static final String PLATFORM_DESCRIPTION = "liberty.lemminx.platform.hover.%s.description";
     public static final String TITLE_HOVER_SOURCE = "liberty.lemminx.feature.hover.source.title";
+
+    public static final String WARN_LIBERTY_CONFIG_NOT_REFERENCED = "liberty.lemminx.liberty.config.not.configured.warning";
 
 }
