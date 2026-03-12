@@ -190,7 +190,7 @@ public class LibertyWorkspaceIT {
 
         Diagnostic notReferencedDiagnostic = new Diagnostic();
         notReferencedDiagnostic.setRange(r(0, 0, 0, 43));
-        notReferencedDiagnostic.setMessage("server4.xml is not linked to a server in the Liberty Maven/Gradle plugin. Liberty tools are active, but this file will not be copied to the runtime.");
+        notReferencedDiagnostic.setMessage("WARNING: The current configuration file server4.xml is not configured with server defined in the Liberty Maven/Gradle plugin configuration. Liberty tools features remain active for this file, though it will not be copied to the target Liberty runtime.");
         notReferencedDiagnostic.setSource("liberty-lemminx");
         notReferencedDiagnostic.setSeverity(DiagnosticSeverity.Warning);
 
@@ -240,7 +240,7 @@ public class LibertyWorkspaceIT {
 
         Diagnostic notReferencedDiagnostic = new Diagnostic();
         notReferencedDiagnostic.setRange(r(0, 0, 0, 43));
-        notReferencedDiagnostic.setMessage("server4.xml is not linked to a server in the Liberty Maven/Gradle plugin. Liberty tools are active, but this file will not be copied to the runtime.");
+        notReferencedDiagnostic.setMessage("WARNING: The current configuration file server4.xml is not configured with server defined in the Liberty Maven/Gradle plugin configuration. Liberty tools features remain active for this file, though it will not be copied to the target Liberty runtime.");
         notReferencedDiagnostic.setSource("liberty-lemminx");
         notReferencedDiagnostic.setSeverity(DiagnosticSeverity.Warning);
 
