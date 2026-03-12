@@ -62,6 +62,9 @@
                     <groupId>io.openliberty.tools</groupId>
                     <artifactId>liberty-maven-plugin</artifactId>
                     <version>3.7.1</version>
+                    <configuration>
+                        <serverXmlFile>${project.basedir}/src/main/liberty/config/server2.xml</serverXmlFile>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>

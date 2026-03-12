@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2025 IBM Corporation and others.
+* Copyright (c) 2020, 2026 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -26,6 +26,7 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.logging.Logger;
 
+import static io.openliberty.tools.langserver.lemminx.util.LibertyUtils.LIBERTY_PLUGIN_CONFIG_XML;
 import static io.openliberty.tools.langserver.lemminx.util.LibertyUtils.findFileInWorkspace;
 import static io.openliberty.tools.langserver.lemminx.util.ResourceBundleUtil.toLocale;
 
@@ -104,7 +105,7 @@ public class SettingsService {
      */
     public void populateVariablesForWorkspace(LibertyWorkspace workspace) {
         Properties variablesForWorkspace = new Properties();
-        Path pluginConfigFilePath = findFileInWorkspace(workspace, Paths.get("liberty-plugin-config.xml"));
+        Path pluginConfigFilePath = findFileInWorkspace(workspace, Paths.get(LIBERTY_PLUGIN_CONFIG_XML));
         if (pluginConfigFilePath != null) {
             File installDirectory = LibertyUtils.getFileFromLibertyPluginXml(pluginConfigFilePath, "installDirectory");
             File serverDirectory = LibertyUtils.getFileFromLibertyPluginXml(pluginConfigFilePath, "serverDirectory");
@@ -192,7 +193,7 @@ public class SettingsService {
     // Check if the liberty-plugin-config.xml is copied to server or not
     public boolean isLibertyPluginConfigAvailableInServer(LibertyWorkspace libertyWorkspace) {
         if (libertyWorkspace != null) {
-            Path pluginConfigFilePath = LibertyUtils.findFileInWorkspace(libertyWorkspace, Paths.get("liberty-plugin-config.xml"));
+            Path pluginConfigFilePath = LibertyUtils.findFileInWorkspace(libertyWorkspace, Paths.get(LIBERTY_PLUGIN_CONFIG_XML));
             return pluginConfigFilePath != null;
         }
         return false;

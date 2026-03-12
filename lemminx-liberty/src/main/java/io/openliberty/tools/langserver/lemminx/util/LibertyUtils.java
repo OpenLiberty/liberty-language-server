@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2025 IBM Corporation and others.
+* Copyright (c) 2020, 2026 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -52,7 +52,10 @@ import org.eclipse.lsp4j.Range;
 
 import javax.xml.xpath.XPathExpressionException;
 
+import static io.openliberty.tools.langserver.lemminx.util.LibertyConstants.SERVER_XML;
+
 public class LibertyUtils {
+    public static final String LIBERTY_PLUGIN_CONFIG_XML = "liberty-plugin-config.xml";
 
     private static final Logger LOGGER = Logger.getLogger(LibertyUtils.class.getName());
     private static final String INCLUDE_PATTERN_REGEX = ".*/(?:usr/shared/config/.+|configDropins/(?:defaults|overrides)/.+|server\\.xml)$";
@@ -410,7 +413,7 @@ public class LibertyUtils {
         Path props = null;
  
         // check for Liberty installation using liberty-plugin-config.xml which should ensure using the latest Liberty install for the workspace
-        Path pluginConfigFilePath = findFileInWorkspace(libertyWorkspace,Paths.get("liberty-plugin-config.xml"));
+        Path pluginConfigFilePath = findFileInWorkspace(libertyWorkspace,Paths.get(LIBERTY_PLUGIN_CONFIG_XML));
         if (pluginConfigFilePath != null) { //If liberty-plugin-config.xml exists, get installation directory from it
             String installationDirectory  = XmlReader.getElementValue(pluginConfigFilePath, "installDirectory");
             if (installationDirectory != null) {
@@ -481,7 +484,7 @@ public class LibertyUtils {
         }
         try {
             File libertyLSFolder = new File(libertyWorkspace.getDir(), ".libertyls"); //Default to workspaceDir/.libertyls
-            Path pluginConfigFilePath = findFileInWorkspace(libertyWorkspace,Paths.get("liberty-plugin-config.xml"));
+            Path pluginConfigFilePath = findFileInWorkspace(libertyWorkspace,Paths.get(LIBERTY_PLUGIN_CONFIG_XML));
             if (pluginConfigFilePath != null) { //If liberty-plugin-config.xml exists use its parent directory: buildDir/.libertyls
                 libertyLSFolder = new File(pluginConfigFilePath.getParent().toFile(), ".libertyls");
             }
@@ -740,5 +743,45 @@ public class LibertyUtils {
                                 Objects.equals(range.getStart().getLine(), diagnostic.getRange().getStart().getLine()) &&
                                 diagnostic.getCode() != null &&
                                 diagnosticCodes.contains(diagnostic.getCode().getLeft()));
+    }
+
+    /**
+     * Determines if the given DOM document is the active server configuration file referenced by the Liberty plugin configuration.
+     * * <p>The method follows this resolution logic:</p>
+     * 1. If the workspace cannot be resolved, the file is assumed valid (returns {@code true}).
+     * 2. If liberty-plugin-config.xml exists:
+     *      It checks the {@code <configFile>} element. If present, the URI must match exactly.
+     *      If {@code <configFile>} is missing but the file is named server.xml, it returns {@code true}.
+     *      Otherwise, if the file is not the one explicitly configured, it returns {@code false}.
+     *    If no plugin configuration is found, it defaults to {@code true}.
+     * 
+     *
+     * @param domDocument representing the XML file to check.
+     * @return {@code true} if the document is the referenced configuration file orif no restriction is found;
+     * {@code false} if a different file is explicitly configured.
+     */
+    public static boolean isConfigXMLFileReferenced(DOMDocument domDocument) {
+        LibertyWorkspace workspace = LibertyProjectsManager.getInstance().getWorkspaceFolder(domDocument.getDocumentURI());
+        if (workspace == null) {
+            LOGGER.warning("Could not get workspace, considering server config file to be valid");
+            return true;
+        }
+        File domDocumentFile = LibertyUtils.getDocumentAsFile(domDocument);
+        boolean isLibertyPluginConfigAvailableInServer = SettingsService.getInstance().isLibertyPluginConfigAvailableInServer(workspace);
+        if (isLibertyPluginConfigAvailableInServer) {
+            Path pluginConfigFilePath = LibertyUtils.findFileInWorkspace(workspace, Paths.get(LIBERTY_PLUGIN_CONFIG_XML));
+            if (pluginConfigFilePath != null) {
+                File serverXmlFile = LibertyUtils.getFileFromLibertyPluginXml(pluginConfigFilePath, "configFile");
+                if (serverXmlFile != null) {
+                    // configured server.xml is different from the current URI
+                    return serverXmlFile.getPath().equals(domDocumentFile.getPath());
+                }
+                // <configFile> element is not found in plugin-config.xml and current  file name is server.xml, then no need to show diagnostics
+                // when filename is server.xml, its not added to plugin-config.xml by default
+                return domDocumentFile.getName().equals(SERVER_XML);
+            }
+        }
+        // return true if liberty-plugin-config.xml is not found
+        return true;
     }
 }
