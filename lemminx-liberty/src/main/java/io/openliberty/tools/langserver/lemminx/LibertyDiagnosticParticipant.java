@@ -22,13 +22,19 @@ import org.eclipse.lemminx.extensions.contentmodel.settings.XMLValidationSetting
 import org.eclipse.lemminx.services.extensions.diagnostics.IDiagnosticsParticipant;
 import org.eclipse.lemminx.utils.XMLPositionUtility;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticRelatedInformation;
 import org.eclipse.lsp4j.DiagnosticSeverity;
+import org.eclipse.lsp4j.Location;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import io.openliberty.tools.langserver.lemminx.data.FeatureListGraph;
 import io.openliberty.tools.langserver.lemminx.data.LibertyRuntime;
 import io.openliberty.tools.langserver.lemminx.services.FeatureService;
+import io.openliberty.tools.langserver.lemminx.services.LibertyConfigGenerationService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
@@ -77,6 +83,13 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             XMLValidationSettings validationSettings, CancelChecker cancelChecker) {
         if (!LibertyUtils.isConfigXMLFile(domDocument))
             return;
+        
+        // Trigger automatic config generation when Liberty config file is opened
+        triggerConfigGenerationIfNeeded(domDocument);
+        
+        // Check if config generation failed previously and show warning diagnostic
+        addConfigGenerationFailureDiagnostic(domDocument, diagnostics);
+        
         try {
             validateDom(domDocument, diagnostics);
         } catch (IOException e) {
@@ -84,6 +97,200 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
             LOGGER.severe(e.getMessage());
         }
     }
+    
+    /**
+     * Add a warning diagnostic if liberty-plugin-config.xml generation failed.
+     * This provides user feedback about the failure and suggests remediation steps.
+     * Only shows diagnostic for projects that have Liberty Maven or Gradle plugin configured.
+     */
+    private void addConfigGenerationFailureDiagnostic(DOMDocument domDocument, List<Diagnostic> diagnostics) {
+        try {
+            LibertyWorkspace workspace = LibertyProjectsManager.getInstance()
+                .getWorkspaceFolder(domDocument.getDocumentURI());
+            
+            if (workspace == null) {
+                return;
+            }
+            
+            LibertyConfigGenerationService configService = LibertyConfigGenerationService.getInstance();
+            
+            // Only show diagnostic if project has Liberty plugin configured
+            if (!configService.hasLibertyPlugin(workspace)) {
+                return;
+            }
+            
+            if (configService.hasProjectFailed(workspace)) {
+                String errorMessage = configService.getFailureMessage(workspace);
+                String logFilePath = configService.getLogFilePath(workspace);
+                
+                // Detect build tool
+                String projectPath = workspace.getWorkspaceURI().getPath();
+                boolean isMaven = java.nio.file.Files.exists(java.nio.file.Paths.get(projectPath, "pom.xml"));
+                boolean isGradle = java.nio.file.Files.exists(java.nio.file.Paths.get(projectPath, "build.gradle")) ||
+                                   java.nio.file.Files.exists(java.nio.file.Paths.get(projectPath, "build.gradle.kts"));
+                
+                // Create main diagnostic message with error summary and resolution steps
+                StringBuilder message = new StringBuilder();
+                message.append("Liberty configuration generation failed. ");
+                message.append("Full language server features are unavailable until this is resolved.");
+                
+                // Show brief error summary
+                if (errorMessage != null && !errorMessage.isEmpty()) {
+                    String summary = getErrorSummary(errorMessage);
+                    message.append("\n\nError: ").append(summary);
+                }
+                
+                // Add resolution steps to main message (customized for Maven or Gradle)
+                message.append("\n\nResolution steps:");
+                if (isMaven) {
+                    message.append("\n1. Ensure you are using liberty-maven-plugin version 3.11 or later");
+                    message.append("\n2. Run 'mvn liberty:prepare-config' manually in your project");
+                    message.append("\n3. Check that your pom.xml has the liberty-maven-plugin configured");
+                    message.append("\n4. Ensure Maven is installed and accessible from command line");
+                } else if (isGradle) {
+                    message.append("\n1. Ensure you are using liberty-gradle-plugin version 4.1 or later");
+                    message.append("\n2. Run './gradlew libertyPrepareConfig' manually in your project");
+                    message.append("\n3. Check that your build.gradle has the liberty-gradle-plugin configured");
+                    message.append("\n4. Ensure Gradle is installed and accessible from command line");
+                } else {
+                    message.append("\n1. Ensure you are using the latest version of liberty-maven-plugin or liberty-gradle-plugin");
+                    message.append("\n2. Run the prepare-config goal manually in your project");
+                    message.append("\n3. Check that your build file has the Liberty plugin configured");
+                    message.append("\n4. Ensure your build tool is installed and accessible from command line");
+                }
+                message.append("\n5. Review the detailed error log for more information");
+
+                // Create diagnostic at the start of the document (server element)
+                Range range = XMLPositionUtility.createRange(
+                    domDocument.getDocumentElement().getStartTagOpenOffset(),
+                    domDocument.getDocumentElement().getStartTagCloseOffset(),
+                    domDocument
+                );
+                Diagnostic diagnostic = new Diagnostic(
+                    range,
+                    message.toString(),
+                    DiagnosticSeverity.Warning,
+                    LIBERTY_LEMMINX_SOURCE,
+                    "config_generation_failed"
+                );
+                
+                // Add only the build log link as related information
+                if (logFilePath != null) {
+                    List<DiagnosticRelatedInformation> relatedInfo = new ArrayList<>();
+                    Range logRange = new Range(
+                        new org.eclipse.lsp4j.Position(0, 0),
+                        new org.eclipse.lsp4j.Position(0, 0)
+                    );
+                    Location logLocation = new Location("file://" + logFilePath, logRange);
+                    relatedInfo.add(new DiagnosticRelatedInformation(
+                        logLocation,
+                        "View detailed error log"
+                    ));
+                    diagnostic.setRelatedInformation(relatedInfo);
+                }
+                
+                diagnostics.add(diagnostic);
+                
+                LOGGER.info("Added config generation failure diagnostic for workspace: " + workspace.getWorkspaceString());
+            }
+        } catch (Exception e) {
+            LOGGER.warning("Error adding config generation failure diagnostic: " + e.getMessage());
+        }
+    }
+    
+    /**
+     * Extract a brief error summary from the full error message.
+     * Takes the first meaningful line or first 200 characters.
+     */
+    private String getErrorSummary(String errorMessage) {
+        if (errorMessage == null || errorMessage.isEmpty()) {
+            return "Unknown error";
+        }
+        
+        // Try to find the first ERROR line from Maven/Gradle output
+        String[] lines = errorMessage.split("\n");
+        for (String line : lines) {
+            String trimmed = line.trim();
+            if (trimmed.startsWith("[ERROR]") && trimmed.length() > 8) {
+                String error = trimmed.substring(8).trim();
+                if (!error.isEmpty() && !error.equals("")) {
+                    return error.length() > 200 ? error.substring(0, 200) + "..." : error;
+                }
+            }
+        }
+        
+        // If no ERROR line found, take first non-empty line
+        for (String line : lines) {
+            String trimmed = line.trim();
+            if (!trimmed.isEmpty() && !trimmed.startsWith("[INFO]")) {
+                return trimmed.length() > 200 ? trimmed.substring(0, 200) + "..." : trimmed;
+            }
+        }
+        
+        // Fallback: return first 200 characters
+        return errorMessage.length() > 200 ? errorMessage.substring(0, 200) + "..." : errorMessage;
+    }
+    
+    /**
+     * Trigger automatic generation of liberty-plugin-config.xml if needed.
+     * This runs synchronously with a quick timeout to show failures immediately.
+     * If automatic generation fails, marks the project as failed for diagnostic display.
+     * Only triggers for projects that have Liberty Maven or Gradle plugin configured.
+     */
+    private void triggerConfigGenerationIfNeeded(DOMDocument domDocument) {
+        try {
+            LibertyWorkspace workspace = LibertyProjectsManager.getInstance()
+                .getWorkspaceFolder(domDocument.getDocumentURI());
+            
+            if (workspace == null) {
+                LOGGER.fine("No workspace found for document: " + domDocument.getDocumentURI());
+                return;
+            }
+            
+            LibertyConfigGenerationService configService = LibertyConfigGenerationService.getInstance();
+            
+            // Only trigger config generation if project has Liberty plugin configured
+            if (!configService.hasLibertyPlugin(workspace)) {
+                LOGGER.fine("Project does not have Liberty plugin configured, skipping config generation: " +
+                           workspace.getWorkspaceString());
+                return;
+            }
+            
+            if (configService.needsConfigGeneration(workspace)) {
+                LOGGER.info("Triggering config generation for workspace: " + workspace.getWorkspaceString());
+                
+                // Generate config synchronously to show failures immediately in diagnostics
+                // This blocks briefly but ensures users see the error right away
+                try {
+                    LibertyConfigGenerationService.ConfigGenerationResult result =
+                        configService.generateConfigAsync(workspace).get(5, java.util.concurrent.TimeUnit.SECONDS);
+                    
+                    if (result.isSuccess()) {
+                        LOGGER.info(String.format(
+                            "Config generated successfully in %dms: %s",
+                            result.getDuration(),
+                            result.getConfigPath()
+                        ));
+                    } else {
+                        LOGGER.warning("Config generation failed: " + result.getError());
+                        // Mark project as failed - will show warning diagnostic in current pass
+                        configService.markProjectAsFailed(workspace, result.getError(), result.getLogFilePath());
+                    }
+                } catch (java.util.concurrent.TimeoutException e) {
+                    // If it takes too long, let it continue in background
+                    LOGGER.info("Config generation taking longer than expected, continuing in background");
+                } catch (Exception e) {
+                    LOGGER.severe("Error during config generation: " + e.getMessage());
+                    // Mark project as failed - will show warning diagnostic in current pass
+                    configService.markProjectAsFailed(workspace, e.getMessage(), null);
+                }
+            }
+        } catch (Exception e) {
+            // Don't let config generation errors affect diagnostics
+            LOGGER.warning("Error checking config generation need: " + e.getMessage());
+        }
+    }
+    
 
     private void validateDom(DOMDocument domDocument, List<Diagnostic> diagnosticsList) throws IOException {
         List<DOMNode> nodes = domDocument.getDocumentElement().getChildren();

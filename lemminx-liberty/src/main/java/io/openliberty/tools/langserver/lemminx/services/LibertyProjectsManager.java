@@ -177,19 +177,41 @@ public class LibertyProjectsManager {
                 if (workspaceFolderURI != null) {
                     Path rootPath = Paths.get(workspaceFolderURI);
                     List<Path> matchingFiles = Files.walk(rootPath)
-                            .filter(p -> (Files.isDirectory(p) && p.getFileName().endsWith(".libertyls")))
+                            .filter(p -> (Files.isDirectory(p) && p.getFileName().toString().equals(".libertyls")))
                             .collect(Collectors.toList());
 
-                    // delete each liberty ls directory
+                    // delete each liberty ls directory and its contents
                     for (Path libertylsDir : matchingFiles) {
-                        if (!libertylsDir.toFile().delete()) {
-                            LOGGER.warning("Could not delete " + libertylsDir);
-                        }
+                        deleteDirectory(libertylsDir);
                     }
                 }
             } catch (IOException e) {
                 LOGGER.warning("Could not clean up /.libertyls directory: " + e.getMessage());
             }
+        }
+    }
+    
+    /**
+     * Recursively delete a directory and all its contents.
+     *
+     * @param directory The directory to delete
+     */
+    private void deleteDirectory(Path directory) {
+        try {
+            if (Files.exists(directory)) {
+                Files.walk(directory)
+                    .sorted(java.util.Comparator.reverseOrder())
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                            LOGGER.fine("Deleted: " + path);
+                        } catch (IOException e) {
+                            LOGGER.warning("Could not delete " + path + ": " + e.getMessage());
+                        }
+                    });
+            }
+        } catch (IOException e) {
+            LOGGER.warning("Error deleting directory " + directory + ": " + e.getMessage());
         }
     }
 
