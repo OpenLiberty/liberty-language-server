@@ -101,7 +101,7 @@ public class LibertyProjectsManager {
                         } else if (this.libertyWorkspaceFolders.containsKey(lastChildDirPath)) {
                             // this sub-module was already added but we still don't want to add the parent module
                             LOGGER.info("Skipping already added sub-module: " + lastChildDirPath);
-                            addedSubModule = true; 
+                            addedSubModule = true;
                             continue;
                         }
                         // Do not add child dirs as sub-modules if there are src/target/build dirs as siblings. This is not a sub-module.

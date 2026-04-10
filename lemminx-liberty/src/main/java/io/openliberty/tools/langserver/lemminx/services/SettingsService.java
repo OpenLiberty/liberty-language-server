@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2025 IBM Corporation and others.
+* Copyright (c) 2020, 2026 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -86,6 +86,16 @@ public class SettingsService {
     }
 
     /**
+     * Initialize the variables map. Called at extension startup.
+     * Actual variable population happens on-demand.
+     */
+    public void initializeVariablesMap() {
+        if (variables == null) {
+            variables = new HashMap<>();
+        }
+    }
+    
+    /**
      * populate all variables for all available workspace folders
      *
      * @param workspaceFolders workspace folders
@@ -103,6 +113,14 @@ public class SettingsService {
      * @param workspace workspace
      */
     public void populateVariablesForWorkspace(LibertyWorkspace workspace) {
+        // Initialize variables map if null (lazy initialization)
+        if (variables == null) {
+            variables = new HashMap<>();
+        }
+        
+        // Check if config needs to be generated before populating variables
+        ensureConfigIsUpToDate(workspace);
+        
         Properties variablesForWorkspace = new Properties();
         Path pluginConfigFilePath = findFileInWorkspace(workspace, Paths.get("liberty-plugin-config.xml"));
         if (pluginConfigFilePath != null) {
@@ -196,6 +214,53 @@ public class SettingsService {
             return pluginConfigFilePath != null;
         }
         return false;
+    }
+    
+    /**
+     * Ensure config is up-to-date before using it.
+     * Checks if config generation is needed and regenerates if necessary.
+     * This is called before populating variables to ensure we always have current config.
+     *
+     * @param workspace workspace to check
+     */
+    private void ensureConfigIsUpToDate(LibertyWorkspace workspace) {
+        try {
+            LibertyConfigGenerationService configService = LibertyConfigGenerationService.getInstance();
+            
+            // Only check if project has Liberty plugin configured
+            if (!configService.hasLibertyPlugin(workspace)) {
+                LOGGER.fine("Project does not have Liberty plugin configured, skipping config check: " +
+                           workspace.getWorkspaceString());
+                return;
+            }
+            
+            if (configService.needsConfigGeneration(workspace)) {
+                LOGGER.info("Config needs regeneration for workspace: " + workspace.getWorkspaceString());
+                
+                try {
+                    LibertyConfigGenerationService.ConfigGenerationResult result =
+                        configService.generateConfigAsync(workspace).get(5, java.util.concurrent.TimeUnit.SECONDS);
+                    
+                    if (result.isSuccess()) {
+                        LOGGER.info(String.format(
+                            "Config regenerated successfully in %dms: %s",
+                            result.getDuration(),
+                            result.getConfigPath()
+                        ));
+                    } else {
+                        LOGGER.warning("Config regeneration failed: " + result.getError());
+                        configService.markProjectAsFailed(workspace, result.getError(), result.getLogFilePath());
+                    }
+                } catch (java.util.concurrent.TimeoutException e) {
+                    LOGGER.info("Config regeneration taking longer than expected for " + workspace.getWorkspaceString());
+                } catch (Exception e) {
+                    LOGGER.warning("Error regenerating config for workspace " + workspace.getWorkspaceString() + ": " + e.getMessage());
+                    configService.markProjectAsFailed(workspace, e.getMessage(), null);
+                }
+            }
+        } catch (Exception e) {
+            LOGGER.warning("Error checking config status: " + e.getMessage());
+        }
     }
 
     public String getLatestRuntimeVersion() {

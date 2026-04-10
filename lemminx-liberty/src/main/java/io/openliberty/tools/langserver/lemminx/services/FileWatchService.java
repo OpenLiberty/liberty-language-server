@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2024 IBM Corporation and others.
+ * Copyright (c) 2024, 2026 IBM Corporation and others.
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License v. 2.0 which is available at
@@ -127,7 +127,35 @@ public class FileWatchService {
                     LOGGER.warning("Liberty XML variables cannot be updated for file path %s with error %s"
                             .formatted(file.getPath(), e.getMessage()));
                 }
-                if (watchedFileChanged || isConfigXmlFile) {
+                
+                // Check if file is in source config directory
+                boolean isSourceConfigFile = false;
+                try {
+                    String filePath = file.getCanonicalPath();
+                    isSourceConfigFile = filePath.contains("src" + File.separator + "main" + File.separator +
+                                                          "liberty" + File.separator + "config");
+                } catch (IOException e) {
+                    LOGGER.warning("Could not determine if file is in source config directory: " + e.getMessage());
+                }
+                
+                if (isSourceConfigFile) {
+                    // Source config file changed - trigger prepare-config to sync to mock server
+                    LOGGER.info("Source config file changed: " + file.getName() +
+                               ", triggering prepare-config for workspace: " + workspace.getWorkspaceString());
+                    
+                    LibertyConfigGenerationService configService = LibertyConfigGenerationService.getInstance();
+                    LibertyConfigGenerationService.ConfigGenerationResult result = configService.generateConfig(workspace);
+                    
+                    if (result.isSuccess()) {
+                        LOGGER.info("Successfully regenerated config after source file change");
+                        // Reload variables from updated mock server
+                        SettingsService.getInstance().populateVariablesForWorkspace(workspace);
+                        LOGGER.info("Liberty XML variables updated for workspace URI " + workspace.getWorkspaceString());
+                    } else {
+                        LOGGER.warning("Failed to regenerate config after source file change: " + result.getError());
+                    }
+                } else if (watchedFileChanged || isConfigXmlFile) {
+                    // Mock server file changed - just reload variables
                     SettingsService.getInstance().populateVariablesForWorkspace(workspace);
                     LOGGER.info("Liberty XML variables updated for workspace URI " + workspace.getWorkspaceString());
                 }

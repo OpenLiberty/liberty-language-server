@@ -46,7 +46,7 @@ public class LibertyConfigGenerationService {
     private static final String CONFIG_FILE_NAME = "liberty-plugin-config.xml";
     private static final String MAVEN_TARGET_DIR = "target";
     private static final String GRADLE_BUILD_DIR = "build";
-    private static final String LIBERTYLS_DIR = ".libertyls";
+    private static final String TMP_DIR = "tmp";
     private static final String BUILD_LOG_FILE = "build.log";
     private static final int COMMAND_TIMEOUT_SECONDS = 30;
     
@@ -66,28 +66,35 @@ public class LibertyConfigGenerationService {
     
     /**
      * Check if liberty-plugin-config.xml needs to be generated.
-     * 
+     *
      * @param workspace The Liberty workspace
      * @return true if config generation is needed, false otherwise
      */
     public boolean needsConfigGeneration(LibertyWorkspace workspace) {
         String projectPath = workspace.getWorkspaceURI().getPath();
-        
-        // Check if already processed in this session
-        if (processedProjects.contains(projectPath)) {
-            LOGGER.fine("Project already processed: %s".formatted(projectPath));
-            return false;
-        }
-        
         Path configPath = getConfigPath(projectPath);
         
-        // Config file doesn't exist
+        // Check 1: Config file doesn't exist
         if (!Files.exists(configPath)) {
             LOGGER.info("Config file does not exist: " + configPath);
+            processedProjects.remove(projectPath);
             return true;
         }
         
-        // Check if config is stale (older than build file)
+        // Check 2: Mock server directory missing (after mvn clean)
+        if (isMockServerInConfig(configPath) && !mockServerDirectoryExists(projectPath)) {
+            LOGGER.info("Mock server directory missing, regeneration needed");
+            processedProjects.remove(projectPath);
+            return true;
+        }
+        
+        // Check 3: Already processed in this session
+        if (processedProjects.contains(projectPath)) {
+            LOGGER.fine("Project already processed: " + projectPath);
+            return false;
+        }
+        
+        // Check 4: Config is stale (older than build file)
         try {
             long configTime = Files.getLastModifiedTime(configPath).toMillis();
             Long buildFileTime = getBuildFileModificationTime(projectPath);
@@ -102,6 +109,32 @@ public class LibertyConfigGenerationService {
         }
         
         return false;
+    }
+    
+    /**
+     * Check if the config file points to a mock server directory.
+     */
+    private boolean isMockServerInConfig(Path configPath) {
+        try {
+            String content = new String(Files.readAllBytes(configPath), StandardCharsets.UTF_8);
+            return content.contains(TMP_DIR);
+        } catch (IOException e) {
+            LOGGER.log(Level.WARNING, "Error reading config file", e);
+            return false;
+        }
+    }
+    
+    /**
+     * Check if the mock server directory exists.
+     */
+    private boolean mockServerDirectoryExists(String projectPath) {
+        Path mockServerPath = Paths.get(projectPath, MAVEN_TARGET_DIR, TMP_DIR);
+        if (Files.exists(mockServerPath)) {
+            return true;
+        }
+        
+        mockServerPath = Paths.get(projectPath, GRADLE_BUILD_DIR, TMP_DIR);
+        return Files.exists(mockServerPath);
     }
     
     /**
@@ -366,7 +399,7 @@ public class LibertyConfigGenerationService {
     }
     
     /**
-     * Save error log to .libertyls/build.log file.
+     * Save error log to .libertyls/prepare-config/build.log file.
      *
      * @param projectPath The project path
      * @param errorMessage The error message to save
@@ -374,14 +407,15 @@ public class LibertyConfigGenerationService {
      */
     private String saveErrorLog(String projectPath, String errorMessage) {
         try {
-            // Create .libertyls directory if it doesn't exist
-            Path libertylsDir = Paths.get(projectPath, LIBERTYLS_DIR);
-            if (!Files.exists(libertylsDir)) {
-                Files.createDirectories(libertylsDir);
+            // Create .libertyls/prepare-config directory if it doesn't exist
+            Path libertylsDir = Paths.get(projectPath, ".libertyls");
+            Path prepareConfigDir = libertylsDir.resolve("prepare-config");
+            if (!Files.exists(prepareConfigDir)) {
+                Files.createDirectories(prepareConfigDir);
             }
             
             // Create log file path
-            Path logFilePath = libertylsDir.resolve(BUILD_LOG_FILE);
+            Path logFilePath = prepareConfigDir.resolve(BUILD_LOG_FILE);
             
             // Write error log with timestamp
             try (BufferedWriter writer = new BufferedWriter(
