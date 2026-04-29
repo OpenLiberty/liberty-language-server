@@ -181,10 +181,8 @@ public class LibertyConfigGenerationService {
                 );
             }
             
-            // Execute prepare-config goal
-            String command = buildTool == BuildTool.MAVEN
-                ? "mvn liberty:prepare-config"
-                : "./gradlew libertyPrepareConfig";
+            // Get the appropriate build command (with fallback to system commands)
+            String command = getBuildCommand(buildTool, projectPath);
             
             ProcessResult processResult = executeCommand(command, projectPath);
             
@@ -344,6 +342,46 @@ public class LibertyConfigGenerationService {
         }
         
         return false;
+    }
+    
+    /**
+     * Get the appropriate build command with fallback logic.
+     * Tries wrapper first (mvnw/gradlew), falls back to system command (mvn/gradle).
+     *
+     * @param buildTool The detected build tool
+     * @param projectPath The project directory path
+     * @return The command to execute
+     */
+    private String getBuildCommand(BuildTool buildTool, String projectPath) {
+        if (buildTool == BuildTool.MAVEN) {
+            // Check for Maven wrapper (mvnw or mvnw.cmd on Windows)
+            boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
+            String wrapperName = isWindows ? "mvnw.cmd" : "mvnw";
+            Path wrapperPath = Paths.get(projectPath, wrapperName);
+            
+            if (Files.exists(wrapperPath)) {
+                LOGGER.info("Using Maven wrapper: " + wrapperName);
+                return (isWindows ? "" : "./") + wrapperName + " liberty:prepare-config";
+            } else {
+                LOGGER.info("Maven wrapper not found, using system mvn command");
+                return "mvn liberty:prepare-config";
+            }
+        } else if (buildTool == BuildTool.GRADLE) {
+            // Check for Gradle wrapper (gradlew or gradlew.bat on Windows)
+            boolean isWindows = System.getProperty("os.name").toLowerCase().contains("win");
+            String wrapperName = isWindows ? "gradlew.bat" : "gradlew";
+            Path wrapperPath = Paths.get(projectPath, wrapperName);
+            
+            if (Files.exists(wrapperPath)) {
+                LOGGER.info("Using Gradle wrapper: " + wrapperName);
+                return (isWindows ? "" : "./") + wrapperName + " libertyPrepareConfig";
+            } else {
+                LOGGER.info("Gradle wrapper not found, using system gradle command");
+                return "gradle libertyPrepareConfig";
+            }
+        }
+        
+        return null;
     }
     
     /**
