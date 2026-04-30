@@ -157,8 +157,20 @@ public class SettingsService {
         Properties variableProps = new Properties();
         if (workspace == null) {
             LOGGER.warning("Could not find workspace for server xml URI %s. Variable resolution cannot be performed.".formatted(serverXmlURI));
-        } else if (variables != null && variables.containsKey(workspace.getWorkspaceString())) {
-            variableProps = variables.get(workspace.getWorkspaceString());
+            return variableProps;
+        }
+
+        if (variables == null) {
+            initializeVariablesMap();
+        }
+
+        String workspaceKey = workspace.getWorkspaceString();
+        if (!variables.containsKey(workspaceKey)) {
+            populateVariablesForWorkspace(workspace);
+        }
+
+        if (variables.containsKey(workspaceKey)) {
+            variableProps = variables.get(workspaceKey);
         } else {
             LOGGER.warning("Could not find variable mapping for workspace URI %s. Variable resolution cannot be performed.".formatted(workspace.getWorkspaceString()));
         }

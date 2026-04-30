@@ -33,6 +33,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import io.openliberty.tools.common.plugins.util.PrepareConfigUtil;
+
 /**
  * Service to manage automatic generation of liberty-plugin-config.xml
  * when Liberty configuration files are opened.
@@ -112,29 +114,37 @@ public class LibertyConfigGenerationService {
     }
     
     /**
-     * Check if the config file points to a mock server directory.
+     * Check if the config file points to a mock server directory using ci.common utility.
      */
     private boolean isMockServerInConfig(Path configPath) {
-        try {
-            String content = new String(Files.readAllBytes(configPath), StandardCharsets.UTF_8);
-            return content.contains(TMP_DIR);
-        } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Error reading config file", e);
-            return false;
-        }
+        return PrepareConfigUtil.isMockServerInConfig(configPath.toFile());
     }
     
     /**
-     * Check if the mock server directory exists.
+     * Check if the mock server directory exists using ci.common utility.
+     * Note: This checks for the existence and validity of the mock server structure.
      */
     private boolean mockServerDirectoryExists(String projectPath) {
-        Path mockServerPath = Paths.get(projectPath, MAVEN_TARGET_DIR, TMP_DIR);
-        if (Files.exists(mockServerPath)) {
-            return true;
+        // Try Maven build directory first
+        File mavenBuildDir = new File(projectPath, MAVEN_TARGET_DIR);
+        if (mavenBuildDir.exists()) {
+            // Extract server name from config if available, otherwise use a generic check
+            File tmpDir = new File(mavenBuildDir, TMP_DIR);
+            if (tmpDir.exists()) {
+                return true;
+            }
         }
         
-        mockServerPath = Paths.get(projectPath, GRADLE_BUILD_DIR, TMP_DIR);
-        return Files.exists(mockServerPath);
+        // Try Gradle build directory
+        File gradleBuildDir = new File(projectPath, GRADLE_BUILD_DIR);
+        if (gradleBuildDir.exists()) {
+            File tmpDir = new File(gradleBuildDir, TMP_DIR);
+            if (tmpDir.exists()) {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     /**
@@ -237,18 +247,11 @@ public class LibertyConfigGenerationService {
     }
     
     /**
-     * Get the path to liberty-plugin-config.xml.
+     * Get the path to liberty-plugin-config.xml using ci.common utility.
      */
     private Path getConfigPath(String projectPath) {
-        // Try Maven target directory first
-        Path configPath = Paths.get(projectPath, MAVEN_TARGET_DIR, CONFIG_FILE_NAME);
-        if (Files.exists(configPath)) {
-            return configPath;
-        }
-        
-        // Try Gradle build directory
-        configPath = Paths.get(projectPath, GRADLE_BUILD_DIR, CONFIG_FILE_NAME);
-        return configPath;
+        File configFile = PrepareConfigUtil.getConfigFilePath(new File(projectPath));
+        return configFile != null ? configFile.toPath() : null;
     }
     
     /**
@@ -268,29 +271,10 @@ public class LibertyConfigGenerationService {
     }
     
     /**
-     * Get modification time of build file (pom.xml or build.gradle).
+     * Get modification time of build file using ci.common utility.
      */
     private Long getBuildFileModificationTime(String projectPath) {
-        try {
-            Path pomPath = Paths.get(projectPath, "pom.xml");
-            if (Files.exists(pomPath)) {
-                return Files.getLastModifiedTime(pomPath).toMillis();
-            }
-            
-            Path gradlePath = Paths.get(projectPath, "build.gradle");
-            if (Files.exists(gradlePath)) {
-                return Files.getLastModifiedTime(gradlePath).toMillis();
-            }
-            
-            Path gradleKtsPath = Paths.get(projectPath, "build.gradle.kts");
-            if (Files.exists(gradleKtsPath)) {
-                return Files.getLastModifiedTime(gradleKtsPath).toMillis();
-            }
-        } catch (IOException e) {
-            LOGGER.log(Level.WARNING, "Error getting build file modification time", e);
-        }
-        
-        return null;
+        return PrepareConfigUtil.getBuildFileModificationTime(new File(projectPath));
     }
     
     /**

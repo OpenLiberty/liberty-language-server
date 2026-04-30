@@ -148,8 +148,8 @@
                         <id>integration-test</id>
                         <phase>integration-test</phase>
                         <goals>
-                           <!-- <goal>install</goal>
-                            <goal>run</goal>-->
+                            <goal>install</goal>
+                            <goal>run</goal>
                         </goals>
                     </execution>
                 </executions>
@@ -190,7 +190,7 @@
         <dependency>
             <groupId>io.openliberty.tools</groupId>
             <artifactId>ci.common</artifactId>
-            <version>1.8.41</version>
+            <version>1.8.42-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>junit</groupId>
