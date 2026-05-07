@@ -72,7 +72,7 @@ public class FileWatchService {
                 new SuffixFileFilter(Arrays.asList(".class", ".lst", ".txt", ".log", ".manager", ".libertyls",
                         ".sLock", ".jar", ".war", ".ear",".mf"),
                         IOCase.INSENSITIVE)
-                        .or(new NameFileFilter(Arrays.asList("plugin-cfg.xml", "libs", "tmp", "classes",
+                        .or(new NameFileFilter(Arrays.asList("plugin-cfg.xml", "libs", "tmp", ".liberty-var-cache", "classes",
                                 "generated-sources", "generated-test-sources", "invoker-reports",
                                 "it", "maven-status", "surefire-reports", "test-classes"), IOCase.INSENSITIVE)));
         FileAlterationObserver observer = new FileAlterationObserver(parentPath, notFileFilter);
