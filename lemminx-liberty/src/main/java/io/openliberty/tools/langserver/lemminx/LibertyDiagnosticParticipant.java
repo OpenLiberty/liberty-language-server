@@ -131,34 +131,33 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 
                 // Create main diagnostic message with error summary and resolution steps
                 StringBuilder message = new StringBuilder();
-                message.append("Liberty configuration generation failed. ");
-                message.append("Full language server features are unavailable until this is resolved.");
+                message.append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.WARN_CONFIG_GENERATION_FAILED));
                 
                 // Show brief error summary
                 if (errorMessage != null && !errorMessage.isEmpty()) {
                     String summary = getErrorSummary(errorMessage);
-                    message.append("\n\nError: ").append(summary);
+                    message.append("\n\n").append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.CONFIG_GENERATION_ERROR_SUMMARY, summary));
                 }
                 
                 // Add resolution steps to main message (customized for Maven or Gradle)
-                message.append("\n\nResolution steps:");
+                message.append("\n\n").append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.CONFIG_GENERATION_RESOLUTION_STEPS));
                 if (isMaven) {
-                    message.append("\n1. Ensure you are using liberty-maven-plugin version 3.11 or later");
-                    message.append("\n2. Run 'mvn liberty:prepare-config' manually in your project");
-                    message.append("\n3. Check that your pom.xml has the liberty-maven-plugin configured");
-                    message.append("\n4. Ensure Maven is installed and accessible from command line");
+                    message.append("\n").append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.CONFIG_GENERATION_MAVEN_STEP1));
+                    message.append("\n").append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.CONFIG_GENERATION_MAVEN_STEP2));
+                    message.append("\n").append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.CONFIG_GENERATION_MAVEN_STEP3));
+                    message.append("\n").append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.CONFIG_GENERATION_MAVEN_STEP4));
                 } else if (isGradle) {
-                    message.append("\n1. Ensure you are using liberty-gradle-plugin version 4.1 or later");
-                    message.append("\n2. Run './gradlew libertyPrepareConfig' manually in your project");
-                    message.append("\n3. Check that your build.gradle has the liberty-gradle-plugin configured");
-                    message.append("\n4. Ensure Gradle is installed and accessible from command line");
+                    message.append("\n").append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.CONFIG_GENERATION_GRADLE_STEP1));
+                    message.append("\n").append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.CONFIG_GENERATION_GRADLE_STEP2));
+                    message.append("\n").append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.CONFIG_GENERATION_GRADLE_STEP3));
+                    message.append("\n").append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.CONFIG_GENERATION_GRADLE_STEP4));
                 } else {
-                    message.append("\n1. Ensure you are using the latest version of liberty-maven-plugin or liberty-gradle-plugin");
-                    message.append("\n2. Run the prepare-config goal manually in your project");
-                    message.append("\n3. Check that your build file has the Liberty plugin configured");
-                    message.append("\n4. Ensure your build tool is installed and accessible from command line");
+                    message.append("\n").append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.CONFIG_GENERATION_GENERIC_STEP1));
+                    message.append("\n").append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.CONFIG_GENERATION_GENERIC_STEP2));
+                    message.append("\n").append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.CONFIG_GENERATION_GENERIC_STEP3));
+                    message.append("\n").append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.CONFIG_GENERATION_GENERIC_STEP4));
                 }
-                message.append("\n5. Review the detailed error log for more information");
+                message.append("\n").append(ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.CONFIG_GENERATION_STEP5));
 
                 // Create diagnostic at the start of the document (server element)
                 Range range = XMLPositionUtility.createRange(
@@ -184,7 +183,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                     Location logLocation = new Location("file://" + logFilePath, logRange);
                     relatedInfo.add(new DiagnosticRelatedInformation(
                         logLocation,
-                        "View detailed error log"
+                        ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.CONFIG_GENERATION_VIEW_LOG)
                     ));
                     diagnostic.setRelatedInformation(relatedInfo);
                 }
