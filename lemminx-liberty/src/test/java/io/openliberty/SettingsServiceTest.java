@@ -1,5 +1,6 @@
 package io.openliberty;
 
+import io.openliberty.tools.langserver.lemminx.services.LibertyConfigGenerationService;
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.LibertyWorkspace;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
@@ -21,8 +22,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Properties;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 
@@ -189,5 +189,142 @@ public class SettingsServiceTest {
             SettingsService.getInstance().initializeLocale(initParams);
             assertEquals(locale.toString(), SettingsService.getInstance().getCurrentLocale().toString());
         }
+    }
+
+    @Test
+    public void testPopulateVariablesForWorkspace_WithConfigGeneration() throws IOException {
+        // Test that populateVariablesForWorkspace triggers config generation when needed
+        MockedStatic<LibertyConfigGenerationService> configServiceMock =
+                Mockito.mockStatic(LibertyConfigGenerationService.class);
+        
+        try {
+            LibertyConfigGenerationService mockService = Mockito.mock(LibertyConfigGenerationService.class);
+            configServiceMock.when(LibertyConfigGenerationService::getInstance).thenReturn(mockService);
+            
+            // Setup mock behavior
+            Mockito.when(mockService.hasLibertyPlugin(any())).thenReturn(true);
+            Mockito.when(mockService.needsConfigGeneration(any())).thenReturn(false);
+            
+            // Call populateVariablesForWorkspace
+            SettingsService.getInstance().populateVariablesForWorkspace(libWorkspace);
+            
+            // Verify that config generation check was called
+            Mockito.verify(mockService).hasLibertyPlugin(any());
+            Mockito.verify(mockService).needsConfigGeneration(any());
+        } finally {
+            configServiceMock.close();
+        }
+    }
+
+    @Test
+    public void testGetVariablesForServerXml_TriggersPopulation() {
+        // Test that getVariablesForServerXml triggers population if not already done
+        SettingsService.getInstance().initializeVariablesMap();
+        
+        Properties variables = SettingsService.getInstance().getVariablesForServerXml(
+                serverXmlFile.toURI().toString());
+        
+        assertNotNull(variables, "Variables should not be null");
+    }
+
+    @Test
+    public void testPopulateVariablesForWorkspace_NoLibertyPlugin() throws IOException {
+        // Test behavior when project doesn't have Liberty plugin
+        MockedStatic<LibertyConfigGenerationService> configServiceMock =
+                Mockito.mockStatic(LibertyConfigGenerationService.class);
+        
+        try {
+            LibertyConfigGenerationService mockService = Mockito.mock(LibertyConfigGenerationService.class);
+            configServiceMock.when(LibertyConfigGenerationService::getInstance).thenReturn(mockService);
+            
+            // Setup mock to return false for hasLibertyPlugin
+            Mockito.when(mockService.hasLibertyPlugin(any())).thenReturn(false);
+            
+            // Call populateVariablesForWorkspace
+            SettingsService.getInstance().populateVariablesForWorkspace(libWorkspace);
+            
+            // Verify that needsConfigGeneration was NOT called since plugin is not present
+            Mockito.verify(mockService).hasLibertyPlugin(any());
+            Mockito.verify(mockService, Mockito.never()).needsConfigGeneration(any());
+        } finally {
+            configServiceMock.close();
+        }
+    }
+
+    @Test
+    public void testPopulateVariablesForWorkspace_ConfigGenerationNeeded() throws Exception {
+        // Test that config is regenerated when needed
+        MockedStatic<LibertyConfigGenerationService> configServiceMock =
+                Mockito.mockStatic(LibertyConfigGenerationService.class);
+        
+        try {
+            LibertyConfigGenerationService mockService = Mockito.mock(LibertyConfigGenerationService.class);
+            configServiceMock.when(LibertyConfigGenerationService::getInstance).thenReturn(mockService);
+            
+            // Setup mock behavior - config needs generation
+            Mockito.when(mockService.hasLibertyPlugin(any())).thenReturn(true);
+            Mockito.when(mockService.needsConfigGeneration(any())).thenReturn(true);
+            
+            // Mock the async generation
+            LibertyConfigGenerationService.ConfigGenerationResult successResult =
+                    LibertyConfigGenerationService.ConfigGenerationResult.success(
+                            "/path/to/config", 1000);
+            java.util.concurrent.CompletableFuture<LibertyConfigGenerationService.ConfigGenerationResult> future =
+                    java.util.concurrent.CompletableFuture.completedFuture(successResult);
+            Mockito.when(mockService.generateConfigAsync(any())).thenReturn(future);
+            
+            // Call populateVariablesForWorkspace
+            SettingsService.getInstance().populateVariablesForWorkspace(libWorkspace);
+            
+            // Verify that config generation was triggered
+            Mockito.verify(mockService).hasLibertyPlugin(any());
+            Mockito.verify(mockService).needsConfigGeneration(any());
+            Mockito.verify(mockService).generateConfigAsync(any());
+        } finally {
+            configServiceMock.close();
+        }
+    }
+
+    @Test
+    public void testPopulateVariablesForWorkspace_ConfigGenerationFailed() throws Exception {
+        // Test behavior when config generation fails
+        MockedStatic<LibertyConfigGenerationService> configServiceMock =
+                Mockito.mockStatic(LibertyConfigGenerationService.class);
+        
+        try {
+            LibertyConfigGenerationService mockService = Mockito.mock(LibertyConfigGenerationService.class);
+            configServiceMock.when(LibertyConfigGenerationService::getInstance).thenReturn(mockService);
+            
+            // Setup mock behavior - config needs generation but fails
+            Mockito.when(mockService.hasLibertyPlugin(any())).thenReturn(true);
+            Mockito.when(mockService.needsConfigGeneration(any())).thenReturn(true);
+            
+            // Mock the async generation with failure
+            LibertyConfigGenerationService.ConfigGenerationResult failureResult =
+                    LibertyConfigGenerationService.ConfigGenerationResult.failure(
+                            "Build failed", "/path/to/log", 1000);
+            java.util.concurrent.CompletableFuture<LibertyConfigGenerationService.ConfigGenerationResult> future =
+                    java.util.concurrent.CompletableFuture.completedFuture(failureResult);
+            Mockito.when(mockService.generateConfigAsync(any())).thenReturn(future);
+            
+            // Call populateVariablesForWorkspace
+            SettingsService.getInstance().populateVariablesForWorkspace(libWorkspace);
+            
+            // Verify that markProjectAsFailed was called
+            Mockito.verify(mockService).markProjectAsFailed(any(), eq("Build failed"), eq("/path/to/log"));
+        } finally {
+            configServiceMock.close();
+        }
+    }
+
+    @Test
+    public void testInitializeVariablesMap() {
+        // Test that variables map is initialized
+        SettingsService service = SettingsService.getInstance();
+        service.initializeVariablesMap();
+        
+        // Should not throw exception when getting variables
+        Properties variables = service.getVariablesForServerXml(serverXmlFile.toURI().toString());
+        assertNotNull(variables, "Variables should be initialized");
     }
 }
