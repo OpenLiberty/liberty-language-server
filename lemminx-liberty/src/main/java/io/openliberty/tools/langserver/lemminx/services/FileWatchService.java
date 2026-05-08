@@ -69,7 +69,7 @@ public class FileWatchService {
     private FileAlterationObserver getFileAlterationObserver(final String parentPath, LibertyWorkspace workspace) {
         //ignore files/directories with below suffixes and names
         IOFileFilter notFileFilter = FileFilterUtils.notFileFilter(
-                new SuffixFileFilter(Arrays.asList(".class", ".lst", ".txt", ".log", ".manager", ".libertyls",
+                new SuffixFileFilter(Arrays.asList(".class", ".lst", ".txt", ".log", ".manager", ".libertyls", ".libertyls-var-cache",
                         ".sLock", ".jar", ".war", ".ear",".mf"),
                         IOCase.INSENSITIVE)
                         .or(new NameFileFilter(Arrays.asList("plugin-cfg.xml", "libs", "tmp", ".liberty-var-cache", "classes",
