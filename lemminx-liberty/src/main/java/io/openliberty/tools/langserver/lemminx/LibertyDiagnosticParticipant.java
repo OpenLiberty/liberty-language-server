@@ -332,7 +332,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         boolean isLibertyPluginConfigAvailableInServer = SettingsService.getInstance().isLibertyPluginConfigAvailableInServer(workspace);
 
         if ((variablesMap.isEmpty() || !isLibertyPluginConfigAvailableInServer) && !variables.isEmpty()) {
-            String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.WARN_VARIABLE_RESOLUTION_NOT_AVAILABLE, workspace.getWorkspaceString());
+            String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.WARN_VARIABLE_RESOLUTION_NOT_AVAILABLE, workspace.getWorkspaceURI().getPath());
             Range range = XMLPositionUtility.createRange(domDocument.getDocumentElement().getStartTagOpenOffset(), domDocument.getDocumentElement().getStartTagCloseOffset(),
                     domDocument);
             Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE);
