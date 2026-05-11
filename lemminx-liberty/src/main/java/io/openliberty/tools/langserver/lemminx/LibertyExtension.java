@@ -100,12 +100,12 @@ public class LibertyExtension implements IXMLExtension {
         // for each workspace, a file alteration observer is added
         for (LibertyWorkspace workspace : LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders()) {
             // checking for any changes in wlp user folder for gradle and maven
-            Path libertyUsrGradlePath = new File(workspace.getWorkspaceURI().getPath(),
+            Path libertyUsrGradlePath = new File(workspace.getDir(),
                     "target").toPath();
-            Path libertyUsrMavenPath = new File(workspace.getWorkspaceURI().getPath(),
+            Path libertyUsrMavenPath = new File(workspace.getDir(),
                     "build").toPath();
             // Also watch source config directory for changes
-            Path sourceConfigPath = new File(workspace.getWorkspaceURI().getPath(),
+            Path sourceConfigPath = new File(workspace.getDir(),
                     "src/main/liberty/config").toPath();
             List<String> paths = Arrays.asList(libertyUsrMavenPath.toString(), libertyUsrGradlePath.toString(),
                     sourceConfigPath.toString());

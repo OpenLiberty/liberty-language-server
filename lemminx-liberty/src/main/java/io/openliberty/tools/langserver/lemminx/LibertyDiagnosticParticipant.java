@@ -124,7 +124,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
                 String logFilePath = configService.getLogFilePath(workspace);
                 
                 // Detect build tool
-                String projectPath = workspace.getWorkspaceURI().getPath();
+                String projectPath = workspace.getDir().getAbsolutePath();
                 boolean isMaven = java.nio.file.Files.exists(java.nio.file.Paths.get(projectPath, "pom.xml"));
                 boolean isGradle = java.nio.file.Files.exists(java.nio.file.Paths.get(projectPath, "build.gradle")) ||
                                    java.nio.file.Files.exists(java.nio.file.Paths.get(projectPath, "build.gradle.kts"));
@@ -332,7 +332,7 @@ public class LibertyDiagnosticParticipant implements IDiagnosticsParticipant {
         boolean isLibertyPluginConfigAvailableInServer = SettingsService.getInstance().isLibertyPluginConfigAvailableInServer(workspace);
 
         if ((variablesMap.isEmpty() || !isLibertyPluginConfigAvailableInServer) && !variables.isEmpty()) {
-            String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.WARN_VARIABLE_RESOLUTION_NOT_AVAILABLE, workspace.getWorkspaceURI().getPath());
+            String message = ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.WARN_VARIABLE_RESOLUTION_NOT_AVAILABLE, workspace.getWorkspaceString());
             Range range = XMLPositionUtility.createRange(domDocument.getDocumentElement().getStartTagOpenOffset(), domDocument.getDocumentElement().getStartTagCloseOffset(),
                     domDocument);
             Diagnostic diag = new Diagnostic(range, message, DiagnosticSeverity.Warning, LIBERTY_LEMMINX_SOURCE);

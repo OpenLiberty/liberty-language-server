@@ -73,7 +73,7 @@ public class LibertyConfigGenerationService {
      * @return true if config generation is needed, false otherwise
      */
     public boolean needsConfigGeneration(LibertyWorkspace workspace) {
-        String projectPath = workspace.getWorkspaceURI().getPath();
+        String projectPath = workspace.getDir().getAbsolutePath();
         Path configPath = getConfigPath(projectPath);
 
         // Check 1: Config file doesn't exist
@@ -162,7 +162,7 @@ public class LibertyConfigGenerationService {
      * @return The generation result
      */
     public ConfigGenerationResult generateConfig(LibertyWorkspace workspace) {
-        String projectPath = workspace.getWorkspaceURI().getPath();
+        String projectPath = workspace.getDir().getAbsolutePath();
         long startTime = System.currentTimeMillis();
 
         try {
@@ -588,7 +588,7 @@ public class LibertyConfigGenerationService {
      * @param logFilePath  The path to the log file containing detailed error information
      */
     public void markProjectAsFailed(LibertyWorkspace workspace, String errorMessage, String logFilePath) {
-        String projectPath = workspace.getWorkspaceURI().getPath();
+        String projectPath = workspace.getDir().getAbsolutePath();
         failedProjects.put(projectPath, new FailureInfo(errorMessage, logFilePath));
         LOGGER.info("Project marked as failed: " + projectPath + " - " + errorMessage);
     }
@@ -600,7 +600,7 @@ public class LibertyConfigGenerationService {
      * @return The error message, or null if project hasn't failed
      */
     public String getFailureMessage(LibertyWorkspace workspace) {
-        String projectPath = workspace.getWorkspaceURI().getPath();
+        String projectPath = workspace.getDir().getAbsolutePath();
         FailureInfo info = failedProjects.get(projectPath);
         return info != null ? info.errorMessage : null;
     }
@@ -612,7 +612,7 @@ public class LibertyConfigGenerationService {
      * @return The log file path, or null if project hasn't failed or no log exists
      */
     public String getLogFilePath(LibertyWorkspace workspace) {
-        String projectPath = workspace.getWorkspaceURI().getPath();
+        String projectPath = workspace.getDir().getAbsolutePath();
         FailureInfo info = failedProjects.get(projectPath);
         return info != null ? info.logFilePath : null;
     }
@@ -624,7 +624,7 @@ public class LibertyConfigGenerationService {
      * @return true if the project has failed, false otherwise
      */
     public boolean hasProjectFailed(LibertyWorkspace workspace) {
-        String projectPath = workspace.getWorkspaceURI().getPath();
+        String projectPath = workspace.getDir().getAbsolutePath();
         return failedProjects.containsKey(projectPath);
     }
 
@@ -634,7 +634,7 @@ public class LibertyConfigGenerationService {
      * @param workspace The Liberty workspace
      */
     public void clearProjectFailure(LibertyWorkspace workspace) {
-        String projectPath = workspace.getWorkspaceURI().getPath();
+        String projectPath = workspace.getDir().getAbsolutePath();
         failedProjects.remove(projectPath);
         LOGGER.info("Cleared failure status for project: " + projectPath);
     }
