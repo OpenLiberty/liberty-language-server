@@ -4,7 +4,7 @@ on:
   push:
     branches: '**'
   pull_request:
-    branches: [main]
+    branches: [main, prepare-config]
 
 jobs:
   liberty-config-language-server:
@@ -35,9 +35,9 @@ jobs:
       - name: Checkout ci.common
         uses: actions/checkout@v3
         with:
-          repository: venmanyarun/ci.common
+          repository: OpenLiberty/ci.common
           path: ci.common
-          ref: prepare_config_poc
+          ref: prepare-config
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
