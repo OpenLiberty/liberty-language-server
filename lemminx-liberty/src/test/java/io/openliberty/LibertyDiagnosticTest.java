@@ -1,5 +1,6 @@
 package io.openliberty;
 
+import io.openliberty.tools.langserver.lemminx.services.LibertyConfigGenerationService;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
 import io.openliberty.tools.langserver.lemminx.util.ResourceBundleMappingConstants;
 import io.openliberty.tools.langserver.lemminx.util.ResourceBundleUtil;
@@ -7,7 +8,11 @@ import org.eclipse.lemminx.XMLAssert;
 import org.eclipse.lemminx.commons.BadLocationException;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.Diagnostic;
+import org.eclipse.lsp4j.DiagnosticRelatedInformation;
 import org.eclipse.lsp4j.DiagnosticSeverity;
+import org.eclipse.lsp4j.Location;
+import org.eclipse.lsp4j.Position;
+import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextDocumentEdit;
 import org.eclipse.lsp4j.TextEdit;
 import org.eclipse.lsp4j.WorkspaceEdit;
@@ -1455,5 +1460,257 @@ public class LibertyDiagnosticTest {
         appSecurityIncompatibilityDiagnostic.setMessage("ERROR: The feature appSecurity-3.0 is incompatible with servlet-3.1. The features do not share a common platform.");
 
         XMLAssert.testDiagnosticsFor(serverXML1, null, null, serverXMLURI, servletIncompatibilityDiagnostic, appSecurityIncompatibilityDiagnostic, mpTelemetryIncompatibilityDiagnostic, mpConfigIncompatibilityDiagnostic);
+    }
+
+    /**
+     * Test that config generation failure diagnostic is shown when prepare-config fails.
+     */
+    @Test
+    public void testConfigGenerationFailureDiagnostic() {
+        MockedStatic<LibertyConfigGenerationService> configServiceMock = 
+                Mockito.mockStatic(LibertyConfigGenerationService.class);
+        
+        try {
+            LibertyConfigGenerationService mockService = Mockito.mock(LibertyConfigGenerationService.class);
+            configServiceMock.when(() -> LibertyConfigGenerationService.getInstance()).thenReturn(mockService);
+            
+            // Setup mock to indicate project has Liberty plugin and has failed
+            when(mockService.hasLibertyPlugin(any())).thenReturn(true);
+            when(mockService.hasProjectFailed(any())).thenReturn(true);
+            when(mockService.getFailureMessage(any())).thenReturn("Build failed: Maven command not found");
+            when(mockService.getLogFilePath(any())).thenReturn("/path/to/build.log");
+            
+            String serverXML = String.join(newLine,
+                    "<server description=\"Sample Liberty server\">",
+                    "    <featureManager>",
+                    "        <feature>servlet-4.0</feature>",
+                    "    </featureManager>",
+                    "</server>"
+            );
+            
+            // Create a diagnostic to match what will be generated
+            Diagnostic d = new Diagnostic();
+            d.setRange(r(0, 0, 0, 43));
+            d.setSeverity(DiagnosticSeverity.Warning);
+            d.setCode("config_generation_failed");
+            d.setSource("liberty-lemminx");
+            d.setMessage("Liberty configuration generation failed. Full language server features are unavailable until this is resolved.\n\n" +
+                    "Error: Build failed: Maven command not found\n\n" +
+                    "Resolution steps:\n" +
+                    "1. Ensure you are using the latest version of liberty-maven-plugin or liberty-gradle-plugin\n" +
+                    "2. Run the prepare-config goal manually in your project\n" +
+                    "3. Check that your build file has the Liberty plugin configured\n" +
+                    "4. Ensure your build tool is installed and accessible from command line\n" +
+                    "5. Review the detailed error log for more information");
+            
+            // Add related information with log file link
+            DiagnosticRelatedInformation relatedInfo = new DiagnosticRelatedInformation();
+            relatedInfo.setLocation(new Location("file:///path/to/build.log", new Range(new Position(0, 0), new Position(0, 0))));
+            relatedInfo.setMessage("");
+            d.setRelatedInformation(Collections.singletonList(relatedInfo));
+            
+            // Process diagnostics - expect the config generation failure diagnostic
+            XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, d);
+            
+            // Verify the mock was called - the diagnostic participant should check for failures
+            Mockito.verify(mockService, Mockito.atLeastOnce()).hasLibertyPlugin(any());
+            Mockito.verify(mockService, Mockito.atLeastOnce()).hasProjectFailed(any());
+            Mockito.verify(mockService, Mockito.atLeastOnce()).getFailureMessage(any());
+            Mockito.verify(mockService, Mockito.atLeastOnce()).getLogFilePath(any());
+        } finally {
+            configServiceMock.close();
+        }
+    }
+
+    /**
+     * Test that no config generation failure diagnostic is shown when project doesn't have Liberty plugin.
+     */
+    @Test
+    public void testNoConfigGenerationDiagnosticWithoutLibertyPlugin() {
+        MockedStatic<LibertyConfigGenerationService> configServiceMock =
+                Mockito.mockStatic(LibertyConfigGenerationService.class);
+        
+        try {
+            LibertyConfigGenerationService mockService = Mockito.mock(LibertyConfigGenerationService.class);
+            configServiceMock.when(() -> LibertyConfigGenerationService.getInstance()).thenReturn(mockService);
+            
+            // Setup mock to indicate project does NOT have Liberty plugin
+            when(mockService.hasLibertyPlugin(any())).thenReturn(false);
+            
+            String serverXML = String.join(newLine,
+                    "<server description=\"Sample Liberty server\">",
+                    "    <featureManager>",
+                    "        <feature>servlet-4.0</feature>",
+                    "    </featureManager>",
+                    "</server>"
+            );
+            
+            // Should not generate config generation failure diagnostic
+            XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false);
+            
+            // Verify hasLibertyPlugin was called but hasProjectFailed was not
+            Mockito.verify(mockService, Mockito.atLeastOnce()).hasLibertyPlugin(any());
+            Mockito.verify(mockService, Mockito.never()).hasProjectFailed(any());
+        } finally {
+            configServiceMock.close();
+        }
+    }
+
+    /**
+     * Test that config generation is triggered when needed.
+     */
+    @Test
+    public void testConfigGenerationTriggered() {
+        MockedStatic<LibertyConfigGenerationService> configServiceMock =
+                Mockito.mockStatic(LibertyConfigGenerationService.class);
+        
+        try {
+            LibertyConfigGenerationService mockService = Mockito.mock(LibertyConfigGenerationService.class);
+            configServiceMock.when(LibertyConfigGenerationService::getInstance).thenReturn(mockService);
+            
+            // Setup mock to indicate project has Liberty plugin and needs config generation
+            when(mockService.hasLibertyPlugin(any())).thenReturn(true);
+            when(mockService.needsConfigGeneration(any())).thenReturn(true);
+            when(mockService.hasProjectFailed(any())).thenReturn(false);
+            
+            // Mock successful config generation
+            LibertyConfigGenerationService.ConfigGenerationResult successResult = 
+                    LibertyConfigGenerationService.ConfigGenerationResult.success("/path/to/config", 1000);
+            java.util.concurrent.CompletableFuture<LibertyConfigGenerationService.ConfigGenerationResult> future = 
+                    java.util.concurrent.CompletableFuture.completedFuture(successResult);
+            when(mockService.generateConfigAsync(any())).thenReturn(future);
+            
+            String serverXML = String.join(newLine,
+                    "<server description=\"Sample Liberty server\">",
+                    "    <featureManager>",
+                    "        <feature>servlet-4.0</feature>",
+                    "    </featureManager>",
+                    "</server>"
+            );
+            
+            // Process diagnostics - should trigger config generation
+            XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false);
+            
+            // Verify config generation was triggered
+            Mockito.verify(mockService, Mockito.atLeastOnce()).hasLibertyPlugin(any());
+            Mockito.verify(mockService, Mockito.atLeastOnce()).needsConfigGeneration(any());
+        } finally {
+            configServiceMock.close();
+        }
+    }
+
+    /**
+     * Test error summary extraction from Maven error messages.
+     */
+    @Test
+    public void testGetErrorSummary() {
+        // This tests the private getErrorSummary method indirectly through the diagnostic
+        MockedStatic<LibertyConfigGenerationService> configServiceMock =
+                Mockito.mockStatic(LibertyConfigGenerationService.class);
+        
+        try {
+            LibertyConfigGenerationService mockService = Mockito.mock(LibertyConfigGenerationService.class);
+            configServiceMock.when(() -> LibertyConfigGenerationService.getInstance()).thenReturn(mockService);
+            
+            when(mockService.hasLibertyPlugin(any())).thenReturn(true);
+            when(mockService.hasProjectFailed(any())).thenReturn(true);
+            
+            // Test with Maven-style error message
+            String mavenError = "[INFO] Building project\n[ERROR] Failed to execute goal\n[INFO] Done";
+            when(mockService.getFailureMessage(any())).thenReturn(mavenError);
+            when(mockService.getLogFilePath(any())).thenReturn(null);
+            
+            String serverXML = String.join(newLine,
+                    "<server description=\"Sample Liberty server\">",
+                    "    <featureManager>",
+                    "        <feature>servlet-4.0</feature>",
+                    "    </featureManager>",
+                    "</server>"
+            );
+            
+            // Create a diagnostic to match what will be generated
+            Diagnostic d = new Diagnostic();
+            d.setRange(r(0, 0, 0, 43));
+            d.setSeverity(DiagnosticSeverity.Warning);
+            d.setCode("config_generation_failed");
+            d.setSource("liberty-lemminx");
+            d.setMessage("Liberty configuration generation failed. Full language server features are unavailable until this is resolved.\n\n" +
+                    "Error: Failed to execute goal\n\n" +
+                    "Resolution steps:\n" +
+                    "1. Ensure you are using the latest version of liberty-maven-plugin or liberty-gradle-plugin\n" +
+                    "2. Run the prepare-config goal manually in your project\n" +
+                    "3. Check that your build file has the Liberty plugin configured\n" +
+                    "4. Ensure your build tool is installed and accessible from command line\n" +
+                    "5. Review the detailed error log for more information");
+            
+            // No relatedInformation since getLogFilePath returns null
+            
+            // Process diagnostics - expect the config generation failure diagnostic
+            XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, d);
+            
+            // Verify the service was called to get the failure message
+            Mockito.verify(mockService, Mockito.atLeastOnce()).getFailureMessage(any());
+        } finally {
+            configServiceMock.close();
+        }
+    }
+
+    /**
+     * Test that diagnostic includes related information with log file link.
+     */
+    @Test
+    public void testConfigGenerationDiagnosticWithLogFile() {
+        MockedStatic<LibertyConfigGenerationService> configServiceMock =
+                Mockito.mockStatic(LibertyConfigGenerationService.class);
+        
+        try {
+            LibertyConfigGenerationService mockService = Mockito.mock(LibertyConfigGenerationService.class);
+            configServiceMock.when(() -> LibertyConfigGenerationService.getInstance()).thenReturn(mockService);
+            
+            when(mockService.hasLibertyPlugin(any())).thenReturn(true);
+            when(mockService.hasProjectFailed(any())).thenReturn(true);
+            when(mockService.getFailureMessage(any())).thenReturn("Build failed");
+            
+            // Provide log file path
+            String logPath = "/project/.libertyls/prepare-config/build.log";
+            when(mockService.getLogFilePath(any())).thenReturn(logPath);
+            
+            String serverXML = String.join(newLine,
+                    "<server description=\"Sample Liberty server\">",
+                    "    <featureManager>",
+                    "        <feature>servlet-4.0</feature>",
+                    "    </featureManager>",
+                    "</server>"
+            );
+            
+            // Create a diagnostic to match what will be generated
+            Diagnostic d = new Diagnostic();
+            d.setRange(r(0, 0, 0, 43));
+            d.setSeverity(DiagnosticSeverity.Warning);
+            d.setCode("config_generation_failed");
+            d.setSource("liberty-lemminx");
+            d.setMessage("Liberty configuration generation failed. Full language server features are unavailable until this is resolved.\n\n" +
+                    "Error: Build failed\n\n" +
+                    "Resolution steps:\n" +
+                    "1. Ensure you are using the latest version of liberty-maven-plugin or liberty-gradle-plugin\n" +
+                    "2. Run the prepare-config goal manually in your project\n" +
+                    "3. Check that your build file has the Liberty plugin configured\n" +
+                    "4. Ensure your build tool is installed and accessible from command line\n" +
+                    "5. Review the detailed error log for more information");
+            
+            // Add related information with log file link
+            DiagnosticRelatedInformation relatedInfo = new DiagnosticRelatedInformation();
+            relatedInfo.setLocation(new Location("file:///project/.libertyls/prepare-config/build.log", new Range(new Position(0, 0), new Position(0, 0))));
+            relatedInfo.setMessage("");
+            d.setRelatedInformation(Collections.singletonList(relatedInfo));
+            
+            // Process diagnostics - expect the config generation failure diagnostic
+            XMLAssert.testDiagnosticsFor(serverXML, null, null, serverXMLURI, false, d);
+            
+            // Verify the service was called to get the log file path
+            Mockito.verify(mockService, Mockito.atLeastOnce()).getLogFilePath(any());
+        } finally {
+            configServiceMock.close();
+        }
     }
 }

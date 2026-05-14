@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2025 IBM Corporation and others.
+* Copyright (c) 2020, 2026 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -89,21 +89,26 @@ public class LibertyExtension implements IXMLExtension {
         documentLinkParticipant = new LibertyDocumentLinkParticipant();
         xmlExtensionsRegistry.registerDocumentLinkParticipant(documentLinkParticipant);
 
-        try {
-            SettingsService.getInstance()
-                    .populateAllVariables(LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders());
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        // Initialize variables map (actual population happens on-demand)
+        SettingsService.getInstance().initializeVariablesMap();
+        
+        // Config generation and variable population now happens on-demand
+        // when diagnostics are triggered or variables are accessed.
+        // This ensures config is always up-to-date without needing a file watcher.
+        LOGGER.info("Liberty extension started. Config will be generated on-demand when needed.");
 
         // for each workspace, a file alteration observer is added
         for (LibertyWorkspace workspace : LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders()) {
             // checking for any changes in wlp user folder for gradle and maven
-            Path libertyUsrGradlePath = new File(workspace.getWorkspaceURI().getPath(),
+            Path libertyUsrGradlePath = new File(workspace.getDir(),
                     "target").toPath();
-            Path libertyUsrMavenPath = new File(workspace.getWorkspaceURI().getPath(),
+            Path libertyUsrMavenPath = new File(workspace.getDir(),
                     "build").toPath();
-            List<String> paths = Arrays.asList(libertyUsrMavenPath.toString(), libertyUsrGradlePath.toString());
+            // Also watch source config directory for changes
+            Path sourceConfigPath = new File(workspace.getDir(),
+                    "src/main/liberty/config").toPath();
+            List<String> paths = Arrays.asList(libertyUsrMavenPath.toString(), libertyUsrGradlePath.toString(),
+                    sourceConfigPath.toString());
             try {
                 FileWatchService.getInstance()
                         .addFileAlterationObserver(workspace, paths);

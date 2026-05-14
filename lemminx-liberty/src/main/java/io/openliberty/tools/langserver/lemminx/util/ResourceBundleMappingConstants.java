@@ -45,6 +45,24 @@ public final class ResourceBundleMappingConstants {
     public static final String ERR_FEATURE_EMPTY = "liberty.lemminx.feature.empty.error";
     public static final String WARN_PLATFORM_EMPTY = "liberty.lemminx.platform.empty.warning";
 
+    public static final String WARN_CONFIG_GENERATION_FAILED = "liberty.lemminx.config.generation.failed.warning";
+    public static final String CONFIG_GENERATION_ERROR_SUMMARY = "liberty.lemminx.config.generation.error.summary";
+    public static final String CONFIG_GENERATION_RESOLUTION_STEPS = "liberty.lemminx.config.generation.resolution.steps";
+    public static final String CONFIG_GENERATION_MAVEN_STEP1 = "liberty.lemminx.config.generation.maven.step1";
+    public static final String CONFIG_GENERATION_MAVEN_STEP2 = "liberty.lemminx.config.generation.maven.step2";
+    public static final String CONFIG_GENERATION_MAVEN_STEP3 = "liberty.lemminx.config.generation.maven.step3";
+    public static final String CONFIG_GENERATION_MAVEN_STEP4 = "liberty.lemminx.config.generation.maven.step4";
+    public static final String CONFIG_GENERATION_GRADLE_STEP1 = "liberty.lemminx.config.generation.gradle.step1";
+    public static final String CONFIG_GENERATION_GRADLE_STEP2 = "liberty.lemminx.config.generation.gradle.step2";
+    public static final String CONFIG_GENERATION_GRADLE_STEP3 = "liberty.lemminx.config.generation.gradle.step3";
+    public static final String CONFIG_GENERATION_GRADLE_STEP4 = "liberty.lemminx.config.generation.gradle.step4";
+    public static final String CONFIG_GENERATION_GENERIC_STEP1 = "liberty.lemminx.config.generation.generic.step1";
+    public static final String CONFIG_GENERATION_GENERIC_STEP2 = "liberty.lemminx.config.generation.generic.step2";
+    public static final String CONFIG_GENERATION_GENERIC_STEP3 = "liberty.lemminx.config.generation.generic.step3";
+    public static final String CONFIG_GENERATION_GENERIC_STEP4 = "liberty.lemminx.config.generation.generic.step4";
+    public static final String CONFIG_GENERATION_STEP5 = "liberty.lemminx.config.generation.step5";
+    public static final String CONFIG_GENERATION_VIEW_LOG = "liberty.lemminx.config.generation.view.log";
+
     public static final String TITLE_ADD_OPTIONAL_ATTRIBUTE = "liberty.lemminx.codeaction.add.optional.attribute.title";
     public static final String TITLE_SET_OPTIONAL_ATTRIBUTE = "liberty.lemminx.codeaction.set.optional.attribute.title";
     public static final String TITLE_ADD_FEATURE = "liberty.lemminx.codeaction.add.feature.title";

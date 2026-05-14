@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2020, 2025 IBM Corporation and others.
+* Copyright (c) 2020, 2026 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -101,7 +101,7 @@ public class LibertyProjectsManager {
                         } else if (this.libertyWorkspaceFolders.containsKey(lastChildDirPath)) {
                             // this sub-module was already added but we still don't want to add the parent module
                             LOGGER.info("Skipping already added sub-module: " + lastChildDirPath);
-                            addedSubModule = true; 
+                            addedSubModule = true;
                             continue;
                         }
                         // Do not add child dirs as sub-modules if there are src/target/build dirs as siblings. This is not a sub-module.
@@ -177,19 +177,41 @@ public class LibertyProjectsManager {
                 if (workspaceFolderURI != null) {
                     Path rootPath = Paths.get(workspaceFolderURI);
                     List<Path> matchingFiles = Files.walk(rootPath)
-                            .filter(p -> (Files.isDirectory(p) && p.getFileName().endsWith(".libertyls")))
+                            .filter(p -> (Files.isDirectory(p) && p.getFileName().toString().equals(".libertyls")))
                             .collect(Collectors.toList());
 
-                    // delete each liberty ls directory
+                    // delete each liberty ls directory and its contents
                     for (Path libertylsDir : matchingFiles) {
-                        if (!libertylsDir.toFile().delete()) {
-                            LOGGER.warning("Could not delete " + libertylsDir);
-                        }
+                        deleteDirectory(libertylsDir);
                     }
                 }
             } catch (IOException e) {
                 LOGGER.warning("Could not clean up /.libertyls directory: " + e.getMessage());
             }
+        }
+    }
+    
+    /**
+     * Recursively delete a directory and all its contents.
+     *
+     * @param directory The directory to delete
+     */
+    private void deleteDirectory(Path directory) {
+        try {
+            if (Files.exists(directory)) {
+                Files.walk(directory)
+                    .sorted(java.util.Comparator.reverseOrder())
+                    .forEach(path -> {
+                        try {
+                            Files.delete(path);
+                            LOGGER.fine("Deleted: " + path);
+                        } catch (IOException e) {
+                            LOGGER.warning("Could not delete " + path + ": " + e.getMessage());
+                        }
+                    });
+            }
+        } catch (IOException e) {
+            LOGGER.warning("Error deleting directory " + directory + ": " + e.getMessage());
         }
     }
 
