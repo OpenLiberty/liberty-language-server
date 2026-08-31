@@ -104,6 +104,45 @@
         </resources>
         <plugins>
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>build-helper-maven-plugin</artifactId>
+                <version>3.2.0</version>
+                <executions>
+                  <execution>
+                    <id>parse-version</id>
+                    <goals>
+                        <goal>parse-version</goal>
+                    </goals>
+                  </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>pl.project13.maven</groupId>
+                <artifactId>git-commit-id-plugin</artifactId>
+                <version>4.9.10</version>
+                <executions>
+                  <execution>
+                    <id>get-the-git-infos</id>
+                    <goals>
+                      <goal>revision</goal>
+                    </goals>
+                  </execution>
+                </executions>
+                <configuration>
+                  <dotGitDirectory>${project.basedir}/../.git</dotGitDirectory>
+                  <generateGitPropertiesFile>true</generateGitPropertiesFile>
+                  <includeOnlyProperties>
+                    <includeOnlyProperty>^git.commit.id.abbrev$</includeOnlyProperty>
+                    <includeOnlyProperty>^git.commit.message.short$</includeOnlyProperty>
+                    <includeOnlyProperty>^git.branch$</includeOnlyProperty>
+                    <includeOnlyProperty>^git.build.version$</includeOnlyProperty>
+                  </includeOnlyProperties>
+                  <gitDescribe>
+                    <skip>true</skip>
+                  </gitDescribe>
+                </configuration>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
                 <version>3.3.0</version>
