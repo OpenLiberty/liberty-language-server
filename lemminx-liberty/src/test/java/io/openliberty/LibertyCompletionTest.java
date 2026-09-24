@@ -68,7 +68,7 @@ public class LibertyCompletionTest {
                                 "<webApplication location=\"\"></webApplication>");
                 CompletionItem httpEndpointCompletion = c("httpEndpoint", "<httpEndpoint></httpEndpoint>");
 
-                final int TOTAL_ITEMS = 173; // total number of available completion items
+                final int TOTAL_ITEMS = 175; // total number of available completion items (includes @formatter:off/on snippets added in lemminx 0.28+)
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, applicationManagerCompletion,
                                 webApplicationCompletion, httpEndpointCompletion);
@@ -113,7 +113,7 @@ public class LibertyCompletionTest {
                 CompletionItem websocket = c("websocket-1.1", "websocket-1.1");
                 CompletionItem microProfileCompletion = c("microProfile-2.2", "microProfile-2.2");
 
-                final int TOTAL_ITEMS = 345; // total number of available completion items excluding all mpConfig versions
+                final int TOTAL_ITEMS = 347; // total number of available completion items excluding all mpConfig versions (includes @formatter:off/on snippets added in lemminx 0.28+)
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, jaxrsCompletion, websocket,
                                 microProfileCompletion);
@@ -146,10 +146,11 @@ public class LibertyCompletionTest {
 
                 // total number of available completion items
                 // 3 for javaee
-                //3 for jakartaee
-                //16 for microprofile
-                // one for CDATA and one for <-
-                final int TOTAL_ITEMS = 24;
+                // 3 for jakartaee
+                // 16 for microprofile
+                // 2 for <!-- and <![CDATA[
+                // 2 for @formatter:off/on snippets added in lemminx 0.28+
+                final int TOTAL_ITEMS = 26;
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS);
 
@@ -164,7 +165,7 @@ public class LibertyCompletionTest {
                 CompletionItem javaee7Completion = c("javaee-7.0", "javaee-7.0");
                 CompletionItem javaee8Completion = c("javaee-8.0", "javaee-8.0");
 
-                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 5,
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 7, // 3 javaee + 2 (<!-- and <![CDATA[) + 2 @formatter snippets
                         javaee6Completion, javaee7Completion, javaee8Completion);
 
                 serverXML = String.join(newLine, //
@@ -180,7 +181,7 @@ public class LibertyCompletionTest {
                 CompletionItem jakartaee91Completion = c("jakartaee-9.1", "jakartaee-9.1");
                 CompletionItem jakartaee80Completion = c("jakartaee-8.0", "jakartaee-8.0");
 
-                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 5, jakartaee80Completion, jakartaee91Completion, jakartaee10Completion);
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 7, jakartaee80Completion, jakartaee91Completion, jakartaee10Completion); // 3 jakartaee + 2 (<!-- and <![CDATA[) + 2 @formatter snippets
 
                 serverXML = String.join(newLine, //
                         "<server description=\"Sample Liberty server\">", //
@@ -190,7 +191,7 @@ public class LibertyCompletionTest {
                         "</server>" //
                 );
 
-                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 2);  // one for CDATA and one for <-, no completion for jakartaee-11.0
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 4);  // 2 (<!-- and <![CDATA[) + 2 @formatter snippets, no completion for jakartaee-11.0
 
                 serverXML = String.join(newLine, //
                         "<server description=\"Sample Liberty server\">", //
@@ -199,7 +200,7 @@ public class LibertyCompletionTest {
                         "       </featureManager>", //
                         "</server>" //
                 );
-                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 18);
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 20); // 16 microprofile + 2 (<!-- and <![CDATA[) + 2 @formatter snippets
 
                 serverXML = String.join(newLine, //
                         "<server description=\"Sample Liberty server\">", //
@@ -209,9 +210,9 @@ public class LibertyCompletionTest {
                         "       </featureManager>", //
                         "</server>" //
                 );
-                //here result should be 2 because it should show only one for CDATA and one for <-
+                //here result should be 4 because it should show only one for CDATA and one for <-, plus 2 @formatter snippets
                 // since ja is entered and javaee-8.0 is included, jakartaee should not be shown because its conflicting with javaee
-                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 2);
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 4);
 
                 serverXML = String.join(newLine, //
                         "<server description=\"Sample Liberty server\">", //
@@ -221,9 +222,9 @@ public class LibertyCompletionTest {
                         "       </featureManager>", //
                         "</server>" //
                 );
-                //here result should be 2 because it should show only one for CDATA and one for <-
+                //here result should be 4 because it should show only one for CDATA and one for <-, plus 2 @formatter snippets
                 // since ja is entered and jakartaee-8.0 is included, javaee should not be shown because its conflicting with jakartaee
-                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 2);
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 4);
 
                 serverXML = String.join(newLine, //
                         "<server description=\"Sample Liberty server\">", //
@@ -233,8 +234,8 @@ public class LibertyCompletionTest {
                         "       </featureManager>", //
                         "</server>" //
                 );
-                //here result should be 8 because it should show only jakartaee and javaee related completion as microprofile is already added
-                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 8);
+                //here result should be 10 because it should show only jakartaee and javaee related completion as microprofile is already added, plus 2 @formatter snippets
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 10);
 
                 // repeating same platform to see for any issues
                 serverXML = String.join(newLine, //
@@ -245,9 +246,9 @@ public class LibertyCompletionTest {
                         "       </featureManager>", //
                         "</server>" //
                 );
-                //here result should be 2 because it should show only one for CDATA and one for <-
+                //here result should be 4 because it should show only one for CDATA and one for <-, plus 2 @formatter snippets
                 // since jakartaee is entered and jakartaee-9.0 is included, javaee should not be shown because its conflicting with jakartaee
-                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 2);
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 4);
 
                 // repeating same platform to see for any issues
                 serverXML = String.join(newLine, //
@@ -259,9 +260,9 @@ public class LibertyCompletionTest {
                         "       </featureManager>", //
                         "</server>" //
                 );
-                //here result should be 2 because it should show only one for CDATA and one for <-
+                //here result should be 4 because it should show only one for CDATA and one for <-, plus 2 @formatter snippets
                 // since jakartaee is entered and jakartaee-9.0 is included, javaee should not be shown because its conflicting with jakartaee
-                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 2);
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 4);
         }
 
         // Tests the feature completion for same feature repetition
@@ -280,7 +281,7 @@ public class LibertyCompletionTest {
                 // 1 for sipServlet-1.1
                 // one for CDATA and one for <-
                 CompletionItem sipServletCompletionItem = c("sipServlet-1.1", "sipServlet-1.1");
-                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 3, sipServletCompletionItem);
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 5, sipServletCompletionItem);
 
                 serverXML = String.join(newLine, //
                         "<server description=\"Sample Liberty server\">", //
@@ -295,7 +296,7 @@ public class LibertyCompletionTest {
                 // 1 for sipServlet-1.1
                 // one for CDATA and one for <-
                 sipServletCompletionItem = c("sipServlet-1.1", "sipServlet-1.1");
-                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 3, sipServletCompletionItem);
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 5, sipServletCompletionItem);
 
                 serverXML = String.join(newLine, //
                         "<server description=\"Sample Liberty server\">", //
@@ -310,7 +311,7 @@ public class LibertyCompletionTest {
                 // 1 for sipServlet-1.1
                 // one for CDATA and one for <-
                 sipServletCompletionItem = c("sipServlet-1.1", "sipServlet-1.1");
-                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 3, sipServletCompletionItem);
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 5, sipServletCompletionItem);
 
                 serverXML = String.join(newLine, //
                         "<server description=\"Sample Liberty server\">", //
@@ -326,7 +327,7 @@ public class LibertyCompletionTest {
                 // 1 for sipServlet-1.1
                 // one for CDATA and one for <-
                 sipServletCompletionItem = c("sipServlet-1.1", "sipServlet-1.1");
-                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 3, sipServletCompletionItem);
+                XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, 5, sipServletCompletionItem);
         }
 
         // Tests the
@@ -624,8 +625,9 @@ public class LibertyCompletionTest {
                 CompletionItem mpTelemetryCompletion2 = c("mpTelemetry-2.0","mpTelemetry-2.0");
                 // total number of available completion items
                 // 4 for mpTelemetry
-                // one for CDATA and one for <-
-                final int TOTAL_ITEMS = 6; // total number of available completion items
+                // 2 for <!-- and <![CDATA[
+                // 2 for @formatter:off/on snippets added in lemminx 0.28+
+                final int TOTAL_ITEMS = 8; // total number of available completion items
 
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, TOTAL_ITEMS, mpTelemetryCompletionVersionLess,mpTelemetryCompletion1,mpTelemetryCompletion11,mpTelemetryCompletion2);
 
@@ -636,8 +638,9 @@ public class LibertyCompletionTest {
                 CompletionItem mpTelemetryCompletion21 = c("mpTelemetry-2.1","mpTelemetry-2.1");
                 // total number of available completion items
                 // 5 for mpTelemetry
-                // one for CDATA and one for <-
-                final int NEW_TOTAL_ITEMS = 7; // total number of available completion items
+                // 2 for <!-- and <![CDATA[
+                // 2 for @formatter:off/on snippets added in lemminx 0.28+
+                final int NEW_TOTAL_ITEMS = 9; // total number of available completion items
                 XMLAssert.testCompletionFor(serverXML, null, serverXMLURI, NEW_TOTAL_ITEMS, mpTelemetryCompletionVersionLess,mpTelemetryCompletion1,mpTelemetryCompletion11,mpTelemetryCompletion2,mpTelemetryCompletion21);
         }
 }

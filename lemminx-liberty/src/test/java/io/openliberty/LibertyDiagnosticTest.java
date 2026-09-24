@@ -68,7 +68,7 @@ public class LibertyDiagnosticTest {
 
     @BeforeEach
     public void setupWorkspace() {
-        initList.add(new WorkspaceFolder(srcResourcesDir.toURI().toString()));
+        initList.add(new WorkspaceFolder(srcResourcesDir.toURI().toString(), "test"));
         libPM = LibertyProjectsManager.getInstance();
         libPM.setWorkspaceFolders(initList);
         libWorkspace = libPM.getLibertyWorkspaceFolders().iterator().next();
@@ -236,7 +236,7 @@ public class LibertyDiagnosticTest {
     public void testDiagnosticsForInclude() throws IOException, BadLocationException {
         // LibertyWorkspace must be initialized
         List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
-        initList.add(new WorkspaceFolder(new File("src/test/resources").toURI().toString()));
+        initList.add(new WorkspaceFolder(new File("src/test/resources").toURI().toString(), "test"));
         LibertyProjectsManager.getInstance().setWorkspaceFolders(initList);
 
         String serverXML = String.join(newLine, //
@@ -325,7 +325,7 @@ public class LibertyDiagnosticTest {
         }
         // LibertyWorkspace must be initialized
         List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
-        initList.add(new WorkspaceFolder(new File("src/test/resources").toURI().toString()));
+        initList.add(new WorkspaceFolder(new File("src/test/resources").toURI().toString(), "test"));
         LibertyProjectsManager.getInstance().setWorkspaceFolders(initList);
 
         String serverXML = String.join(newLine, //

@@ -35,7 +35,7 @@ public class LibertyFeatureTest {
         
         // LibertyWorkspace must be initialized
         List<WorkspaceFolder> initList = new ArrayList<WorkspaceFolder>();
-        initList.add(new WorkspaceFolder(srcResourcesDir.toURI().toString()));
+        initList.add(new WorkspaceFolder(srcResourcesDir.toURI().toString(),"test"));
         LibertyProjectsManager.getInstance().cleanInstance();
         LibertyProjectsManager.getInstance().setWorkspaceFolders(initList);
         Collection<LibertyWorkspace> workspaceFolders = LibertyProjectsManager.getInstance().getLibertyWorkspaceFolders();

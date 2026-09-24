@@ -37,6 +37,13 @@ jobs:
         with:
           repository: OpenLiberty/ci.common
           path: ci.common
+      # TODO: Remove once lemminx 0.31.3 is released to Maven Central
+      - name: Checkout lemminx
+        uses: actions/checkout@v3
+        with:
+          repository: eclipse-lemminx/lemminx
+          ref: main
+          path: lemminx
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
@@ -44,6 +51,10 @@ jobs:
           java-version: 17
       - name: Build ci common
         working-directory: ci.common
+        run: ./mvnw -V clean install --batch-mode --no-transfer-progress --errors -DtrimStackTrace=false -DskipTests
+      # TODO: Remove once lemminx 0.31.3 is released to Maven Central
+      - name: Build lemminx
+        working-directory: lemminx
         run: ./mvnw -V clean install --batch-mode --no-transfer-progress --errors -DtrimStackTrace=false -DskipTests
       - name: Build Lemminx Liberty
         working-directory: ./lemminx-liberty

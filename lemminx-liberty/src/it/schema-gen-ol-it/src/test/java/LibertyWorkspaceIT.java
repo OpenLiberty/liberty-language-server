@@ -34,7 +34,7 @@ public class LibertyWorkspaceIT {
         File serverXmlFile = new File(testFolder, "src/main/liberty/config/server.xml");
 
         //Configure Liberty workspace for testing
-        WorkspaceFolder testWorkspace = new WorkspaceFolder(testFolder.toURI().toString());
+        WorkspaceFolder testWorkspace = new WorkspaceFolder(testFolder.toURI().toString(), "");
         List<WorkspaceFolder> testWorkspaceFolders = new ArrayList<WorkspaceFolder>();
         testWorkspaceFolders.add(testWorkspace);
         LibertyProjectsManager.getInstance().setWorkspaceFolders(testWorkspaceFolders);
@@ -63,7 +63,7 @@ public class LibertyWorkspaceIT {
         File serverXmlFile = new File(testFolder, "src/main/liberty/config/server.xml");
 
         //Configure Liberty workspace for testing
-        WorkspaceFolder testWorkspace = new WorkspaceFolder(testFolder.toURI().toString());
+        WorkspaceFolder testWorkspace = new WorkspaceFolder(testFolder.toURI().toString(), "");
         List<WorkspaceFolder> testWorkspaceFolders = new ArrayList<WorkspaceFolder>();
         testWorkspaceFolders.add(testWorkspace);
         LibertyProjectsManager.getInstance().setWorkspaceFolders(testWorkspaceFolders);
@@ -79,7 +79,7 @@ public class LibertyWorkspaceIT {
 
         CompletionItem jaxrsCompletion = c("jaxrs-2.1", "jaxrs-2.1");
 
-        final int TOTAL_ITEMS = 345; // total number of available completion items excluding all mpConfig versions
+        final int TOTAL_ITEMS = 347; // total number of available completion items excluding all mpConfig versions
 
         XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, jaxrsCompletion);
         

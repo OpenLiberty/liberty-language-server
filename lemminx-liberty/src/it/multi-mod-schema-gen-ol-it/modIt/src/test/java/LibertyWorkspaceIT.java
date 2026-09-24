@@ -56,7 +56,7 @@ public class LibertyWorkspaceIT {
             String serverModCGenXSDURI = serverModCXmlFile.toPath().toUri().toString().replace("///", "/");
 
             //Configure Liberty workspace for testing - use parent module folder on purpose for multi-mod scenario
-            WorkspaceFolder testWorkspace = new WorkspaceFolder(parentModuleFolder.toURI().toString());
+            WorkspaceFolder testWorkspace = new WorkspaceFolder(parentModuleFolder.toURI().toString(), "");
             List<WorkspaceFolder> testWorkspaceFolders = new ArrayList<WorkspaceFolder>();
             testWorkspaceFolders.add(testWorkspace);
             LibertyProjectsManager.getInstance().setWorkspaceFolders(testWorkspaceFolders);
@@ -154,7 +154,7 @@ public class LibertyWorkspaceIT {
             String serverModBGenXSDURI = serverModBXmlFile.toPath().toUri().toString().replace("///", "/");
 
             //Configure Liberty workspace for testing
-            WorkspaceFolder testWorkspace = new WorkspaceFolder(parentModuleFolder.toURI().toString());
+            WorkspaceFolder testWorkspace = new WorkspaceFolder(parentModuleFolder.toURI().toString(), "");
             List<WorkspaceFolder> testWorkspaceFolders = new ArrayList<WorkspaceFolder>();
             testWorkspaceFolders.add(testWorkspace);
             LibertyProjectsManager.getInstance().setWorkspaceFolders(testWorkspaceFolders);

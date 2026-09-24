@@ -57,7 +57,7 @@ public class LibertyHoverTest {
 
         @BeforeEach
         public void setup(){
-                initList.add(new WorkspaceFolder(srcResourcesDir.toURI().toString()));
+                initList.add(new WorkspaceFolder(srcResourcesDir.toURI().toString(), "test"));
                 libPM = LibertyProjectsManager.getInstance();
                 libPM.setWorkspaceFolders(initList);
                 libWorkspace = libPM.getLibertyWorkspaceFolders().iterator().next();
