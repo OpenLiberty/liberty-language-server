@@ -36,7 +36,7 @@ public class LibertyWorkspaceIT {
         File serverXmlFile = new File(testFolder, "src/main/liberty/config/server.xml");
 
         //Configure Liberty workspace for testing
-        WorkspaceFolder testWorkspace = new WorkspaceFolder(testFolder.toURI().toString());
+        WorkspaceFolder testWorkspace = new WorkspaceFolder(testFolder.toURI().toString(), "");
         List<WorkspaceFolder> testWorkspaceFolders = new ArrayList<WorkspaceFolder>();
         testWorkspaceFolders.add(testWorkspace);
         LibertyProjectsManager.getInstance().setWorkspaceFolders(testWorkspaceFolders);
@@ -65,7 +65,7 @@ public class LibertyWorkspaceIT {
         File serverXmlFile = new File(testFolder, "src/main/liberty/config/server.xml");
 
         //Configure Liberty workspace for testing
-        WorkspaceFolder testWorkspace = new WorkspaceFolder(testFolder.toURI().toString());
+        WorkspaceFolder testWorkspace = new WorkspaceFolder(testFolder.toURI().toString(), "");
         List<WorkspaceFolder> testWorkspaceFolders = new ArrayList<WorkspaceFolder>();
         testWorkspaceFolders.add(testWorkspace);
         LibertyProjectsManager.getInstance().setWorkspaceFolders(testWorkspaceFolders);
@@ -82,6 +82,7 @@ public class LibertyWorkspaceIT {
         CompletionItem jaxrsCompletion = c("jaxrs-2.1", "jaxrs-2.1");
 
         // would be 282 if apiDiscovery-1.0 was not already specified - this is using wlp-22.0.0.3
+        // @formatter:off/on snippets removed in lemminx pr-1801
         final int TOTAL_ITEMS = 281; // total number of available completion items
 
         XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, jaxrsCompletion);
@@ -96,6 +97,6 @@ public class LibertyWorkspaceIT {
 
         org.junit.jupiter.api.Assertions.assertFalse(featurelistFile.exists(), "Found unexpected generated featurelist file: "+featureListName);
         // this version test needs to be updated whenever a new liberty version is released
-        org.junit.jupiter.api.Assertions.assertEquals(SettingsService.getInstance().getLatestRuntimeVersion(), "26.0.0.8");
+        org.junit.jupiter.api.Assertions.assertEquals(SettingsService.getInstance().getLatestRuntimeVersion(), "26.0.0.9");
     }
 }

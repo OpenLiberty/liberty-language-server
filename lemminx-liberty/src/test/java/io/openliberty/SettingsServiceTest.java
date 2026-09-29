@@ -41,8 +41,8 @@ public class SettingsServiceTest {
 
     @BeforeEach
     public void setupWorkspace() {
-        initList.add(new WorkspaceFolder(resourcesDir.toURI().toString()));
-        initList.add(new WorkspaceFolder(resourcesLibertyDir.toURI().toString())); // initialize workspace that test method uses also
+        initList.add(new WorkspaceFolder(resourcesDir.toURI().toString(), "test"));
+        initList.add(new WorkspaceFolder(resourcesLibertyDir.toURI().toString(), "test")); // initialize workspace that test method uses also
         libPM = LibertyProjectsManager.getInstance();
         libPM.setWorkspaceFolders(initList);
         libWorkspace = libPM.getLibertyWorkspaceFolders().iterator().next();

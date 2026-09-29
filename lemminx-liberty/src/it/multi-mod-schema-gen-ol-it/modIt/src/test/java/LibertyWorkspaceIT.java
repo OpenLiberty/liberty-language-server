@@ -56,7 +56,7 @@ public class LibertyWorkspaceIT {
             String serverModCGenXSDURI = serverModCXmlFile.toPath().toUri().toString().replace("///", "/");
 
             //Configure Liberty workspace for testing - use parent module folder on purpose for multi-mod scenario
-            WorkspaceFolder testWorkspace = new WorkspaceFolder(parentModuleFolder.toURI().toString());
+            WorkspaceFolder testWorkspace = new WorkspaceFolder(parentModuleFolder.toURI().toString(), "");
             List<WorkspaceFolder> testWorkspaceFolders = new ArrayList<WorkspaceFolder>();
             testWorkspaceFolders.add(testWorkspace);
             LibertyProjectsManager.getInstance().setWorkspaceFolders(testWorkspaceFolders);
@@ -154,7 +154,7 @@ public class LibertyWorkspaceIT {
             String serverModBGenXSDURI = serverModBXmlFile.toPath().toUri().toString().replace("///", "/");
 
             //Configure Liberty workspace for testing
-            WorkspaceFolder testWorkspace = new WorkspaceFolder(parentModuleFolder.toURI().toString());
+            WorkspaceFolder testWorkspace = new WorkspaceFolder(parentModuleFolder.toURI().toString(), "");
             List<WorkspaceFolder> testWorkspaceFolders = new ArrayList<WorkspaceFolder>();
             testWorkspaceFolders.add(testWorkspace);
             LibertyProjectsManager.getInstance().setWorkspaceFolders(testWorkspaceFolders);
@@ -170,8 +170,8 @@ public class LibertyWorkspaceIT {
 
             CompletionItem jaxrsCompletion = c("jaxrs-2.1", "jaxrs-2.1");
 
-            // would be 228 if mpConfig-1.4 was not already specified - this is using ol-22.0.0.12
-            final int TOTAL_ITEMS = 227; // total number of available completion items
+            // would be 226 if mpConfig-1.4 was not already specified - this is using ol-22.0.0.12 (@formatter:off/on snippets removed in lemminx pr-1801)
+            final int TOTAL_ITEMS = 225; // total number of available completion items
 
             XMLAssert.testCompletionFor(serverXML, null, serverModAXmlFile.toURI().toString(), TOTAL_ITEMS, jaxrsCompletion);
             XMLAssert.testCompletionFor(serverXML, null, serverModBXmlFile.toURI().toString(), TOTAL_ITEMS, jaxrsCompletion);

@@ -27,7 +27,7 @@
     </developers>
 
     <properties>
-        <lemminx.version>0.26.1</lemminx.version>
+        <lemminx.version>0.31.3-SNAPSHOT</lemminx.version>
     </properties>
 
     <scm>
