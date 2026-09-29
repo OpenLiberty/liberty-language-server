@@ -87,8 +87,8 @@ public class LibertyWorkspaceIT {
 
         // this is using a beta runtime which does not have any features.json in Maven Central
         // this causes the featurelist xml file to get generated in the .libertyls folder
-        // +2 for @formatter:off/on snippets added in lemminx 0.28+
-        final int TOTAL_ITEMS = 263; // total number of available completion items excluding all servlet versions
+        // @formatter:off/on snippets removed in lemminx pr-1801
+        final int TOTAL_ITEMS = 261; // total number of available completion items excluding all servlet versions
 
         XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, batchCompletion);
                 
@@ -112,8 +112,8 @@ public class LibertyWorkspaceIT {
         cdiFeatures.add("cdi-4.0");
 
         // changed to only return features that contain the passed in partial feature name (Note: if a version was listed after the hyphen, it gets stripped off in order to match all available versions of a feature)
-        // - includes the four cdi features and two random completion items with labels "<![CDATA[" and "<!--"
-        CompletionList completionList = XMLAssert.testCompletionFor(serverXML2, null, serverXmlFile.toURI().toString(), 8, cdiCompletion1, cdiCompletion2, cdiCompletion3, cdiCompletion4);
+        // - includes the four cdi features and two random completion items with labels "<![CDATA[" and "<!--" (@formatter:off/on snippets removed in lemminx pr-1801)
+        CompletionList completionList = XMLAssert.testCompletionFor(serverXML2, null, serverXmlFile.toURI().toString(), 6, cdiCompletion1, cdiCompletion2, cdiCompletion3, cdiCompletion4);
 
         Set<String> foundLabels = new HashSet<String> ();
         Set<String> unexpectedLabels = new HashSet<String> ();

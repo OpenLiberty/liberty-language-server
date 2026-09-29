@@ -81,9 +81,9 @@ public class LibertyWorkspaceIT {
 
         CompletionItem jaxrsCompletion = c("jaxrs-2.1", "jaxrs-2.1");
 
-        // would be 284 if apiDiscovery-1.0 was not already specified - this is using wlp-22.0.0.3
-        // +2 for @formatter:off/on snippets added in lemminx 0.28+
-        final int TOTAL_ITEMS = 283; // total number of available completion items
+        // would be 282 if apiDiscovery-1.0 was not already specified - this is using wlp-22.0.0.3
+        // @formatter:off/on snippets removed in lemminx pr-1801
+        final int TOTAL_ITEMS = 281; // total number of available completion items
 
         XMLAssert.testCompletionFor(serverXML, null, serverXmlFile.toURI().toString(), TOTAL_ITEMS, jaxrsCompletion);
         

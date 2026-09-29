@@ -38,11 +38,12 @@ jobs:
           repository: OpenLiberty/ci.common
           path: ci.common
       # TODO: Remove once lemminx 0.31.3 is released to Maven Central
+      # Using Angelo's fork with Roslyn-style incremental parser + memory optimizations (PR eclipse-lemminx/lemminx#1801)
       - name: Checkout lemminx
         uses: actions/checkout@v3
         with:
-          repository: eclipse-lemminx/lemminx
-          ref: main
+          repository: angelozerr/lemminx
+          ref: fix/red-green-tree
           path: lemminx
       - name: Set up Java
         uses: actions/setup-java@v3
