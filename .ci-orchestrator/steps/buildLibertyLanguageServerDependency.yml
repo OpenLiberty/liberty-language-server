@@ -1,0 +1,7 @@
+- stepName: "LibertyLanguageServerDependencyBuild"
+  coreStep: true
+  workType: Jenkins
+  projectName: LibertyLanguageServerDependencyBuild
+  timeoutInMinutes: 30
+  properties:
+    jenkinsServiceName: "websphere-extra-jenkins"
