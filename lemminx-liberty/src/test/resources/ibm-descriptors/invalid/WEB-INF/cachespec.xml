@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cache
+    xmlns="http://websphere.ibm.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://websphere.ibm.com/xml/ns/javaee
+        http://websphere.ibm.com/xml/ns/javaee/cachespec.xsd">
+
+    <cache-entry>
+        <class>servlet</class>
+        <name>/MyServlet</name>
+        <cache-id>
+            <component id="param" type="pathinfo"/>
+            <timeout>3600</timeout>
+            <priority>1</priority>
+        </cache-id>
+    </cache-entry>
+
+</cache>
