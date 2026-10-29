@@ -41,6 +41,9 @@ public final class IBMDescriptorSchemaUtil {
     // Bump the version segment when the bundled schemas change, so the .lemminx cache gets refreshed.
     private static final String CACHE_URL_DIR = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/ibm/v1/";
 
+    // Application client descriptors (ibm-application-client-bnd/ext) are not included: 
+    // Liberty does not ship their schemas.
+
     // root element -> latest schema
     private static final Map<String, String> ROOT_TO_LATEST_SCHEMA = Map.of(
             "web-ext", "ibm-web-ext_1_1.xsd",
