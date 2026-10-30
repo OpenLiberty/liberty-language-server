@@ -27,13 +27,13 @@ import io.openliberty.tools.langserver.lemminx.util.XmlReader.RootElement;
  * Finds the bundled schema for IBM deployment descriptors such as ibm-web-bnd.xml.
  * The schemas are the ones shipped in a Liberty install under dev/api/ibm/schema.
  *
- * A file is an IBM descriptor when its root element is one of the known descriptor roots in the IBM
+ * A file is a deployment descriptor when its root element is one of the known descriptor roots in the IBM
  * namespace. It can be in any folder. If the root element cannot be read (new or empty file), the
  * file name is used instead.
  */
-public final class IBMDescriptorSchemaUtil {
+public final class DeploymentDescriptorSchemaUtil {
 
-    private static final Logger LOGGER = Logger.getLogger(IBMDescriptorSchemaUtil.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(DeploymentDescriptorSchemaUtil.class.getName());
 
     private static final String IBM_NAMESPACE = "http://websphere.ibm.com/xml/ns/javaee";
 
@@ -82,11 +82,11 @@ public final class IBMDescriptorSchemaUtil {
             "ibm-web-ext_1_0.xsd", "ibm-web-ext_1_1.xsd",
             "ibm-ws-bnd_1_0.xsd");
 
-    private IBMDescriptorSchemaUtil() {
+    private DeploymentDescriptorSchemaUtil() {
     }
 
     /**
-     * @return the file name of the latest schema for this descriptor, or null if the file is not an IBM descriptor
+     * @return the file name of the latest schema for this descriptor, or null if the file is not a deployment descriptor
      */
     private static String getLatestSchemaName(String fileUri) {
         if (fileUri == null || !fileUri.endsWith(".xml")) {
@@ -105,17 +105,17 @@ public final class IBMDescriptorSchemaUtil {
      * @param fileUri URI of the file, may be null
      * @return true if the file is an IBM deployment descriptor such as ibm-web-bnd.xml
      */
-    public static boolean isIBMDescriptor(String fileUri) {
+    public static boolean isDeploymentDescriptor(String fileUri) {
         return getLatestSchemaName(fileUri) != null;
     }
 
     /**
-     * Get the file name of the schema to use for an IBM descriptor, for example ibm-web-bnd_1_0.xsd.
+     * Get the file name of the schema to use for a deployment descriptor, for example ibm-web-bnd_1_0.xsd.
      *
      * @param fileUri  URI of the descriptor file
      * @param systemId schema location from xsi:schemaLocation, may be null. If it names a bundled version
      *                 of the schema of this descriptor, that version is used. Otherwise the latest version is used.
-     * @return schema file name, or null if the file is not an IBM descriptor
+     * @return schema file name, or null if the file is not a deployment descriptor
      */
     private static String getSchemaName(String fileUri, String systemId) {
         String schemaName = getLatestSchemaName(fileUri);
@@ -133,14 +133,14 @@ public final class IBMDescriptorSchemaUtil {
     }
 
     /**
-     * Get the schema URL from the xsi:schemaLocation of an IBM descriptor (the last value of the
+     * Get the schema URL from the xsi:schemaLocation of a deployment descriptor (the last value of the
      * "namespace url" pair), so that the schema version named in the file can be used.
      *
      * @param fileUri URI of the descriptor file
-     * @return the schema URL, or null if the file is not an IBM descriptor or has no xsi:schemaLocation
+     * @return the schema URL, or null if the file is not a deployment descriptor or has no xsi:schemaLocation
      */
     public static String getSchemaLocationHint(String fileUri) {
-        if (!isIBMDescriptor(fileUri)) {
+        if (!isDeploymentDescriptor(fileUri)) {
             return null;
         }
         RootElement root = XmlReader.getRootElement(fileUri);
@@ -152,12 +152,12 @@ public final class IBMDescriptorSchemaUtil {
     }
 
     /**
-     * Get the URI of the local schema for an IBM descriptor.
+     * Get the URI of the local schema for a deployment descriptor.
      *
      * @param fileUri  URI of the descriptor file
      * @param systemId schema location from xsi:schemaLocation, may be null. If it names a bundled version
      *                 of the schema of this descriptor, that version is used. Otherwise the latest version is used.
-     * @return schema URI as a String, or null if the file is not an IBM descriptor
+     * @return schema URI as a String, or null if the file is not a deployment descriptor
      */
     public static String getSchemaUri(String fileUri, String systemId) {
         String schemaName = getSchemaName(fileUri, systemId);

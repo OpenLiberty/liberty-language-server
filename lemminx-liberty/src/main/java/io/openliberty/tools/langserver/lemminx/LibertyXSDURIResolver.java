@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
-import io.openliberty.tools.langserver.lemminx.util.IBMDescriptorSchemaUtil;
+import io.openliberty.tools.langserver.lemminx.util.DeploymentDescriptorSchemaUtil;
 import io.openliberty.tools.langserver.lemminx.util.LibertyVersionDownloadUtil;
 import io.openliberty.tools.langserver.lemminx.util.SchemaAndFeatureListGeneratorUtil;
 import org.apache.xerces.xni.XMLResourceIdentifier;
@@ -80,8 +80,8 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
      */
     public String resolve(String baseLocation, String publicId, String systemId) {
         // IBM deployment descriptors (ibm-web-bnd.xml and similar) use schemas bundled with this plugin
-        if (IBMDescriptorSchemaUtil.isIBMDescriptor(baseLocation)) {
-            return IBMDescriptorSchemaUtil.getSchemaUri(baseLocation, systemId);
+        if (DeploymentDescriptorSchemaUtil.isDeploymentDescriptor(baseLocation)) {
+            return DeploymentDescriptorSchemaUtil.getSchemaUri(baseLocation, systemId);
         }
 
         if (!LibertyUtils.isConfigXMLFile(baseLocation)) {
@@ -155,14 +155,14 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
     }
 
     /**
-     * For IBM descriptors, point the xsi:schemaLocation URL at the bundled schema
+     * For deployment descriptors, point the xsi:schemaLocation URL at the bundled schema
      */
     @Override
     public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier) throws XNIException, IOException {
         String baseSystemId = resourceIdentifier.getBaseSystemId();
         String literalSystemId = resourceIdentifier.getLiteralSystemId();
-        if (literalSystemId != null && IBMDescriptorSchemaUtil.isIBMDescriptor(baseSystemId)) {
-            String schemaUri = IBMDescriptorSchemaUtil.getSchemaUri(baseSystemId, literalSystemId);
+        if (literalSystemId != null && DeploymentDescriptorSchemaUtil.isDeploymentDescriptor(baseSystemId)) {
+            String schemaUri = DeploymentDescriptorSchemaUtil.getSchemaUri(baseSystemId, literalSystemId);
             if (schemaUri != null) {
                 return new XMLInputSource(resourceIdentifier.getPublicId(), schemaUri, baseSystemId);
             }
@@ -172,8 +172,8 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
 
     @Override
     public Map<String, String> getExternalGrammarLocation(URI fileURI) {
-        // For IBM descriptors, pass the xsi:schemaLocation URL so that the version named in the file is used
-        String xsdFile = resolve(fileURI.toString(), null, IBMDescriptorSchemaUtil.getSchemaLocationHint(fileURI.toString()));
+        // For deployment descriptors, pass the xsi:schemaLocation URL so that the version named in the file is used
+        String xsdFile = resolve(fileURI.toString(), null, DeploymentDescriptorSchemaUtil.getSchemaLocationHint(fileURI.toString()));
         if (xsdFile == null) {
             return null;
         }

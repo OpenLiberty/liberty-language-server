@@ -54,14 +54,14 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import io.openliberty.tools.langserver.lemminx.services.LibertyProjectsManager;
 import io.openliberty.tools.langserver.lemminx.services.SettingsService;
-import io.openliberty.tools.langserver.lemminx.util.IBMDescriptorSchemaUtil;
+import io.openliberty.tools.langserver.lemminx.util.DeploymentDescriptorSchemaUtil;
 
 /**
  * Tests for IBM deployment descriptors (ibm-web-bnd.xml and similar).
- * The sample files are in src/test/resources/ibm-descriptors.
+ * The sample files are in src/test/resources/deployment-descriptors.
  */
 @ExtendWith(MockitoExtension.class)
-public class IBMDescriptorTest {
+public class DeploymentDescriptorTest {
 
     @Mock
     SettingsService settingsService;
@@ -69,7 +69,7 @@ public class IBMDescriptorTest {
     MockedStatic<SettingsService> settings;
 
     static File srcResourcesDir = new File("src/test/resources/sample");
-    static File descriptorDir = new File("src/test/resources/ibm-descriptors");
+    static File descriptorDir = new File("src/test/resources/deployment-descriptors");
 
     @BeforeEach
     public void setup() {
@@ -100,59 +100,59 @@ public class IBMDescriptorTest {
     @Test
     public void testDetectionByFileNameWhenFileCannotBeRead() {
         // files that do not exist on disk (new files): the file name is used, in any folder
-        assertTrue(IBMDescriptorSchemaUtil.isIBMDescriptor("file:///app/WEB-INF/ibm-web-bnd.xml"));
-        assertTrue(IBMDescriptorSchemaUtil.isIBMDescriptor("file:///app/META-INF/ibm-application-ext.xml"));
-        assertTrue(IBMDescriptorSchemaUtil.isIBMDescriptor("file:///app/WEB-INF/cachespec.xml"));
-        assertTrue(IBMDescriptorSchemaUtil.isIBMDescriptor("file:///app/config/ibm-web-bnd.xml"));
+        assertTrue(DeploymentDescriptorSchemaUtil.isDeploymentDescriptor("file:///app/WEB-INF/ibm-web-bnd.xml"));
+        assertTrue(DeploymentDescriptorSchemaUtil.isDeploymentDescriptor("file:///app/META-INF/ibm-application-ext.xml"));
+        assertTrue(DeploymentDescriptorSchemaUtil.isDeploymentDescriptor("file:///app/WEB-INF/cachespec.xml"));
+        assertTrue(DeploymentDescriptorSchemaUtil.isDeploymentDescriptor("file:///app/config/ibm-web-bnd.xml"));
         // other files
-        assertFalse(IBMDescriptorSchemaUtil.isIBMDescriptor("file:///app/WEB-INF/web.xml"));
-        assertFalse(IBMDescriptorSchemaUtil.isIBMDescriptor("file:///app/src/main/liberty/config/server.xml"));
-        assertFalse(IBMDescriptorSchemaUtil.isIBMDescriptor("file:///app/WEB-INF/ibm-web-bnd.txt"));
-        assertFalse(IBMDescriptorSchemaUtil.isIBMDescriptor(null));
+        assertFalse(DeploymentDescriptorSchemaUtil.isDeploymentDescriptor("file:///app/WEB-INF/web.xml"));
+        assertFalse(DeploymentDescriptorSchemaUtil.isDeploymentDescriptor("file:///app/src/main/liberty/config/server.xml"));
+        assertFalse(DeploymentDescriptorSchemaUtil.isDeploymentDescriptor("file:///app/WEB-INF/ibm-web-bnd.txt"));
+        assertFalse(DeploymentDescriptorSchemaUtil.isDeploymentDescriptor(null));
     }
 
     @Test
     public void testDetectionByRootElementInAnyFolder() {
         // any file name, any folder, as long as the root element and namespace match
-        assertTrue(IBMDescriptorSchemaUtil.isIBMDescriptor(uriOf("any-folder/config/web-bnd-schema-1_2-version-1_2.xml")));
-        assertTrue(IBMDescriptorSchemaUtil.isIBMDescriptor(uriOf("any-folder/other-name.xml")));
-        // same root element name but another namespace is not an IBM descriptor
-        assertFalse(IBMDescriptorSchemaUtil.isIBMDescriptor(uriOf("any-folder/other-namespace.xml")));
+        assertTrue(DeploymentDescriptorSchemaUtil.isDeploymentDescriptor(uriOf("any-folder/config/web-bnd-schema-1_2-version-1_2.xml")));
+        assertTrue(DeploymentDescriptorSchemaUtil.isDeploymentDescriptor(uriOf("any-folder/other-name.xml")));
+        // same root element name but another namespace is not a deployment descriptor
+        assertFalse(DeploymentDescriptorSchemaUtil.isDeploymentDescriptor(uriOf("any-folder/other-namespace.xml")));
         // IBM file name but another root element: the root element wins
-        assertFalse(IBMDescriptorSchemaUtil.isIBMDescriptor(uriOf("any-folder/ibm-web-bnd.xml")));
+        assertFalse(DeploymentDescriptorSchemaUtil.isDeploymentDescriptor(uriOf("any-folder/ibm-web-bnd.xml")));
     }
 
     @Test
     public void testSchemaVersionFromSchemaLocationHint() {
         String uri = "file:///app/WEB-INF/ibm-web-bnd.xml";
-        String latest = IBMDescriptorSchemaUtil.getSchemaUri(uri, null);
+        String latest = DeploymentDescriptorSchemaUtil.getSchemaUri(uri, null);
         assertNotNull(latest);
         assertTrue(latest.endsWith("ibm-web-bnd_1_2.xsd"), latest);
 
-        String older = IBMDescriptorSchemaUtil.getSchemaUri(uri, "http://websphere.ibm.com/xml/ns/javaee/ibm-web-bnd_1_0.xsd");
+        String older = DeploymentDescriptorSchemaUtil.getSchemaUri(uri, "http://websphere.ibm.com/xml/ns/javaee/ibm-web-bnd_1_0.xsd");
         assertTrue(older.endsWith("ibm-web-bnd_1_0.xsd"), older);
 
         // a hint for a different descriptor, or an unknown file, falls back to the latest version
-        String other = IBMDescriptorSchemaUtil.getSchemaUri(uri, "http://websphere.ibm.com/xml/ns/javaee/ibm-web-ext_1_0.xsd");
+        String other = DeploymentDescriptorSchemaUtil.getSchemaUri(uri, "http://websphere.ibm.com/xml/ns/javaee/ibm-web-ext_1_0.xsd");
         assertTrue(other.endsWith("ibm-web-bnd_1_2.xsd"), other);
-        String unknown = IBMDescriptorSchemaUtil.getSchemaUri(uri, "http://example.com/foo.xsd");
+        String unknown = DeploymentDescriptorSchemaUtil.getSchemaUri(uri, "http://example.com/foo.xsd");
         assertTrue(unknown.endsWith("ibm-web-bnd_1_2.xsd"), unknown);
 
-        assertNull(IBMDescriptorSchemaUtil.getSchemaUri("file:///app/WEB-INF/web.xml", null));
+        assertNull(DeploymentDescriptorSchemaUtil.getSchemaUri("file:///app/WEB-INF/web.xml", null));
     }
 
     @Test
     public void testSchemaLocationHint(@TempDir File tempDir) throws IOException {
         // the last value of the "namespace url" pair
-        String hint = IBMDescriptorSchemaUtil.getSchemaLocationHint(uriOf("any-folder/config/web-bnd-schema-1_0-version-1_0.xml"));
+        String hint = DeploymentDescriptorSchemaUtil.getSchemaLocationHint(uriOf("any-folder/config/web-bnd-schema-1_0-version-1_0.xml"));
         assertEquals("http://websphere.ibm.com/xml/ns/javaee/ibm-web-bnd_1_0.xsd", hint);
-        // IBM descriptor without xsi:schemaLocation, not an IBM descriptor, and a file that is not there
+        // deployment descriptor without xsi:schemaLocation, not a deployment descriptor, and a file that is not there
         File noLocation = new File(tempDir, "no-location.xml");
         Files.writeString(noLocation.toPath(), "<web-bnd xmlns=\"http://websphere.ibm.com/xml/ns/javaee\" version=\"1.2\"/>");
-        assertNull(IBMDescriptorSchemaUtil.getSchemaLocationHint(noLocation.toURI().toString()));
-        assertNull(IBMDescriptorSchemaUtil.getSchemaLocationHint(uriOf("any-folder/other-namespace.xml")));
-        assertNull(IBMDescriptorSchemaUtil.getSchemaLocationHint("file:///app/WEB-INF/web.xml"));
-        assertNull(IBMDescriptorSchemaUtil.getSchemaLocationHint(null));
+        assertNull(DeploymentDescriptorSchemaUtil.getSchemaLocationHint(noLocation.toURI().toString()));
+        assertNull(DeploymentDescriptorSchemaUtil.getSchemaLocationHint(uriOf("any-folder/other-namespace.xml")));
+        assertNull(DeploymentDescriptorSchemaUtil.getSchemaLocationHint("file:///app/WEB-INF/web.xml"));
+        assertNull(DeploymentDescriptorSchemaUtil.getSchemaLocationHint(null));
     }
 
     @Test
@@ -354,6 +354,6 @@ public class IBMDescriptorTest {
 
     @Test
     public void testServerXmlIsNotTreatedAsDescriptor() {
-        assertFalse(IBMDescriptorSchemaUtil.isIBMDescriptor(new File(srcResourcesDir, "test/server.xml").toURI().toString()));
+        assertFalse(DeploymentDescriptorSchemaUtil.isDeploymentDescriptor(new File(srcResourcesDir, "test/server.xml").toURI().toString()));
     }
 }

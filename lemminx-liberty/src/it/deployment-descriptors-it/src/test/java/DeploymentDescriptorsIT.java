@@ -37,7 +37,7 @@ import org.junit.jupiter.api.Test;
  *
  * Sample files are in src/main/descriptors.
  */
-public class IBMDescriptorsIT {
+public class DeploymentDescriptorsIT {
 
     private static final File DESCRIPTORS = new File(System.getProperty("user.dir"), "src/main/descriptors");
     private static final String VALID_FILE = "WEB-INF/ibm-web-bnd.xml";

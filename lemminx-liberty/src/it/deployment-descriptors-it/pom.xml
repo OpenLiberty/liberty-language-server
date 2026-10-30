@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>io.openliberty.tools.test</groupId>
-    <artifactId>ibm-descriptors-it</artifactId>
+    <artifactId>deployment-descriptors-it</artifactId>
     <version>1.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
