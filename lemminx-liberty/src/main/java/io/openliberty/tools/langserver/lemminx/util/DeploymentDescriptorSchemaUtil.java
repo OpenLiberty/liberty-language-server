@@ -132,7 +132,7 @@ public final class DeploymentDescriptorSchemaUtil {
         if (systemId != null) {
             String hinted = systemId.substring(systemId.lastIndexOf('/') + 1);
             // only accept another version of the same schema
-            if (BUNDLED_FILES.contains(hinted) && hinted.startsWith(schemaBaseName(latestSchemaName))) {
+            if (BUNDLED_FILES.contains(hinted) && schemaFamily(hinted).equals(schemaFamily(latestSchemaName))) {
                 return hinted;
             }
         }
@@ -196,10 +196,9 @@ public final class DeploymentDescriptorSchemaUtil {
         }
     }
 
-    // ibm-web-bnd_1_2.xsd -> ibm-web-bnd_ ; cachespec.xsd -> cachespec
-    private static String schemaBaseName(String schemaName) {
-        int underscore = schemaName.lastIndexOf('_');
-        return underscore >= 0 ? schemaName.substring(0, underscore + 1) : schemaName;
+    // ibm-web-bnd_1_2.xsd -> ibm-web-bnd ; cachespec.xsd -> cachespec.xsd
+    private static String schemaFamily(String schemaName) {
+        return schemaName.replaceFirst("_\\d+_\\d+\\.xsd$", "");
     }
 
     /**

@@ -137,6 +137,13 @@ public class DeploymentDescriptorTest {
         String unknown = DeploymentDescriptorSchemaUtil.getSchemaUri(uri, "http://example.com/foo.xsd");
         assertTrue(unknown.endsWith("ibm-web-bnd_1_2.xsd"), unknown);
 
+        // cachespec.xsd has no version, so only cachespec.xsd is accepted for it
+        String cachespecUri = "file:///app/WEB-INF/cachespec.xml";
+        String cachespec = DeploymentDescriptorSchemaUtil.getSchemaUri(cachespecUri, "http://websphere.ibm.com/xml/ns/javaee/cachespec.xsd");
+        assertTrue(cachespec.endsWith("cachespec.xsd"), cachespec);
+        String cachespecOther = DeploymentDescriptorSchemaUtil.getSchemaUri(cachespecUri, "http://websphere.ibm.com/xml/ns/javaee/ibm-web-bnd_1_0.xsd");
+        assertTrue(cachespecOther.endsWith("cachespec.xsd"), cachespecOther);
+
         assertNull(DeploymentDescriptorSchemaUtil.getSchemaUri("file:///app/WEB-INF/web.xml", null));
     }
 
