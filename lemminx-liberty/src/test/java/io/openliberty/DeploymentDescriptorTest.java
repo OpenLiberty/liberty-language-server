@@ -16,6 +16,7 @@ import static org.eclipse.lemminx.XMLAssert.c;
 import static org.eclipse.lemminx.XMLAssert.ca;
 import static org.eclipse.lemminx.XMLAssert.te;
 import static org.eclipse.lemminx.XMLAssert.d;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -181,6 +182,29 @@ public class DeploymentDescriptorTest {
         for (String schema : schemas) {
             assertNotNull(getClass().getResource("/schema/xsd/ibm/" + schema), schema + " is missing");
         }
+    }
+
+    @Test
+    public void testEveryBundledSchemaCanBeSelectedByItsSchemaLocation() {
+        // Every schema file in the folder, except the ibm-common-* files that the others include, must be
+        // listed for its descriptor and bundled. Otherwise the schemaLocation of a file is silently ignored.
+        File[] files = new File("src/main/resources/schema/xsd/ibm").listFiles((dir, name) -> name.endsWith(".xsd"));
+        assertNotNull(files);
+        int checked = 0;
+        for (File file : files) {
+            String schema = file.getName();
+            if (schema.startsWith("ibm-common-")) {
+                continue;
+            }
+            // ibm-web-bnd_1_2.xsd -> ibm-web-bnd.xml ; cachespec.xsd -> cachespec.xml
+            String descriptor = schema.replaceFirst("(_\\d+_\\d+)?\\.xsd$", ".xml");
+            String uri = DeploymentDescriptorSchemaUtil.getSchemaUri("file:///app/" + descriptor,
+                    "http://websphere.ibm.com/xml/ns/javaee/" + schema);
+            assertNotNull(uri, schema + " is not listed or not bundled");
+            assertTrue(uri.endsWith("/" + schema), schema + " was not selected, got " + uri);
+            checked++;
+        }
+        assertEquals(19, checked);
     }
 
     // ---- validation: schema version named in xsi:schemaLocation ----

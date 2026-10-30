@@ -44,29 +44,29 @@ public final class DeploymentDescriptorSchemaUtil {
     // Application client descriptors (ibm-application-client-bnd/ext) are not included:
     // Liberty does not ship their schemas.
 
-    // root element -> latest schema
-    private static final Map<String, String> ROOT_TO_LATEST_SCHEMA = Map.of(
-            "web-ext", "ibm-web-ext_1_1.xsd",
-            "web-bnd", "ibm-web-bnd_1_2.xsd",
-            "application-ext", "ibm-application-ext_1_1.xsd",
-            "application-bnd", "ibm-application-bnd_1_2.xsd",
-            "ejb-jar-ext", "ibm-ejb-jar-ext_1_1.xsd",
-            "ejb-jar-bnd", "ibm-ejb-jar-bnd_1_2.xsd",
-            "managed-bean-bnd", "ibm-managed-bean-bnd_1_1.xsd",
-            "webservices-bnd", "ibm-ws-bnd_1_0.xsd",
-            "cache", "cachespec.xsd");
+    // root element -> schema versions of that descriptor, oldest first. The last one is the latest.
+    private static final Map<String, List<String>> ROOT_TO_SCHEMAS = Map.of(
+            "web-ext", List.of("ibm-web-ext_1_0.xsd", "ibm-web-ext_1_1.xsd"),
+            "web-bnd", List.of("ibm-web-bnd_1_0.xsd", "ibm-web-bnd_1_1.xsd", "ibm-web-bnd_1_2.xsd"),
+            "application-ext", List.of("ibm-application-ext_1_0.xsd", "ibm-application-ext_1_1.xsd"),
+            "application-bnd", List.of("ibm-application-bnd_1_0.xsd", "ibm-application-bnd_1_1.xsd", "ibm-application-bnd_1_2.xsd"),
+            "ejb-jar-ext", List.of("ibm-ejb-jar-ext_1_0.xsd", "ibm-ejb-jar-ext_1_1.xsd"),
+            "ejb-jar-bnd", List.of("ibm-ejb-jar-bnd_1_0.xsd", "ibm-ejb-jar-bnd_1_1.xsd", "ibm-ejb-jar-bnd_1_2.xsd"),
+            "managed-bean-bnd", List.of("ibm-managed-bean-bnd_1_0.xsd", "ibm-managed-bean-bnd_1_1.xsd"),
+            "webservices-bnd", List.of("ibm-ws-bnd_1_0.xsd"),
+            "cache", List.of("cachespec.xsd"));
 
-    // file name -> latest schema, only used when the root element cannot be read
-    private static final Map<String, String> FILE_NAME_TO_LATEST_SCHEMA = Map.of(
-            "ibm-web-ext.xml", "ibm-web-ext_1_1.xsd",
-            "ibm-web-bnd.xml", "ibm-web-bnd_1_2.xsd",
-            "ibm-application-ext.xml", "ibm-application-ext_1_1.xsd",
-            "ibm-application-bnd.xml", "ibm-application-bnd_1_2.xsd",
-            "ibm-ejb-jar-ext.xml", "ibm-ejb-jar-ext_1_1.xsd",
-            "ibm-ejb-jar-bnd.xml", "ibm-ejb-jar-bnd_1_2.xsd",
-            "ibm-managed-bean-bnd.xml", "ibm-managed-bean-bnd_1_1.xsd",
-            "ibm-ws-bnd.xml", "ibm-ws-bnd_1_0.xsd",
-            "cachespec.xml", "cachespec.xsd");
+    // file name -> root element, only used when the root element cannot be read
+    private static final Map<String, String> FILE_NAME_TO_ROOT = Map.of(
+            "ibm-web-ext.xml", "web-ext",
+            "ibm-web-bnd.xml", "web-bnd",
+            "ibm-application-ext.xml", "application-ext",
+            "ibm-application-bnd.xml", "application-bnd",
+            "ibm-ejb-jar-ext.xml", "ejb-jar-ext",
+            "ibm-ejb-jar-bnd.xml", "ejb-jar-bnd",
+            "ibm-managed-bean-bnd.xml", "managed-bean-bnd",
+            "ibm-ws-bnd.xml", "webservices-bnd",
+            "cachespec.xml", "cache");
 
     // Every bundled file. The ibm-common-* files are included by the others and must sit next to them.
     private static final List<String> BUNDLED_FILES = List.of(
@@ -99,18 +99,19 @@ public final class DeploymentDescriptorSchemaUtil {
 
     /**
      * @param root the root element of the file, or null if it could not be read
-     * @return the file name of the latest schema for this descriptor, or null if the file is not a deployment descriptor
+     * @return the schema versions of this descriptor, oldest first, or null if the file is not a deployment descriptor
      */
-    private static String getLatestSchemaName(String fileUri, RootElement root) {
+    private static List<String> getSchemas(String fileUri, RootElement root) {
         if (fileUri == null) {
             return null;
         }
         if (root != null) {
-            return IBM_NAMESPACE.equals(root.namespace()) ? ROOT_TO_LATEST_SCHEMA.get(root.localName()) : null;
+            return IBM_NAMESPACE.equals(root.namespace()) ? ROOT_TO_SCHEMAS.get(root.localName()) : null;
         }
         // Root element not readable: the file may be new, empty, or not on disk. Use the file name.
         String fileName = fileUri.substring(fileUri.lastIndexOf('/') + 1);
-        return FILE_NAME_TO_LATEST_SCHEMA.get(fileName);
+        String rootName = FILE_NAME_TO_ROOT.get(fileName);
+        return rootName == null ? null : ROOT_TO_SCHEMAS.get(rootName);
     }
 
     /**
@@ -118,25 +119,24 @@ public final class DeploymentDescriptorSchemaUtil {
      * @return true if the file is an IBM deployment descriptor such as ibm-web-bnd.xml
      */
     public static boolean isDeploymentDescriptor(String fileUri) {
-        return getLatestSchemaName(fileUri, readRoot(fileUri)) != null;
+        return getSchemas(fileUri, readRoot(fileUri)) != null;
     }
 
     /**
      * Get the file name of the schema to use for a deployment descriptor, for example ibm-web-bnd_1_0.xsd.
      *
-     * @param latestSchemaName file name of the latest schema for this descriptor
-     * @param systemId         schema location from xsi:schemaLocation, may be null. If it names a bundled version
-     *                         of the schema of this descriptor, that version is used. Otherwise the latest version is used.
+     * @param schemas  the schema versions of this descriptor, oldest first
+     * @param systemId schema location from xsi:schemaLocation, may be null. If it names one of the schemas of this
+     *                 descriptor, that version is used. Otherwise the latest version is used.
      */
-    private static String getSchemaName(String latestSchemaName, String systemId) {
+    private static String getSchemaName(List<String> schemas, String systemId) {
         if (systemId != null) {
             String hinted = systemId.substring(systemId.lastIndexOf('/') + 1);
-            // only accept another version of the same schema
-            if (BUNDLED_FILES.contains(hinted) && schemaFamily(hinted).equals(schemaFamily(latestSchemaName))) {
+            if (schemas.contains(hinted)) {
                 return hinted;
             }
         }
-        return latestSchemaName;
+        return schemas.get(schemas.size() - 1);
     }
 
     /**
@@ -159,27 +159,27 @@ public final class DeploymentDescriptorSchemaUtil {
      */
     public static String getSchemaUri(String fileUri) {
         RootElement root = readRoot(fileUri);
-        String latestSchemaName = getLatestSchemaName(fileUri, root);
-        if (latestSchemaName == null) {
+        List<String> schemas = getSchemas(fileUri, root);
+        if (schemas == null) {
             return null;
         }
-        return deploySchema(fileUri, getSchemaName(latestSchemaName, getSchemaLocationHint(root)));
+        return deploySchema(fileUri, getSchemaName(schemas, getSchemaLocationHint(root)));
     }
 
     /**
      * Get the URI of the local schema for a deployment descriptor.
      *
      * @param fileUri  URI of the descriptor file
-     * @param systemId schema location from xsi:schemaLocation, may be null. If it names a bundled version
-     *                 of the schema of this descriptor, that version is used. Otherwise the latest version is used.
+     * @param systemId schema location from xsi:schemaLocation, may be null. If it names a version of the schema
+     *                 of this descriptor, that version is used. Otherwise the latest version is used.
      * @return schema URI as a String, or null if the file is not a deployment descriptor
      */
     public static String getSchemaUri(String fileUri, String systemId) {
-        String latestSchemaName = getLatestSchemaName(fileUri, readRoot(fileUri));
-        if (latestSchemaName == null) {
+        List<String> schemas = getSchemas(fileUri, readRoot(fileUri));
+        if (schemas == null) {
             return null;
         }
-        return deploySchema(fileUri, getSchemaName(latestSchemaName, systemId));
+        return deploySchema(fileUri, getSchemaName(schemas, systemId));
     }
 
     private static String deploySchema(String fileUri, String schemaName) {
@@ -194,11 +194,6 @@ public final class DeploymentDescriptorSchemaUtil {
             LOGGER.warning("Unable to deploy the schema " + schemaName + " for " + fileUri + ": " + e.getMessage());
             return null;
         }
-    }
-
-    // ibm-web-bnd_1_2.xsd -> ibm-web-bnd ; cachespec.xsd -> cachespec.xsd
-    private static String schemaFamily(String schemaName) {
-        return schemaName.replaceFirst("_\\d+_\\d+\\.xsd$", "");
     }
 
     /**
