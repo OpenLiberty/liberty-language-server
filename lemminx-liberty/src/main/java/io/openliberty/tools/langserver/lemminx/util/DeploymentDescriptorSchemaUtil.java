@@ -41,7 +41,7 @@ public final class DeploymentDescriptorSchemaUtil {
     // Bump the version segment when the bundled schemas change, so the .lemminx cache gets refreshed.
     private static final String CACHE_URL_DIR = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/ibm/v1/";
 
-    // Application client descriptors (ibm-application-client-bnd/ext) are not included: 
+    // Application client descriptors (ibm-application-client-bnd/ext) are not included:
     // Liberty does not ship their schemas.
 
     // root element -> latest schema
@@ -86,13 +86,25 @@ public final class DeploymentDescriptorSchemaUtil {
     }
 
     /**
-     * @return the file name of the latest schema for this descriptor, or null if the file is not a deployment descriptor
+     * Read only the root element of an xml file.
+     *
+     * @return the root element, or null if the file is not an xml file or cannot be read
      */
-    private static String getLatestSchemaName(String fileUri) {
+    private static RootElement readRoot(String fileUri) {
         if (fileUri == null || !fileUri.endsWith(".xml")) {
             return null;
         }
-        RootElement root = XmlReader.getRootElement(fileUri);
+        return XmlReader.getRootElement(fileUri);
+    }
+
+    /**
+     * @param root the root element of the file, or null if it could not be read
+     * @return the file name of the latest schema for this descriptor, or null if the file is not a deployment descriptor
+     */
+    private static String getLatestSchemaName(String fileUri, RootElement root) {
+        if (fileUri == null) {
+            return null;
+        }
         if (root != null) {
             return IBM_NAMESPACE.equals(root.namespace()) ? ROOT_TO_LATEST_SCHEMA.get(root.localName()) : null;
         }
@@ -106,49 +118,52 @@ public final class DeploymentDescriptorSchemaUtil {
      * @return true if the file is an IBM deployment descriptor such as ibm-web-bnd.xml
      */
     public static boolean isDeploymentDescriptor(String fileUri) {
-        return getLatestSchemaName(fileUri) != null;
+        return getLatestSchemaName(fileUri, readRoot(fileUri)) != null;
     }
 
     /**
      * Get the file name of the schema to use for a deployment descriptor, for example ibm-web-bnd_1_0.xsd.
      *
-     * @param fileUri  URI of the descriptor file
-     * @param systemId schema location from xsi:schemaLocation, may be null. If it names a bundled version
-     *                 of the schema of this descriptor, that version is used. Otherwise the latest version is used.
-     * @return schema file name, or null if the file is not a deployment descriptor
+     * @param latestSchemaName file name of the latest schema for this descriptor
+     * @param systemId         schema location from xsi:schemaLocation, may be null. If it names a bundled version
+     *                         of the schema of this descriptor, that version is used. Otherwise the latest version is used.
      */
-    private static String getSchemaName(String fileUri, String systemId) {
-        String schemaName = getLatestSchemaName(fileUri);
-        if (schemaName == null) {
-            return null;
-        }
+    private static String getSchemaName(String latestSchemaName, String systemId) {
         if (systemId != null) {
             String hinted = systemId.substring(systemId.lastIndexOf('/') + 1);
             // only accept another version of the same schema
-            if (BUNDLED_FILES.contains(hinted) && hinted.startsWith(schemaBaseName(schemaName))) {
+            if (BUNDLED_FILES.contains(hinted) && hinted.startsWith(schemaBaseName(latestSchemaName))) {
                 return hinted;
             }
         }
-        return schemaName;
+        return latestSchemaName;
     }
 
     /**
-     * Get the schema URL from the xsi:schemaLocation of a deployment descriptor (the last value of the
-     * "namespace url" pair), so that the schema version named in the file can be used.
-     *
-     * @param fileUri URI of the descriptor file
-     * @return the schema URL, or null if the file is not a deployment descriptor or has no xsi:schemaLocation
+     * @return the last value of the "namespace url" pairs of the xsi:schemaLocation, or null if there is none
      */
-    public static String getSchemaLocationHint(String fileUri) {
-        if (!isDeploymentDescriptor(fileUri)) {
-            return null;
-        }
-        RootElement root = XmlReader.getRootElement(fileUri);
+    private static String getSchemaLocationHint(RootElement root) {
         if (root == null || root.schemaLocation() == null || root.schemaLocation().isBlank()) {
             return null;
         }
         String[] tokens = root.schemaLocation().trim().split("\\s+");
         return tokens[tokens.length - 1];
+    }
+
+    /**
+     * Get the URI of the local schema for a deployment descriptor, using the schema version named in the
+     * xsi:schemaLocation of the file. The file is read once.
+     *
+     * @param fileUri URI of the descriptor file
+     * @return schema URI as a String, or null if the file is not a deployment descriptor
+     */
+    public static String getSchemaUri(String fileUri) {
+        RootElement root = readRoot(fileUri);
+        String latestSchemaName = getLatestSchemaName(fileUri, root);
+        if (latestSchemaName == null) {
+            return null;
+        }
+        return deploySchema(fileUri, getSchemaName(latestSchemaName, getSchemaLocationHint(root)));
     }
 
     /**
@@ -160,10 +175,14 @@ public final class DeploymentDescriptorSchemaUtil {
      * @return schema URI as a String, or null if the file is not a deployment descriptor
      */
     public static String getSchemaUri(String fileUri, String systemId) {
-        String schemaName = getSchemaName(fileUri, systemId);
-        if (schemaName == null) {
+        String latestSchemaName = getLatestSchemaName(fileUri, readRoot(fileUri));
+        if (latestSchemaName == null) {
             return null;
         }
+        return deploySchema(fileUri, getSchemaName(latestSchemaName, systemId));
+    }
+
+    private static String deploySchema(String fileUri, String schemaName) {
         try {
             Path schemaPath = deploy(schemaName);
             if (schemaPath == null) {

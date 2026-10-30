@@ -16,7 +16,6 @@ import static org.eclipse.lemminx.XMLAssert.c;
 import static org.eclipse.lemminx.XMLAssert.ca;
 import static org.eclipse.lemminx.XMLAssert.te;
 import static org.eclipse.lemminx.XMLAssert.d;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -142,17 +141,21 @@ public class DeploymentDescriptorTest {
     }
 
     @Test
-    public void testSchemaLocationHint(@TempDir File tempDir) throws IOException {
-        // the last value of the "namespace url" pair
-        String hint = DeploymentDescriptorSchemaUtil.getSchemaLocationHint(uriOf("any-folder/config/web-bnd-schema-1_0-version-1_0.xml"));
-        assertEquals("http://websphere.ibm.com/xml/ns/javaee/ibm-web-bnd_1_0.xsd", hint);
-        // deployment descriptor without xsi:schemaLocation, not a deployment descriptor, and a file that is not there
+    public void testSchemaUriFromFile(@TempDir File tempDir) throws IOException {
+        // the version in the xsi:schemaLocation of the file is used
+        String older = DeploymentDescriptorSchemaUtil.getSchemaUri(uriOf("any-folder/config/web-bnd-schema-1_0-version-1_0.xml"));
+        assertNotNull(older);
+        assertTrue(older.endsWith("ibm-web-bnd_1_0.xsd"), older);
+        // deployment descriptor without xsi:schemaLocation uses the latest version
         File noLocation = new File(tempDir, "no-location.xml");
         Files.writeString(noLocation.toPath(), "<web-bnd xmlns=\"http://websphere.ibm.com/xml/ns/javaee\" version=\"1.2\"/>");
-        assertNull(DeploymentDescriptorSchemaUtil.getSchemaLocationHint(noLocation.toURI().toString()));
-        assertNull(DeploymentDescriptorSchemaUtil.getSchemaLocationHint(uriOf("any-folder/other-namespace.xml")));
-        assertNull(DeploymentDescriptorSchemaUtil.getSchemaLocationHint("file:///app/WEB-INF/web.xml"));
-        assertNull(DeploymentDescriptorSchemaUtil.getSchemaLocationHint(null));
+        String latest = DeploymentDescriptorSchemaUtil.getSchemaUri(noLocation.toURI().toString());
+        assertNotNull(latest);
+        assertTrue(latest.endsWith("ibm-web-bnd_1_2.xsd"), latest);
+        // not a deployment descriptor
+        assertNull(DeploymentDescriptorSchemaUtil.getSchemaUri(uriOf("any-folder/other-namespace.xml")));
+        assertNull(DeploymentDescriptorSchemaUtil.getSchemaUri("file:///app/WEB-INF/web.xml"));
+        assertNull(DeploymentDescriptorSchemaUtil.getSchemaUri(null));
     }
 
     @Test

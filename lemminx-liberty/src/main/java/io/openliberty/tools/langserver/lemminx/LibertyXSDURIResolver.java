@@ -80,8 +80,9 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
      */
     public String resolve(String baseLocation, String publicId, String systemId) {
         // IBM deployment descriptors (ibm-web-bnd.xml and similar) use schemas bundled with this plugin
-        if (DeploymentDescriptorSchemaUtil.isDeploymentDescriptor(baseLocation)) {
-            return DeploymentDescriptorSchemaUtil.getSchemaUri(baseLocation, systemId);
+        String descriptorSchemaUri = DeploymentDescriptorSchemaUtil.getSchemaUri(baseLocation, systemId);
+        if (descriptorSchemaUri != null) {
+            return descriptorSchemaUri;
         }
 
         if (!LibertyUtils.isConfigXMLFile(baseLocation)) {
@@ -161,7 +162,7 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
     public XMLInputSource resolveEntity(XMLResourceIdentifier resourceIdentifier) throws XNIException, IOException {
         String baseSystemId = resourceIdentifier.getBaseSystemId();
         String literalSystemId = resourceIdentifier.getLiteralSystemId();
-        if (literalSystemId != null && DeploymentDescriptorSchemaUtil.isDeploymentDescriptor(baseSystemId)) {
+        if (literalSystemId != null) {
             String schemaUri = DeploymentDescriptorSchemaUtil.getSchemaUri(baseSystemId, literalSystemId);
             if (schemaUri != null) {
                 return new XMLInputSource(resourceIdentifier.getPublicId(), schemaUri, baseSystemId);
@@ -173,7 +174,10 @@ public class LibertyXSDURIResolver implements URIResolverExtension, IExternalGra
     @Override
     public Map<String, String> getExternalGrammarLocation(URI fileURI) {
         // For deployment descriptors, pass the xsi:schemaLocation URL so that the version named in the file is used
-        String xsdFile = resolve(fileURI.toString(), null, DeploymentDescriptorSchemaUtil.getSchemaLocationHint(fileURI.toString()));
+        String xsdFile = DeploymentDescriptorSchemaUtil.getSchemaUri(fileURI.toString());
+        if (xsdFile == null) {
+            xsdFile = resolve(fileURI.toString(), null, null);
+        }
         if (xsdFile == null) {
             return null;
         }
