@@ -38,8 +38,8 @@ public final class DeploymentDescriptorSchemaUtil {
     private static final String IBM_NAMESPACE = "http://websphere.ibm.com/xml/ns/javaee";
 
     private static final String CLASSPATH_DIR = "/schema/xsd/ibm/";
-    // Bump the version segment when the bundled schemas change, so the .lemminx cache gets refreshed.
-    private static final String CACHE_URL_DIR = "https://github.com/OpenLiberty/liberty-language-server/blob/master/lemminx-liberty/src/main/resources/schema/xsd/ibm/v1/";
+    // Only used by LemMinX to pick the folder in the .lemminx cache. The files are copied from the classpath, not downloaded.
+    private static final String CACHE_URL_DIR = "https://github.com/OpenLiberty/liberty-language-server/blob/main/lemminx-liberty/src/main/resources/schema/xsd/ibm/";
 
     // Application client descriptors (ibm-application-client-bnd/ext) are not included:
     // Liberty does not ship their schemas.
