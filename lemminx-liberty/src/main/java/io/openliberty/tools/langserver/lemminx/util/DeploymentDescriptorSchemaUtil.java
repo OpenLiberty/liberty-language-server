@@ -165,7 +165,12 @@ public final class DeploymentDescriptorSchemaUtil {
             return null;
         }
         try {
-            return deploy(schemaName).toUri().toString();
+            Path schemaPath = deploy(schemaName);
+            if (schemaPath == null) {
+                LOGGER.warning("The schema " + schemaName + " for " + fileUri + " is not one of the bundled schemas");
+                return null;
+            }
+            return schemaPath.toUri().toString();
         } catch (IOException e) {
             LOGGER.warning("Unable to deploy the schema " + schemaName + " for " + fileUri + ": " + e.getMessage());
             return null;
