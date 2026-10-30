@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-bnd xmlns="http://example.com/not-ibm">
+    <virtual-host name="default_host"/>
+</web-bnd>

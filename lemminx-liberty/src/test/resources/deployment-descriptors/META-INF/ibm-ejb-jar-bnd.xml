@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ejb-jar-bnd
+    xmlns="http://websphere.ibm.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://websphere.ibm.com/xml/ns/javaee
+        http://websphere.ibm.com/xml/ns/javaee/ibm-ejb-jar-bnd_1_2.xsd"
+    version="1.2">
+
+    <session name="MySessionBean"
+             simple-binding-name="ejb/MySession"
+             remote-home-binding-name="ejb/MySessionHome">
+        <interface class="com.example.MySessionRemote" binding-name="ejb/MySession"/>
+        <resource-ref name="jdbc/myDS" binding-name="jdbc/myDataSource"/>
+    </session>
+
+    <message-driven name="MyMDB">
+        <jca-adapter activation-spec-binding-name="jms/MyActivationSpec"
+                     destination-binding-name="jms/MyQueue"/>
+    </message-driven>
+
+</ejb-jar-bnd>
