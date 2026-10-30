@@ -14,6 +14,7 @@ package io.openliberty.tools.langserver.lemminx.util;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -67,6 +68,9 @@ public final class DeploymentDescriptorSchemaUtil {
             "ibm-managed-bean-bnd.xml", "managed-bean-bnd",
             "ibm-ws-bnd.xml", "webservices-bnd",
             "cachespec.xml", "cache");
+
+    // schema file name -> path in the .lemminx cache. Null until the schemas have been deployed.
+    private static volatile Map<String, Path> deployedSchemas;
 
     // Every bundled file. The ibm-common-* files are included by the others and must sit next to them.
     private static final List<String> BUNDLED_FILES = List.of(
@@ -197,18 +201,21 @@ public final class DeploymentDescriptorSchemaUtil {
     }
 
     /**
-     * Copies all bundled schemas to the .lemminx cache and returns the path of the requested one.
-     * The files are deployed together because the schemas include each other by relative path.
+     * Copies all bundled schemas to the .lemminx cache the first time it is called, and returns the path of the
+     * requested one. The files are deployed together because the schemas include each other by relative path.
+     * If copying fails, nothing is remembered, so the next call tries again.
      */
     private static Path deploy(String schemaName) throws IOException {
-        Path requested = null;
-        for (String file : BUNDLED_FILES) {
-            Path deployed = CacheResourcesManager
-                    .getResourceCachePath(new ResourceToDeploy(CACHE_URL_DIR + file, CLASSPATH_DIR + file));
-            if (file.equals(schemaName)) {
-                requested = deployed;
+        Map<String, Path> deployed = deployedSchemas;
+        if (deployed == null) {
+            Map<String, Path> paths = new HashMap<>();
+            for (String file : BUNDLED_FILES) {
+                paths.put(file, CacheResourcesManager
+                        .getResourceCachePath(new ResourceToDeploy(CACHE_URL_DIR + file, CLASSPATH_DIR + file)));
             }
+            deployed = Map.copyOf(paths);
+            deployedSchemas = deployed;
         }
-        return requested;
+        return deployed.get(schemaName);
     }
 }
