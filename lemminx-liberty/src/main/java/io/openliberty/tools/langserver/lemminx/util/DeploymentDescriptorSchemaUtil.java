@@ -130,15 +130,18 @@ public final class DeploymentDescriptorSchemaUtil {
     }
 
     /**
-     * Get the file name of the schema to use for a deployment descriptor, for example ibm-web-bnd_1_0.xsd.
+     * Find the bundled schema file name to use for a deployment descriptor, for example ibm-web-bnd_1_0.xsd.
+     * The xml file names the schema it wants in its xsi:schemaLocation (e.g.
+     * http://websphere.ibm.com/xml/ns/javaee/ibm-web-bnd_1_0.xsd). The url is not downloaded. Only the file name
+     * at its end is looked up in the schemas that are bundled for this descriptor.
      *
-     * @param schemas  the schema versions of this descriptor, oldest first
-     * @param systemId schema location from xsi:schemaLocation, may be null. If it names one of the schemas of this
-     *                 descriptor, that version is used. Otherwise the latest version is used.
+     * @param schemas   the bundled schema file names of this descriptor (from ROOT_TO_SCHEMAS), oldest first
+     * @param schemaUrl the schema url from the xsi:schemaLocation of the file, may be null
+     * @return the file name named by schemaUrl if it is one of schemas, otherwise the latest one in schemas
      */
-    private static String getSchemaName(List<String> schemas, String systemId) {
-        if (systemId != null) {
-            String hinted = systemId.substring(systemId.lastIndexOf('/') + 1);
+    private static String getSchemaName(List<String> schemas, String schemaUrl) {
+        if (schemaUrl != null) {
+            String hinted = schemaUrl.substring(schemaUrl.lastIndexOf('/') + 1);
             if (schemas.contains(hinted)) {
                 return hinted;
             }
@@ -184,17 +187,17 @@ public final class DeploymentDescriptorSchemaUtil {
     /**
      * Get the URI of the local schema for a deployment descriptor.
      *
-     * @param fileUri  URI of the descriptor file
-     * @param systemId schema location from xsi:schemaLocation, may be null. If it names a version of the schema
-     *                 of this descriptor, that version is used. Otherwise the latest version is used.
+     * @param fileUri   URI of the descriptor file
+     * @param schemaUrl schema url from xsi:schemaLocation, may be null. If it names a version of the schema
+     *                  of this descriptor, that version is used. Otherwise the latest version is used.
      * @return schema URI as a String, or null if the file is not a deployment descriptor
      */
-    public static String getSchemaUri(String fileUri, String systemId) {
+    public static String getSchemaUri(String fileUri, String schemaUrl) {
         List<String> schemas = getSchemas(fileUri, readRoot(fileUri));
         if (schemas == null) {
             return null;
         }
-        return deploySchema(fileUri, getSchemaName(schemas, systemId));
+        return deploySchema(fileUri, getSchemaName(schemas, schemaUrl));
     }
 
     private static String deploySchema(String fileUri, String schemaName) {
