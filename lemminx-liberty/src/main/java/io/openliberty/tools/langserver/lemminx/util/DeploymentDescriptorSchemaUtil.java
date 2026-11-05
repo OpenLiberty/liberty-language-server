@@ -69,8 +69,8 @@ public final class DeploymentDescriptorSchemaUtil {
             "ibm-ws-bnd.xml", "webservices-bnd",
             "cachespec.xml", "cache");
 
-    // schema file name -> path in the .lemminx cache. Null until the schemas have been deployed.
-    private static volatile Map<String, Path> deployedSchemas;
+    // schema file name -> path in the .lemminx cache. Null until the schemas have been copied to the cache.
+    private static volatile Map<String, Path> cachedSchemas;
 
     // Every bundled file. The ibm-common-* files are included by the others and must sit next to them.
     private static final List<String> BUNDLED_FILES = List.of(
@@ -181,7 +181,7 @@ public final class DeploymentDescriptorSchemaUtil {
         if (schemas == null) {
             return null;
         }
-        return deploySchema(fileUri, getSchemaName(schemas, getSchemaLocationHint(root)));
+        return getCachedSchemaUri(fileUri, getSchemaName(schemas, getSchemaLocationHint(root)));
     }
 
     /**
@@ -197,39 +197,49 @@ public final class DeploymentDescriptorSchemaUtil {
         if (schemas == null) {
             return null;
         }
-        return deploySchema(fileUri, getSchemaName(schemas, schemaUrl));
+        return getCachedSchemaUri(fileUri, getSchemaName(schemas, schemaUrl));
     }
 
-    private static String deploySchema(String fileUri, String schemaName) {
+    /**
+     * Get the URI of a bundled schema in the .lemminx cache. The schemas are copied from the jar into the cache
+     * only on the first call, and only the files that are not already in the cache. All the bundled schemas are
+     * copied together because they include each other by relative path. Later calls reuse the cached paths. It
+     * also checks that the requested schema is one of the bundled ones.
+     *
+     * @param fileUri    URI of the descriptor file, only used in log messages
+     * @param schemaName file name of the bundled schema, for example ibm-web-bnd_1_2.xsd
+     * @return the URI of the cached schema as a String, or null if the schema is not bundled or cannot be copied
+     */
+    private static String getCachedSchemaUri(String fileUri, String schemaName) {
         try {
-            Path schemaPath = deploy(schemaName);
+            Path schemaPath = getCachedSchemaPath(schemaName);
             if (schemaPath == null) {
                 LOGGER.warning("The schema " + schemaName + " for " + fileUri + " is not one of the bundled schemas");
                 return null;
             }
             return schemaPath.toUri().toString();
         } catch (IOException e) {
-            LOGGER.warning("Unable to deploy the schema " + schemaName + " for " + fileUri + ": " + e.getMessage());
+            LOGGER.warning("Unable to copy the schema " + schemaName + " for " + fileUri + " to the cache: " + e.getMessage());
             return null;
         }
     }
 
     /**
      * Copies all bundled schemas to the .lemminx cache the first time it is called, and returns the path of the
-     * requested one. The files are deployed together because the schemas include each other by relative path.
+     * requested one. The files are copied together because the schemas include each other by relative path.
      * If copying fails, nothing is remembered, so the next call tries again.
      */
-    private static Path deploy(String schemaName) throws IOException {
-        Map<String, Path> deployed = deployedSchemas;
-        if (deployed == null) {
+    private static Path getCachedSchemaPath(String schemaName) throws IOException {
+        Map<String, Path> cached = cachedSchemas;
+        if (cached == null) {
             Map<String, Path> paths = new HashMap<>();
             for (String file : BUNDLED_FILES) {
                 paths.put(file, CacheResourcesManager
                         .getResourceCachePath(new ResourceToDeploy(CACHE_URL_DIR + file, CLASSPATH_DIR + file)));
             }
-            deployed = Map.copyOf(paths);
-            deployedSchemas = deployed;
+            cached = Map.copyOf(paths);
+            cachedSchemas = cached;
         }
-        return deployed.get(schemaName);
+        return cached.get(schemaName);
     }
 }
