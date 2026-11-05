@@ -6,7 +6,7 @@
         http://websphere.ibm.com/xml/ns/javaee/ibm-web-bnd_1_2.xsd"
     version="1.2">
 
-    <virtual-host/>
+    <virtual-host/> <!-- Invalid: the required "name" attribute is missing -->
 
     <!-- Resource reference bindings -->
     <resource-ref name="jdbc/myDS" binding-name="jdbc/myDataSource"/>
