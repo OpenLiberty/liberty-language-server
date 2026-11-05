@@ -147,12 +147,20 @@ public final class DeploymentDescriptorSchemaUtil {
     }
 
     /**
-     * @return the last value of the "namespace url" pairs of the xsi:schemaLocation, or null if there is none
+     * xsi:schemaLocation is a whitespace separated list of "namespace schema-url" pairs, possibly spread over
+     * several lines. This returns the schema url of the last pair. The url is not downloaded, the caller only
+     * uses the file name at its end. For example, the value "http://websphere.ibm.com/xml/ns/javaee
+     * http://websphere.ibm.com/xml/ns/javaee/ibm-web-bnd_1_2.xsd" has two parts, and this returns the second one.
+     * The caller then uses ibm-web-bnd_1_2.xsd.
+     *
+     * @return the schema url, or null if there is no xsi:schemaLocation
      */
     private static String getSchemaLocationHint(RootElement root) {
         if (root == null || root.schemaLocation() == null || root.schemaLocation().isBlank()) {
             return null;
         }
+        // split on any run of spaces, tabs and new lines: [namespace, url]
+        // These descriptors declare one pair, so the url is the last token.
         String[] tokens = root.schemaLocation().trim().split("\\s+");
         return tokens[tokens.length - 1];
     }
