@@ -120,7 +120,10 @@ public final class DeploymentDescriptorSchemaUtil {
 
     /**
      * @param fileUri URI of the file, may be null
-     * @return true if the file is an IBM deployment descriptor such as ibm-web-bnd.xml
+     * @return true if the file is an IBM deployment descriptor such as ibm-web-bnd.xml.
+     *         false if fileUri is null.
+     *         If the root element cannot be read, true if the file name is a known deployment descriptor
+     *         file name, otherwise false.
      */
     public static boolean isDeploymentDescriptor(String fileUri) {
         return getSchemas(fileUri, readRoot(fileUri)) != null;
