@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<webservices-bnd
+    xmlns="http://websphere.ibm.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://websphere.ibm.com/xml/ns/javaee
+        http://websphere.ibm.com/xml/ns/javaee/ibm-ws-bnd_1_0.xsd"
+    version="1.0">
+
+    <webservice-endpoint-properties
+        request-timeout="30"
+        async-execution-thread-pool-size="10"/>
+
+    <webservice-endpoint port-component-name="MyServicePort"
+                        address="/MyService"/>
+
+    <service-ref name="service/MyClient" wsdl-location="META-INF/wsdl/MyService.wsdl">
+        <port name="MyPort" namespace="http://example.com" address="http://localhost:9080/MyService"/>
+    </service-ref>
+
+</webservices-bnd>

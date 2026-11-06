@@ -1,5 +1,5 @@
 /*******************************************************************************
-* Copyright (c) 2023, 2024 IBM Corporation and others.
+* Copyright (c) 2023, 2026 IBM Corporation and others.
 *
 * This program and the accompanying materials are made available under the
 * terms of the Eclipse Public License v. 2.0 which is available at
@@ -26,14 +26,67 @@ import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.xml.XMLConstants;
+import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.events.Attribute;
 import javax.xml.stream.events.Characters;
+import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 
 public class XmlReader {
     private static final Logger LOGGER = Logger.getLogger(XmlReader.class.getName());
+    private static final String XSI_NAMESPACE = "http://www.w3.org/2001/XMLSchema-instance";
+
+    /**
+     * The root element of an XML file.
+     */
+    public record RootElement(String localName, String namespace, String schemaLocation) {
+    }
+
+    /**
+     * Read only the root element of a file.
+     */
+    public static RootElement getRootElement(String fileUri) {
+        if (fileUri == null) {
+            return null;
+        }
+        File xmlFile;
+        try {
+            xmlFile = new File(new URI(fileUri).getPath());
+        } catch (URISyntaxException | IllegalArgumentException e) {
+            return null;
+        }
+        if (!xmlFile.isFile() || xmlFile.length() == 0) {
+            return null;
+        }
+
+        XMLEventReader reader = null;
+        try (FileInputStream fis = new FileInputStream(xmlFile)) {
+            reader = getXmlInputFactory().createXMLEventReader(fis);
+            while (reader.hasNext()) {
+                XMLEvent event = reader.nextEvent();
+                if (event.isStartElement()) {
+                    StartElement root = event.asStartElement();
+                    Attribute schemaLocation = root.getAttributeByName(new QName(XSI_NAMESPACE, "schemaLocation"));
+                    return new RootElement(root.getName().getLocalPart(), root.getName().getNamespaceURI(),
+                            schemaLocation == null ? null : schemaLocation.getValue());
+                }
+            }
+        } catch (Exception e) {
+            // not well formed while the user is typing, or not readable. There is no root to report.
+            LOGGER.fine("Unable to read the root element of " + xmlFile.getAbsolutePath() + ": " + e.getMessage());
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (Exception ignored) {
+                }
+            }
+        }
+        return null;
+    }
 
     public static boolean hasServerRoot(String filePath) {
         File file = null;
