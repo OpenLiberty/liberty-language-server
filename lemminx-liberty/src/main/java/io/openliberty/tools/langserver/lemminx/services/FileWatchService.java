@@ -128,6 +128,11 @@ public class FileWatchService {
                     LOGGER.warning("Liberty XML variables cannot be updated for file path %s with error %s"
                             .formatted(file.getPath(), e.getMessage()));
                 }
+                if (file.getName().contains(LibertyConstants.LIBERTY_PLUGIN_CONFIG_XML)
+                        || file.getName().contains(LibertyConstants.OPENLIBERTY_PROPERTIES)
+                        || file.getName().contains(LibertyConstants.WEBSPHERE_PROPERTIES)) {
+                    LibertyUtils.invalidatePluginConfigPathCache(workspace);
+                }
                 if (watchedFileChanged || isConfigXmlFile) {
                     SettingsService.getInstance().populateVariablesForWorkspace(workspace);
                     LOGGER.info("Liberty XML variables updated for workspace URI " + workspace.getWorkspaceString());

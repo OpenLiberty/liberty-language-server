@@ -276,10 +276,7 @@ public class LibertyUtils {
             return null;
         }
         Optional<Path> cached = cachedPluginConfigPaths.get(libertyWorkspace);
-        if (cached != null) {
-            if (cached.isEmpty()) {
-                return null;
-            }
+        if (cached != null && cached.isPresent()) {
             if (cached.get().toFile().exists()) {
                 return cached.get();
             }
@@ -287,8 +284,12 @@ public class LibertyUtils {
             invalidatePluginConfigPathCache(libertyWorkspace);
         }
         Path result = findFileInWorkspace(libertyWorkspace, Paths.get("liberty-plugin-config.xml"));
-        cachedPluginConfigPaths.put(libertyWorkspace, cached.ofNullable(result));
-        LOGGER.info("Cached plugin config path: " + result);
+        if (result != null) {
+            cachedPluginConfigPaths.put(libertyWorkspace, Optional.of(result));
+            LOGGER.info("Cached plugin config path: " + result);
+        } else {
+            cachedPluginConfigPaths.remove(libertyWorkspace);
+        }
         return result;
     }
 
@@ -463,10 +464,7 @@ public class LibertyUtils {
      */
     public static Path getLibertyPropertiesFile(LibertyWorkspace libertyWorkspace) {
         Optional<Path> cached = cachedPropertiesFilePaths.get(libertyWorkspace);
-        if (cached != null) {
-            if (cached.isEmpty()) {
-                return null;
-            }
+        if (cached != null && cached.isPresent()) {
             if (cached.get().toFile().exists()) {
                 return cached.get();
             }
@@ -507,8 +505,12 @@ public class LibertyUtils {
             }
         }
 
-        cachedPropertiesFilePaths.put(libertyWorkspace, Optional.ofNullable(props));
-        LOGGER.info("Cached properties file path: " + props);
+        if (props != null) {
+            cachedPropertiesFilePaths.put(libertyWorkspace, Optional.of(props));
+            LOGGER.info("Cached properties file path: " + props);
+        } else {
+            cachedPropertiesFilePaths.remove(libertyWorkspace);
+        }
         return props;
     }
 
