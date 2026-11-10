@@ -1,0 +1,111 @@
+/*******************************************************************************
+* Copyright (c) 2026 IBM Corporation and others.
+*
+* This program and the accompanying materials are made available under the
+* terms of the Eclipse Public License v. 2.0 which is available at
+* http://www.eclipse.org/legal/epl-2.0.
+*
+* SPDX-License-Identifier: EPL-2.0
+*
+* Contributors:
+*     IBM Corporation - initial API and implementation
+*******************************************************************************/
+
+package io.openliberty.tools.langserver.lemminx;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.List;
+import java.util.logging.Logger;
+
+import org.eclipse.lemminx.commons.BadLocationException;
+import org.eclipse.lemminx.dom.DOMDocument;
+import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionParticipant;
+import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionRequest;
+import org.eclipse.lsp4j.CodeAction;
+import org.eclipse.lsp4j.CodeActionKind;
+import org.eclipse.lsp4j.Range;
+import org.eclipse.lsp4j.TextDocumentEdit;
+import org.eclipse.lsp4j.TextEdit;
+import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
+import org.eclipse.lsp4j.WorkspaceEdit;
+import org.eclipse.lsp4j.jsonrpc.CancelChecker;
+import org.eclipse.lsp4j.jsonrpc.messages.Either;
+
+import io.openliberty.tools.langserver.lemminx.util.DeploymentDescriptorSchemaUtil;
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleMappingConstants;
+import io.openliberty.tools.langserver.lemminx.util.ResourceBundleUtil;
+
+/**
+ * Offers a starter file (stub) as a quick fix when an IBM deployment descriptor,
+ * for example ibm-web-bnd.xml, is empty. A stub is available for a file name when a
+ * resource with that name exists under {@link #STUB_RESOURCE_DIR}.
+ */
+public class LibertyDeploymentDescriptorCodeActionParticipant implements ICodeActionParticipant {
+    private static final Logger LOGGER = Logger.getLogger(LibertyDeploymentDescriptorCodeActionParticipant.class.getName());
+
+    private static final String STUB_RESOURCE_DIR = "/stubs/deployment-descriptors/";
+
+    /**
+     * Adds a quick fix that replaces an empty deployment descriptor with its stub. The quick fix is added for
+     * the diagnostic of the request when the document is empty and a stub exists for the file name.
+     */
+    @Override
+    public void doCodeAction(ICodeActionRequest request, List<CodeAction> codeActions, CancelChecker cancelChecker) {
+        DOMDocument document = request.getDocument();
+        String text = document.getText();
+        if (text == null || !text.isEmpty()) {
+            return;
+        }
+        if (!DeploymentDescriptorSchemaUtil.isDeploymentDescriptor(document.getDocumentURI())) {
+            return;
+        }
+        String stub = getStub(getFileName(document.getDocumentURI()));
+        if (stub == null) {
+            return;
+        }
+
+        Range wholeDocument;
+        try {
+            wholeDocument = new Range(document.positionAt(0), document.positionAt(text.length()));
+        } catch (BadLocationException e) {
+            LOGGER.warning("Could not generate the deployment descriptor stub: " + e);
+            return;
+        }
+        VersionedTextDocumentIdentifier id = new VersionedTextDocumentIdentifier(document.getDocumentURI(),
+                document.getTextDocument().getVersion());
+        TextDocumentEdit edit = new TextDocumentEdit(id,
+                Collections.singletonList(new TextEdit(wholeDocument, stub)));
+
+        CodeAction codeAction = new CodeAction(
+                ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_GENERATE_DEPLOYMENT_DESCRIPTOR));
+        codeAction.setKind(CodeActionKind.QuickFix);
+        codeAction.setDiagnostics(Collections.singletonList(request.getDiagnostic()));
+        codeAction.setEdit(new WorkspaceEdit(Collections.singletonList(Either.forLeft(edit))));
+        codeActions.add(codeAction);
+    }
+
+    private static String getFileName(String uri) {
+        return uri == null ? "" : uri.substring(uri.lastIndexOf('/') + 1);
+    }
+
+    /**
+     * @return the stub content for the given file name, or null if there is no stub for it
+     */
+    private static String getStub(String fileName) {
+        if (fileName.isEmpty()) {
+            return null;
+        }
+        try (InputStream in = LibertyDeploymentDescriptorCodeActionParticipant.class.getResourceAsStream(STUB_RESOURCE_DIR + fileName)) {
+            if (in == null) {
+                return null;
+            }
+            return new String(in.readAllBytes(), StandardCharsets.UTF_8);
+        } catch (IOException e) {
+            LOGGER.warning("Could not read the stub for " + fileName + ": " + e);
+            return null;
+        }
+    }
+}
