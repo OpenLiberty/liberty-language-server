@@ -49,6 +49,7 @@ public class LibertyExtension implements IXMLExtension {
     private IHoverParticipant hoverParticipant;
     private IDiagnosticsParticipant diagnosticsParticipant;
     private ICodeActionParticipant codeActionsParticipant;
+    private ICodeActionParticipant deploymentDescriptorCodeActionParticipant;
     private IDocumentLinkParticipant documentLinkParticipant;
 
     @Override
@@ -85,6 +86,9 @@ public class LibertyExtension implements IXMLExtension {
 
         codeActionsParticipant = new LibertyCodeActionParticipant();
         xmlExtensionsRegistry.registerCodeActionParticipant(codeActionsParticipant);
+
+        deploymentDescriptorCodeActionParticipant = new LibertyDeploymentDescriptorCodeActionParticipant();
+        xmlExtensionsRegistry.registerCodeActionParticipant(deploymentDescriptorCodeActionParticipant);
 
         documentLinkParticipant = new LibertyDocumentLinkParticipant();
         xmlExtensionsRegistry.registerDocumentLinkParticipant(documentLinkParticipant);
@@ -125,6 +129,7 @@ public class LibertyExtension implements IXMLExtension {
         xmlExtensionsRegistry.unregisterHoverParticipant(hoverParticipant);
         xmlExtensionsRegistry.unregisterDiagnosticsParticipant(diagnosticsParticipant);
         xmlExtensionsRegistry.unregisterCodeActionParticipant(codeActionsParticipant);
+        xmlExtensionsRegistry.unregisterCodeActionParticipant(deploymentDescriptorCodeActionParticipant);
         FileWatchService.getInstance().cleanFileMonitors();
     }
 

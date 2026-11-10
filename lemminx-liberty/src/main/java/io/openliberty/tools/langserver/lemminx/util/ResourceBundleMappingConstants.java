@@ -50,6 +50,7 @@ public final class ResourceBundleMappingConstants {
     public static final String TITLE_ADD_FEATURE = "liberty.lemminx.codeaction.add.feature.title";
     public static final String TITLE_ADD_TRAILING_SLASH = "liberty.lemminx.codeaction.add.trailing.slash.title";
     public static final String TITLE_CREATE_SERVER_CONFIG_FILE = "liberty.lemminx.codeaction.create.server.config.file.title";
+    public static final String TITLE_GENERATE_DEPLOYMENT_DESCRIPTOR = "liberty.lemminx.codeaction.generate.deployment.descriptor.title";
     public static final String TITLE_REMOVE_TRAILING_SLASH = "liberty.lemminx.codeaction.remove.trailing.slash.title";
     public static final String TITLE_REPLACE_FEATURE = "liberty.lemminx.codeaction.replace.feature.title";
     public static final String TITLE_REPLACE_PLATFORM = "liberty.lemminx.codeaction.replace.platform.title";
