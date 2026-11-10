@@ -100,15 +100,32 @@ public class LibertyWorkspaceTest {
     }
 
     @Test
-    public void testGetPluginConfigFileCachesAbsence(@TempDir Path tempDir) {
+    public void testGetPluginConfigFileAbsence(@TempDir Path tempDir) {
         LibertyWorkspace workspace = new LibertyWorkspace(tempDir.toUri().toString());
         LibertyUtils.invalidatePluginConfigPathCache(workspace);
 
         assertNull(LibertyUtils.getPluginConfigFile(workspace), "Expected absence of liberty-plugin-config.xml");
+    }
 
+    @Test
+    public void testGetPluginConfigFileFoundAfterDevModeStarts(@TempDir Path tempDir) throws IOException {
+        LibertyWorkspace workspace = new LibertyWorkspace(tempDir.toUri().toString());
+        LibertyUtils.invalidatePluginConfigPathCache(workspace);
+
+        assertNull(LibertyUtils.getPluginConfigFile(workspace), "Expected absence of liberty-plugin-config.xml before dev mode starts");
+
+        // Now dev mode creates liberty-plugin-config.xml
+        Path configFile = tempDir.resolve("liberty-plugin-config.xml");
+        Files.createFile(configFile);
+
+        Path found = LibertyUtils.getPluginConfigFile(workspace);
+        assertNotNull(found, "Expected to find liberty-plugin-config.xml after dev mode starts");
+        assertEquals(configFile, found);
+
+        // Subsequent calls should return cached path without re-searching
         try (MockedStatic<LibertyUtils> staticMock = mockStatic(LibertyUtils.class,
                 withSettings().defaultAnswer(CALLS_REAL_METHODS))) {
-            assertNull(LibertyUtils.getPluginConfigFile(workspace), "Expected cached absence of liberty-plugin-config.xml");
+            assertSame(LibertyUtils.getPluginConfigFile(workspace), found, "Expected cached liberty-plugin-config.xml");
             staticMock.verify(
                     () -> LibertyUtils.findFileInWorkspace(any(LibertyWorkspace.class), any(Path.class)),
                     times(0));
@@ -170,15 +187,30 @@ public class LibertyWorkspaceTest {
     }
 
     @Test
-    public void testGetPropertiesFileCachesAbsence(@TempDir Path tempDir) throws IOException {
+    public void testGetPropertiesFileAbsence(@TempDir Path tempDir) throws IOException {
         LibertyWorkspace workspace = new LibertyWorkspace(tempDir.toUri().toString());
         LibertyUtils.invalidatePluginConfigPathCache(workspace);
 
         assertNull(LibertyUtils.getLibertyPropertiesFile(workspace), "Expected absence of openliberty.properties");
+    }
+
+    @Test
+    public void testGetPropertiesFileFoundAfterCreated(@TempDir Path tempDir) throws IOException {
+        LibertyWorkspace workspace = new LibertyWorkspace(tempDir.toUri().toString());
+        LibertyUtils.invalidatePluginConfigPathCache(workspace);
+
+        assertNull(LibertyUtils.getLibertyPropertiesFile(workspace), "Expected absence of openliberty.properties before created");
+
+        Path propsFile = tempDir.resolve("openliberty.properties");
+        Files.createFile(propsFile);
+
+        Path found = LibertyUtils.getLibertyPropertiesFile(workspace);
+        assertNotNull(found, "Expected to find openliberty.properties after created");
+        assertEquals(propsFile, found);
 
         try (MockedStatic<LibertyUtils> staticMock = mockStatic(LibertyUtils.class,
                 withSettings().defaultAnswer(CALLS_REAL_METHODS))) {
-            assertNull(LibertyUtils.getLibertyPropertiesFile(workspace), "Expected cached absence of openliberty.properties");
+            assertSame(LibertyUtils.getLibertyPropertiesFile(workspace), found, "Expected cached openliberty.properties");
             staticMock.verify(
                     () -> LibertyUtils.findFileInWorkspace(any(LibertyWorkspace.class), any(Path.class)),
                     times(0));
@@ -218,7 +250,7 @@ public class LibertyWorkspaceTest {
             assertNull(LibertyUtils.getLibertyPropertiesFile(workspace), "Expected absence of openliberty.properties after deletion");
             staticMock.verify(
                     () -> LibertyUtils.findFileInWorkspace(any(LibertyWorkspace.class), any(Path.class)),
-                    times(2));
+                    times(3));
         }
     }
 

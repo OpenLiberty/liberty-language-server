@@ -276,19 +276,21 @@ public class LibertyUtils {
             return null;
         }
         Optional<Path> cached = cachedPluginConfigPaths.get(libertyWorkspace);
-        if (cached != null) {
-            if (cached.isEmpty()) {
-                return null;
-            }
+        if (cached != null && cached.isPresent()) {
             if (cached.get().toFile().exists()) {
                 return cached.get();
             }
             // invalidate and search again
             invalidatePluginConfigPathCache(libertyWorkspace);
         }
-        Path result = findFileInWorkspace(libertyWorkspace, Paths.get("liberty-plugin-config.xml"));
-        cachedPluginConfigPaths.put(libertyWorkspace, cached.ofNullable(result));
-        LOGGER.info("Cached plugin config path: " + result);
+        Path result = findFileInWorkspace(libertyWorkspace, Paths.get(LibertyConstants.LIBERTY_PLUGIN_CONFIG_XML));
+        if (result != null) {
+            cachedPluginConfigPaths.put(libertyWorkspace, Optional.of(result));
+            LOGGER.info("Cached plugin config path: " + result);
+        } else {
+            cachedPluginConfigPaths.remove(libertyWorkspace);
+            LOGGER.fine("Plugin config file not found for workspace URI: " + libertyWorkspace.getWorkspaceURI());
+        }
         return result;
     }
 
@@ -463,10 +465,7 @@ public class LibertyUtils {
      */
     public static Path getLibertyPropertiesFile(LibertyWorkspace libertyWorkspace) {
         Optional<Path> cached = cachedPropertiesFilePaths.get(libertyWorkspace);
-        if (cached != null) {
-            if (cached.isEmpty()) {
-                return null;
-            }
+        if (cached != null && cached.isPresent()) {
             if (cached.get().toFile().exists()) {
                 return cached.get();
             }
@@ -484,15 +483,15 @@ public class LibertyUtils {
                 Path libertyInstallDir = Paths.get(installationDirectory);
                 if (libertyInstallDir.toFile().exists()) {
                     try {
-                        props = findLastModifiedMatchingFileInDirectory(libertyInstallDir, Paths.get("WebSphereApplicationServer.properties"));
+                        props = findLastModifiedMatchingFileInDirectory(libertyInstallDir, Paths.get(LibertyConstants.WEBSPHERE_PROPERTIES));
                         if (props == null) {
-                            props = findLastModifiedMatchingFileInDirectory(libertyInstallDir, Paths.get("openliberty.properties"));
+                            props = findLastModifiedMatchingFileInDirectory(libertyInstallDir, Paths.get(LibertyConstants.OPENLIBERTY_PROPERTIES));
                             if (props == null) {
-                                LOGGER.info("Could not find openliberty.properties file in Liberty installation: " + libertyInstallDir.toString());                            
+                                LOGGER.info("Could not find " + LibertyConstants.OPENLIBERTY_PROPERTIES + " file in Liberty installation: " + libertyInstallDir.toString());
                             }
                         }
                     } catch (IOException e) {
-                        LOGGER.warning("Error received loading properties file from Liberty installation: " + libertyInstallDir.toString() + ": " + e.getMessage());                            
+                        LOGGER.warning("Error received loading properties file from Liberty installation: " + libertyInstallDir.toString() + ": " + e.getMessage());
                     }
                 }
             }
@@ -500,15 +499,20 @@ public class LibertyUtils {
 
         // if props not found using liberty-plugin-config.xml, try checking for files in workspace
         if (props == null) {
-            props = findFileInWorkspace(libertyWorkspace, Paths.get("WebSphereApplicationServer.properties"));
+            props = findFileInWorkspace(libertyWorkspace, Paths.get(LibertyConstants.WEBSPHERE_PROPERTIES));
 
             if (props == null) {
-                props = findFileInWorkspace(libertyWorkspace, Paths.get("openliberty.properties"));
+                props = findFileInWorkspace(libertyWorkspace, Paths.get(LibertyConstants.OPENLIBERTY_PROPERTIES));
             }
         }
 
-        cachedPropertiesFilePaths.put(libertyWorkspace, Optional.ofNullable(props));
-        LOGGER.info("Cached properties file path: " + props);
+        if (props != null) {
+            cachedPropertiesFilePaths.put(libertyWorkspace, Optional.of(props));
+            LOGGER.info("Cached properties file path: " + props);
+        } else {
+            cachedPropertiesFilePaths.remove(libertyWorkspace);
+            LOGGER.fine("Properties file not found for workspace URI: " + libertyWorkspace.getWorkspaceURI());
+        }
         return props;
     }
 
@@ -577,8 +581,8 @@ public class LibertyUtils {
      *                         there is an associated installation of Liberty
      */
     public static void watchFiles(Path watchFile, LibertyWorkspace libertyWorkspace) {     
-        boolean isProperties = watchFile.endsWith("openliberty.properties")
-                            || watchFile.endsWith("WebSphereApplicationServer.properties");
+        boolean isProperties = watchFile.endsWith(LibertyConstants.OPENLIBERTY_PROPERTIES)
+                            || watchFile.endsWith(LibertyConstants.WEBSPHERE_PROPERTIES);
         try {
             WatchService watcher = FileSystems.getDefault().newWatchService();
             watchFile.getParent().register(watcher, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.ENTRY_DELETE);
