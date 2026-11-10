@@ -70,11 +70,13 @@ public final class LibertyConstants {
         put("wasJmsSecurity-", "messagingSecurity-");
     }});
 
+    public static final String SERVER_ENV = "server.env";
+    public static final String BOOTSTRAP_PROPERTIES = "bootstrap.properties";
     public static final String LIBERTY_PLUGIN_CONFIG_XML = "liberty-plugin-config.xml";
     public static final String OPENLIBERTY_PROPERTIES = "openliberty.properties";
     public static final String WEBSPHERE_PROPERTIES = "WebSphereApplicationServer.properties";
 
-    public static List<String> filesToWatch = Arrays.asList(SERVER_XML, "server.env", "bootstrap.properties",
+    public static List<String> filesToWatch = Arrays.asList(SERVER_XML, SERVER_ENV, BOOTSTRAP_PROPERTIES,
             LIBERTY_PLUGIN_CONFIG_XML, OPENLIBERTY_PROPERTIES, WEBSPHERE_PROPERTIES);
     public static final String DEFAULT_LIBERTY_VERSION = "25.0.0.6";
 
