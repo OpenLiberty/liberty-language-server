@@ -77,7 +77,7 @@ public class LibertyDeploymentDescriptorCodeActionParticipant implements ICodeAc
         if (!DeploymentDescriptorSchemaUtil.isDeploymentDescriptor(document.getDocumentURI())) {
             return;
         }
-        String stub = getStub(getFileName(document.getDocumentURI()));
+        String stub = getStub(DeploymentDescriptorSchemaUtil.getDescriptorFileName(document.getDocumentURI()));
         if (stub == null) {
             return;
         }
@@ -98,15 +98,11 @@ public class LibertyDeploymentDescriptorCodeActionParticipant implements ICodeAc
         codeActions.add(codeAction);
     }
 
-    private static String getFileName(String uri) {
-        return uri == null ? "" : uri.substring(uri.lastIndexOf('/') + 1);
-    }
-
     /**
-     * @return the stub content for the given file name, or null if there is no stub for it
+     * @return the stub content for the given file name, or null if the file name is null or there is no stub for it
      */
     private static String getStub(String fileName) {
-        if (fileName.isEmpty()) {
+        if (fileName == null) {
             return null;
         }
         try (InputStream in = LibertyDeploymentDescriptorCodeActionParticipant.class.getResourceAsStream(STUB_RESOURCE_DIR + fileName)) {
