@@ -1,0 +1,27 @@
+type: pipeline_definition
+product: Liberty
+name: LibertyLanguageServer
+description: Run a Pipeline for liberty-language-server using Cognitive Software Delivery infrastructure
+
+triggers:
+- type: manual
+  triggerName: "Manual"
+  description: "Runs a liberty-language-server Pipeline, building and testing the PR - Manual Trigger"
+  triggerRank: 50
+  groups: ["CommonComponents"]
+- type: github
+  triggerName: "GitHub"
+  description: "Runs a liberty-language-server Pipeline, building and testing the PR - Github Trigger"
+  triggerRank: 50
+  groups: ["CommonComponents"]
+  keyword: "!build"
+  aliasKeywords:
+    - "#build"
+
+steps:
+- stepGroup: Build liberty-language-server Dependency
+  includeSteps:
+  - file: steps/buildLibertyLanguageServerDependency.yml
+- stepGroup: Build liberty-language-server
+  includeSteps:
+  - file: steps/buildLibertyLanguageServer.yml
