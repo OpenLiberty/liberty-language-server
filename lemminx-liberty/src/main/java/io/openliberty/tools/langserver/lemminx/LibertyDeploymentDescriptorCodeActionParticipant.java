@@ -26,6 +26,7 @@ import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionParticipant
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionRequest;
 import org.eclipse.lsp4j.CodeAction;
 import org.eclipse.lsp4j.CodeActionKind;
+import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Range;
 import org.eclipse.lsp4j.TextDocumentEdit;
 import org.eclipse.lsp4j.TextEdit;
@@ -54,11 +55,31 @@ public class LibertyDeploymentDescriptorCodeActionParticipant implements ICodeAc
      */
     @Override
     public void doCodeAction(ICodeActionRequest request, List<CodeAction> codeActions, CancelChecker cancelChecker) {
+        String text = request.getDocument().getText();
+        if (text != null && text.isEmpty()) {
+            addStubCodeAction(request, codeActions, request.getDiagnostic());
+        }
+    }
+
+    /**
+     * Adds the stub quick fix when the document contains only whitespace, because no diagnostic is reported for it.
+     */
+    @Override
+    public void doCodeActionUnconditional(ICodeActionRequest request, List<CodeAction> codeActions,
+            CancelChecker cancelChecker) {
+        String text = request.getDocument().getText();
+        if (text != null && !text.isEmpty() && text.isBlank()) {
+            addStubCodeAction(request, codeActions, null);
+        }
+    }
+
+    /**
+     * Adds a quick fix that replaces the whole document with the stub of the deployment descriptor, when a stub
+     * exists for the file name.
+     */
+    private void addStubCodeAction(ICodeActionRequest request, List<CodeAction> codeActions, Diagnostic diagnostic) {
         DOMDocument document = request.getDocument();
         String text = document.getText();
-        if (text == null || !text.isEmpty()) {
-            return;
-        }
         if (!DeploymentDescriptorSchemaUtil.isDeploymentDescriptor(document.getDocumentURI())) {
             return;
         }
@@ -82,7 +103,9 @@ public class LibertyDeploymentDescriptorCodeActionParticipant implements ICodeAc
         CodeAction codeAction = new CodeAction(
                 ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_GENERATE_DEPLOYMENT_DESCRIPTOR));
         codeAction.setKind(CodeActionKind.QuickFix);
-        codeAction.setDiagnostics(Collections.singletonList(request.getDiagnostic()));
+        if (diagnostic != null) {
+            codeAction.setDiagnostics(Collections.singletonList(diagnostic));
+        }
         codeAction.setEdit(new WorkspaceEdit(Collections.singletonList(Either.forLeft(edit))));
         codeActions.add(codeAction);
     }

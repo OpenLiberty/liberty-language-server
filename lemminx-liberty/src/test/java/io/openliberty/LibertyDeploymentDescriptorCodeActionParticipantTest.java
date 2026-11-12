@@ -111,14 +111,31 @@ public class LibertyDeploymentDescriptorCodeActionParticipantTest {
     }
 
     @Test
-    public void noStubCodeActionWithoutDiagnostic() throws Exception {
+    public void noStubCodeActionForEmptyDescriptorWithoutDiagnostic() throws Exception {
         try (MockedStatic<SettingsService> settings = Mockito.mockStatic(SettingsService.class)) {
             settings.when(SettingsService::getInstance).thenReturn(settingsService);
             Mockito.lenient().when(settingsService.getCurrentLocale()).thenReturn(Locale.getDefault());
             Mockito.lenient().when(settingsService.getVariablesForServerXml(Mockito.any())).thenReturn(new Properties());
 
             assertTrue(getCodeActions("", "ibm-web-bnd.xml", new CodeActionContext()).isEmpty(),
-                    "A request without a diagnostic gets no stub");
+                    "An empty descriptor gets the stub only for a diagnostic, so that it is not offered twice");
+        }
+    }
+
+    @Test
+    public void whitespaceOnlyDescriptorGetsStubCodeAction() throws Exception {
+        try (MockedStatic<SettingsService> settings = Mockito.mockStatic(SettingsService.class)) {
+            settings.when(SettingsService::getInstance).thenReturn(settingsService);
+            Mockito.lenient().when(settingsService.getCurrentLocale()).thenReturn(Locale.getDefault());
+            Mockito.lenient().when(settingsService.getVariablesForServerXml(Mockito.any())).thenReturn(new Properties());
+
+            for (String text : new String[] { " ", "\n", "  \r\n\t\n" }) {
+                assertEquals(1, getCodeActions(text, "ibm-web-bnd.xml", new CodeActionContext()).size(),
+                        "Expected one code action for whitespace only");
+                // a request that carries a diagnostic must not add a second one
+                assertEquals(1, getCodeActions(text, "ibm-web-bnd.xml").size(),
+                        "Expected one code action for whitespace only and a diagnostic");
+            }
         }
     }
 }
