@@ -74,9 +74,6 @@ public class LibertyDeploymentDescriptorCodeActionParticipant implements ICodeAc
     private void addStubCodeAction(ICodeActionRequest request, List<CodeAction> codeActions, Diagnostic diagnostic) {
         DOMDocument document = request.getDocument();
         String text = document.getText();
-        if (!DeploymentDescriptorSchemaUtil.isDeploymentDescriptor(document.getDocumentURI())) {
-            return;
-        }
         String stub = getStub(DeploymentDescriptorSchemaUtil.getDescriptorFileName(document.getDocumentURI()));
         if (stub == null) {
             return;
