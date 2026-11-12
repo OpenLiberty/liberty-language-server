@@ -16,24 +16,18 @@ package io.openliberty.tools.langserver.lemminx;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
 import org.eclipse.lemminx.commons.BadLocationException;
+import org.eclipse.lemminx.commons.CodeActionFactory;
 import org.eclipse.lemminx.dom.DOMDocument;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionParticipant;
 import org.eclipse.lemminx.services.extensions.codeaction.ICodeActionRequest;
 import org.eclipse.lsp4j.CodeAction;
-import org.eclipse.lsp4j.CodeActionKind;
 import org.eclipse.lsp4j.Diagnostic;
 import org.eclipse.lsp4j.Range;
-import org.eclipse.lsp4j.TextDocumentEdit;
-import org.eclipse.lsp4j.TextEdit;
-import org.eclipse.lsp4j.VersionedTextDocumentIdentifier;
-import org.eclipse.lsp4j.WorkspaceEdit;
 import org.eclipse.lsp4j.jsonrpc.CancelChecker;
-import org.eclipse.lsp4j.jsonrpc.messages.Either;
 
 import io.openliberty.tools.langserver.lemminx.util.DeploymentDescriptorSchemaUtil;
 import io.openliberty.tools.langserver.lemminx.util.ResourceBundleMappingConstants;
@@ -95,18 +89,12 @@ public class LibertyDeploymentDescriptorCodeActionParticipant implements ICodeAc
             LOGGER.warning("Could not generate the deployment descriptor stub: " + e);
             return;
         }
-        VersionedTextDocumentIdentifier id = new VersionedTextDocumentIdentifier(document.getDocumentURI(),
-                document.getTextDocument().getVersion());
-        TextDocumentEdit edit = new TextDocumentEdit(id,
-                Collections.singletonList(new TextEdit(wholeDocument, stub)));
-
-        CodeAction codeAction = new CodeAction(
-                ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_GENERATE_DEPLOYMENT_DESCRIPTOR));
-        codeAction.setKind(CodeActionKind.QuickFix);
-        if (diagnostic != null) {
-            codeAction.setDiagnostics(Collections.singletonList(diagnostic));
+        CodeAction codeAction = CodeActionFactory.replace(
+                ResourceBundleUtil.getMessage(ResourceBundleMappingConstants.TITLE_GENERATE_DEPLOYMENT_DESCRIPTOR),
+                wholeDocument, stub, document.getTextDocument(), diagnostic);
+        if (diagnostic == null) {
+            codeAction.setDiagnostics(null);
         }
-        codeAction.setEdit(new WorkspaceEdit(Collections.singletonList(Either.forLeft(edit))));
         codeActions.add(codeAction);
     }
 
