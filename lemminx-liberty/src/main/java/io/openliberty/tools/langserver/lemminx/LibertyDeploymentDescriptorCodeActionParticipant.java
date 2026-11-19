@@ -34,7 +34,7 @@ import io.openliberty.tools.langserver.lemminx.util.ResourceBundleMappingConstan
 import io.openliberty.tools.langserver.lemminx.util.ResourceBundleUtil;
 
 /**
- * Offers a starter file (stub) as a quick fix when an IBM deployment descriptor,
+ * Offers a stub as a quick fix when an IBM deployment descriptor,
  * for example ibm-web-bnd.xml, is empty. A stub is available for a file name when a
  * resource with that name exists under {@link #STUB_RESOURCE_DIR}.
  */
