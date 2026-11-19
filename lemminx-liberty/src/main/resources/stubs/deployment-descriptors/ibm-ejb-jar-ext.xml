@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ejb-jar-ext
+    xmlns="http://websphere.ibm.com/xml/ns/javaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://websphere.ibm.com/xml/ns/javaee
+        http://websphere.ibm.com/xml/ns/javaee/ibm-ejb-jar-ext_1_1.xsd"
+    version="1.1">
+
+    <session name="MySessionBean">
+        <bean-cache activation-policy="TRANSACTION"/>
+        <time-out value="600"/>
+    </session>
+
+    <message-driven name="MyMDB">
+        <bean-cache activation-policy="ONCE"/>
+    </message-driven>
+
+</ejb-jar-ext>

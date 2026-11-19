@@ -113,9 +113,21 @@ public final class DeploymentDescriptorSchemaUtil {
             return IBM_NAMESPACE.equals(root.namespace()) ? ROOT_TO_SCHEMAS.get(root.localName()) : null;
         }
         // Root element not readable: the file may be new, empty, or not on disk. Use the file name.
+        String fileName = getDescriptorFileName(fileUri);
+        return fileName == null ? null : ROOT_TO_SCHEMAS.get(FILE_NAME_TO_ROOT.get(fileName));
+    }
+
+    /**
+     * @param fileUri URI of the file, may be null
+     * @return the file name of the URI, for example ibm-web-bnd.xml, if it is the name of a known deployment
+     *         descriptor, otherwise null
+     */
+    public static String getDescriptorFileName(String fileUri) {
+        if (fileUri == null) {
+            return null;
+        }
         String fileName = fileUri.substring(fileUri.lastIndexOf('/') + 1);
-        String rootName = FILE_NAME_TO_ROOT.get(fileName);
-        return rootName == null ? null : ROOT_TO_SCHEMAS.get(rootName);
+        return FILE_NAME_TO_ROOT.containsKey(fileName) ? fileName : null;
     }
 
     /**
